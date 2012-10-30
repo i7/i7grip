@@ -389,6 +389,11 @@ Include (-
 
 To say (ch - unicode character) -- running on (documented at phs_unicode): (- llo_printUnicode({ch}); -).
 
+Chapter "Filter I/O"
+
+To say invoking (F - a phrase number -> nothing) once for each character code -- beginning say_invoking: (- @getiosys sp sp; @aload {F} 1 sp; @setiosys 1 sp; -).
+To say end invoking -- ending say_invoking: (- @stkswap; @setiosys sp sp; -).
+
 Chapter "Latin-1 Arrays"
 
 Include (-
@@ -1237,6 +1242,28 @@ will say both "Er..." and "Um...," even though the first rule tried to make the
 rulebook succeed.
 
 Section: Characters
+
+A segmented substitution beginning with
+
+	invoking (F - a phrase number -> nothing) once for each character code
+
+and ending with
+
+	end invoking
+
+will cause F to be invoked on the Unicode codepoint of every character inside,
+the characters being read from left to right.  For example, if we have
+
+	To foo (C - a number) (this is fooing):
+		....
+
+then writing
+
+	say "[invoking fooing once for each character code][twelve][end invoking]";
+
+will cause the fooing phrase to be called twice, once with C set to 49 (the
+codepoint for the digit 1), and another time with C set to 50 (the codepoint for
+the digit 2).
 
 The conversion phrase
 
