@@ -320,12 +320,15 @@ To append (S - a parseme) to (A - a production):
 Section "Saying and Debugging Productions"
 
 To say (A - a production):
-	say "[the left-hand parseme of A] ->";
-	if the right-hand parseme linked list of A is empty:
-		say " ε";
+	if A is an invalid production:
+		say "<invalid production>";
 	otherwise:
-		repeat with the parseme running through the parseme keys of the right-hand parseme linked list of A:
-			say " [the parseme]".
+		say "[the left-hand parseme of A] ->";
+		if the right-hand parseme linked list of A is empty:
+			say " ε";
+		otherwise:
+			repeat with the parseme running through the parseme keys of the right-hand parseme linked list of A:
+				say " [the parseme]".
 
 Part "Parsing Structures"
 
@@ -372,7 +375,7 @@ Section "Saying and Debugging Parse Tree Rewrites" - unindexed
 
 To say (A - a parse tree rewrite):
 	let the rewriting phrase be the rewriting phrase of A;
-	say "[if the rewriting phrase is unsubstituting a production]unsubstitution of[otherwise if the rewriting phrase is rotating a production]rotation of[otherwise]unknown operation on[end if] [the production of A]".
+	say "[if the rewriting phrase is unsubstituting a production]unsubstitution of[otherwise if the rewriting phrase is rotating a production]rotation of[otherwise]custom operation ([the rewriting phrase]) on[end if] [the production of A]".
 
 Chapter "Parse Steps" - unindexed
 
