@@ -1029,7 +1029,7 @@ To decide what linked list is the replacements for (L - a linked list) after the
 	let the survivors be an empty linked list;
 	repeat with the candidate running through L:
 		let the point be the parse tree vertex value of the candidate;
-		if K applied to the point converted to a number is the disambiguation key and V applied to the point converted to a number is the disambiguation value:
+		if (K applied to the point converted to a number) is the disambiguation key and (V applied to the point converted to a number) is the disambiguation value:
 			push the key the number key of the candidate and the value the point onto the survivors;
 	delete L;
 	delete the seen hash table;

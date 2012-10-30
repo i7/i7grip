@@ -788,7 +788,7 @@ To simulate glk_select to hide window wrapping with (A - a wrapping layer), poll
 			let the applied flag be false;
 			if the event type of the target event is:
 				-- 1: [timer event]
-					if the foreign event handler of A applied to the target event is routing the event no further:
+					if (the foreign event handler of A applied to the target event) is routing the event no further:
 						now the break flag is false;
 					now the applied flag is true;
 				-- 2: [character input]
@@ -822,7 +822,7 @@ To simulate glk_select to hide window wrapping with (A - a wrapping layer), poll
 					let the discarded value be the foreign event handler of A applied to the target event;
 					now the applied flag is true;
 				-- 7: [sound notify event]
-					if the foreign event handler of A applied to the target event is routing the event no further:
+					if (the foreign event handler of A applied to the target event) is routing the event no further:
 						now the break flag is false;
 					now the applied flag is true;
 				-- 8: [hyperlink input]
@@ -1361,7 +1361,7 @@ To wait for the next foreign event using (A - a wrapping layer) (this is waiting
 		let the applied flag be false;
 		if the event type of the event is:
 			-- 1: [timer event]
-				if the foreign event handler of A applied to the event is routing the event no further:
+				if (the foreign event handler of A applied to the event) is routing the event no further:
 					now the break flag is true;
 				now the applied flag is true;
 			-- 2: [character input]
@@ -1378,7 +1378,7 @@ To wait for the next foreign event using (A - a wrapping layer) (this is waiting
 			-- 6: [redraw event]
 				let the discarded value be the foreign event handler of A applied to the event;
 			-- 7: [sound notify event]
-				if the foreign event handler of A applied to the event is routing the event no further:
+				if (the foreign event handler of A applied to the event) is routing the event no further:
 					now the break flag is true;
 				now the applied flag is true;
 			-- 8: [hyperlink input]
