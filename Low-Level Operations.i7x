@@ -32,10 +32,10 @@ Include (-
 	];
 -).
 
+To decide what number is the bitwise not of (I - a number): (- (~{I}) -).
 To decide what number is the bitwise and of (I - a number) and (J - a number): (- ({I}&{J}) -).
 To decide what number is the bitwise or of (I - a number) and (J - a number): (- ({I}|{J}) -).
 To decide what number is the bitwise xor of (I - a number) and (J - a number): (- llo_xor({I},{J}) -).
-To decide what number is the bitwise not of (I - a number): (- (~{I}) -).
 
 Chapter "Shift Operations"
 
@@ -208,6 +208,10 @@ Definition: a number is a valid integer address rather than an invalid integer a
 Chapter "Reading Memory"
 
 Include (-
+	[ llo_getBit address bitOffset;
+		@aloadbit address bitOffset sp;
+		@return sp;
+	];
 	! if the high parameter is nonzero, get the high nybble (bits 4--7); otherwise get the low nybble (bits 0--3)
 	[ llo_getNybble address high;
 		if(high){
@@ -233,6 +237,7 @@ Include (-
 	];
 -).
 
+To decide whether the bit at address (A - a number) and secondary address (B - a number) is set: (- llo_getBit({A},{B}) -).
 To decide what number is the nybble at address (A - a number) and secondary address (B - a number): (- llo_getNybble({A},{B}) -).
 To decide what number is the byte at address (A - a number): (- llo_getByte({A}) -).
 To decide what number is the short at address (A - a number): (- llo_getShort({A}) -).
@@ -241,6 +246,9 @@ To decide what number is the integer at address (A - a number): (- llo_getInt({A
 Chapter "Writing Memory"
 
 Include (-
+	[ llo_setBit address bitOffset value;
+		@astorebit address bitOffset value;
+	];
 	! if the high parameter is nonzero, set the high nybble (bits 4--7); otherwise set the low nybble (bits 0--3)
 	[ llo_setNybble address high value;
 		if(high){
@@ -265,6 +273,7 @@ Include (-
 	];
 -).
 
+To write the bit (I - a truth state) to address (A - a number) and secondary address (B - a number): (- llo_setBit({A},{B}); -).
 To write the nybble (I - a number) to address (A - a number) and secondary address (B - a number): (- llo_setNybble({A},{B},{I}); -).
 To write the byte (I - a number) to address (A - a number): (- llo_setByte({A},{I}); -).
 To write the short (I - a number) to address (A - a number): (- llo_setShort({A},{I}); -).
@@ -1054,7 +1063,7 @@ for two bytes, in big-endian order, and
 
 for four bytes, also in big-endian order.
 
-Besides these three, we can also address memory at the nybble level.
+Besides these three, we can also address memory at the nybble and bit levels.
 (Nybble-level access is mostly for the benefit of the Glulx Runtime
 Instrumentation Framework, because Glulx bytecode packs addressing modes two to
 a byte.)
@@ -1064,8 +1073,17 @@ a byte.)
 refers to the low nybble when J is zero, the higher four bits when J is one.
 The phrase's behavior when J is some other value is undefined.
 
+	whether or not the bit at address (I - a number) and secondary address (J - a number) is set
+
+is true if the Jth bit is on, and false otherwise.  In this case, J may extend
+outside of the range 0--7.
+
 Likewise, given a valid read-write address, we can modify the contents of
 memory:
+
+	write the bit (I - a truth state) to address (J - a number) and secondary address (K - a number)
+
+modifies a single bit,
 
 	write the nybble (I - a number) to address (J - a number) and secondary address (K - a number)
 
