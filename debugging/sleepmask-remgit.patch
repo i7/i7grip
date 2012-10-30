@@ -1,0 +1,12 @@
+diff --git a/sleepmask.rb b/sleepmask.rb
+index 1ff9b48..416b98d 100755
+--- a/sleepmask.rb
++++ b/sleepmask.rb
+@@ -14,6 +14,7 @@ STDOUT.sync = true
+ 
+ execpath = File.dirname(File.realdirpath(File.absolute_path(__FILE__)))
+ $interpreters = {
++  :git => File.join(execpath, '..', 'Git', 'remgit'),
+   :glulxe => File.join(execpath, '..', 'glulxe-047-rem', 'glulxe'),
+   :nitfol => File.join(execpath, '..', 'nitfol-0.5-rem', 'remnitfol'),
+   :cheapglulxe => File.join(execpath, '..', 'glulxe-047-rem', 'glulxe'),

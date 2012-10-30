@@ -1,0 +1,1 @@
+ruby $DEBUGGING_DIR/sleepmask/sleepmask.rb --interpreter git $@

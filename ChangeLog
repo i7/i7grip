@@ -1,0 +1,9 @@
+2012-01-11  Brady Garvin  <bgarvin@users.sourceforge.net>
+
+	* ChangeLog: Cleaned out the changelog, which hadn't been used in
+	some time.  From now on I'll mostly restrict the changelog to
+	things that might be worth mentioning in release notes.  So new
+	features and fixes for released bugs are certainly in, API changes
+	will only be mentioned for public rules and phrases, etc.
+	Incremental gains won't appear until the new feature or bug fix is
+	ready for release.

@@ -1,0 +1,7 @@
+The Glulx Runtime Instrumentation Project (GRIP) provides debugging tools for authors of interactive fiction (IF) by building on the capabilities of the Glulx virtual machine.
+
+GRIP is hosted on SourceForge at https://sourceforge.net/projects/i7grip/.
+
+This is a beta (re-)rerelease.  A few extensions are still in need of some cleanup and documentation, but otherwise everything is ready to use.
+
+Unlike the original beta release, the documentation now reflects the latest version of Inform's Windows IDE, and there is a JAR that simplifies the process of setting up symbolic links and including the extensions.  Incidentally, it also picks up a handful of bug fixes.

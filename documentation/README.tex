@@ -1,0 +1,3901 @@
+\errorcontextlines=8\relax
+\documentclass{book}
+
+% Formatting of paragraphs
+\widowpenalty=10000
+\clubpenalty=10000
+\parindent=0pt
+\parskip=6pt
+
+% Formatting of pages; metadata
+\usepackage{fullpage}
+\usepackage{fancyhdr}
+\headheight=14pt
+\headsep=16pt
+\newcommand{\lastpagebreak}{\vfill\pagebreak}
+\title{Glulx Runtime Instrumentation\\Version 2}
+\author{Brady Garvin}
+\date{1 September 2012}
+
+% General packages
+\usepackage{bbding}
+\usepackage{longtable}
+\usepackage{multirow}
+\usepackage{booktabs}
+\usepackage{amssymb}
+\usepackage{amsmath}
+\usepackage{cancel}
+\usepackage{wasysym}
+\usepackage{graphicx}
+\usepackage{url}
+\usepackage{array}
+\usepackage{multicol}
+\usepackage[usenames,dvipsnames]{color}
+
+% Code listings
+\usepackage{listings}
+\lstset{%
+  language=,%
+  basicstyle=\ttfamily,%
+  identifierstyle=,%
+  commentstyle=,%
+  stringstyle=,%
+  showstringspaces=false,%
+  keywordstyle=,%
+  emphstyle=\underbar,%
+  breaklines=true,%
+  numbers=none,%
+  firstnumber=auto,%
+  extendedchars=true,%
+  tabsize=8,%
+  columns=flexible,%
+  aboveskip=0pt,%
+  belowskip=0pt,%
+}
+
+% Hyperlinks
+\definecolor{internallinkcolor}{rgb}{0,0,0}
+\definecolor{citelinkcolor}{rgb}{0,1,0}
+\definecolor{filelinkcolor}{rgb}{1,0,1}
+\definecolor{urllinkcolor}{rgb}{0.5,0,0}
+\usepackage[
+  setpagesize=false,
+  colorlinks=true,
+  linkcolor=internallinkcolor,
+  citecolor=citelinkcolor,
+  filecolor=filelinkcolor,
+  urlcolor=urllinkcolor,
+  pdfpagemode=UseNone,
+  pdfpagelayout=OneColumn,
+  pdfstartview=FitH,
+  pdfview=FitH,
+  pdfnewwindow=true
+]{hyperref}
+
+% General macros
+\newcommand{\nil}{{\null}}
+\newcommand{\thento}{\(\nil\rightarrow\nil\)}
+\newcommand{\n}{\hspace*{\fill}\newline}
+
+% Contents
+\makeatletter
+\newcommand{\tableofimpatience}{%
+  \chapter*{\impatiencename
+    \@mkboth{%
+      \MakeUppercase\impatiencename}{\MakeUppercase\impatiencename}}%
+  \@starttoc{toi}}
+\newcommand{\impatiencechapter}[1]{\chapter{#1}\addcontentsline{toi}{chapter}{#1}}
+\newcommand{\impatiencesection}[1]{\section{#1}\addcontentsline{toi}{section}{#1}}
+\newcommand{\impatiencesubsection}[1]{\subsection{#1}\addcontentsline{toi}{subsection}{#1}}
+\makeatother
+
+\newcommand{\frontchapter}[1]{\chapter{#1}\fancyhead[LO,RE]{\slshape\MakeUppercase{#1}}}
+
+\renewcommand\contentsname{Full Contents}
+\newcommand\impatiencename{Contents for the Impatient}
+
+% Graphics macros
+\newcommand{\mpinline}[2]{\convertMPtoPDF{#1.#2}{1}{1}}
+\newcommand{\mpfigure}[2]{\vskip 12pt\centerline{\convertMPtoPDF{#1.#2}{1}{1}}}
+\newcommand{\screenshot}[2]{\centerline{\includegraphics[width=#2\textwidth]{#1}}}
+
+% Terp macros
+\newcommand{\terp}[2]{\begin{center}\begin{tabular}{p{0.45\textwidth}|p{0.45\textwidth}}\midrule #1&#2\\\midrule\end{tabular}\end{center}}
+\newcommand{\glkheading}[1]{\textbf{#1}}
+\newcommand{\glkinput}[1]{\textbf{#1}}
+\newcommand{\glkstatusline}[2]{\centerline{\colorbox{black}{\hbox to 0.45\textwidth{\textcolor{white}{#1\hfil #2}}}}}
+\newcommand{\storyprompt}{\raisebox{1.5pt}{\(>\)}}
+\newcommand{\cursor}{\raisebox{-1.5pt}{\RectangleThin}}
+\newcommand{\markedindent}{\(>\)\qquad}
+\newcommand{\unmarkedindent}{\hphantom{\(>\)}\qquad}
+\newcommand{\unmarkedindentb}{\qquad\hphantom{\(>\)}}
+\newcommand{\markeddip}{\(>\)\ }
+\newcommand{\unmarkeddip}{\hphantom{\(>\)}\ }
+\newcommand{\unmarkeddipb}{\ \hphantom{\(>\)}}
+
+% Command documentation macros
+\newcommand{\command}[2]{%
+  \hbox{}\par
+  \vbox{\textbf{#1}\par
+  \parindent=20pt\relax
+  \hangindent=20pt\relax
+  #2\par
+  \parindent=0pt\relax
+  \hangindent=0pt\relax}
+}
+\newcommand{\orcommand}{ \textnormal{\emph{--or--}}\n}
+
+% Index macros
+\newcommand{\term}[2]{%
+  \vbox{\textbf{#1}\label{#1}\par
+  \parindent=20pt\relax
+  \hangindent=20pt\relax
+  #2\par
+  \parindent=0pt\relax
+  \hangindent=0pt\relax}\hbox{}\par
+}
+\newcommand{\seeterm}[1]{\textbf{#1}}
+
+% Document
+\begin{document}
+
+\frontmatter
+\maketitle
+\thispagestyle{empty}\pagestyle{empty}
+\lastpagebreak
+\begin{center}
+  Copyright \copyright\ 2012 Brady Garvin
+
+  Permission is granted to copy, distribute and/or modify this document under the
+  terms of the GNU Free Documentation License, Version 1.3 or any later version
+  published by the Free Software Foundation; with no Invariant Sections, no
+  Front-Cover Texts, and no Back-Cover Texts.  A copy of the license is included
+  in the chapter entitled "GNU Free Documentation License".
+\end{center}
+\lastpagebreak
+
+\thispagestyle{empty}\pagestyle{fancy}\fancyhead[LE,RO]{}
+\tableofimpatience
+\tableofcontents
+
+\frontchapter{Preface}
+
+The Glulx Runtime Instrumentation Project (GRIP) provides debugging tools for
+authors of interactive fiction (IF) by building on the capabilities of the Glulx
+virtual machine.  There are currently three such tools:
+
+\begin{itemize}
+  \item{\textbf{Interactive Debugger}---for seeing what goes on inside an
+    executing story,}
+  \item{\textbf{Verbose Diagnostics}---for adding detail to error messages
+    printed by a story, and}
+  \item{\textbf{Floyd Mode}---for testing a story as it would appear in command
+    line and MUD interpreters.}
+\end{itemize}
+
+Under the hood, these three use a common suite of support extensions, most
+notably the Glulx Runtime Instrumentation Framework (GRIF), with which a story
+can rewrite itself at runtime.  The support extensions are designed in hopes
+that it will be easy to add new debugging tools in the future.
+
+All of the GRIP extensions must be installed before they can be used, and a few
+of them require additional setup---the specifics are described in
+Chapter~\ref{setup}.  Authors who want to use a debugging tool should then
+consult one of the self-contained manuals in
+Chapters~\ref{interactive-debugger}--\ref{floyd-mode}.  On the other hand,
+authors who want to understand how GRIP works or create a new debugging tool are
+referred to Chapter~\ref{technical-manual}.  Chapter~\ref{trouble} is provided
+in case of trouble.
+
+\lastpagebreak
+
+\frontchapter{Acknowledgements}
+
+GRIP owes a great deal to everyone who made Inform possible and everyone who
+continues to contribute.  I'd like to give especial thanks to Graham Nelson and
+Emily Short, not only for their design and coding work, but also for all of the
+documentation, both of the language and its internals---it proved indispensable.
+
+I am likewise indebted to everybody who worked to make Glulx and Glk a reality.
+Without them, there simply wouldn't have been any hope for this kind of project.
+My special thanks to Andrew Plotkin, with further kudos for his work maintaining
+the specifications.  They proved as essential as Inform's documentation.
+
+The project itself was inspired by suggestions from Ron Newcomb and Esteban
+Montecristo on Inform's feature request page.  It's only because of their posts
+that I ever started.  (And here's hoping that late is better than never.)
+
+Esteban Montecristo also made invaluable contributions as an alpha tester.  I
+cannot thank him enough: he signed on as a beta tester but then quickly
+uncovered a slew of problems that forced me to reconsider both the term ``beta''
+and my timeline.  The impetus for the new, cleaner design and several clues that
+led to huge performance improvements are all due to him.  Moreover, he
+contributed code, since modified to fit the revised framework, for the extension
+Verbose Diagnostics.
+
+As for Ron Newcomb, I can credit him for nearly half of the bugs unearthed in
+the beta proper, not to mention sound advice on the organization of the
+documentation and the extensions.  GRIP is much sturdier as a result.
+
+Roger Carbol, Jesse McGrew, Michael Martin, Dan Shiovitz, Johnny Rivera, and
+probably several others deserve similar thanks for answering questions on
+ifMUD's I6 and I7 channels.  I am grateful to Andrew Plotkin, David Kinder, and
+others for the same sort of help on intfiction.org.
+
+On top of that, David Kinder was kind enough to accommodate Debug File Parsing
+in the Windows IDE; consequently, authors who have a sufficiently recent version
+of Windows no longer need to write batch scripts.  His help is much appreciated,
+particularly because the majority of downloaders are running Windows.
+
+Even with the IDEs creating debug files, setting up symbolic links to those
+files can be a chore.  Jim Aiken suggested an automated solution, which now
+ships with the project.
+
+And preliminary support for authors who want to debug inside a browser stems
+from discussion with Erik Temple and Andrew Plotkin; my thanks for their ideas.
+
+Finally, I should take this opportunity to express my gratitude to everyone who
+helped me get involved in the IF community.  Notable among these people are
+Jesse McGrew and Emily Short, not to mention Jacqueline Lott, David Welbourn,
+and all of the other Club Floyd attendees.
+
+\lastpagebreak
+
+\mainmatter
+
+\impatiencechapter{Setup}
+\label{setup}
+\fancyhead[LE,RO]{\slshape \rightmark}
+\fancyhead[LO,RE]{\slshape \leftmark}
+
+Most of the GRIP setup, such as installing the extensions or configuring the
+IDE, only needs to happen once.  Sections~\ref{installing-easy} and
+\ref{installing-hard} describe how to perform these steps automatically and by
+hand, respectively.  However, five of the extensions need access to debug
+information, and therefore require some extra work on a per-story basis.  They
+are:
+
+\begin{itemize}
+  \item{Interactive Debugger,}
+  \item{Verbose Diagnostics (but not Verbose Diagnostics Lite),}
+  \item{Breakpoints,}
+  \item{Printing according to Kind Names, and}
+  \item{Debug File Parsing.}
+\end{itemize}
+
+Consult Section~\ref{including-easy} for the automatic story setup procedure or
+Section~\ref{including-hard} for the equivalent manual steps before using one of
+these extensions in a story.
+
+\lastpagebreak
+
+\impatiencesection{Inform Setup (The Easy Way)}
+\label{installing-easy}
+
+These instructions assume that you are using the extensions inside the Inform
+IDE and have Java 6 or newer installed (see \url{http://www.java.com/}).  They
+will also work with the Linux command-line interface, although they require you
+to run a graphical utility.  For any other situation, refer to
+Section~\ref{installing-hard}.
+
+\textbf{1. Download and unzip the files}
+
+If you're reading this manual, you've probably already downloaded the zip file
+and extracted its contents.  But if not, point your browser at
+\url{https://sourceforge.net/projects/i7grip/} and click on the big green
+download button.  The browser might unarchive the content for you, or you might
+have to unzip it yourself.  In either case, a folder should appear containing
+the files that you will need.
+
+\textbf{2. Run the Setup Utility}
+
+Open \texttt{GRIP Inform Setup.jar} and follow the on-screen instructions.  (If
+Java isn't your default program for opening JARs, you will have to right-click
+on the file and ask to open it with the Java runtime environment.)
+
+\lastpagebreak
+
+\section{Inform Setup (The Hard Way)}
+\label{installing-hard}
+
+\subsection{Mac OS X}
+
+\textbf{1. Download and unzip the files}
+
+If you're reading this manual, you've probably already downloaded the zip file
+and extracted its contents.  But if not, point your browser at
+\url{https://sourceforge.net/projects/i7grip/} and click on the big green
+download button.  The browser might unarchive the content for you, or you might
+have to double-click on the zip file in Finder.  In either case, a folder should
+appear containing the files that you will need.
+
+\textbf{2. Install the extensions}
+
+Install the extensions just as you would any others: Open Inform and under
+``File,'' choose ``Install Extension\dots.''  Then navigate to the folder
+containing the unzipped files.  Click on the first extension, shift-click on the
+last one to select them all, and finally click ``Open.''
+
+\textbf{3. Change the line endings in the relation kind template file (only
+  necessary for Inform versions 6G60 and earlier)}
+
+In Inform~6G60 and earlier, the file \texttt{RelationKind.i6t} has the wrong
+encoding for its line breaks, which can confuse the debugger.  Unless you have a
+newer version of Inform, you should replace this file with the corrected one
+included in the download.
+
+To do so, locate the Inform application in Finder.  (It is usually under
+``Applications.'')  Right-click (or control-click) on it and choose ``Show
+Package Contents.''  In the new Finder window, open the following chain of
+folders: ``Contents\thento Resources\thento Inform7\thento Extensions\thento
+Reserved.''  Copy \texttt{RelationKind.i6t} from the unzipped files into the
+``Reserved'' folder and choose ``Replace'' when Finder warns you that a file
+with that name already exists.
+
+\textbf{4. Switch to git (recommended, but optional)}
+
+The debugger runs faster under the git interpreter, both because git is faster
+in general and because the extensions can take advantage of some git-specific
+optimizations.  If you'll be working in the Inform IDE, you can select git by
+choosing the menu option ``Preferences\dots'' under ``Inform,'' changing to the
+``Advanced'' tab in the dialog that appears, and picking git from the ``Glulx
+Interpreter'' dropdown.  If you want to switch to git in another application,
+you will have to consult that application's documentation.
+
+\lastpagebreak
+
+\subsection{Windows}
+
+\textbf{1. Download and unzip the files}
+
+If you're reading this manual, you've probably already downloaded the zip file
+and extracted its contents.  But if not, point your browser at
+\url{https://sourceforge.net/projects/i7grip/} and click on the big green
+download button.  The browser might unarchive the content for you, or you might
+have to right-click on the zip file and choose ``Extract all\dots.''  In either
+case, a folder should appear containing the files that you will need.
+
+\textbf{2. Install the extensions}
+
+Install the extensions just as you would any others: Open Inform and under
+``File,'' choose ``Install Extension\dots.''  Then navigate to the folder
+containing the unzipped files.  Click on the first extension, shift-click on the
+last one to select them all, and finally click ``Open.''
+
+\textbf{3. Change the line endings in the relation kind template file (only
+  necessary for Inform versions 6G60 and earlier)}
+
+In Inform~6G60 and earlier, the file \texttt{RelationKind.i6t} has the wrong
+encoding for its line breaks, which can confuse the debugger.  Unless you have a
+newer version of Inform, you should replace this file with the corrected one
+included in the download.
+
+To do so, locate the folder containing the Inform application.  (It is
+usually under ``Program Files\(\mathord{\setminus}\)Inform 7.'')  Open
+the chain of folders ``Inform7\thento Extensions\thento Reserved,''
+where the folder called ``Inform 7'' should be next to Inform
+application.  Copy \texttt{RelationKind.i6t} from the unzipped files
+into the ``Reserved'' folder and choose ``Copy and Replace'' when
+warned that a file with that name already exists.  (You might need to
+provide administrator permission.)
+
+\textbf{4. Switch to git (recommended, but optional)}
+
+The debugger runs faster under the git interpreter, both because git
+is faster in general and because the extensions can take advantage of
+some git-specific optimizations.  If you'll be working in the Inform
+IDE, you can select git by choosing the menu option
+``Preferences\dots'' under ``Edit'' and picking git from the ``Glulx
+Interpreter'' dropdown.  If you want to switch to git in another
+application, you will have to consult that application's
+documentation.
+
+\lastpagebreak
+
+\subsection{Linux, with the GNOME IDE}
+
+\textbf{1. Download and unzip the files}
+
+If you're reading this manual, you've probably already downloaded the zip file
+and extracted its contents.  But if not, point your browser at
+\url{https://sourceforge.net/projects/i7grip/} and click on the big green
+download button.  The browser might unarchive the content for you, or you might
+have to unzip it yourself.
+
+\textbf{2. Install the extensions}
+
+Install the extensions just as you would any others: Open Inform and under
+``File,'' choose ``Install Extension\dots.''  Then navigate to the directory
+containing the unzipped files.  Click on the first extension, shift-click on the
+last one to select them all, and finally click ``Open.''
+
+\textbf{3. Change the line endings in the relation kind template file (only
+  necessary for Inform versions 6G60 and earlier)}
+
+In Inform~6G60 and earlier, the file \texttt{RelationKind.i6t} has the wrong
+encoding for its line breaks, which can confuse the debugger.  Unless you have a
+newer version of Inform, you should replace this file with the corrected one
+included in the download.
+
+To do so, locate the Inform installation.  (It is usually found in
+\texttt{/usr/share/gnome-inform7/}.)  You should find a directory named
+\texttt{Extensions}, under which is a directory named \texttt{Reserved}.  Copy
+\texttt{RelationKind.i6t} from the unzipped files into the \texttt{Reserved}
+directory to replace the version that is already there.  (Depending on your
+setup, you might need superuser privileges to do so.)
+
+\textbf{4. Switch to git (recommended, but optional)}
+
+The debugger runs faster under the git interpreter, both because git is faster
+in general and because the extensions can take advantage of some git-specific
+optimizations.  If you'll be working in the Inform IDE, you can select git by
+choosing the menu option ``Preferences\dots'' under ``Edit,'' changing to the
+``Advanced'' tab in the dialog that appears, and picking git from the ``Glulx
+Interpreter'' dropdown.  If you want to switch to git in another application,
+you will have to consult that application's documentation.
+
+\lastpagebreak
+
+\subsection{Linux, with the Command-Line Interface}
+
+\textbf{1. Download and unzip the files}
+
+If you're reading this manual, you've probably already downloaded the zip file
+and extracted its contents.  But if not, point your browser at
+\url{https://sourceforge.net/projects/i7grip/} and click on the big green
+download button.  The browser might unarchive the content for you, or you might
+have to unzip it yourself.
+
+\textbf{2. Install the extensions}
+
+Install the extensions just as you would any others: First, locate the Inform
+installation.  (It is usually found in \texttt{/usr/local/}, but would be
+somewhere else if you used the \texttt{--prefix} option during installation.)
+You should find a directory \texttt{\dots/share/inform7/Inform7/Extensions}.  In
+that directory, create a new folder named \texttt{Brady Garvin},
+and copy the \texttt{.i7x} files there.
+
+\textbf{3. Change the line endings in the relation kind template file (only
+  necessary for Inform versions 6G60 and earlier)}
+
+In Inform~6G60 and earlier, the file \texttt{RelationKind.i6t} has the wrong
+encoding for its line breaks, which can confuse the debugger.  Unless you have a
+newer version of Inform, you should replace this file by copying
+\texttt{RelationKind.i6t} from the unzipped files into the directory
+\texttt{Reserved} under the aforementioned \texttt{Extensions} folder.
+
+\textbf{4. Switch to git (recommended, but optional)}
+
+The debugger runs faster under the git interpreter, both because git is faster
+in general and because the extensions can take advantage of some git-specific
+optimizations.  If you're invoking the Perl interface interactively, you can
+select a git interpreter by choosing the menu options ``(S)ettings\thento (I)DE
+Settings\thento (G)lulx interpreter''.  The command-line version of git that
+comes with Inform, \texttt{\dots/libexec/dumb-git}, would be one possible
+choice.
+
+\lastpagebreak
+
+\impatiencesection{Story Setup (The Easy Way)}
+\label{including-easy}
+
+Unless you are using Interactive Debugger, Verbose Diagnostics, Breakpoints,
+Printing according to Kind Names, or Debug File Parsing, you can skip the story
+setup procedure.  In particular, it isn't required for Verbose Diagnostics Lite
+or Floyd Mode.
+
+These instructions assume that you are using the extensions inside the Inform
+IDE, have Java 6 or newer installed (see \url{http://www.java.com/}), and, if
+running Windows, aren't running a version older than Vista.  They will also work
+with the Linux command-line interface, although they require you to run a
+graphical utility.  For any other situation, refer to
+Section~\ref{including-hard}.
+
+\textbf{1. Download a recent version of the Windows IDE (if you are running Windows)}
+
+Furthermore, these instructions apply only to versions of the Windows IDE
+released after 4 March 2012; if you downloaded a copy before that date, you will
+need to navigate to \url{http://inform7.com/download/} and obtain a newer
+version.
+
+\textbf{2. Run the Setup Utility}
+
+Open \texttt{GRIP Story Setup.jar} and follow the on-screen instructions.  (If
+Java isn't your default program for opening JARs, you will have to right-click
+on the file and ask to open it with the Java runtime environment.)
+
+\textbf{3. Name rules and phrases (recommended, but optional)}
+
+Debugging a rule like the following is tricky, because there might be many
+instead-of-jumping rules, and both you and the extensions will have to deal with
+the ambiguity:
+
+\begin{quote}
+  \lstinputlisting{anonymous-rule.ni}
+\end{quote}
+
+Inform, however, lets you give rules specific names:
+
+\begin{quote}
+  \lstinputlisting{rule.ni}
+\end{quote}
+
+You may want add such rule names before debugging.
+
+The same argument applies to phrases, except that names are even more important;
+unnamed rules can at least be described by their preambles, whereas unnamed
+phrases cannot.  You are advised to convert code like
+
+\begin{quote}
+  \lstinputlisting{anonymous-phrase.ni}
+\end{quote}
+
+to code like
+
+\begin{quote}
+  \lstinputlisting{phrase.ni}
+\end{quote}
+
+\lastpagebreak
+
+\section{Story Setup (The Hard Way)}
+\label{including-hard}
+
+\subsection{Mac OS X}
+
+Unless you are using Interactive Debugger, Verbose Diagnostics, Breakpoints,
+Printing according to Kind Names, or Debug File Parsing, you can skip the story
+setup procedure.  In particular, it isn't required for Verbose Diagnostics Lite
+or Floyd Mode.
+
+\textbf{1. Switch to Glulx}
+
+The following steps need the story to have access to external files, so Glulx
+must be chosen.  As usual, open the project in Inform, and, on the settings tab,
+be sure that Glulx is selected as the story file format.
+
+\textbf{2. Create placeholders for symbolic links}
+
+For security reasons, a story cannot access files unless they are in a
+particular folder and have a file name with a particular format---the specifics
+depend on the interpreter.  With the Mac OS X version of Inform, the debugging
+files are not placed in this folder and do not have suitable file names.
+Therefore, if the extensions are to get at debugging information, we must make
+aliases for these files that satisfy the interpreter's requirements.  We first
+have the interpreter create placeholders for the aliases, so that we know that
+it will be able to find them.
+
+Choose three file names, one for the project's debug information, one for its
+intermediate I6, and one for its debugging log.  The examples that follow are
+for a story titled ``Example,'' so we will use file names beginning with
+``\texttt{example}.''
+
+Enter the following source text, substituting the file names you have chosen:
+
+\begin{quote}
+  \lstinputlisting{placeholder.ni}
+\end{quote}
+
+Then run the story so that the new when-play-begins rule can execute.
+
+\textbf{3. Replace the placeholders with actual symbolic links}
+
+Unfortunately, we cannot use Finder's ``make alias'' function because Finder's
+aliases are destroyed by Inform's compile process.  Instead we choose another
+kind of alias, a symbolic link.
+
+In Finder, locate the \texttt{.glkdata} files created by the when-play-begins
+rule.  They should be in same folder as the project itself, unless you're
+running the story in an interpreter outside of the IDE.
+
+Next, right-click (or control-click) on the project.  Choose ``Show Package
+Contents.''  In the new Finder window, open the ``Build'' folder and find the
+files \texttt{gameinfo.dbg}, \texttt{auto.inf}, and \texttt{Debug log.txt}.
+
+Now open Terminal, which can be found in the ``Utilities'' folder under
+``Applications.''  At the prompt, type \texttt{ln -is} followed by a space and
+drag \texttt{gameinfo.dbg} from Finder to Terminal.  Its full file name should
+appear.  Then drag the equivalent of \texttt{exampleDebug.glkdata} from Finder
+to Terminal and press enter.  You will be asked whether to replace the file
+created by the when-play-begins rule.  If everything looks okay, answer ``y''
+for ``yes.''
+
+Repeat the process, entering a second \texttt{ln -is} command for
+\texttt{auto.inf} and the data file corresponding to \texttt{exampleI6.glkdata}
+and a third for \texttt{Debug log.txt} and the file filling the role of
+\texttt{exampleLog.glkdata}.
+
+\lastpagebreak
+
+\textbf{4. Include the extension and tell it about the symbolic links}
+
+Remove the source text added earlier, and replace it with the following,
+adjusting file names as appropriate:
+
+\begin{quote}
+  \lstinputlisting{inclusion.ni}
+\end{quote}
+
+\textbf{5. Name rules and phrases (recommended, but optional)}
+
+Debugging a rule like the following is tricky, because there might be many
+instead-of-jumping rules, and both you and the extensions will have to deal with
+the ambiguity:
+
+\begin{quote}
+  \lstinputlisting{anonymous-rule.ni}
+\end{quote}
+
+Inform, however, lets you give rules specific names:
+
+\begin{quote}
+  \lstinputlisting{rule.ni}
+\end{quote}
+
+You may want add such rule names before debugging.
+
+The same argument applies to phrases, except that names are even more important;
+unnamed rules can at least be described by their preambles, whereas unnamed
+phrases cannot.  You are advised to convert code like
+
+\begin{quote}
+  \lstinputlisting{anonymous-phrase.ni}
+\end{quote}
+
+to code like
+
+\begin{quote}
+  \lstinputlisting{phrase.ni}
+\end{quote}
+
+\textbf{6. Avoid release builds when debugging}
+
+When you compile a release version of a story, a substantial amount of internal
+information is lost.  The debugger will still function, but it might not know as
+many names for things.  Therefore, if you are including the debugger, use
+``Release for Testing'' whenever possible.
+
+\lastpagebreak
+
+\subsection{Windows (Vista or newer)}
+
+Unless you are using Interactive Debugger, Verbose Diagnostics, Breakpoints,
+Printing according to Kind Names, or Debug File Parsing, you can skip the story
+setup procedure.  In particular, it isn't required for Verbose Diagnostics Lite
+or Floyd Mode.
+
+(Windows has only limited support for symbolic links, and in particular they
+aren't implemented for all filesystems.  If these instructions don't work, you
+can try again after moving your project to another drive or else fall back on
+the instructions for Windows XP.)
+
+\textbf{1. Download a recent version of the Windows IDE}
+
+These instructions apply only to versions of the Windows IDE released after 4
+March 2012; if you downloaded a copy before that date, you will need to navigate
+to \url{http://inform7.com/download/} and obtain a newer version.
+
+\textbf{2. Switch to Glulx}
+
+The following steps need the story to have access to external files, so Glulx
+must be chosen.  As usual, open the project in Inform, and, on the settings tab,
+be sure that Glulx is selected as the story file format.
+
+\textbf{3. Create placeholders for symbolic links}
+
+For security reasons, a story cannot access files unless they are in a
+particular folder and have a file name with a particular format---the specifics
+depend on the interpreter.  With the Windows version of Inform, the debugging
+files are not placed in this folder and do not have suitable file names.
+Therefore, if the extensions are to get at debugging information, we must make
+aliases for these files that satisfy the interpreter's requirements.  We first
+have the interpreter create placeholders for the aliases, so that we know that
+it will be able to find them.
+
+Choose three file names, one for the project's debug information, one for its
+intermediate I6, and one for its debugging log.  The examples that follow are
+for a story titled ``Example,'' so we will use file names beginning with
+``\texttt{example}.''
+
+Enter the following source text, substituting the file names you have chosen:
+
+\begin{quote}
+  \lstinputlisting{placeholder.ni}
+\end{quote}
+
+Then run the story so that the new when-play-begins rule can execute.
+
+\textbf{4. Replace the placeholders with actual symbolic links}
+
+Unfortunately, we cannot use the ``create shortcut'' function because Windows
+shortcuts are themselves valid data files, so the debugger would end up trying
+to read the shortcut information as if it were debug information.  Instead we
+choose another kind of alias, a symbolic link.
+
+To start off, locate the \texttt{.glkdata} files created by the when-play-begins
+rule.  They should be in same folder as the project itself, unless you're
+running the story in an interpreter outside of the IDE.
+
+Next, right-click on the project and choose ``Open in new window.''  Open the
+``Build'' folder that appears and find the files \texttt{gameinfo.dbg},
+\texttt{auto.inf}, and \texttt{Debug log.txt}.
+
+Now click on the Windows orb on the Start bar, and in the box that reads
+``Search programs and files,'' enter \texttt{Command Prompt}.  Right-click on
+the exact match, choose ``Run as administrator,'' and answer ``yes'' when asked
+whether you want to allow it to make changes to your computer.  (If you don't
+have this option, ask an administrator to grant you symbolic link privileges;
+once you have them, you can just click on the match.)
+
+At the prompt, type \texttt{mklink} followed by a space and a double quote, but
+don't press enter yet.  Right-click on the equivalent to
+\texttt{exampleDebug.glkdata} in Windows Explorer, and choose ``Properties.''
+Select the text labeled ``Location'' (if it's clipped, select from left to
+right, and it will scroll), and press Control-C to copy it.  Back at the command
+prompt, click on the program icon in the title bar and choose ``Edit \thento
+Paste.''  Then type a backslash (\lstinline @\@), the name of the file including
+the \texttt{.glkdata} extension, if any, and another double quote.  The command
+should now look something like this:
+
+\begin{quote}
+  \lstinline{mklink "C:\Users\johndoe\Documents\Inform\Projects\exampleDebug.glkdata"}
+\end{quote}
+
+Follow that by a space, and repeat the process for \texttt{gameinfo.dbg}, so
+that the command has the same form as
+
+\begin{quote}
+  \lstinline{mklink "C:\Users\johndoe\Documents\Inform\Projects\exampleDebug.glkdata" "C:\Users\johndoe\Documents\Inform\Projects\Example.inform\Build\gameinfo.dbg"}
+\end{quote}
+
+If everything looks good, delete the file in the role of
+\texttt{exampleDebug.glkdata}, return to the command prompt, and press enter to
+run the command.
+
+Finally, repeat everything from typing \texttt{mklink} to pressing enter, but
+for \texttt{auto.inf} and the data file corresponding to
+\texttt{exampleI6.glkdata}, and then do it once more for \texttt{Debug log.txt}
+and the file filling the role of \texttt{exampleLog.glkdata}.
+
+\textbf{5. Include the extension and tell it about the symbolic links}
+
+Remove the source text added earlier, and replace it with the following,
+adjusting file names as appropriate:
+
+\begin{quote}
+  \lstinputlisting{inclusion.ni}
+\end{quote}
+
+\textbf{6. Name rules and phrases (recommended, but optional)}
+
+Debugging a rule like the following is tricky, because there might be many
+instead-of-jumping rules, and both you and the extensions will have to deal with
+the ambiguity:
+
+\begin{quote}
+  \lstinputlisting{anonymous-rule.ni}
+\end{quote}
+
+Inform, however, lets you give rules specific names:
+
+\begin{quote}
+  \lstinputlisting{rule.ni}
+\end{quote}
+
+You may want add such rule names before debugging.
+
+\lastpagebreak
+
+The same argument applies to phrases, except that names are even more important;
+unnamed rules can at least be described by their preambles, whereas unnamed
+phrases cannot.  You are advised to convert code like
+
+\begin{quote}
+  \lstinputlisting{anonymous-phrase.ni}
+\end{quote}
+
+to code like
+
+\begin{quote}
+  \lstinputlisting{phrase.ni}
+\end{quote}
+
+\textbf{7. Avoid release builds when debugging}
+
+When you compile a release version of a story, a substantial amount of internal
+information is lost.  The debugger will still function, but it might not know as
+many names for things.  Therefore, if you are including the debugger, use
+``Release for Testing'' whenever possible.
+
+\lastpagebreak
+
+\subsection{Windows XP}
+
+Unless you are using Interactive Debugger, Verbose Diagnostics, Breakpoints,
+Printing according to Kind Names, or Debug File Parsing, you can skip the story
+setup procedure.  In particular, it isn't required for Verbose Diagnostics Lite
+or Floyd Mode.
+
+\textbf{1. Download a recent version of the Windows IDE}
+
+These instructions apply only to versions of the Windows IDE released after 4
+March 2012; if you downloaded a copy before that date you will need to navigate
+to \url{http://inform7.com/download/} and obtain a newer version.
+
+\textbf{2. Switch to Glulx}
+
+The following steps need the story to have access to external files, so Glulx
+must be chosen.  As usual, open the project in Inform, and, on the settings tab,
+be sure that Glulx is selected as the story file format.
+
+\textbf{3. Collect information for a batch file}
+
+Windows XP does not support symbolic links like the other operating systems, and
+renaming debug files after every compilation is a little tedious.  Therefore,
+I'd advise a batch file.
+
+First, we need some information.  For security reasons, a story cannot access
+files unless they are in a particular folder and have a file name with a
+particular format---the specifics depend on the interpreter.  When we later
+compile the story, the debugging files will not be placed in this folder, nor
+will they have suitable file names.  Therefore, for the extensions to get at
+debugging information we arrange for these files to be copied and renamed.
+We'll begin by having the interpreter create placeholders for the files, so that
+we know under what conditions it will be able to find them.
+
+Choose three file names, one for the project's debug information, one for its
+intermediate I6, and one for its debugging log.  The examples that follow are
+for a story titled ``Example,'' so we will use file names beginning with
+``\texttt{example}.''
+
+Enter the following source text, substituting the file names you have chosen:
+
+\begin{quote}
+  \lstinputlisting{placeholder.ni}
+\end{quote}
+
+Then run the story so that the new when-play-begins rule can execute.  Locate
+the three files that were created; they will have the file name extension
+\texttt{.glkdata} and appear in the same folder as the project if you're
+running the story in the IDE.
+
+\textbf{4. Create the batch file}
+
+Open notepad and enter the following program.  You will have to replace
+``\texttt{Example}'' everywhere with the name of your project.  If you are
+running the story in an interpreter outside of the IDE, you must also change the
+``\texttt{glkdata}'' extension on the files to match your interpreter, and
+occurrences of ``\lstinline{.\}'' should be revised to the drive and sequence of
+  folders enclosing the files (in order and separated by backslashes, as in
+  ``\lstinline{C:\fiction\interactive\}'').
+
+\begin{quote}
+  \lstinputlisting{batch.bat}
+\end{quote}
+
+Once you've entered the program and checked for typos, choose ``Save As\dots''
+from the ``File'' menu.  Under ``Save as type,'' select ``All files
+(\texttt{*.*}).''  Navigate to the folder containing your project, enter an
+unused file name that ends in \texttt{.bat}, and click ``Save.''
+
+\textbf{5. Include the extension and tell it about the copied files}
+
+Remove the source text added earlier, and replace it with the following,
+adjusting file names as appropriate:
+
+\begin{quote}
+  \lstinputlisting{inclusion.ni}
+\end{quote}
+
+\textbf{6. Name rules and phrases (recommended, but optional)}
+
+Debugging a rule like the following is tricky, because there might be many
+instead-of-jumping rules, and both you and the extensions will have to deal with
+the ambiguity:
+
+\begin{quote}
+  \lstinputlisting{anonymous-rule.ni}
+\end{quote}
+
+Inform, however, lets you give rules specific names:
+
+\begin{quote}
+  \lstinputlisting{rule.ni}
+\end{quote}
+
+You may want add such rule names before debugging.
+
+The same argument applies to phrases, except that names are even more important;
+unnamed rules can at least be described by their preambles, whereas unnamed
+phrases cannot.  You are advised to convert code like
+
+\begin{quote}
+  \lstinputlisting{anonymous-phrase.ni}
+\end{quote}
+
+to code like
+
+\begin{quote}
+  \lstinputlisting{phrase.ni}
+\end{quote}
+
+\textbf{7. Invoke the batch file when recompiling}
+
+After making a change and pressing ``Go,'' the story will run, but it will have
+outdated debug information, which makes the debugger at best misleading.  To
+update the debug data, you must double click on the batch file, check that it
+didn't give any error messages, and then press ``Go'' a second time.
+
+For ``Replay,'' unfortunately, the only sure-fire approach is to click ``Go,''
+double click on the batch file, check for errors, click ``Go'' again, and then
+use the skein to replay.
+
+If you are releasing the story and trying it out in an external interpreter, you
+must use ``Release for Testing'' (not the plain ``Release''), double click on
+the batch file, and only then load the story into the interpreter.
+
+\lastpagebreak
+
+\subsection{Linux, with the GNOME IDE}
+
+Unless you are using Interactive Debugger, Verbose Diagnostics, Breakpoints,
+Printing according to Kind Names, or Debug File Parsing, you can skip the story
+setup procedure.  In particular, it isn't required for Verbose Diagnostics Lite
+or Floyd Mode.
+
+\textbf{1. Switch to Glulx}
+
+The following steps need the story to have access to external files, so Glulx
+must be chosen.  As usual, open the project in Inform, and, on the settings tab,
+be sure that Glulx is selected as the story file format.
+
+\textbf{2. Create placeholders for symbolic links}
+
+For security reasons, a story cannot access files unless they are in a
+particular directory and have a file name with a particular format---the
+specifics depend on the interpreter.  With the Linux version of Inform, the
+debugging files are not placed in this directory and do not have suitable file
+names.  Therefore, if the extensions are to get at debugging information, we
+must make aliases for these files that satisfy the interpreter's requirements.
+We first have the interpreter create placeholders for the aliases, so that we
+know that it will be able to find them.
+
+Choose three file names, one for the project's debug information, one for its
+intermediate I6, and one for its debugging log.  The examples that follow are
+for a story titled ``Example,'' so we will use file names beginning with
+``\texttt{example}.''
+
+Enter the following source text, substituting the file names you have chosen:
+
+\begin{quote}
+  \lstinputlisting{placeholder.ni}
+\end{quote}
+
+Then run the story so that the new when-play-begins rule can execute.
+
+\textbf{3. Replace the placeholders with actual symbolic links}
+
+In Nautilus, locate the files created by the when-play-begins rule.  They should
+have no extension and appear in your home directly, unless you're running the
+story in an interpreter outside of the IDE.
+
+Next, open the project in a separate Nautilus window.  Inside you should find a
+``Build'' directory containing the files \texttt{gameinfo.dbg},
+\texttt{auto.inf}, and \texttt{Debug log.txt}.
+
+Right-click on \texttt{gameinfo.dbg} and select ``Make Link.''  Rename the link
+to match the first file, which is \texttt{exampleDebug} in our example, and then
+move it to the appropriate directory.  (Nautilus's ``Move to Home'' option is
+good for this.)  When prompted, choose to replace the file made by the
+when-play-begins rule.
+
+Repeat this process once for \texttt{auto.inf} and the data file corresponding
+to \texttt{exampleI6.glkdata}, another time for \texttt{Debug log.txt} and the
+file filling the role of \texttt{exampleLog.glkdata}.
+
+\lastpagebreak
+
+\textbf{4. Include the extension and tell it about the symbolic links}
+
+Remove the source text added earlier, and replace it with the following,
+adjusting file names as appropriate:
+
+\begin{quote}
+  \lstinputlisting{inclusion.ni}
+\end{quote}
+
+\textbf{5. Name rules and phrases (recommended, but optional)}
+
+Debugging a rule like the following is tricky, because there might be many
+instead-of-jumping rules, and both you and the extensions will have to deal with
+the ambiguity:
+
+\begin{quote}
+  \lstinputlisting{anonymous-rule.ni}
+\end{quote}
+
+Inform, however, lets you give rules specific names:
+
+\begin{quote}
+  \lstinputlisting{rule.ni}
+\end{quote}
+
+You may want add such rule names before debugging.
+
+The same argument applies to phrases, except that names are even more important;
+unnamed rules can at least be described by their preambles, whereas unnamed
+phrases cannot.  You are advised to convert code like
+
+\begin{quote}
+  \lstinputlisting{anonymous-phrase.ni}
+\end{quote}
+
+to code like
+
+\begin{quote}
+  \lstinputlisting{phrase.ni}
+\end{quote}
+
+\textbf{6. Avoid release builds when debugging}
+
+When you compile a release version of a story, a substantial amount of internal
+information is lost.  The debugger will still function, but it might not know as
+many names for things.  Therefore, if you are including the debugger, use
+``Release for Testing'' whenever possible.
+
+\lastpagebreak
+
+\subsection{Linux, with the Command-Line Interface}
+
+Unless you are using Interactive Debugger, Verbose Diagnostics, Breakpoints,
+Printing according to Kind Names, or Debug File Parsing, you can skip the story
+setup procedure.  In particular, it isn't required for Verbose Diagnostics Lite
+or Floyd Mode.
+
+\textbf{1. Switch to Glulx}
+
+The debugger needs a fair amount of memory, not to mention the ability to read
+external files, so Glulx is required.  As usual, open the project and choose
+``(S)ettings\thento Compile to (G)lulx.''
+
+\textbf{2. Create placeholders for symbolic links}
+
+For security reasons, a story cannot access files unless they are in a
+particular directory and have a file name with a particular format---the
+specifics depend on the interpreter.  With the command-line version of Inform,
+not all of the debugging files are placed in this directory, and none of them
+has a suitable file name.  Therefore, if the extensions are to get at debugging
+information, we must make aliases for these files that satisfy the interpreter's
+requirements.  We first have the interpreter create placeholders for the
+aliases, so that we know that it will be able to find them.
+
+Choose three file names, one for the project's debug information, one for its
+intermediate I6, and one for its debugging log.  The examples that follow are
+for a story titled ``Example,'' so we will use file names beginning with
+``\texttt{example}.''
+
+Enter the following source text, substituting the file names you have chosen:
+
+\begin{quote}
+  \lstinputlisting{placeholder.ni}
+\end{quote}
+
+Then run the story so that the new when-play-begins rule can execute.
+
+\textbf{3. Replace the placeholders with actual symbolic links}
+
+Locate the files created by the when-play-begins rule.  They should have no
+extension and appear inside of the \texttt{.inform} directory if you're running
+the story with the command-line git.  Also find---in the \texttt{Build}
+directory inside the project---the files \texttt{gameinfo.dbg},
+\texttt{auto.inf}, and \texttt{Debug log.txt}.
+
+Overwrite the data files with symbolic links to their counterparts.  For
+example, using \texttt{ln} from within the \texttt{.inform} directory:
+
+\begin{quote}
+  \lstinputlisting{lnis.cmd}
+\end{quote}
+
+\textbf{4. Include the extension and tell it about the symbolic links}
+
+Remove the source text added earlier, and replace it with the following,
+adjusting file names as appropriate:
+
+\begin{quote}
+  \lstinputlisting{inclusion.ni}
+\end{quote}
+
+\lastpagebreak
+
+\textbf{5. Name rules and phrases (recommended, but optional)}
+
+Debugging a rule like the following is tricky, because there might be many
+instead-of-jumping rules, and both you and the extensions will have to deal with
+the ambiguity:
+
+\begin{quote}
+  \lstinputlisting{anonymous-rule.ni}
+\end{quote}
+
+Inform, however, lets you give rules specific names:
+
+\begin{quote}
+  \lstinputlisting{rule.ni}
+\end{quote}
+
+You may want add such rule names before debugging.
+
+The same argument applies to phrases, except that names are even more important;
+unnamed rules can at least be described by their preambles, whereas unnamed
+phrases cannot.  You are advised to convert code like
+
+\begin{quote}
+  \lstinputlisting{anonymous-phrase.ni}
+\end{quote}
+
+to code like
+
+\begin{quote}
+  \lstinputlisting{phrase.ni}
+\end{quote}
+
+\textbf{6. Avoid release builds when debugging}
+
+When you compile a release version of a story, a substantial amount of internal
+information is lost.  The debugger will still function, but it might not know as
+many names for things.  Therefore, if you are including the debugger, use
+``Release for Testing'' whenever possible.
+
+\lastpagebreak
+
+\impatiencechapter{Interactive Debugger}
+\label{interactive-debugger}
+
+Interactive Debugger.i7x is a debugger for Inform~7 written in Inform~7.
+
+\label{what}
+A debugger is a program that shows us what is happening ``inside'' of another
+program---in this case an Inform~7 story---making it easier for us figure out
+why the latter behaves the way it does.  Contrary to what the term might
+suggest, debuggers do not find bugs or remove them, though they can simplify
+these tasks.  Also contrary to the term, they are not exclusively for bug
+hunting.  For instance, if we're trying to decipher someone else's code, we
+might want to watch the program run in slow motion.
+
+Most debuggers let us do at three things not otherwise possible:
+
+\begin{itemize}
+  \item{pause execution when certain conditions hold, with the option to resume
+    it later,}
+  \item{inspect the program's internal state,}
+\end{itemize}
+
+\noindent and
+
+\begin{itemize}
+  \item{change the internal state of a paused program, to see how program
+    behavior is affected.}
+\end{itemize}
+
+\noindent Generally speaking then, a debugger is most helpful when we have
+questions of the form ``What is the state of X when Y happens?''\ or ``What is
+the significance of X's state when Y happens?''  When we face a higher-level
+problem, like ``How did that character just walk through a closed door?,'' it's
+up to us to decide on a fruitful line of inquiry.  In this manual we will ignore
+the art of asking the right questions and focus on the mechanics of using
+Interactive Debugger.i7x once we have a question to ask.  Therefore, we are
+mainly interested in three things: (1) how one pauses the story when something
+happens, (2) how one determines the state of the story, and (3) how one alters
+that state.
+
+Two debugging tutorials cover these topics in Sections~\ref{first} and
+\ref{second}.  At the end of each tutorial is a summary of the commands that
+were covered; these are Sections~\ref{key} and \ref{other}, which are intended
+both for review and reference.
+
+\lastpagebreak
+
+\section{First Debugging Tutorial}
+\label{first}
+
+For the first tutorial we'll be debugging a small story called ``Tournament.''
+If you've installed the debugger and compiled at least one project since,
+``Tournament'' will be available as a pastable example (\emph{Writing with
+  Inform}\thento Contents\thento Installed Extensions\thento Brady Garvin\thento
+Interactive Debugger).  Otherwise, see Appendix~\ref{tournament}.
+
+Enter the source text of ``Tournament'' into a new Inform~7 project and follow
+the directions from the previous chapter to include the debugger.  When you run
+the story, the screen should look something like this:
+
+\terp{\null}{%
+  \glkheading{An Interactive Debugger for Inform~7}\n
+  \glkheading{Version 2 (1 September 2012)}\n
+  \n
+  This extension comes with ABSOLUTELY NO WARRANTY; for details type ``warranty'' at the debug prompt.\n
+  \n
+  This is free software, and you are welcome to redistribute it under certain conditions; type ``license'' at the debug prompt for details.\n
+  \n
+  There may be a slight delay whenever something happens for the first time---the first time a rulebook is used, the first time a story command is parsed, or the first time the action machinery runs, for instance.\n
+  \n
+  Enter the command ``help'' at the debug prompt for help.\n
+  \n
+  Debug command?\ \cursor}
+
+The left half of the window contains the story proper, which is not yet running,
+and the right half contains the debugger's interface.  If you don't like this
+arrangement, you can add one of these use options to the source text and
+restart:
+
+\begin{itemize}
+  \item{\lstinline{Use the left of the window for the debugger.}}
+  \item{\lstinline{Use the bottom of the window for the debugger.}}
+  \item{\lstinline{Use the top of the window for the debugger.}}
+\end{itemize}
+
+(Command-line interpreters only show whichever of the two interfaces is active;
+for them the use options have no effect.)
+
+At the debug command prompt, enter the command \glkinput{run} (or the
+abbreviation \glkinput{r}) to run the story.  As we were warned, there will be a
+slight pause for all of the things that are happening for the first time.  After
+that, we arrive at something familiar looking.
+
+\terp{\glkstatusline{Lists}{0/1}\n
+  \glkheading{Tournament}\n
+  An Interactive Fiction\n
+  Release 1 / Serial number 120204 / Inform~7 build 6G60 (I6/v6.32 lib 6/12N) SD\n
+  \n
+  \glkheading{Lists}\n
+  You can see a target and a willow wand here.\n
+  \n
+  \storyprompt\cursor}{%
+  \n
+  This extension comes with ABSOLUTELY NO WARRANTY; for details type ``warranty'' at the debug prompt.\n
+  \n
+  This is free software, and you are welcome to redistribute it under certain conditions; type ``license'' at the debug prompt for details.\n
+  \n
+  There may be a slight delay whenever something happens for the first time---the first time a rulebook is used, the first time a story command is parsed, or the first time the action machinery runs, for instance.\n
+  \n
+  Enter the command ``help'' at the debug prompt for help.\n
+  \n
+  Debug command?\ \glkinput{run}\n
+  \n
+  Debug command?\ \cursor}
+
+At this point we should be able to interact with the story normally:
+
+\terp{\glkstatusline{Lists}{0/2}\n
+  \glkheading{Tournament}\n
+  An Interactive Fiction\n
+  Release 1 / Serial number 120204 / Inform~7 build 6G60 (I6/v6.32 lib 6/12N) SD\n
+  \n
+  \glkheading{Lists}\n
+  You can see a target and a willow wand here.\n
+  \n
+  \storyprompt\glkinput{take inventory}\n
+  You are carrying:\n
+  \null\ \ a longbow\n
+  \null\ \ three arrows\n
+  \n
+  \storyprompt\cursor}{%
+  \n
+  This extension comes with ABSOLUTELY NO WARRANTY; for details type ``warranty'' at the debug prompt.\n
+  \n
+  This is free software, and you are welcome to redistribute it under certain conditions; type ``license'' at the debug prompt for details.\n
+  \n
+  There may be a slight delay whenever something happens for the first time---the first time a rulebook is used, the first time a story command is parsed, or the first time the action machinery runs, for instance.\n
+  \n
+  Enter the command ``help'' at the debug prompt for help.\n
+  \n
+  Debug command?\ \glkinput{run}\n
+  \n
+  Debug command?\ \cursor}
+
+\pagebreak
+
+When we are ready to go back to the debugger, we can usually just click in the
+debugger's window.  But some interpreters can only take input from one place at
+a time, for which case we have the out-of-world action ``forcing a breakpoint.''
+
+\terp{\glkstatusline{Lists}{0/2}\n
+  \glkheading{Tournament}\n
+  An Interactive Fiction\n
+  Release 1 / Serial number 120204 / Inform~7 build 6G60 (I6/v6.32 lib 6/12N) SD\n
+  \n
+  \glkheading{Lists}\n
+  You can see a target and a willow wand here.\n
+  \n
+  \storyprompt\glkinput{take inventory}\n
+  You are carrying:\n
+  \null\ \ a longbow\n
+  \null\ \ three arrows\n
+  \n
+  \storyprompt\glkinput{force a breakpoint}}{%
+  rulebook is used, the first time a story command is parsed, or the first time the action machinery runs, for instance.\n
+  \n
+  Enter the command ``help'' at the debug prompt for help.\n
+  \n
+  Debug command?\ \glkinput{run}\n
+  \n
+  Debug command?\ (input interrupted)\n
+  \glkheading{Breakpoint triggered by source text:} The out-of-world action ``forcing a breakpoint''\n
+  \n
+  Execution paused (at address 164423, code offset 0x2820B, I6 line 24600, and I7 line 24599)\n
+  \markedindent \lstinline{force a breakpoint named "The out-of-world action `forcing a breakpoint'".}\n
+  within carry out forcing a breakpoint (at address 164370).\n
+  \n
+  Debug command?\ \cursor}
+
+``Break,'' in the sense we're using it in here, is a verb meaning ``to
+temporarily interrupt.''  Consequently, a ``breakpoint'' is a point at which the
+debugger temporarily interrupts the story, and \glkinput{force a breakpoint} is
+an action that forces the story to reach such a point.
+
+When the story arrives at a breakpoint, the debugger announces that fact, gives
+a short summary of what the story is up to, and then prompts for a debug
+command.  As the bolded text indicates, the breakpoint in this case was one
+declared by the source text.  Per the unbolded text below it, the story has
+paused while it was inside the carry out forcing a breakpoint rule, on a line
+that reads
+
+\begin{quote}
+  \lstinline{force a breakpoint named "The out-of-world action `forcing a breakpoint'".}
+\end{quote}
+
+(We will ignore for the moment the parenthetical addresses, code offset, and
+line numbers, except to note that they are each ways to identify a location in
+the story's code.)
+
+If we wanted, we could use the same phrase,
+
+\begin{quote}
+  \lstinline{force a breakpoint named (T - some text without substitutions)}
+\end{quote}
+
+\noindent to declare other mandatory breakpoints in our source text.  But
+generally this isn't necessary because the debugger can add breakpoints on the
+fly.  Let's place one on the carry out attacking rule using the command
+\glkinput{break} (or one of its synonyms \glkinput{stop}, \glkinput{bre}, or
+\glkinput{b}) followed by the rule's preamble, \lstinline{carry out attacking}.
+The debugger ordinarily understands rules and phrases by their name, but it can
+also recognize unnamed rules---like this one---by their preamble.  There is,
+unfortunately, no such backup mechanism for phrases.
+
+Because we're dealing with a conditional rule, the debugger won't generate a
+breakpoint immediately, but will first ask us whether we want execution to pause
+every time the rule is considered or just when the rule applies.  Give the
+answer \glkinput{yes}, to put the breakpoint after the applicability check.
+
+\terp{\glkstatusline{Lists}{0/2}\n
+  \glkheading{Tournament}\n
+  An Interactive Fiction\n
+  Release 1 / Serial number 120204 / Inform~7 build 6G60 (I6/v6.32 lib 6/12N) SD\n
+  \n
+  \glkheading{Lists}\n
+  You can see a target and a willow wand here.\n
+  \n
+  \storyprompt\glkinput{take inventory}\n
+  You are carrying:\n
+  \null\ \ a longbow\n
+  \null\ \ three arrows\n
+  \n
+  \storyprompt\glkinput{force a breakpoint}}{%
+  Debug command?\ (input interrupted)\n
+  \glkheading{Breakpoint triggered by source text:} The out-of-world action ``forcing a breakpoint''\n
+  \n
+  Execution paused (at address 164423, code offset 0x2820B, I6 line 24600, and I7 line 24599)\n
+  \markedindent \lstinline{force a breakpoint named "The out-of-world action `forcing a breakpoint'".}\n
+  within carry out forcing a breakpoint (at address 164370).\n
+  \n
+  Debug command?\ \glkinput{break carry out attacking}\n
+  \n
+  Would you like to place the breakpoint after the rule's applicability check, so that it only pauses the story when the rule applies? \glkinput{yes}\n
+  \n
+  Breakpoint 0 (enabled): Pause when carry out attacking (at address 126171) applies\n
+  \n
+  Debug command?\ \cursor}
+
+Having created a breakpoint for us, the debugger reports its number, whether it
+is enabled, and a brief description.  Use the command \glkinput{go} (or one of
+the synonyms \glkinput{continue} or \glkinput{c}) to unpause the story, and then
+shoot the target to see the breakpoint in action.
+
+\terp{\glkstatusline{Lists}{0/2}\n
+  \glkheading{Tournament}\n
+  An Interactive Fiction\n
+  Release 1 / Serial number 120204 / Inform~7 build 6G60 (I6/v6.32 lib 6/12N) SD\n
+  \n
+  \glkheading{Lists}\n
+  You can see a target and a willow wand here.\n
+  \n
+  \storyprompt\glkinput{take inventory}\n
+  You are carrying:\n
+  \null\ \ a longbow\n
+  \null\ \ three arrows\n
+  \n
+  \storyprompt\glkinput{force a breakpoint}\n
+  \storyprompt\glkinput{shoot target}}{%
+  \n
+  Debug command?\ \glkinput{break carry out attacking}\n
+  \n
+  Would you like to place the breakpoint after the rule's applicability check, so that it only pauses the story when the rule applies? \glkinput{yes}\n
+  \n
+  Breakpoint 0 (enabled): Pause when carry out attacking (at address 126171) applies\n
+  \n
+  Debug command?\ \glkinput{go}\n
+  \n
+  \glkheading{Breakpoint 0:} Pause when carry out attacking (at address 126171) applies\n
+  \n
+  Execution paused (at address 126184, code offset 0x1ECAC, I6 line 18142, and I7 line 18137)\n
+  \markedindent \lstinline{Carry out attacking:}\n
+  within carry out attacking (at address 126171).\n
+  \n
+  Debug command?\ \cursor}
+
+As expected, the breakpoint stopped the story as soon as Inform determined that
+the carry out attacking rule applied.  Now let's move on to some commands that
+inspect the story's state.
+
+The first such command is \glkinput{list} (or just \glkinput{l}), which shows
+nearby lines in the current rule or phrase:
+
+\terp{\glkstatusline{Lists}{0/2}\n
+  \glkheading{Tournament}\n
+  An Interactive Fiction\n
+  Release 1 / Serial number 120204 / Inform~7 build 6G60 (I6/v6.32 lib 6/12N) SD\n
+  \n
+  \glkheading{Lists}\n
+  You can see a target and a willow wand here.\n
+  \n
+  \storyprompt\glkinput{take inventory}\n
+  You are carrying:\n
+  \null\ \ a longbow\n
+  \null\ \ three arrows\n
+  \n
+  \storyprompt\glkinput{force a breakpoint}\n
+  \storyprompt\glkinput{shoot target}}{%
+  attacking (at address 126171) applies\n
+  \n
+  Debug command?\ \glkinput{go}\n
+  \n
+  \glkheading{Breakpoint 0:} Pause when carry out attacking (at address 126171) applies\n
+  \n
+  Execution paused (at address 126184, code offset 0x1ECAC, I6 line 18142, and I7 line 18137)\n
+  \markedindent \lstinline{Carry out attacking:}\n
+  within carry out attacking (at address 126171).\n
+  \n
+  Debug command?\ \glkinput{list}\n
+  \n
+  \markedindent \lstinline{018137 Carry out attacking:}\n
+  \unmarkedindent \lstinline{018144 \ \ \ \ if the player carries an arrow ( called the missile )}\lstinline{\ begin;}\n
+  \unmarkedindent \lstinline{018147 \ \ \ \ \ \ \ \ hit the noun with the missile;}\n
+  \unmarkedindent \lstinline{018150 \ \ \ \ end if}\n
+  \n
+  Debug command?\ \cursor}
+
+The line numbers indicate where each of those lines appears in the file
+\texttt{auto.inf}.  They are useful when we want breakpoints in the middle of a
+rule or phrase.  For example, let's place one on the hit-the-noun line:
+
+\terp{\glkstatusline{Lists}{0/2}\n
+  \glkheading{Tournament}\n
+  An Interactive Fiction\n
+  Release 1 / Serial number 120204 / Inform~7 build 6G60 (I6/v6.32 lib 6/12N) SD\n
+  \n
+  \glkheading{Lists}\n
+  You can see a target and a willow wand here.\n
+  \n
+  \storyprompt\glkinput{take inventory}\n
+  You are carrying:\n
+  \null\ \ a longbow\n
+  \null\ \ three arrows\n
+  \n
+  \storyprompt\glkinput{force a breakpoint}\n
+  \storyprompt\glkinput{shoot target}}{%
+  \glkheading{Breakpoint 0:} Pause when carry out attacking (at address 126171) applies\n
+  \n
+  Execution paused (at address 126184, code offset 0x1ECAC, I6 line 18142, and I7 line 18137)\n
+  \markedindent \lstinline{Carry out attacking:}\n
+  within carry out attacking (at address 126171).\n
+  \n
+  Debug command?\ \glkinput{list}\n
+  \n
+  \markedindent \lstinline{018137 Carry out attacking:}\n
+  \unmarkedindent \lstinline{018144 \ \ \ \ if the player carries an arrow ( called the missile )}\lstinline{\ begin;}\n
+  \unmarkedindent \lstinline{018147 \ \ \ \ \ \ \ \ hit the noun with the missile;}\n
+  \unmarkedindent \lstinline{018150 \ \ \ \ end if}\n
+  \n
+  Debug command?\ \glkinput{break 18147}\n
+  \n
+  Breakpoint 1 (enabled): Pause on I7 line 018147\n
+  \n
+  Debug command?\ \cursor}
+
+\glkinput{List} is even more useful in combination with commands that navigate
+something called the call stack.  To explain it, we will first \glkinput{examine
+  the call stack} (a command available in a variety of variations, including
+\glkinput{x stack} and \glkinput{stack}, not to mention \glkinput{backtrace},
+\glkinput{bt}, and \glkinput{where} for authors accustomed to other debugging
+tools).
+
+\terp{\glkstatusline{Lists}{0/2}\n
+  \glkheading{Tournament}\n
+  An Interactive Fiction\n
+  Release 1 / Serial number 120204 / Inform~7 build 6G60 (I6/v6.32 lib 6/12N) SD\n
+  \n
+  \glkheading{Lists}\n
+  You can see a target and a willow wand here.\n
+  \n
+  \storyprompt\glkinput{take inventory}\n
+  You are carrying:\n
+  \null\ \ a longbow\n
+  \null\ \ three arrows\n
+  \n
+  \storyprompt\glkinput{force a breakpoint}\n
+  \storyprompt\glkinput{shoot target}}{%
+  Debug command?\ \glkinput{examine the call stack}\n
+  \n
+  Execution paused (at address 126184)\n
+  within carry out attacking (at address 126171) (call frame \#0, currently selected)\n
+  \null\qquad (no original arguments)\n
+  \null\qquad (the temporary named value is\n
+  \null\qquad \qquad t\_0 = arrow: nothing),\n
+  within the carry out stage rule (at address 100476) (call frame \#1)\n
+  \null\qquad (no original arguments)\n
+  \null\qquad (no temporary named values),\n
+  within the I6 routine AttackSub (at address 98067) (call frame \#2)\n
+  \null\qquad (no original arguments)\n
+  \null\qquad (no temporary named values),\n
+  within the descend to specific action-processing rule (at address 9647) (call frame \#3)\n
+  \null\qquad (no original arguments)\n
+  \null\qquad (no temporary named values),\n
+  within the generate action rule (at address 71340) (call frame \#4)\n
+  \null\qquad (no original arguments)\n
+  \null\qquad (the temporary named values are\n
+  \null\qquad \qquad i = \(<\)no kind\(>\): 0 / 0x0,\n
+  \null\qquad \qquad j = \(<\)no kind\(>\): 0 / 0x0,\n
+  \null\qquad \qquad k = \(<\)no kind\(>\): 0 / 0x0, and\n
+  \null\qquad \qquad l = \(<\)no kind\(>\): 0 / 0x0,\n
+  within the main story routine (at address 70749) (call frame \#5)\n
+  \null\qquad (the original arguments are unknown)\n
+  \null\qquad (no temporary named values).\n
+  \n
+  Debug command?\ \cursor}
+
+When a story is running, it typically has a number of tasks that it is working
+on at any one time.  Each of the blocks starting ``within\dots''\ in the output
+above is a summary of one task's state; the term for such a state is a ``call
+frame.''  For example, at the moment we can see that one of the story's tasks,
+\#4 to be precise, is running the generate action rule.  The original arguments
+of a call frame tell us what parameters the task had when it was started, and
+its temporary named values are its private variables.  In this case, task \#4
+has no arguments, but four temporary named values \lstinline{i} through
+\lstinline{l}, each of which is storing the number zero in a variable with no
+kind.  Task \#0 is perhaps more interesting to us.  That rule of course had no
+arguments, but we do see a cryptic temporary name for an arrow, \lstinline{t_0}.
+This, it turns out, is the I6 name for the variable.  It will have an I7 name,
+\lstinline{the missile}, as soon as execution reaches the next line.
+
+Call frames also have numbers, which are important in that they indicate the
+relationship between tasks.  For instance, the descend to specific
+action-processing rule (in task \#3) is running because the generate action rule
+(as task \#4) requested that it do so.  More generally, any task \#\(i\) is
+running because task \#\((i+1)\) asked it to.  (Except the last one; the main
+story routine is running simply because we loaded the story into an
+interpreter.)
+
+A call stack, then, is the collection of all active call frames, ordered by who
+asked whom to run.  Within it there is always one call frame selected, and any
+of our inspection commands take the perspective of that call frame.  Looking
+back at this particular call stack, we see that call frame \#0 is selected,
+which is why our list command showed the code for the carry out attacking rule.
+We can change the selection (via \glkinput{select} or \glkinput{sel}) to get a
+different source text listing:
+
+\terp{\glkstatusline{Lists}{0/2}\n
+  \glkheading{Tournament}\n
+  An Interactive Fiction\n
+  Release 1 / Serial number 120204 / Inform~7 build 6G60 (I6/v6.32 lib 6/12N) SD\n
+  \n
+  \glkheading{Lists}\n
+  You can see a target and a willow wand here.\n
+  \n
+  \storyprompt\glkinput{take inventory}\n
+  You are carrying:\n
+  \null\ \ a longbow\n
+  \null\ \ three arrows\n
+  \n
+  \storyprompt\glkinput{force a breakpoint}\n
+  \storyprompt\glkinput{shoot target}}{%
+  \qquad \qquad l = \(<\)unknown kind\(>\): 0,\n
+  within the main story routine (at address 70749) (call frame \#5)\n
+  \null\qquad (the original arguments are unknown)\n
+  \null\qquad (no temporary named values).\n
+  \n
+  Debug command?\ \glkinput{select 1}\n
+  \n
+  The selected frame is now\n
+  \null\ \ within the carry out stage rule (at address 100476) (call frame \#1).\n
+  \n
+  Debug command?\ \glkinput{list}\n
+  \n
+  \unmarkedindent \lstinline{012900 A specific action-processing rule ( this is the carry out stage rule ):}\n
+  \markedindent \lstinline{012903 \ \ \ \ consider the specific carry out rulebook.}\n
+  \n
+  Debug command?\ \cursor}
+
+The other call stack navigation commands are \glkinput{in} and \glkinput{out}.
+The former moves the selection a given number of call frames away from the main
+story routine, while the latter moves it in the opposite direction.  If we omit
+the distance, it's assumed to be one.  To demonstrate, \glkinput{out} followed
+by \glkinput{in 2} gets us back to call frame \#0, as pictured on the next page.
+
+For the next few commands we need to get the story somewhere slightly more
+interesting.  Fortunately, we've set breakpoint 1 at a suitable location, so we
+can just enter \glkinput{go}.
+
+\pagebreak
+
+\terp{\glkstatusline{Lists}{0/2}\n
+  \glkheading{Tournament}\n
+  An Interactive Fiction\n
+  Release 1 / Serial number 120204 / Inform~7 build 6G60 (I6/v6.32 lib 6/12N) SD\n
+  \n
+  \glkheading{Lists}\n
+  You can see a target and a willow wand here.\n
+  \n
+  \storyprompt\glkinput{take inventory}\n
+  You are carrying:\n
+  \null\ \ a longbow\n
+  \null\ \ three arrows\n
+  \n
+  \storyprompt\glkinput{force a breakpoint}\n
+  \storyprompt\glkinput{shoot target}}{%
+  Debug command?\ \glkinput{out}\n
+  \n
+  The selected frame is now\n
+  \null\ \ within the I6 routine AttackSub (at address 98067) (call frame \#2).\n
+  \n
+  Debug command?\ \glkinput{in 2}\n
+  \n
+  The selected frame is now\n
+  \null\ \ within carry out attacking (at address 126171) (call frame \#0).\n
+  \n
+  Debug command?\ \glkinput{go}\n
+  \n
+  \glkheading{Breakpoint 1:} Pause on I7 line 018147\n
+  \n
+  Execution paused (at address 126221, code offset 0x1ECD1, I6 line 18148, and I7 line 18147)\n
+  \markedindent hit the noun with the missile;\n
+  within carry out attacking (at address 126171)\n
+  \n
+  Debug command?\ \cursor}
+
+On this line we might be interested in what exactly the story will be hitting
+with what.  We can find out with the \glkinput{examine} command (\glkinput{x}
+for short, \glkinput{print} or \glkinput{p} for authors used to other
+debuggers).
+
+\terp{\glkstatusline{Lists}{0/2}\n
+  \glkheading{Tournament}\n
+  An Interactive Fiction\n
+  Release 1 / Serial number 120204 / Inform~7 build 6G60 (I6/v6.32 lib 6/12N) SD\n
+  \n
+  \glkheading{Lists}\n
+  You can see a target and a willow wand here.\n
+  \n
+  \storyprompt\glkinput{take inventory}\n
+  You are carrying:\n
+  \null\ \ a longbow\n
+  \null\ \ three arrows\n
+  \n
+  \storyprompt\glkinput{force a breakpoint}\n
+  \storyprompt\glkinput{shoot target}}{%
+  \ \ within carry out attacking (at address 126171) (call frame \#0).\n
+  \n
+  Debug command?\ \glkinput{go}\n
+  \n
+  \glkheading{Breakpoint 1:} Pause on I7 line 018147\n
+  \n
+  Execution paused (at address 126221, code offset 0x1ECD1, I6 line 18148, and I7 line 18147)\n
+  \markedindent hit the noun with the missile;\n
+  within carry out attacking (at address 126171)\n
+  \n
+  Debug command?\ \glkinput{examine the noun}\n
+  \n
+  the noun = object: target\n
+  \n
+  Debug command?\ \glkinput{examine the missile}\n
+  \n
+  the missile = arrow: arrow\n
+  \n
+  Debug command?\ \cursor}
+
+So the noun is the target and the missile is a generic arrow.  We knew both of
+these things, but the point is to illustrate that the debugger can report both
+non-temporary named values (like \lstinline{the noun}) and temporary named
+values (like \lstinline{the missile}), although we need to have the right call
+frame selected to refer to the latter.  It also defines some extra non-temporary
+named values to help us debug actions: \lstinline{the verb} and
+\lstinline{the requester}.  For example, the verb in our case is ``attacking,''
+an action name:
+
+\terp{\glkstatusline{Lists}{0/2}\n
+  \glkheading{Tournament}\n
+  An Interactive Fiction\n
+  Release 1 / Serial number 120204 / Inform~7 build 6G60 (I6/v6.32 lib 6/12N) SD\n
+  \n
+  \glkheading{Lists}\n
+  You can see a target and a willow wand here.\n
+  \n
+  \storyprompt\glkinput{take inventory}\n
+  You are carrying:\n
+  \null\ \ a longbow\n
+  \null\ \ three arrows\n
+  \n
+  \storyprompt\glkinput{force a breakpoint}\n
+  \storyprompt\glkinput{shoot target}}{%
+  Execution paused (at address 126221, code offset 0x1ECD1, I6 line 18148, and I7 line 18147)\n
+  \markedindent hit the noun with the missile;\n
+  within carry out attacking (at address 126171)\n
+  \n
+  Debug command?\ \glkinput{examine the noun}\n
+  \n
+  the noun = object: target\n
+  \n
+  Debug command?\ \glkinput{examine the missile}\n
+  \n
+  the missile = arrow: arrow\n
+  \n
+  Debug command?\ \glkinput{examine the verb}\n
+  \n
+  the verb = action name: attacking\n
+  \n
+  Debug command?\ \cursor}
+
+Next, we'll walk through the arrow's flight.  Enter the command \glkinput{step}
+(or \glkinput{s} or \glkinput{next line anywhere}).  \glkinput{Step} allows the
+story to run for only a short space, far enough to get to the next source text
+line but no further.
+
+\terp{\glkstatusline{Lists}{0/2}\n
+  \glkheading{Tournament}\n
+  An Interactive Fiction\n
+  Release 1 / Serial number 120204 / Inform~7 build 6G60 (I6/v6.32 lib 6/12N) SD\n
+  \n
+  \glkheading{Lists}\n
+  You can see a target and a willow wand here.\n
+  \n
+  \storyprompt\glkinput{take inventory}\n
+  You are carrying:\n
+  \null\ \ a longbow\n
+  \null\ \ three arrows\n
+  \n
+  \storyprompt\glkinput{force a breakpoint}\n
+  \storyprompt\glkinput{shoot target}}{%
+  the noun = object: target\n
+  \n
+  Debug command?\ \glkinput{examine the missile}\n
+  \n
+  the missile = arrow: arrow\n
+  \n
+  Debug command?\ \glkinput{examine the verb}\n
+  \n
+  the verb = action name: attacking\n
+  \n
+  Debug command?\ \glkinput{step}\n
+  \n
+  Execution paused (at address 466101, code offset 0x71C79, and I6 line 89574)\n
+  \markedindent \lstinline@if ((t\_0 == I251\_willow\_wand)) { (PHR\_4198\_r13 (t\_0,t\_1)); rtrue; }@\n
+  within the I6 routine Resolver\_5 (at address 466096)\n
+  \n
+  Debug command?\ \cursor}
+
+Here's a surprise---that doesn't look like a line from the source text.  But
+``within the I6 routine Resolver\_5'' provides a clue: we're looking at code
+that Inform wrote itself, code to decide which of the two to-hit implementations
+applies.  As the mention of ``\lstinline{I251_willow_wand}'' suggests, the story
+is about to check the willow wand case.  If we step once more, it will rule that
+out and move on to the second possibility:
+
+\terp{\glkstatusline{Lists}{0/2}\n
+  \glkheading{Tournament}\n
+  An Interactive Fiction\n
+  Release 1 / Serial number 120204 / Inform~7 build 6G60 (I6/v6.32 lib 6/12N) SD\n
+  \n
+  \glkheading{Lists}\n
+  You can see a target and a willow wand here.\n
+  \n
+  \storyprompt\glkinput{take inventory}\n
+  You are carrying:\n
+  \null\ \ a longbow\n
+  \null\ \ three arrows\n
+  \n
+  \storyprompt\glkinput{force a breakpoint}\n
+  \storyprompt\glkinput{shoot target}}{%
+  the verb = action name: attacking\n
+  \n
+  Debug command?\ \glkinput{step}\n
+  \n
+  Execution paused (at address 466101, code offset 0x71C79, and I6 line 89574)\n
+  \markedindent \lstinline@if ((t\_0 == I251\_willow\_wand)) { (PHR\_4198\_r13 (t\_0,t\_1)); rtrue; }@\n
+  within the I6 routine Resolver\_5 (at address 466096)\n
+  \n
+  Debug command?\ \glkinput{step}\n
+  \n
+  Execution paused (at address 458586, code offset 0x6FDF0, and I6 line 88011)\n
+  \markedindent \lstinline@if ((((t\_0 ofclass K16\_mark)))) { (PHR\_4197\_r14 (t\_0,t\_1)); rtrue; }@\n
+  within the I6 routine Resolver\_5 (at address 466096)\n
+  \n
+  Debug command?\ \cursor}
+
+And yet another step brings us into the phrase itself.  We'll take this
+opportunity to mention that \glkinput{again} (which can be abbreviated as
+\glkinput{g} or a blank input) repeats the previous command.
+
+\terp{\glkstatusline{Lists}{0/2}\n
+  \glkheading{Tournament}\n
+  An Interactive Fiction\n
+  Release 1 / Serial number 120204 / Inform~7 build 6G60 (I6/v6.32 lib 6/12N) SD\n
+  \n
+  \glkheading{Lists}\n
+  You can see a target and a willow wand here.\n
+  \n
+  \storyprompt\glkinput{take inventory}\n
+  You are carrying:\n
+  \null\ \ a longbow\n
+  \null\ \ three arrows\n
+  \n
+  \storyprompt\glkinput{force a breakpoint}\n
+  \storyprompt\glkinput{shoot target}}{%
+  458257)\n
+  \n
+  Debug command?\ \glkinput{step}\n
+  \n
+  Execution paused (at address 466123, code offset 0x71C8F, and I6 line 89575)\n
+  \markedindent \lstinline@if ((((t\_0 ofclass K16\_mark)))) { (PHR\_4197\_r14 (t\_0,t\_1)); rtrue; }@\n
+  within the I6 routine Resolver\_5 (at address 466096)\n
+  \n
+  Debug command?\ \glkinput{again}\n
+  \n
+  Execution paused (at address 250202, code offset 0x3D11E, I6 line 35504, and I7 line 35503)\n
+  \markedindent \lstinline{if an arrow ( called the previous shot )}\lstinline{\ is part of t begin}\n
+  within the I6 routine PHR\_4197\_r14 (at address 250197)\n
+  \n
+  Debug command?\ \cursor}
+
+Note that the synopsis of the story's location in the source text mentions ``the
+I6 routine PHR\_4197\_r14.''  The debugger knows that this phrase was originally
+written in Inform~7, but it doesn't know any I7 name for it, so it's showing the
+I6 name.  (It also understands the I6 name in our input, but that's only useful
+if \emph{we} happen to know it.)
+
+Were we to continue stepping, we would work our way through more code written by
+Inform, this time to decide whether an arrow is part of something.  Instead,
+we'll introduce another command, \glkinput{next} (which has the synonyms
+\glkinput{next line} and \glkinput{n}).
+
+Much as \glkinput{step} waits until any task in the story has proceeded to
+another line, \glkinput{next} waits for a specific task to advance a
+line---whichever task corresponds to the selected call frame.  Every time we
+re-pause the story, the selection automatically moves to the innermost call
+frame, so at this point we have the call frame for
+\lstinline{To hit (T - a mark)}\lstinline{ with (A - an arrow)} selected.
+Therefore, \glkinput{next} will take us to the next line in that phrase,
+ignoring any rules or phrases the story uses to get there.
+
+\terp{\glkstatusline{Lists}{0/2}\n
+  \glkheading{Tournament}\n
+  An Interactive Fiction\n
+  Release 1 / Serial number 120204 / Inform~7 build 6G60 (I6/v6.32 lib 6/12N) SD\n
+  \n
+  \glkheading{Lists}\n
+  You can see a target and a willow wand here.\n
+  \n
+  \storyprompt\glkinput{take inventory}\n
+  You are carrying:\n
+  \null\ \ a longbow\n
+  \null\ \ three arrows\n
+  \n
+  \storyprompt\glkinput{force a breakpoint}\n
+  \storyprompt\glkinput{shoot target}}{%
+  within the I6 routine Resolver\_5 (at address 466096)\n
+  \n
+  Debug command?\ \glkinput{again}\n
+  \n
+  Execution paused (at address 250202, code offset 0x3D11E, I6 line 35504, and I7 line 35503)\n
+  \markedindent \lstinline{if an arrow ( called the previous shot )}\lstinline{\ is part of t begin}\n
+  within the I6 routine PHR\_4197\_r14 (at address 250197)\n
+  \n
+  Debug command? \glkinput{next}\n
+  \n
+  Execution paused (at address 250235, code offset 0x3D13F, I6 line 35514, and I7 line 35513)\n
+  \markedindent \lstinline{now a is part of t;}\n
+  within the I6 routine PHR\_4197\_r14 (at address 250197)\n
+  \n
+  Debug command?\ \cursor}
+
+One more useful command for running the story by increments: \glkinput{finish}
+(also \glkinput{finish this call}, \glkinput{fin}, or \glkinput{f}).  It
+continues until the end of a particular task, again whichever one matches the
+selected call frame.  With its help we return to \lstinline{Resolver_5} on the
+next page.
+
+To complete the tutorial, let's look at an actual, albeit simple bug.  First,
+we'll need a clean slate.  The command \glkinput{breakpoint information} (also
+\glkinput{information}, \glkinput{info}, \glkinput{i b} or just \glkinput{i})
+tells us about the breakpoints we've created so far; enter it to show our two
+breakpoints.
+
+\terp{\glkstatusline{Lists}{0/2}\n
+  \glkheading{Tournament}\n
+  An Interactive Fiction\n
+  Release 1 / Serial number 120204 / Inform~7 build 6G60 (I6/v6.32 lib 6/12N) SD\n
+  \n
+  \glkheading{Lists}\n
+  You can see a target and a willow wand here.\n
+  \n
+  \storyprompt\glkinput{take inventory}\n
+  You are carrying:\n
+  \null\ \ a longbow\n
+  \null\ \ three arrows\n
+  \n
+  \storyprompt\glkinput{force a breakpoint}\n
+  \storyprompt\glkinput{shoot target}}{%
+  0x3D13F, I6 line 35514, and I7 line 35513)\n
+  \markedindent \lstinline{now a is part of t;}\n
+  within the I6 routine PHR\_4197\_r14 (at address 250197)\n
+  \n
+  Debug command?\ \glkinput{finish}\n
+  \n
+  Execution paused (at address 466149, code offset 0x71CA9, and I6 line 89575)\n
+  \markedindent \lstinline@if ((((t\_0 ofclass K16\_mark)))) { (PHR\_4197\_r14 (t\_0,t\_1)); rtrue; }@\n
+  within the I6 routine Resolver\_5 (at address 466096).\n
+  \n
+  Debug command?\ \glkinput{breakpoint information}\n
+  \n
+  Breakpoint 0 (enabled): Pause when carry out attacking (at address 126171) applies\n
+  Breakpoint 1 (enabled): Pause on I7 line 018147\n
+  \n
+  Debug command?\ \cursor}
+
+To get these breakpoints out of the way, we have two choices.  We could
+\glkinput{disable} (or just \glkinput{dis}) them, which is a good idea if
+sometime later we might want to \glkinput{enable} (\glkinput{ena}) them again,
+or we could \glkinput{delete} (\glkinput{del} or \glkinput{d}) them outright.
+Let's disable them for now.  We can enter the commands \glkinput{disable 0} and
+\glkinput{disable 1}, but for a wholesale change like this write \glkinput{all
+  breakpoints}, as in \glkinput{disable all breakpoints}.
+
+\terp{\glkstatusline{Lists}{0/2}\n
+  \glkheading{Tournament}\n
+  An Interactive Fiction\n
+  Release 1 / Serial number 120204 / Inform~7 build 6G60 (I6/v6.32 lib 6/12N) SD\n
+  \n
+  \glkheading{Lists}\n
+  You can see a target and a willow wand here.\n
+  \n
+  \storyprompt\glkinput{take inventory}\n
+  You are carrying:\n
+  \null\ \ a longbow\n
+  \null\ \ three arrows\n
+  \n
+  \storyprompt\glkinput{force a breakpoint}\n
+  \storyprompt\glkinput{shoot target}}{%
+  \n
+  Debug command?\ \glkinput{finish}\n
+  \n
+  Execution paused (at address 466149, code offset 0x71CA9, and I6 line 89575)\n
+  \markedindent \lstinline@if ((((t\_0 ofclass K16\_mark)))) { (PHR\_4197\_r14 (t\_0,t\_1)); rtrue; }@\n
+  within the I6 routine Resolver\_5 (at address 466096).\n
+  \n
+  Debug command?\ \glkinput{breakpoint information}\n
+  \n
+  Breakpoint 0 (enabled): Pause when carry out attacking (at address 126171) applies\n
+  Breakpoint 1 (enabled): Pause on I7 line 018147\n
+  \n
+  Debug command?\ \glkinput{disable all breakpoints}\n
+  \n
+  All breakpoints disabled.\n
+  \n
+  Debug command?\ \cursor}
+
+Once the breakpoints are disabled, continue and shoot the willow wand.
+
+\terp{\glkstatusline{Lists}{0/3}\n
+  Release 1 / Serial number 120204 / Inform~7 build 6G60 (I6/v6.32 lib 6/12N) SD\n
+  \n
+  \glkheading{Lists}\n
+  You can see a target and a willow wand here.\n
+  \n
+  \storyprompt\glkinput{take inventory}\n
+  You are carrying:\n
+  \null\ \ a longbow\n
+  \null\ \ three arrows\n
+  \n
+  \storyprompt\glkinput{force a breakpoint}\n
+  \storyprompt\glkinput{shoot target}\n
+  Your arrow buries itself in the target.\n
+  \n
+  \storyprompt\glkinput{shoot wand}\n
+  \n
+  [** Programming error: tried to ``move'' arrow to nothing **]}{%
+  Debug command?\ \glkinput{go}\n
+  \n
+  \glkheading{Breakpoint triggered by source text:} Programming error\n
+  \n
+  Execution paused (at address 229637, code offset 0x380C9, and I6 line 33283)\n
+  \markedindent \lstinline@];@\n
+  within the I6 routine MoveObject (at address 229152).\n
+  \n
+  Selecting the nearest location in the simplified call stack (at address 250171, code offset 0x3D0FF, I6 line 35492, and I7 line 35491)\n
+  \markedindent \lstinline {move a to the location of t.}\n
+  within the I6 routine PHR\_4198\_r13 (at address 250154).\n
+  (Use the command ``prefer no simplification'' to always select the point where execution is paused.)\n
+  \n
+  Debug command?\ \cursor}
+
+What's happened is that one of Inform's internal checks has detected something
+fishy.  Most of the time we see these checks as runtime problems, which in most
+Inform~7 development environments will pop up an explanatory page.  But this one
+is a ``programming error,'' which is caught at the Inform~6 level and has no
+such explanation.
+
+An extension that Interactive Debugger includes, Verbose Diagnostics, alters the
+code for reporting runtime problems, programming errors, and several other kinds
+of trouble.  Usually these alterations just print out a call stack, but inside
+the debugger they force a breakpoint.  Thus, we find the story paused in an I6
+routine named \lstinline{MoveObject}.
+
+But then we get this bit:
+
+\begin{quote}
+  Selecting the nearest location in the simplified call stack (at address 250171, code offset 0x3D0FF, I6 line 35492, and I7 line 35491) ...
+\end{quote}
+
+The debugger normally leaves out standard Inform internals so that we can focus
+on the code that we've written (or the code that is a consequence of what we've
+written, like \lstinline{Resolver_5}).  Here it's warning us that the
+programming error turned up inside of an internal routine, and that the nearest
+line of non-internal code it could find is the one that moves A to the location
+of T.  This suits us just fine; it's a pretty blatant hint of what's gone wrong.
+
+For the demonstration's sake, however, let's confirm that T is indeed an
+off-stage object.  First we try the command \glkinput{examine T}, by which we
+find out what T is, but nothing more.  What we really want is \glkinput{showme},
+which replicates the behavior of Inform's testing command.
+
+\terp{\glkstatusline{Lists}{0/3}\n
+  build 6G60 (I6/v6.32 lib 6/12N) SD\n
+  \n
+  \glkheading{Lists}\n
+  You can see a target and a willow wand here.\n
+  \n
+  \storyprompt\glkinput{take inventory}\n
+  You are carrying:\n
+  \null\ \ a longbow\n
+  \null\ \ three arrows\n
+  \n
+  \storyprompt\glkinput{force a breakpoint}\n
+  \storyprompt\glkinput{shoot target}\n
+  Your arrow buries itself in the target.\n
+  \n
+  \storyprompt\glkinput{shoot wand}\n
+  \n
+  [** Programming error: tried to ``move'' arrow to nothing **]}{%
+  250154).\n
+  (Use the command ``prefer no simplification'' to always select the point where execution is paused.)\n
+  \n
+  Debug command?\ \glkinput{examine T}\n
+  \n
+  t = mark: willow wand\n
+  \n
+  Debug command?\ \glkinput{showme T}\n
+  \n
+  The ``showme'' command works by running some story code, which is liable to crash the debugger if the story is in the middle of rearranging its data structures.  It could also disturb the state of the story, for instance if a printed name has a text substitution with side-effects.  (Use the command ``prefer no showme warnings'' to disable this message.)  Are you sure you want to continue?\ \cursor}
+
+The admonition that pops up is relevant mainly in three cases.  One is when we
+are debugging Inform internals, which we're not.  Another is when printing the
+showme information might cause something to happen inside the story.  Looking at
+our source text, this case doesn't seem applicable either.  The third is when we
+try to use showme on a value that looks like it could be converted to an object
+but actually can't.  (\glkinput{Showme} automatically converts its argument to
+the object kind for convenience when dealing with low-level code.)  If our
+command were something like \glkinput{showme 12345}, we might get astoundingly
+unlucky, but as it is we've already determined that T is just an ordinary willow
+wand.  We can answer \glkinput{yes}.
+
+\terp{\glkstatusline{Lists}{0/3}\n
+  build 6G60 (I6/v6.32 lib 6/12N) SD\n
+  \n
+  \glkheading{Lists}\n
+  You can see a target and a willow wand here.\n
+  \n
+  \storyprompt\glkinput{take inventory}\n
+  You are carrying:\n
+  \null\ \ a longbow\n
+  \null\ \ three arrows\n
+  \n
+  \storyprompt\glkinput{force a breakpoint}\n
+  \storyprompt\glkinput{shoot target}\n
+  Your arrow buries itself in the target.\n
+  \n
+  \storyprompt\glkinput{shoot wand}\n
+  \n
+  [** Programming error: tried to ``move'' arrow to nothing **]}{%
+  The ``showme'' command works by running some story code, which is liable to crash the debugger if the story is in the middle of rearranging its data structures.  It could also disturb the state of the story, for instance if a printed name has a text substitution with side-effects.  (Use the command ``prefer no showme warnings'' to disable this message.)  Are you sure you want to continue?\ \hbox to 80pt{\glkinput{yes}\hfil}\n
+  \n
+  willow wand - mark\n
+  location: out of play\n
+  singular-named, improper-named; unlit, inedible, portable\n
+  printed name: ``willow wand''\n
+  printed plural name: ``marks''\n
+  indefinite article: none\n
+  description: none\n
+  initial appearance: none\n
+  \n
+  Debug command?\ \cursor}
+
+Our hunch is confirmed, and the cause is close at hand, the ordering of lines
+35488 and 35491:
+
+\terp{\glkstatusline{Lists}{0/3}\n
+  build 6G60 (I6/v6.32 lib 6/12N) SD\n
+  \n
+  \glkheading{Lists}\n
+  You can see a target and a willow wand here.\n
+  \n
+  \storyprompt\glkinput{take inventory}\n
+  You are carrying:\n
+  \null\ \ a longbow\n
+  \null\ \ three arrows\n
+  \n
+  \storyprompt\glkinput{force a breakpoint}\n
+  \storyprompt\glkinput{shoot target}\n
+  Your arrow buries itself in the target.\n
+  \n
+  \storyprompt\glkinput{shoot wand}\n
+  \n
+  [** Programming error: tried to ``move'' arrow to nothing **]}{%
+  \n
+  willow wand - mark\n
+  location: out of play\n
+  singular-named, improper-named; unlit, inedible, portable\n
+  printed name: ``willow wand''\n
+  printed plural name: ``marks''\n
+  indefinite article: none\n
+  description: none\n
+  initial appearance: none\n
+  \n
+  Debug command?\ \glkinput{list}\n
+  \n
+  \unmarkedindent \lstinline{035482 To hit ( T - the willow wand )}\lstinline{\ with ( A - an arrow ):}\n
+  \unmarkedindent \lstinline{035488 \ \ \ \ remove the willow wand from play;}\n
+  \markedindent \lstinline{035491 \ \ \ \ move a to the location of t.}\n
+  \n
+  Debug command?\ \cursor}
+
+That wraps up the first tutorial.  The next section summarizes the commands
+we've seen, plus a handful of other common commands.
+
+\lastpagebreak
+
+\impatiencesection{Key Debugging Commands}
+\label{key}
+
+\subsection{Getting Help}
+
+\command{help}{see a list of topics for which the debugger has documentation
+  built in.}
+
+\command{help [topic]}{see the built-in documentation for the given
+  topic.}
+
+\subsection{Repeating Commands}
+
+\command{again\orcommand g\orcommand[an empty line]}{repeat the previous
+  command.}
+
+\subsection{Printing the Story's Location}
+
+\command{summary}{show where execution is paused from the perspective of the
+  selected call frame.}
+
+\subsection{Advancing the Story}
+
+\command{go\orcommand continue\orcommand c}{resume execution until the next
+  breakpoint.}
+
+\command{step\orcommand s\orcommand next line anywhere}{resume execution until
+  any task in the story reaches another line, unless interrupted by a breakpoint.}
+
+\command{next\orcommand n\orcommand next line}{resume execution until the
+  selected task reaches another line (or terminates), unless interrupted by a
+  breakpoint.}
+
+\command{finish\orcommand fin\orcommand f\orcommand finish this call}{resume
+  execution until the selected task completes, unless interrupted by a
+  breakpoint.}
+
+\subsection{Placing Breakpoints}
+
+\command{break\orcommand bre\orcommand b\orcommand stop}{place a breakpoint
+  wherever the selected task is paused.}
+
+\command{break [a source text location]\orcommand bre [a source text
+  location]\orcommand b [a source text location]\orcommand stop [a source text
+  location]}{place a breakpoint at the given location in the source text.  It
+  can be written as a rule name, a phrase name, the preamble of an unnamed rule,
+  an I6 routine name, a function address in decimal or hexadecimal, an I7 line
+  number, or an I6 line number, any of which can be prefixed by the word ``at''
+  or the word ``on.''}
+
+\subsection{Managing Breakpoints}
+
+\command{breakpoint information\orcommand information\orcommand info\orcommand i
+  b\orcommand i}{list all breakpoints with short descriptions, indicating
+  whether they are enabled or disabled.}
+
+\command{enable [a breakpoint number]\orcommand ena [a breakpoint number]}{enable the breakpoint with the given number.}
+
+\command{enable all breakpoints\orcommand ena all breakpoints\orcommand ena}{enable every breakpoint.}
+
+\command{disable [a breakpoint number]\orcommand dis [a breakpoint number]}{disable the breakpoint with the given number.}
+
+\command{disable all breakpoints\orcommand dis all breakpoints\orcommand dis}{disable every breakpoint.}
+
+\command{delete [a breakpoint number]\orcommand del [a breakpoint number]}{delete the breakpoint with the given number.}
+
+\command{delete all breakpoints\orcommand del all breakpoints\orcommand del\orcommand d b}{delete every breakpoint.}
+
+\subsection{Navigating the Call Stack}
+
+\command{examine the call stack\orcommand x stack\orcommand stack\orcommand backtrace\orcommand bt\orcommand where}{display the call stack, noting the selected call frame.}
+
+\command{select [a call frame number]\orcommand sel [a call frame
+  number]}{change the selected call frame to the one indicated.}
+
+\command{in}{select the call frame one call inward from the current selection.}
+
+\command{in [a call frame count]}{select the call frame the given number of
+  calls inward from the current selection.}
+
+\command{out}{select the call frame one call outward from the current selection.}
+
+\command{out [a call frame count]}{select the call frame the given number of
+  calls outward from the current selection.}
+
+\subsection{Listing Source Text}
+
+\command{list\orcommand l}{list the source text corresponding to the selected
+  call frame.}
+
+\command{list [a source text location]\orcommand l [a source text
+  location]}{list the source text at the given location.  It can be written as a
+  rule name, a phrase name, the preamble of an unnamed rule, an I6 routine name,
+  a function address in decimal or hexadecimal, an I7 line number, a range of I7
+  line numbers, an I6 line number, or a range of I6 line numbers.}
+
+\pagebreak
+
+\subsection{Inspecting Values}
+
+\command{examine [a variable name]\orcommand x [a variable name]\orcommand print
+  [a variable name]\orcommand p [a variable name]}{show the value of the named
+  variable.  If the variable is a temporary named value, give the value in the
+  selected call frame.}
+
+\command{examine [an object name]\orcommand x [an object name]\orcommand print
+  [an object name]\orcommand p [an object name]}{show the named object.}
+
+\command{examine [a function name]\orcommand x [a function name]\orcommand print
+  [a function name]\orcommand p [a function name]}{show the named rule, phrase,
+  or I6 routine.}
+
+\command{showme [a variable name]}{convert the value of the named variable to an
+  object and display it and all of its properties.  If the variable is a
+  temporary named value, use the value in the selected call frame.}
+
+\command{showme [an object name]}{display the named object and all of its
+  properties.}
+
+\command{showme [a number]}{convert the number to an object and display it and
+  all of its properties.  The number can be given in decimal or hexadecimal.}
+
+\lastpagebreak
+
+\section{Second Debugging Tutorial}
+\label{second}
+
+In the second tutorial, we'll look further into the inner workings of an Inform
+story and observe some of the steps for indexed text allocation.  We'll use the
+story ``Monochrome,'' which, much like ``Tournament,'' is available as a
+pastable example from the online extension documentation or as a listing in
+Appendix~\ref{monochrome}.
+
+Enter the source text of ``Monochrome'' into a new Inform~7 project and once
+again follow the directions from Section~\ref{including-easy} or
+\ref{including-hard} to include the debugger.
+
+The allocation we're interested in is the one that happens in the carry out
+drawing rule---the noun's description, which is ordinary text, is given to the
+lowercasing phrase, which expects indexed text, so a conversion must take place.
+Accordingly, place a breakpoint on that rule.  Because memory is reserved
+whether or not the rule applies or the conversion actually happens, we'll answer
+no to placing the breakpoint after the applicability check.  That brings up
+another question:
+
+\terp{\null}{%
+  redistribute it under certain conditions; type ``license'' at the debug prompt for details.\n
+  \n
+  There may be a slight delay whenever something happens for the first time---the first time a rulebook is used, the first time a story command is parsed, or the first time the action machinery runs, for instance.\n
+  \n
+  Enter the command ``help'' at the debug prompt for help.\n
+  \n
+  Debug command?\ \glkinput{break carry out drawing}\n
+  \n
+  Would you like to place the breakpoint after the rule's applicability check, so that it only pauses the story when the rule applies?\ \glkinput{no}\n
+  \n
+  Would you like to place the breakpoint on the routine kernel, so that you can skip over the block value management code?\ \cursor}
+
+Some explanation is in order.  Inform has three sorts of values: those that take
+up no more than 32 bits, those that are larger but stored in permanently
+dedicated memory, and those that are kept in dynamically allocated memory.  The
+first two don't require much special handling under Glulx, but the third
+involves some code to reserve space in memory, format that space, and then
+reclaim it when it's no longer needed.  Lists, indexed text, and stored actions
+are all examples of the third category; we call them ``block values.''
+
+The block value management code comes in two parts: one part resides in a
+standard set of Inform 6 routines, and the other comprises routines
+automatically added to the rules and phrases that we write.  We call these
+latter routines ``routine shells'' because they enclose Inform 7 that we've
+written.  Extending the analogy, we term the encased code ``routine kernels.''
+
+Normally we're not interested in block value management, so we want to focus on
+what we've written, the routine kernels.  But here our plan is to inspect
+Inform's addendum, so answer no and continue.
+
+\terp{\glkstatusline{Drawing Room}{0/1}\n
+  \glkheading{Monochrome}\n
+  An Interactive Fiction\n
+  Release 1 / Serial number 120204 / Inform~7 build 6G60 (I6/v6.32 lib 6/12N) SD\n
+  \n
+  \glkheading{Drawing Room}\n
+  You can see a table (on which is a bowl (in which is some fruit)) here.\n
+  \n
+  \storyprompt\cursor}{%
+  book is used, the first time a story command is parsed, or the first time the action machinery runs, for instance.\n
+  \n
+  Enter the command ``help'' at the debug prompt for help.\n
+  \n
+  Debug command?\ \glkinput{break carry out drawing}\n
+  \n
+  Would you like to place the breakpoint after the rule's applicability check, so that it only pauses the story when the rule applies?\ \glkinput{no}\n
+  \n
+  Would you like to place the breakpoint on the routine kernel, so that you can skip over the block value management code?\ \glkinput{no}\n
+  \n
+  Breakpoint 0 (enabled): Pause when entering carry out drawing (at address 164179)\n
+  \n
+  Debug command?\ \glkinput{go}}
+
+If we give the command \glkinput{draw fruit}, the breakpoint will trigger, and
+we can attempt to list the routine shell:
+
+\terp{\glkstatusline{Drawing Room}{0/1}\n
+  \glkheading{Monochrome}\n
+  An Interactive Fiction\n
+  Release 1 / Serial number 120204 / Inform~7 build 6G60 (I6/v6.32 lib 6/12N) SD\n
+  \n
+  \glkheading{Drawing Room}\n
+  You can see a table (on which is a bowl (in which is some fruit)) here.\n
+  \n
+  \storyprompt\glkinput{draw fruit}}{%
+  \n
+  Breakpoint 0 (enabled): Pause when entering carry out drawing (at address 164179)\n
+  \n
+  Debug command?\ \glkinput{go}\n
+  \n
+  \glkheading{Breakpoint 0:} Pause when entering carry out drawing (at address 164179)\n
+  \n
+  Execution paused (at address 164182, code offset 0x2811A, I6 line 24480, and I7 line 24479)\n
+  \markedindent \lstinline{Carry out drawing:}\n
+  within carry out drawing (at address 164179).\n
+  \n
+  Debug command?\ \glkinput{list}\n
+  \n
+  \markedindent \lstinline{024479 Carry out drawing:}\n
+  \unmarkedindent \lstinline{\ \ \ \ \ \ \ \ \ \ \ \ (invoke the kernel of "carry out drawing", at address 164628)}\n
+  \n
+  Debug command?\ \cursor}
+
+Because we didn't write the routine shell, there's no corresponding Inform 7
+source text, but the debugger is trying its best.  If we want to see inside of
+this code, we'll need to switch to a lower-level view by changing our debugging
+preferences.
+
+First, let's have a look at the current settings.  Enter the command
+\glkinput{examine my preferences} (or \glkinput{x preferences} or just
+\glkinput{preferences}).
+
+\terp{\glkstatusline{Drawing Room}{0/1}\n
+  \glkheading{Monochrome}\n
+  An Interactive Fiction\n
+  Release 1 / Serial number 120204 / Inform~7 build 6G60 (I6/v6.32 lib 6/12N) SD\n
+  \n
+  \glkheading{Drawing Room}\n
+  You can see a table (on which is a bowl (in which is some fruit)) here.\n
+  \n
+  \storyprompt\glkinput{draw fruit}}{%
+  Debug command?\ \glkinput{examine my preferences}\n
+  \n
+  The debugger is set to show information at the I7 level when possible, at the I6 level if not, and at the Glulx assembly level failing even that.  "Step" and "next" advance by I7 line when possible, by I6 line if not, and by sequence point if specifically asked to.\n
+  The debugger is set to show original arguments in call stacks.\n
+  The debugger is set to show temporary named values in call stacks.\n
+  The debugger is set to elide catch tokens in call stacks.\n
+  The debugger is set to simplify call stacks, eliding internal Inform routines.  "Step" and "next" will skip lines in these routines, and "finish" will not stop until a non-internal function completes its execution.  When the story pauses, the nearest location in the simplified call stack will be selected, which may not be the point where the story actually paused.\n
+  The debugger is set to warn you about the risks entailed by the "showme" command.\n
+  \n
+  Debug command?\ \cursor}
+
+Each of these paragraphs summarizes a setting that we can change with the
+command \glkinput{prefer}.  Let's alter the first preference by writing
+\glkinput{prefer Inform 6}.
+
+\terp{\glkstatusline{Drawing Room}{0/1}\n
+  \glkheading{Monochrome}\n
+  An Interactive Fiction\n
+  Release 1 / Serial number 120204 / Inform~7 build 6G60 (I6/v6.32 lib 6/12N) SD\n
+  \n
+  \glkheading{Drawing Room}\n
+  You can see a table (on which is a bowl (in which is some fruit)) here.\n
+  \n
+  \storyprompt\glkinput{draw fruit}}{%
+  not stop until a non-internal function completes its execution.  When the story pauses, the nearest location in the simplified call stack will be selected, which may not be the point where the story actually paused.\n
+  The debugger is set to warn you about the risks entailed by the "showme" command.\n
+  \n
+  Debug command?\ \glkinput{prefer Inform 6}\n
+  \n
+  The debugger will now show information at the I6 level when possible, at the Glulx assembly level otherwise.  "Step" and "next" will advance by I6 line unless asked to advance by sequence point.\n
+  \n
+  Debug command?\ \cursor}
+
+Listing again, we see much more detail:
+
+\terp{\glkstatusline{Drawing Room}{0/1}\n
+  \glkheading{Monochrome}\n
+  An Interactive Fiction\n
+  Release 1 / Serial number 120204 / Inform~7 build 6G60 (I6/v6.32 lib 6/12N) SD\n
+  \n
+  \glkheading{Drawing Room}\n
+  You can see a table (on which is a bowl (in which is some fruit)) here.\n
+  \n
+  \storyprompt\glkinput{draw fruit}}{%
+  Debug command?\ \glkinput{list}\n
+  \n
+  \unmarkedindent \lstinline{024479 ! Carry out drawing:}\n
+  \markedindent \lstinline{024480 [ R\_4196 ;blockv\_stack-->(blockv\_sp+1) = BlkValueCreate(INDEXED\_TEXT\_TY,0,INDEXED\_TEXT\_TY);}\n
+  \unmarkedindent \lstinline{024481 \ \ \ \ blockv\_stack-->(blockv\_sp+0) = BlkValueCreate(INDEXED\_TEXT\_TY,0,INDEXED\_TEXT\_TY);}\n
+  \unmarkedindent \lstinline{024482 \ \ \ \ blockv\_sp = blockv\_sp + 2;}\n
+  \unmarkedindent \lstinline{024483 \ \ \ \ blockv\_stack-->(blockv\_sp++) = R\_SHELL\_0(blockv\_sp-2);}\n
+  \unmarkedindent \lstinline{024484 \ \ \ \ blockv\_sp = blockv\_sp - 3;}\n
+  \unmarkedindent \lstinline{024485 \ \ \ \ BlkFree(blockv\_stack-->(blockv\_sp+1));}\n
+  \unmarkedindent \lstinline{024486 \ \ \ \ BlkFree(blockv\_stack-->(blockv\_sp+0));}\n
+  \unmarkedindent \lstinline{024487 \ \ \ \ return blockv\_stack-->(blockv\_sp+2);}\n
+  \unmarkedindent \lstinline{024488 ];}\n
+  \n
+  Debug command?\ \cursor}
+
+Even without some background in Inform 6, it's clear that most of these lines
+are simply manipulating block values.  As for the other routine mentioned,
+\lstinline{R_SHELL_0}, we can use the \glkinput{examine} command to see its more
+recognizable name:
+
+\terp{\glkstatusline{Drawing Room}{0/1}\n
+  \glkheading{Monochrome}\n
+  An Interactive Fiction\n
+  Release 1 / Serial number 120204 / Inform~7 build 6G60 (I6/v6.32 lib 6/12N) SD\n
+  \n
+  \glkheading{Drawing Room}\n
+  You can see a table (on which is a bowl (in which is some fruit)) here.\n
+  \n
+  \storyprompt\glkinput{draw fruit}}{%
+  \unmarkedindentb \lstinline{024483 \ \ \ \ blockv\_stack-->(blockv\_sp++) = R\_SHELL\_0(blockv\_sp-2);}\n
+  \unmarkedindent \lstinline{024484 \ \ \ \ blockv\_sp = blockv\_sp - 3;}\n
+  \unmarkedindent \lstinline{024485 \ \ \ \ BlkFree(blockv\_stack-->(blockv\_sp+1));}\n
+  \unmarkedindent \lstinline{024486 \ \ \ \ BlkFree(blockv\_stack-->(blockv\_sp+0));}\n
+  \unmarkedindent \lstinline{024487 \ \ \ \ return blockv\_stack-->(blockv\_sp+2);}\n
+  \unmarkedindent \lstinline{024488 ];}\n
+  \n
+  Debug command?\ \glkinput{examine R\_SHELL\_0}\n
+  \n
+  R\_SHELL\_0 = routine: the kernel of ``carry out drawing''\n
+  \n
+  Debug command?\ \cursor}
+
+The allocation routine we're steering for is \lstinline{BlkValueCreate}, and
+we're poised to step into it.  Unfortunately, the \glkinput{step} command is
+currently configured to skip lines in internal Inform routines, which is exactly
+what we don't want it to do.  So type \glkinput{prefer no call stack
+  simplification} (or just \glkinput{prefer no simplification}).
+
+\terp{\glkstatusline{Drawing Room}{0/1}\n
+  \glkheading{Monochrome}\n
+  An Interactive Fiction\n
+  Release 1 / Serial number 120204 / Inform~7 build 6G60 (I6/v6.32 lib 6/12N) SD\n
+  \n
+  \glkheading{Drawing Room}\n
+  You can see a table (on which is a bowl (in which is some fruit)) here.\n
+  \n
+  \storyprompt\glkinput{draw fruit}}{%
+  \unmarkedindentb \lstinline{024487 \ \ \ \ return blockv\_stack-->(blockv\_sp+2);}\n
+  \unmarkedindent \lstinline{024488 ];}\n
+  \n
+  Debug command?\ \glkinput{examine R\_SHELL\_0}\n
+  \n
+  R\_SHELL\_0 = routine: the kernel of "carry out drawing"\n
+  \n
+  Debug command?\ \glkinput{prefer no call stack simplification}\n
+  \n
+  The debugger will now show entire call stacks, without eliding internal Inform routines.  "Step" and "next" will stop on lines in these routines, and "finish" will stop as soon as any routine on the call stack completes its execution.  When the story pauses, the location where it paused will always be selected.\n
+  \n
+  Debug command?\ \cursor}
+
+While we're here, let's also take a moment to see what the unsimplified call
+stack looks like.  For the sake of space, change preferences to leave out
+original arguments and temporary named values:
+
+\terp{\glkstatusline{Drawing Room}{0/1}\n
+  \glkheading{Monochrome}\n
+  An Interactive Fiction\n
+  Release 1 / Serial number 120204 / Inform~7 build 6G60 (I6/v6.32 lib 6/12N) SD\n
+  \n
+  \glkheading{Drawing Room}\n
+  You can see a table (on which is a bowl (in which is some fruit)) here.\n
+  \n
+  \storyprompt\glkinput{draw fruit}}{%
+  The debugger will now show entire call stacks, without eliding internal Inform routines.  "Step" and "next" will stop on lines in these routines, and "finish" will stop as soon as any routine on the call stack completes its execution.  When the story pauses, the location where it paused will always be selected.\n
+  \n
+  Debug command?\ \glkinput{prefer no original arguments}\n
+  \n
+  The debugger will now elide original arguments in call stacks.\n
+  \n
+  Debug command?\ \glkinput{prefer no temporary named values}\n
+  \n
+  The debugger will now elide temporary named values in call stacks.\n
+  \n
+  Debug command?\ \cursor}
+
+And examine the call stack:
+
+\terp{\glkstatusline{Drawing Room}{0/1}\n
+  \glkheading{Monochrome}\n
+  An Interactive Fiction\n
+  Release 1 / Serial number 120204 / Inform~7 build 6G60 (I6/v6.32 lib 6/12N) SD\n
+  \n
+  \glkheading{Drawing Room}\n
+  You can see a table (on which is a bowl (in which is some fruit)) here.\n
+  \n
+  \storyprompt\glkinput{draw fruit}}{%
+  Debug command?\ \glkinput{examine the call stack}\n
+  \n
+  Execution paused (at address 164182)\n
+  within carry out drawing (at address 164179) (call frame \#0, currently selected),\n
+  within the I6 routine ProcessRulebook (at address 205660) (call frame \#1),\n
+  within the I6 routine ProcessRulebook (at address 205660) (call frame \#2),\n
+  within the carry out stage rule (at address 100362) (call frame \#3),\n
+  within the I6 routine ProcessRulebook (at address 205660) (call frame \#4),\n
+  within the I6 routine ProcessRulebook (at address 205660) (call frame \#5),\n
+  within the I6 routine GenericVerbSub (at address 176966) (call frame \#6),\n
+  within the I6 routine A81\_drawingSub (at address 98973) (call frame \#7),\n
+  within the descend to specific action-processing rule (at address 9647) (call frame \#8),\n
+  within the I6 routine ProcessRulebook (at address 205660) (call frame \#9),\n
+  within the I6 routine ProcessRulebook (at address 205660) (call frame \#10),\n
+  within the I6 routine ActionPrimitive (at address 174498) (call frame \#11),\n
+  within the I6 routine BeginAction (at address 174389) (call frame \#12),\n
+  within the generate action rule (at address 71340) (call frame \#13),\n
+  within the I6 routine ProcessRulebook (at address 205660) (call frame \#14),\n
+  within the I6 routine ProcessRulebook (at address 205660) (call frame \#15),\n
+  within the I6 routine FollowRulebook (at address 204885) (call frame \#16),\n
+  within the main story routine (at address 70749) (call frame \#17).\n
+  \n
+  Debug command?\ \cursor}
+
+Notice that the call frame numbering has changed to account for all of the
+frames that would otherwise be hidden.  We must be careful not to use outdated
+numbers when we turn simplification on and off.  Also, if we select a internal
+call frame and then turn simplification off, we should be prepared for the
+debugger to adjust our selection.
+
+Now onwards.  Step once to enter \lstinline{BlkValueCreate}, another time to get
+to the line that finds the support function for indexed text, and twice more to
+reach the next interesting line, in \lstinline{KindAtomic}.
+
+\terp{\glkstatusline{Drawing Room}{0/1}\n
+  \glkheading{Monochrome}\n
+  An Interactive Fiction\n
+  Release 1 / Serial number 120204 / Inform~7 build 6G60 (I6/v6.32 lib 6/12N) SD\n
+  \n
+  \glkheading{Drawing Room}\n
+  You can see a table (on which is a bowl (in which is some fruit)) here.\n
+  \n
+  \storyprompt\glkinput{draw fruit}}{%
+  Debug command?\ \glkinput{step}\n
+  \n
+  Execution paused (at address 482780, code offset 0x75DA0, and I6 line 93891)\n
+  \markedindent \lstinline{if (skov == 0 && (kov < 0 || kov >= BASE_KIND_HWM))}\lstinline{\ skov = kov;}\n
+  within the I6 routine BlkValueCreate (at address 482775).\n
+  \n
+  Debug command?\ \glkinput{again}\n
+  \n
+  Execution paused (at address 482799, code offset 0x75DB3, and I6 line 93893)\n
+  \markedindent \lstinline{sf = KOVSupportFunction(kov);}\n
+  within the I6 routine BlkValueCreate (at address 482775).\n
+  \n
+  Debug command?\ \glkinput{again}\n
+  \n
+  Execution paused (at address 93187, code offset 0x16BC7, and I6 line 10900)\n
+  \markedindent \lstinline{k = KindAtomic(k);}\n
+  within the I6 routine KOVSupportFunction (at address 93182).\n
+  \n
+  Debug command?\ \glkinput{again}\n
+  \n
+  Execution paused (at address 34789, code offset 0x87A9, and I6 line 5205)\n
+  \markedindent \lstinline{if ((kind >= 0)}\lstinline{\ &&}\lstinline{\ (kind < BASE_KIND_HWM))}\lstinline{\ return kind;}\n
+  within the I6 routine KindAtomic (at address 34784).\n
+  \n
+  Debug command?\ \cursor}
+
+On a line like this we might want to know what value \lstinline{BASE_KIND_HWM}
+has.  Unfortunately, \lstinline{BASE_KIND_HWM} is an Inform 6 constant, which
+means that its name only exists in the story's source text---there's no easy way
+for a command like \glkinput{examine} to know what value it's associated with.
+But that value must be present in the story file, and we can find it by
+switching to an even lower-level view: Glulx assembly.
+
+\label{glulx-format}
+Glulx assembly is a textual representation of the raw machine code in a Glulx
+story.  It consists of sequences of instructions to the interpreter, with some
+points in that sequence labeled for the convenience of the reader.  Each
+instruction is made up of an operation code, which plays the same role as a verb
+in a traditional IF command, and possibly operands, which are like a noun, a
+second noun, and so on.  Let's use the command \glkinput{prefer Glulx assembly}
+followed by \glkinput{list} to see an example.
+
+\terp{\glkstatusline{Drawing Room}{0/1}\n
+  \glkheading{Monochrome}\n
+  An Interactive Fiction\n
+  Release 1 / Serial number 120204 / Inform~7 build 6G60 (I6/v6.32 lib 6/12N) SD\n
+  \n
+  \glkheading{Drawing Room}\n
+  You can see a table (on which is a bowl (in which is some fruit)) here.\n
+  \n
+  \storyprompt\glkinput{draw fruit}}{%
+  34784).\n
+  \n
+  Debug command?\ \glkinput{prefer Glulx assembly}\n
+  \n
+  The debugger will now show all information except listings by line number at the Glulx assembly level.  "Step" and "next" will advance by I6 line unless asked to advance by sequence point.\n
+  \n
+  Debug command?\ \glkinput{list}\n
+  \n
+  \markeddip \(<\)*\(>\) \lstinline{0x87E5 jlt locals[0x0] <zero> ?L1}\n
+  \unmarkeddip \hphantom{\(<\)*\(>\)} \lstinline{0x87EA jge locals[0x0] 0x62 ?L1}\n
+  \unmarkeddip \(<\)*\(>\) \lstinline{0x87F0 return locals[0x0]}\n
+  \unmarkeddip \lstinline{.L1:}\n
+  \unmarkeddip \(<\)*\(>\) \lstinline @0x87F3 callfii@\hfill\lstinline @0x82ECF locals[0x0] <zero> <stack>@\n
+  \unmarkeddip \hphantom{\(<\)*\(>\)} \lstinline{0x87FC return <stack>}\n
+  \n
+  Debug command?\ \cursor}
+
+The numbers beginning with \lstinline{0x} are machine code addresses written in
+hexadecimal---essentially numbers that uniquely identify an instruction.  The
+first word of each instruction is the standard mnemonic for the operation code,
+and the items that follow are the operands.  \lstinline{.L1} is an example of a
+label (referred to as \lstinline{?L1} in the instructions), and the \(<\)*\(>\)
+markers signify ``sequence points,'' places where a breakpoint can pause.
+
+Most of this formatting draws from the Glulx specification, which is also the
+document that describes all of the operation codes and their meanings, and the
+\(<\)*\(>\) notation is borrowed from the Inform Technical Manual.  Beyond that,
+the debugger introduces some formatting rules of its own:
+
+\begin{itemize}
+  \item{Operands that stand for zero or a discarded value are represented as
+    \lstinline{<zero>}.}
+  \item{Operands that read from or write to main memory appear as \lstinline{*X}
+    or \lstinline{*(RAM+X)}, where \lstinline{X} is the memory address in
+    hexadecimal, and the latter form is used when the offset to RAM is to be
+    added in.}
+  \item{Operands that read from or write to the stack (a data structure
+    maintained by the interpreter) are written \lstinline{<stack>}.}
+  \item{Operands that read from or write to temporary named values are shown as
+    \lstinline{locals[X]}, where \lstinline{X} is the offset to the variable in
+    hexadecimal.  (Most of the time the \(i\)th temporary named value, where
+    \(i\) counts from zero, has offset \(4i\).)}
+\end{itemize}
+
+Without getting into too much more detail, the instruction we're interested in
+is \lstinline{jge locals[0x0] 0x62} \hbox{\lstinline{?L1}, which} tells the
+interpreter to jump to the instruction following the label \lstinline{L1} (in
+other words, to divert execution away from the return statement enclosed by the
+if) when the first local, \lstinline{kind}, is greater than \lstinline{0x62}.
+In decimal that's the number 98, which we can discover with the examine command.
+
+\terp{\glkstatusline{Drawing Room}{0/1}\n
+  \glkheading{Monochrome}\n
+  An Interactive Fiction\n
+  Release 1 / Serial number 120204 / Inform~7 build 6G60 (I6/v6.32 lib 6/12N) SD\n
+  \n
+  \glkheading{Drawing Room}\n
+  You can see a table (on which is a bowl (in which is some fruit)) here.\n
+  \n
+  \storyprompt\glkinput{draw fruit}}{%
+  The debugger will now show all information except listings by line number at the Glulx assembly level.  "Step" and "next" will advance by I6 line unless asked to advance by sequence point.\n
+  \n
+  Debug command?\ \glkinput{list}\n
+  \n
+  \markeddip \(<\)*\(>\) \lstinline{0x87E5 jlt locals[0x0] <zero> ?L1}\n
+  \unmarkeddip \hphantom{\(<\)*\(>\)} \lstinline{0x87EA jge locals[0x0] 0x62 ?L1}\n
+  \unmarkeddip \(<\)*\(>\) \lstinline{0x87F0 return locals[0x0]}\n
+  \unmarkeddip \lstinline{.L1:}\n
+  \unmarkeddip \(<\)*\(>\) \lstinline @0x87F3 callfii@\hfill\lstinline @0x82ECF locals[0x0] <zero> <stack>@\n
+  \unmarkeddip \hphantom{\(<\)*\(>\)} \lstinline{0x87FC return <stack>}\n
+  \n
+  Debug command?\ \glkinput{examine 0x62}\n
+  \n
+  0x62 = number: 98\n
+  \n
+  Debug command?\ \cursor}
+
+To find out what will happen, we could obtain the value of \lstinline{kind} and
+compare it to 98 ourselves.  But sometimes it's nicer to just advance within a
+line.  One command for the latter option is \glkinput{step sequence point}
+(\glkinput{si} for authors used to other debuggers or \glkinput{next sequence
+  point anywhere} for a verbose version).  It and \glkinput{next sequence point}
+(\glkinput{ni}) are analogous to \glkinput{step} and \glkinput{next}, except
+that they stop for any progress, even progress that hasn't yet reached another
+line.  We will use \glkinput{next sequence point} and then \glkinput{list}.
+
+\terp{\glkstatusline{Drawing Room}{0/1}\n
+  \glkheading{Monochrome}\n
+  An Interactive Fiction\n
+  Release 1 / Serial number 120204 / Inform~7 build 6G60 (I6/v6.32 lib 6/12N) SD\n
+  \n
+  \glkheading{Drawing Room}\n
+  You can see a table (on which is a bowl (in which is some fruit)) here.\n
+  \n
+  \storyprompt\glkinput{draw fruit}}{%
+  \n
+  Debug command?\ \glkinput{next sequence point}\n
+  \n
+  Execution paused (at address 34800, code offset 0x87B4, and I6 line 5205)\n
+  \markedindent \lstinline{if ((kind >= 0)}\lstinline{\ &&}\lstinline{\ (kind < BASE_KIND_HWM))}\lstinline{\ return kind;}\n
+  within the I6 routine KindAtomic (at address 34784)\n
+  \n
+  Debug command?\ \glkinput{list}\n
+  \n
+  \unmarkeddip \(<\)*\(>\) \lstinline{0x87E5 jlt locals[0x0] <zero> ?L1}\n
+  \unmarkeddip \hphantom{\(<\)*\(>\)} \lstinline{0x87EA jge locals[0x0] 0x62 ?L1}\n
+  \markeddip \(<\)*\(>\) \lstinline{0x87F0 return locals[0x0]}\n
+  \unmarkeddip \lstinline{.L1:}\n
+  \unmarkeddip \(<\)*\(>\) \lstinline @0x87F3 callfii@\hfill\lstinline @0x82ECF locals[0x0] <zero> <stack>@\n
+  \unmarkeddip \hphantom{\(<\)*\(>\)} \lstinline{0x87FC return <stack>}\n
+  \n
+  Debug command?\ \cursor}
+
+Indeed, we have reached the return statement, which means that indexed text must
+be an atomic kind.  Give the command \glkinput{finish} twice, and we'll see what
+its support function is.
+
+\terp{\glkstatusline{Drawing Room}{0/1}\n
+  \glkheading{Monochrome}\n
+  An Interactive Fiction\n
+  Release 1 / Serial number 120204 / Inform~7 build 6G60 (I6/v6.32 lib 6/12N) SD\n
+  \n
+  \glkheading{Drawing Room}\n
+  You can see a table (on which is a bowl (in which is some fruit)) here.\n
+  \n
+  \storyprompt\glkinput{draw fruit}}{%
+  \unmarkeddipb \(<\)*\(>\) \lstinline @0x87F3 callfii@\hfill\lstinline @0x82ECF locals[0x0] <zero> <stack>@\n
+  \unmarkeddip \hphantom{\(<\)*\(>\)} \lstinline{0x87FC return <stack>}\n
+  \n
+  Debug command?\ \glkinput{finish}\n
+  \n
+  Execution paused (at address 93197, code offset 0x16BD1, and I6 line 10901)\n
+  \markedindent \lstinline @switch(k) \{@\n
+  within the I6 routine KOVSupportFunction (at address 93182).\n
+  \n
+  Debug command?\ \glkinput{finish}\n
+  \n
+  Execution paused (at address 482809, code offset 0x75DBD, and I6 line 93894)\n
+  \markedindent \lstinline{if (sf)}\lstinline{\ block = sf(CREATE_KOVS, cast_from, skov);}\n
+  within the I6 routine BlkValueCreate (at address 482775).\n
+  \n
+  Debug command?\ \cursor}
+
+The value we'd like to print is \lstinline{sf}.  However, as shown below, an
+ordinary \glkinput{examine} is little use in this case because \lstinline{sf} is
+an Inform 6 variable and has no associated kind.  Instead, we turn to
+\glkinput{examine as} (\glkinput{x as}, \glkinput{print as}, or \glkinput{p
+  as}), which lets us convert a value to a named kind before printing it.
+
+\terp{\glkstatusline{Drawing Room}{0/1}\n
+  \glkheading{Monochrome}\n
+  An Interactive Fiction\n
+  Release 1 / Serial number 120204 / Inform~7 build 6G60 (I6/v6.32 lib 6/12N) SD\n
+  \n
+  \glkheading{Drawing Room}\n
+  You can see a table (on which is a bowl (in which is some fruit)) here.\n
+  \n
+  \storyprompt\glkinput{draw fruit}}{%
+  \n
+  Debug command?\ \glkinput{finish}\n
+  \n
+  Execution paused (at address 482809, code offset 0x75DBD, and I6 line 93894)\n
+  \markedindent \lstinline{if (sf)}\lstinline{\ block = sf(CREATE_KOVS, cast_from, skov);}\n
+  within the I6 routine BlkValueCreate (at address 482775).\n
+  \n
+  Debug command?\ \glkinput{examine sf}\n
+  \n
+  sf = \(<\)no kind\(>\): 484298 / 0x763CA\n
+  \n
+  Debug command?\ \glkinput{examine sf as a routine}\n
+  \n
+  sf as a routine = a routine: the I6 routine INDEXED\_TEXT\_TY\_Support\n
+  \n
+  Debug command?\ \cursor}
+
+And step, as expected, takes us into exactly that routine:
+
+\terp{\glkstatusline{Drawing Room}{0/1}\n
+  \glkheading{Monochrome}\n
+  An Interactive Fiction\n
+  Release 1 / Serial number 120204 / Inform~7 build 6G60 (I6/v6.32 lib 6/12N) SD\n
+  \n
+  \glkheading{Drawing Room}\n
+  You can see a table (on which is a bowl (in which is some fruit)) here.\n
+  \n
+  \storyprompt\glkinput{draw fruit}}{%
+  482775).\n
+  \n
+  Debug command?\ \glkinput{examine sf}\n
+  \n
+  sf = \(<\)no kind\(>\): 484298 / 0x763CA\n
+  \n
+  Debug command?\ \glkinput{examine sf as a routine}\n
+  \n
+  sf as a routine = a routine: the I6 routine INDEXED\_TEXT\_TY\_Support\n
+  \n
+  Debug command?\ \glkinput{step}\n
+  \n
+  Execution paused (at address 484303, code offset 0x76393, and I6 line 94247)\n
+  \markedindent \lstinline @switch(task) \{@\n
+  within the I6 routine INDEXED\_TEXT\_TY\_Support (at address 484298).\n
+  \n
+  Debug command?\ \cursor}
+
+That's it for the second tutorial.  The new commands are summarized in the next
+section, along with a few others.
+
+\lastpagebreak
+
+\section{Other Debugging Commands}
+\label{other}
+
+\subsection{Managing Preferences}
+
+\command{examine my preferences\orcommand x preferences\orcommand
+  preferences}{Show all of the current preferences.}
+
+\command{prefer Inform 7\orcommand prefer I7}{request that code be expressed in
+  Inform 7 wherever possible, and favor Inform 6 over Glulx assembly as a
+  backup.  Commands that act on lines will assume that Inform 7 lines are meant
+  barring evidence to the contrary.}
+
+\command{prefer Inform 6\orcommand prefer I6}{request that code be expressed in
+  Inform 6 wherever possible and that commands operating on lines act on I6
+  lines unless that would be obviously wrong.}
+
+\command{prefer Glulx assembly\orcommand prefer Glulx\orcommand prefer
+  assembly}{request that code be expressed in Glulx assembly whenever possible.
+  Commands that operate on lines will be understood as acting on Inform 6
+  lines except when that would be obviously wrong.}
+
+\command{prefer original arguments\orcommand prefer originals}{request that
+  original arguments appear when the call stack is examined.}
+
+\command{prefer no original arguments\orcommand prefer no originals}{request that
+  original arguments not appear when the call stack is examined.}
+
+\command{prefer temporary named values\orcommand prefer temporaries}{request that
+  temporary named values appear when the call stack is examined.}
+
+\command{prefer no temporary named values\orcommand prefer no
+  temporaries}{request that temporary named values not appear when the call
+  stack is examined.}
+
+\command{prefer catch tokens\orcommand prefer tokens}{request that catch tokens
+  appear when the call stack is examined.}
+
+\command{prefer no catch tokens\orcommand prefer no tokens}{request that catch
+  tokens not appear when the call stack is examined.}
+
+\command{prefer call stack simplification\orcommand prefer
+  simplification}{request that call frames for Inform internals be hidden when
+  the call stack is examined.  This command renumbers the call
+  frames and may change which one is selected.}
+
+\command{prefer no call stack simplification\orcommand prefer no
+  simplification}{request that call frames for Inform internals not be hidden
+  when the call stack is examined.  This command renumbers the
+  call frames.}
+
+\command{prefer showme warnings}{request that the showme command warn about the
+  dangers of executing story code from within the debugger.}
+
+\command{prefer no showme warnings}{request that the showme command not warn
+  about the dangers of executing story code from within the debugger.}
+
+% NLZ: introduce these in the tutorial
+\command{prefer limitations on saving}{request that attempts to save the story
+  always fail, which is useful in interpreters that cannot save the debugger's
+  state quickly.}
+
+\command{prefer no limitations on saving}{request that attempts to save the
+  story proceed normally, even if the interpreter cannot save the debugger's
+  state quickly.}
+
+\subsection{Advancing the Story}
+
+\command{step sequence point\orcommand si\orcommand next sequence point
+  anywhere}{resume execution until any task in the story reaches another
+  sequence point.}
+
+\command{next sequence point\orcommand ni}{resume execution until the selected
+  task reaches another sequence point (or terminates), unless interrupted by a
+  breakpoint.}
+
+\subsection{Inspecting Values}
+
+\command{examine [a variable name] as [a kind name]\orcommand x [a variable
+  name] as [a kind name]\orcommand print [a variable name] as [a kind
+  name]\orcommand p [a variable name] as [a kind name]}{show the value of the
+  named variable after converting it to the named kind.  If the variable is a
+  temporary named value, give the value in the selected call frame.}
+
+\command{examine [an object name] as [a kind name]\orcommand x [an object name]
+  as [a kind name]\orcommand print [an object name] as [a kind name]\orcommand p
+  [an object name] as [a kind name]}{show the named object after converting it
+  to the named kind.}
+
+\command{examine [a number] as [a kind name]\orcommand x [a number] as [a kind
+  name]\orcommand print [a number] as [a kind name]\orcommand p [a number] as [a
+  kind name]}{show the given number after converting it to the named kind.  It
+  can be given in decimal or hexadecimal.}
+
+\subsection{Quitting}
+
+\command{quit}{force both the story and the debugger to stop running.}
+
+\subsection{Getting Information about the Debugger}
+
+\command{about}{display the version number, release date, and website URL.}
+
+\command{version}{display just the version number, which is useful when
+  reporting bugs.}
+
+\command{license\orcommand licence}{display version 3 of the GPL, under which
+  the extensions are licensed.}
+
+\command{warranty}{display the disclaimer of warranty recommended by version 3
+  of the GPL.}
+
+\lastpagebreak
+
+\impatiencechapter{Verbose Diagnostics}
+\label{verbose-diagnostics}
+
+Verbose Diagnostics is a behind-the-scenes extension.  We simply include it, and
+when the story reports a runtime problem, it will also print a call stack like
+
+\begin{quote}
+  \texttt{*** Run-time problem P10: Since yourself is not allowed the property "open",}\n
+  \null\qquad\texttt{it is against the rules to try to use it.}\n
+  \texttt{within the I6 routine Adj\_43\_t2\_v9 (at address 140694),}\n
+  \texttt{within before singing (at address 95178),}\n
+  \texttt{within the before stage rule (at address 93834),}\n
+  \texttt{within the generate action rule (at address 71034),}\n
+  \texttt{within the main story routine (at address 70444).}
+\end{quote}
+
+to tell us where in the story the failure was detected.  Reports for programming
+errors and block value errors and many other I6-level runtime problems are
+similarly improved.
+
+Verbose Diagnostics requires some special setup; either see Chapter~\ref{setup}
+or use Verbose Diagnostics Lite, a version that sacrifices some clarity in order
+to get by without that setup.
+
+When Verbose Diagnostics is included, all of the known problem messages for
+runtime trouble, both at the I7 and the I6 level, are accompanied by a call
+stack.  These call stacks are printed using phrases from the extension Call
+Stack Tracking, and we can customize them by changing the truth states from Call
+Stack Tracking in a GRIF setup rule.  For example,
+
+\begin{quote}
+  \lstinputlisting{vrpm-example.ni}
+\end{quote}
+
+The available flags are summarized below:
+
+\hbox{}
+\begin{longtable}{llp{6cm}}
+  \midrule
+  \textbf{Flag}&\textbf{Default Value}&\textbf{Meaning}\\
+  \midrule
+  \texttt{the original arguments flag}&\texttt{false}&whether functions' original arguments are shown\\
+  \texttt{the temporary named values flag}&\texttt{false}&whether functions' temporary named values are shown\\
+  \texttt{the catch tokens flag}&\texttt{false}&whether catch tokens generated by functions are shown\\
+  \texttt{the call stack simplification flag}&\texttt{true}&whether internal routines are hidden\\
+  \texttt{the call frame numbering flag}&\texttt{false}&whether call frames are numbered\\
+  \texttt{the terse call stack numbers flag}&\texttt{false}&whether call frame numbers are shown without the text that explains that they are call frame numbers\\
+  \texttt{the call stack addresses flag}&\texttt{true}&whether function addresses are shown\\
+  \midrule
+\end{longtable}
+
+If the extension Interactive Debugger is also included, Verbose Diagnostics
+forgoes the call stack and instead forces a breakpoint.  We can then use all of
+the debugger's facilities to diagnose the problem, including the debug command
+"examine the call stack".
+
+\impatiencechapter{Floyd Mode}
+\label{floyd-mode}
+
+Floyd Mode hides interpreter capabilities from the story so that we can test
+playability under restricted settings: playing on the command line or via Floyd
+of Club Floyd fame.  Window splitting, text styles, graphics, sounds,
+hyperlinks, and timers are all disabled, though we can reinstate these
+capabilities on an individual basis.
+
+When Floyd Mode is included, all of the interpreter capabilities not supported
+by Floyd are disabled.  We can selectively re-enable them with use options:
+
+\begin{quote}
+  \lstinline @Use window splitting even in Floyd mode.@
+\end{quote}
+
+\begin{quote}
+  \lstinline @Use text styles even in Floyd mode.@
+\end{quote}
+
+\begin{quote}
+  \lstinline @Use graphics even in Floyd mode.@
+\end{quote}
+
+\begin{quote}
+  \lstinline @Use sounds even in Floyd mode.@
+\end{quote}
+
+\begin{quote}
+  \lstinline @Use hyperlinks even in Floyd mode.@
+\end{quote}
+
+\begin{quote}
+  \lstinline @Use timers even in Floyd mode.@
+\end{quote}
+
+Otherwise there is nothing else that we need to do.
+
+\emph{Note: Floyd has since been equipped with an extension called sleepmask,
+  which prints the status line window every turn.  Floyd Mode does not yet
+  emulate sleepmask, though it should in the next version.}
+
+\lastpagebreak
+
+\chapter{GRIP Technical Manual}
+\label{technical-manual}
+
+\lastpagebreak
+
+\impatiencechapter{Troubleshooting, Getting Help, and Reporting Bugs}
+\label{trouble}
+
+If you encounter a problem or a possible problem, follow these steps
+
+1. For general how-to questions or cases where you are unsure whether you are
+seeing a bug, ask your local Inform guru.  For those without a local Inform
+guru, try searching on \url{http://www.intfiction.org/}, and, if no matches
+comes up, post your question as a new thread in the Inform~7 forum.  This is
+better than e-mailing me directly because (A) there's a good chance that you
+will get an answer sooner and (B) others who have the same question will be able
+to find that answer on their own.  I read that forum regularly, so you can
+expect the next version to contain a fix or a clarification whether or not I'm
+the one posting the response.
+
+2. If you know you are encountering a bug, first go to the project website
+(\url{https://sourceforge.net/projects/i7grip/}) and see whether a newer version
+is available.  If so, download it, install it, and check for the problem again.
+
+3. Should the fault remain in the latest version, look for it in the project's
+bug database.  To get there, navigate to the website, choose "Support" from the
+toolbar, and follow the link in the box titled "Best Way to Get Help".
+
+4. If the bug isn't in the database, obtain a SourceForge account and file a
+report.  (You need an account so that I can get a hold of you in case I have
+questions.  SourceForge won't send you any e-mails unless you check a box asking
+them to, I will only contact you about bugs that you file, and neither of us
+will share your information except as required by law.)  I will try to respond
+quickly, at least with an estimate of when the bug might be fixed, though
+sometimes I am away from the internet for a week or two at a time.
+
+Whether asking a question or filing a bug report, the most important thing you
+can do is describe the problem in such a way that others can see it for
+themselves.  This generally means stating what you did, what you expected to
+happen, and what actually happened, both concisely and precisely.  If you can do
+that, there's a good chance that we can get the problem resolved.
+
+\section*{Known Bugs at the Time of Writing}
+\label{known}
+
+\begin{itemize}
+  \item{The debugger causes naming clashes with stories that define a size
+    property.}
+  \item{Release builds sometimes fail with I6 errors.}
+  \item{The debugger doesn't understand rule preambles that include punctuation.}
+  \item{The debugger makes undo unavailable in under most compilations of git.}
+  \item{When the story executes an undo, debugger actions since the last turn
+    are also undone.  Similarly, when the story executes a restart, the debugger
+    also restarts, and a quit in the story quits the debugger.}
+  \item{The \glkinput{examine} and \glkinput{showme} commands do not recognize
+    table entries.}
+  \item{There's no interactive disambiguation of kind names (although
+    disambiguation by parentheses works).}
+  \item{The \glkinput{step} and \glkinput{next} commands don't always pause the
+    story for the end of the function, but instead stop on the next line in the
+    caller.}
+\end{itemize}
+
+\lastpagebreak
+
+\appendix
+
+\chapter{Package Contents}
+\label{package-contents}
+
+\begin{itemize}
+  \item{Documentation}
+  \begin{itemize}
+    \item{\texttt{README.pdf}---this file.}
+    \item{\texttt{ChangeLog}---the version history.}
+  \end{itemize}
+  \item{Utilities}
+  \begin{itemize}
+    \item{\texttt{GRIP Inform Setup.jar}---a utility that installs the extensions, configures the IDE, and completes any other one-time setup. (see Sections~\ref{installing-easy} and~\ref{installing-hard}).}
+    \item{\texttt{GRIP Story Setup.jar}---a utility that sets up a story so that it can access its debug information (see Sections~\ref{including-easy} and~\ref{including-hard}).}
+  \end{itemize}
+  \item{Extensions Useful to Story Authors}
+  \begin{itemize}
+    \item{\texttt{Interactive Debugger.i7x}---a tool for seeing what goes on inside an executing story.}
+    \item{\texttt{Verbose Diagnostics.i7x}---additional detail in the messages for runtime problems, programming errors, block value errors, and so on.}
+    \item{\texttt{Verbose Diagnostics Lite.i7x}---like Verbose Diagnostics, except that it sacrifices some clarity in order to do without debug information.}
+    \item{\texttt{Floyd Mode.i7x}---emulation of command line and MUD interpreters (like Floyd).}
+  \end{itemize}
+  \item{Support Extensions}
+  \begin{itemize}
+    \item{\texttt{Binary Input Files.i7x}}
+    \item{\texttt{Breakpoints.i7x}}
+    \item{\texttt{Call Stack Tracking.i7x}}
+    \item{\texttt{Compiler Version Checks.i7x}}
+    \item{\texttt{Context-Free Parsing Engine.i7x}}
+    \item{\texttt{Glk Interception.i7x}}
+    \item{\texttt{Glk Window Wrappers.i7x}}
+    \item{\texttt{Glulx Runtime Instrumentation Framework.i7x}}
+    \item{\texttt{Human-Friendly Function Names.i7x}}
+    \item{\texttt{I6 Routine Names.i7x}} 
+    \item{\texttt{Low-Level Hash Tables.i7x}}
+    \item{\texttt{Low-Level Linked Lists.i7x}}
+    \item{\texttt{Low-Level Operations.i7x}}
+    \item{\texttt{Low-Level Text.i7x}}
+    \item{\texttt{Object Pools.i7x}}
+    \item{\texttt{Punctuated Word Parsing Engine.i7x}}
+    \item{\texttt{Runtime Checks.i7x}}
+  \end{itemize}
+  \item{License}
+  \begin{itemize}
+    \item{\texttt{COPYING}---version 3 of the GPL.}
+  \end{itemize}
+\end{itemize}
+
+\chapter{The First Debugging Tutorial Source Text: ``Tournament''}
+\label{tournament}
+
+\lstinputlisting{tournament.ni}
+
+\chapter{The Second Debugging Tutorial Source Text: ``Monochrome''}
+\label{monochrome}
+
+\lstinputlisting{monochrome.ni}
+
+\chapter{GNU Free Documentation License}
+
+\begin{center}
+  Version 1.3, 3 November 2008
+
+  Copyright \copyright{} 2000, 2001, 2002, 2007, 2008  Free Software Foundation, Inc.
+  
+  \bigskip
+  
+  \url{http://fsf.org/}
+  
+  \bigskip
+  
+  Everyone is permitted to copy and distribute verbatim copies of this license,
+  but changing it is not allowed.
+\end{center}
+
+\begin{center}
+{\bf\large Preamble}
+\end{center}
+
+The purpose of this License is to make a manual, textbook, or other
+functional and useful document ``free'' in the sense of freedom: to
+assure everyone the effective freedom to copy and redistribute it,
+with or without modifying it, either commercially or noncommercially.
+Secondarily, this License preserves for the author and publisher a way
+to get credit for their work, while not being considered responsible
+for modifications made by others.
+
+This License is a kind of ``copyleft'', which means that derivative
+works of the document must themselves be free in the same sense.  It
+complements the GNU General Public License, which is a copyleft
+license designed for free software.
+
+We have designed this License in order to use it for manuals for free
+software, because free software needs free documentation: a free
+program should come with manuals providing the same freedoms that the
+software does.  But this License is not limited to software manuals;
+it can be used for any textual work, regardless of subject matter or
+whether it is published as a printed book.  We recommend this License
+principally for works whose purpose is instruction or reference.
+
+\begin{center}
+{\Large\bf 1. APPLICABILITY AND DEFINITIONS\par}
+\end{center}
+
+This License applies to any manual or other work, in any medium, that
+contains a notice placed by the copyright holder saying it can be
+distributed under the terms of this License.  Such a notice grants a
+world-wide, royalty-free license, unlimited in duration, to use that
+work under the conditions stated herein.  The ``\textbf{Document}'', below,
+refers to any such manual or work.  Any member of the public is a
+licensee, and is addressed as ``\textbf{you}''.  You accept the license if you
+copy, modify or distribute the work in a way requiring permission
+under copyright law.
+
+A ``\textbf{Modified Version}'' of the Document means any work containing the
+Document or a portion of it, either copied verbatim, or with
+modifications and/or translated into another language.
+
+A ``\textbf{Secondary Section}'' is a named appendix or a front-matter section of
+the Document that deals exclusively with the relationship of the
+publishers or authors of the Document to the Document's overall subject
+(or to related matters) and contains nothing that could fall directly
+within that overall subject.  (Thus, if the Document is in part a
+textbook of mathematics, a Secondary Section may not explain any
+mathematics.)  The relationship could be a matter of historical
+connection with the subject or with related matters, or of legal,
+commercial, philosophical, ethical or political position regarding
+them.
+
+The ``\textbf{Invariant Sections}'' are certain Secondary Sections whose titles
+are designated, as being those of Invariant Sections, in the notice
+that says that the Document is released under this License.  If a
+section does not fit the above definition of Secondary then it is not
+allowed to be designated as Invariant.  The Document may contain zero
+Invariant Sections.  If the Document does not identify any Invariant
+Sections then there are none.
+
+The ``\textbf{Cover Texts}'' are certain short passages of text that are listed,
+as Front-Cover Texts or Back-Cover Texts, in the notice that says that
+the Document is released under this License.  A Front-Cover Text may
+be at most 5 words, and a Back-Cover Text may be at most 25 words.
+
+A ``\textbf{Transparent}'' copy of the Document means a machine-readable copy,
+represented in a format whose specification is available to the
+general public, that is suitable for revising the document
+straightforwardly with generic text editors or (for images composed of
+pixels) generic paint programs or (for drawings) some widely available
+drawing editor, and that is suitable for input to text formatters or
+for automatic translation to a variety of formats suitable for input
+to text formatters.  A copy made in an otherwise Transparent file
+format whose markup, or absence of markup, has been arranged to thwart
+or discourage subsequent modification by readers is not Transparent.
+An image format is not Transparent if used for any substantial amount
+of text.  A copy that is not ``Transparent'' is called ``\textbf{Opaque}''.
+
+Examples of suitable formats for Transparent copies include plain
+ASCII without markup, Texinfo input format, LaTeX input format, SGML
+or XML using a publicly available DTD, and standard-conforming simple
+HTML, PostScript or PDF designed for human modification.  Examples of
+transparent image formats include PNG, XCF and JPG.  Opaque formats
+include proprietary formats that can be read and edited only by
+proprietary word processors, SGML or XML for which the DTD and/or
+processing tools are not generally available, and the
+machine-generated HTML, PostScript or PDF produced by some word
+processors for output purposes only.
+
+The ``\textbf{Title Page}'' means, for a printed book, the title page itself,
+plus such following pages as are needed to hold, legibly, the material
+this License requires to appear in the title page.  For works in
+formats which do not have any title page as such, ``Title Page'' means
+the text near the most prominent appearance of the work's title,
+preceding the beginning of the body of the text.
+
+The ``\textbf{publisher}'' means any person or entity that distributes
+copies of the Document to the public.
+
+A section ``\textbf{Entitled XYZ}'' means a named subunit of the Document whose
+title either is precisely XYZ or contains XYZ in parentheses following
+text that translates XYZ in another language.  (Here XYZ stands for a
+specific section name mentioned below, such as ``\textbf{Acknowledgements}'',
+``\textbf{Dedications}'', ``\textbf{Endorsements}'', or ``\textbf{History}''.)  
+To ``\textbf{Preserve the Title}''
+of such a section when you modify the Document means that it remains a
+section ``Entitled XYZ'' according to this definition.
+
+The Document may include Warranty Disclaimers next to the notice which
+states that this License applies to the Document.  These Warranty
+Disclaimers are considered to be included by reference in this
+License, but only as regards disclaiming warranties: any other
+implication that these Warranty Disclaimers may have is void and has
+no effect on the meaning of this License.
+
+\pagebreak
+
+\begin{center}
+{\Large\bf 2. VERBATIM COPYING\par}
+\end{center}
+
+You may copy and distribute the Document in any medium, either
+commercially or noncommercially, provided that this License, the
+copyright notices, and the license notice saying this License applies
+to the Document are reproduced in all copies, and that you add no other
+conditions whatsoever to those of this License.  You may not use
+technical measures to obstruct or control the reading or further
+copying of the copies you make or distribute.  However, you may accept
+compensation in exchange for copies.  If you distribute a large enough
+number of copies you must also follow the conditions in section~3.
+
+You may also lend copies, under the same conditions stated above, and
+you may publicly display copies.
+
+\begin{center}
+{\Large\bf 3. COPYING IN QUANTITY\par}
+\end{center}
+
+If you publish printed copies (or copies in media that commonly have
+printed covers) of the Document, numbering more than 100, and the
+Document's license notice requires Cover Texts, you must enclose the
+copies in covers that carry, clearly and legibly, all these Cover
+Texts: Front-Cover Texts on the front cover, and Back-Cover Texts on
+the back cover.  Both covers must also clearly and legibly identify
+you as the publisher of these copies.  The front cover must present
+the full title with all words of the title equally prominent and
+visible.  You may add other material on the covers in addition.
+Copying with changes limited to the covers, as long as they preserve
+the title of the Document and satisfy these conditions, can be treated
+as verbatim copying in other respects.
+
+If the required texts for either cover are too voluminous to fit
+legibly, you should put the first ones listed (as many as fit
+reasonably) on the actual cover, and continue the rest onto adjacent
+pages.
+
+If you publish or distribute Opaque copies of the Document numbering
+more than 100, you must either include a machine-readable Transparent
+copy along with each Opaque copy, or state in or with each Opaque copy
+a computer-network location from which the general network-using
+public has access to download using public-standard network protocols
+a complete Transparent copy of the Document, free of added material.
+If you use the latter option, you must take reasonably prudent steps,
+when you begin distribution of Opaque copies in quantity, to ensure
+that this Transparent copy will remain thus accessible at the stated
+location until at least one year after the last time you distribute an
+Opaque copy (directly or through your agents or retailers) of that
+edition to the public.
+
+It is requested, but not required, that you contact the authors of the
+Document well before redistributing any large number of copies, to give
+them a chance to provide you with an updated version of the Document.
+
+\begin{center}
+{\Large\bf 4. MODIFICATIONS\par}
+\end{center}
+
+You may copy and distribute a Modified Version of the Document under
+the conditions of sections 2 and 3 above, provided that you release
+the Modified Version under precisely this License, with the Modified
+Version filling the role of the Document, thus licensing distribution
+and modification of the Modified Version to whoever possesses a copy
+of it.  In addition, you must do these things in the Modified Version:
+
+\begin{itemize}
+\item[A.] 
+   Use in the Title Page (and on the covers, if any) a title distinct
+   from that of the Document, and from those of previous versions
+   (which should, if there were any, be listed in the History section
+   of the Document).  You may use the same title as a previous version
+   if the original publisher of that version gives permission.
+   
+\item[B.]
+   List on the Title Page, as authors, one or more persons or entities
+   responsible for authorship of the modifications in the Modified
+   Version, together with at least five of the principal authors of the
+   Document (all of its principal authors, if it has fewer than five),
+   unless they release you from this requirement.
+   
+\item[C.]
+   State on the Title page the name of the publisher of the
+   Modified Version, as the publisher.
+   
+\item[D.]
+   Preserve all the copyright notices of the Document.
+   
+\item[E.]
+   Add an appropriate copyright notice for your modifications
+   adjacent to the other copyright notices.
+   
+\item[F.]
+   Include, immediately after the copyright notices, a license notice
+   giving the public permission to use the Modified Version under the
+   terms of this License, in the form shown in the Addendum below.
+   
+\item[G.]
+   Preserve in that license notice the full lists of Invariant Sections
+   and required Cover Texts given in the Document's license notice.
+   
+\item[H.]
+   Include an unaltered copy of this License.
+   
+\item[I.]
+   Preserve the section Entitled ``History'', Preserve its Title, and add
+   to it an item stating at least the title, year, new authors, and
+   publisher of the Modified Version as given on the Title Page.  If
+   there is no section Entitled ``History'' in the Document, create one
+   stating the title, year, authors, and publisher of the Document as
+   given on its Title Page, then add an item describing the Modified
+   Version as stated in the previous sentence.
+   
+\item[J.]
+   Preserve the network location, if any, given in the Document for
+   public access to a Transparent copy of the Document, and likewise
+   the network locations given in the Document for previous versions
+   it was based on.  These may be placed in the ``History'' section.
+   You may omit a network location for a work that was published at
+   least four years before the Document itself, or if the original
+   publisher of the version it refers to gives permission.
+   
+\item[K.]
+   For any section Entitled ``Acknowledgements'' or ``Dedications'',
+   Preserve the Title of the section, and preserve in the section all
+   the substance and tone of each of the contributor acknowledgements
+   and/or dedications given therein.
+   
+\item[L.]
+   Preserve all the Invariant Sections of the Document,
+   unaltered in their text and in their titles.  Section numbers
+   or the equivalent are not considered part of the section titles.
+   
+\item[M.]
+   Delete any section Entitled ``Endorsements''.  Such a section
+   may not be included in the Modified Version.
+   
+\item[N.]
+   Do not retitle any existing section to be Entitled ``Endorsements''
+   or to conflict in title with any Invariant Section.
+   
+\item[O.]
+   Preserve any Warranty Disclaimers.
+\end{itemize}
+
+If the Modified Version includes new front-matter sections or
+appendices that qualify as Secondary Sections and contain no material
+copied from the Document, you may at your option designate some or all
+of these sections as invariant.  To do this, add their titles to the
+list of Invariant Sections in the Modified Version's license notice.
+These titles must be distinct from any other section titles.
+
+You may add a section Entitled ``Endorsements'', provided it contains
+nothing but endorsements of your Modified Version by various
+parties---for example, statements of peer review or that the text has
+been approved by an organization as the authoritative definition of a
+standard.
+
+You may add a passage of up to five words as a Front-Cover Text, and a
+passage of up to 25 words as a Back-Cover Text, to the end of the list
+of Cover Texts in the Modified Version.  Only one passage of
+Front-Cover Text and one of Back-Cover Text may be added by (or
+through arrangements made by) any one entity.  If the Document already
+includes a cover text for the same cover, previously added by you or
+by arrangement made by the same entity you are acting on behalf of,
+you may not add another; but you may replace the old one, on explicit
+permission from the previous publisher that added the old one.
+
+The author(s) and publisher(s) of the Document do not by this License
+give permission to use their names for publicity for or to assert or
+imply endorsement of any Modified Version.
+
+\begin{center}
+{\Large\bf 5. COMBINING DOCUMENTS\par}
+\end{center}
+
+You may combine the Document with other documents released under this
+License, under the terms defined in section~4 above for modified
+versions, provided that you include in the combination all of the
+Invariant Sections of all of the original documents, unmodified, and
+list them all as Invariant Sections of your combined work in its
+license notice, and that you preserve all their Warranty Disclaimers.
+
+The combined work need only contain one copy of this License, and
+multiple identical Invariant Sections may be replaced with a single
+copy.  If there are multiple Invariant Sections with the same name but
+different contents, make the title of each such section unique by
+adding at the end of it, in parentheses, the name of the original
+author or publisher of that section if known, or else a unique number.
+Make the same adjustment to the section titles in the list of
+Invariant Sections in the license notice of the combined work.
+
+In the combination, you must combine any sections Entitled ``History''
+in the various original documents, forming one section Entitled
+``History''; likewise combine any sections Entitled ``Acknowledgements'',
+and any sections Entitled ``Dedications''.  You must delete all sections
+Entitled ``Endorsements''.
+
+\begin{center}
+{\Large\bf 6. COLLECTIONS OF DOCUMENTS\par}
+\end{center}
+
+You may make a collection consisting of the Document and other documents
+released under this License, and replace the individual copies of this
+License in the various documents with a single copy that is included in
+the collection, provided that you follow the rules of this License for
+verbatim copying of each of the documents in all other respects.
+
+You may extract a single document from such a collection, and distribute
+it individually under this License, provided you insert a copy of this
+License into the extracted document, and follow this License in all
+other respects regarding verbatim copying of that document.
+
+\begin{center}
+{\Large\bf 7. AGGREGATION WITH INDEPENDENT WORKS\par}
+\end{center}
+
+A compilation of the Document or its derivatives with other separate
+and independent documents or works, in or on a volume of a storage or
+distribution medium, is called an ``aggregate'' if the copyright
+resulting from the compilation is not used to limit the legal rights
+of the compilation's users beyond what the individual works permit.
+When the Document is included in an aggregate, this License does not
+apply to the other works in the aggregate which are not themselves
+derivative works of the Document.
+
+If the Cover Text requirement of section~3 is applicable to these
+copies of the Document, then if the Document is less than one half of
+the entire aggregate, the Document's Cover Texts may be placed on
+covers that bracket the Document within the aggregate, or the
+electronic equivalent of covers if the Document is in electronic form.
+Otherwise they must appear on printed covers that bracket the whole
+aggregate.
+
+\begin{center}
+{\Large\bf 8. TRANSLATION\par}
+\end{center}
+
+Translation is considered a kind of modification, so you may
+distribute translations of the Document under the terms of section~4.
+Replacing Invariant Sections with translations requires special
+permission from their copyright holders, but you may include
+translations of some or all Invariant Sections in addition to the
+original versions of these Invariant Sections.  You may include a
+translation of this License, and all the license notices in the
+Document, and any Warranty Disclaimers, provided that you also include
+the original English version of this License and the original versions
+of those notices and disclaimers.  In case of a disagreement between
+the translation and the original version of this License or a notice
+or disclaimer, the original version will prevail.
+
+If a section in the Document is Entitled ``Acknowledgements'',
+``Dedications'', or ``History'', the requirement (section~4) to Preserve
+its Title (section~1) will typically require changing the actual
+title.
+
+\begin{center}
+{\Large\bf 9. TERMINATION\par}
+\end{center}
+
+You may not copy, modify, sublicense, or distribute the Document
+except as expressly provided under this License.  Any attempt
+otherwise to copy, modify, sublicense, or distribute it is void, and
+will automatically terminate your rights under this License.
+
+However, if you cease all violation of this License, then your license
+from a particular copyright holder is reinstated (a) provisionally,
+unless and until the copyright holder explicitly and finally
+terminates your license, and (b) permanently, if the copyright holder
+fails to notify you of the violation by some reasonable means prior to
+60 days after the cessation.
+
+Moreover, your license from a particular copyright holder is
+reinstated permanently if the copyright holder notifies you of the
+violation by some reasonable means, this is the first time you have
+received notice of violation of this License (for any work) from that
+copyright holder, and you cure the violation prior to 30 days after
+your receipt of the notice.
+
+Termination of your rights under this section does not terminate the
+licenses of parties who have received copies or rights from you under
+this License.  If your rights have been terminated and not permanently
+reinstated, receipt of a copy of some or all of the same material does
+not give you any rights to use it.
+
+\begin{center}
+{\Large\bf 10. FUTURE REVISIONS OF THIS LICENSE\par}
+\end{center}
+
+The Free Software Foundation may publish new, revised versions
+of the GNU Free Documentation License from time to time.  Such new
+versions will be similar in spirit to the present version, but may
+differ in detail to address new problems or concerns.  See
+\url{http://www.gnu.org/copyleft/}.
+
+Each version of the License is given a distinguishing version number.
+If the Document specifies that a particular numbered version of this
+License ``or any later version'' applies to it, you have the option of
+following the terms and conditions either of that specified version or
+of any later version that has been published (not as a draft) by the
+Free Software Foundation.  If the Document does not specify a version
+number of this License, you may choose any version ever published (not
+as a draft) by the Free Software Foundation.  If the Document
+specifies that a proxy can decide which future versions of this
+License can be used, that proxy's public statement of acceptance of a
+version permanently authorizes you to choose that version for the
+Document.
+
+\begin{center}
+{\Large\bf 11. RELICENSING\par}
+\end{center}
+
+``Massive Multiauthor Collaboration Site'' (or ``MMC Site'') means any
+World Wide Web server that publishes copyrightable works and also
+provides prominent facilities for anybody to edit those works.  A
+public wiki that anybody can edit is an example of such a server.  A
+``Massive Multiauthor Collaboration'' (or ``MMC'') contained in the
+site means any set of copyrightable works thus published on the MMC
+site.
+
+``CC-BY-SA'' means the Creative Commons Attribution-Share Alike 3.0
+license published by Creative Commons Corporation, a not-for-profit
+corporation with a principal place of business in San Francisco,
+California, as well as future copyleft versions of that license
+published by that same organization.
+
+``Incorporate'' means to publish or republish a Document, in whole or
+in part, as part of another Document.
+
+An MMC is ``eligible for relicensing'' if it is licensed under this
+License, and if all works that were first published under this License
+somewhere other than this MMC, and subsequently incorporated in whole
+or in part into the MMC, (1) had no cover texts or invariant sections,
+and (2) were thus incorporated prior to November 1, 2008.
+
+The operator of an MMC Site may republish an MMC contained in the site
+under CC-BY-SA on the same site at any time before August 1, 2009,
+provided the MMC is eligible for relicensing.
+
+\begin{center}
+{\Large\bf ADDENDUM: How to use this License for your documents\par}
+\end{center}
+
+To use this License in a document you have written, include a copy of
+the License in the document and put the following copyright and
+license notices just after the title page:
+
+\bigskip
+\begin{quote}
+    Copyright \copyright{}  YEAR  YOUR NAME.
+    Permission is granted to copy, distribute and/or modify this document
+    under the terms of the GNU Free Documentation License, Version 1.3
+    or any later version published by the Free Software Foundation;
+    with no Invariant Sections, no Front-Cover Texts, and no Back-Cover Texts.
+    A copy of the license is included in the section entitled ``GNU
+    Free Documentation License''.
+\end{quote}
+\bigskip
+    
+If you have Invariant Sections, Front-Cover Texts and Back-Cover Texts,
+replace the ``with \dots\ Texts.''\ line with this:
+
+\bigskip
+\begin{quote}
+    with the Invariant Sections being LIST THEIR TITLES, with the
+    Front-Cover Texts being LIST, and with the Back-Cover Texts being LIST.
+\end{quote}
+\bigskip
+    
+If you have Invariant Sections without Cover Texts, or some other
+combination of the three, merge those two alternatives to suit the
+situation.
+
+If your document contains nontrivial examples of program code, we
+recommend releasing these examples in parallel under your choice of
+free software license, such as the GNU General Public License,
+to permit their use in free software.
+
+\impatiencechapter{Glossary}
+
+\term{Address}{a number that uniquely identifies a location in the interpreter's
+  memory.  Sometimes this is also a number that uniquely identifies a location
+  in the story file because the interpreter stores the unchangeable parts of a
+  story file at address zero on up.}
+
+\term{Assembly}{see \seeterm{Glulx assembly}.}
+
+\term{Backtrace}{see \seeterm{call stack}.}
+
+\term{Block value}{any value that takes up more than 32 bits of memory but does
+  not have a permanent existence.  Lists, indexed text, and stored actions are
+  common examples.  Inform has to allocate and deallocate memory for block
+  values while the story is executing.}
+
+\term{Break}{to temporarily interrupt the execution of a story, or,
+  intransitively, to become temporarily interrupted.}
+
+\term{Breakpoint}{a point in code that, when reached, should cause execution to
+  break.}
+
+\term{Call}{a request that a function execute, or, as a verb, to make such a
+  request. ``Invocation'' and ``invoke'' are common synonyms, respectively.}
+
+\term{Call frame}{the state of a code execution task.  For instance, if a rule
+  invokes a phrase, the rule's frame will remember what the rule was doing when
+  it called the phrase.  If that phrase then invokes itself, it will have two
+  call frames---one to remember what it was doing in the first invocation, and
+  another to track what it's doing in the second.  Call frames are ordinarily
+  destroyed as soon as the corresponding task completes.}
+
+\term{Call stack}{the set of active call frames, ordered so that each frame is
+  immediately above the one waiting for it to complete.  Also called a
+  ``backtrace,'' because it traces execution tasks back to the main story
+  routine.}
+
+\term{Caller}{in a call, the function requesting another to execute.}
+
+\term{Callee}{in a call, the function that has been asked to execute.}
+
+\term{Catch token}{a number identifying a fragment of a call frame.  In Glulx
+  assembly a catch token can be ``thrown,'' which destroys all call frames
+  created after the one in question and then resets that frame to match the
+  fragment.  Inform never uses catch tokens on its own, so most authors don't
+  need to worry about them.}
+
+\term{Code}{instructions to the interpreter.  We generally manipulate code in
+  the form of Inform~7 source text.}
+
+\term{Code offset}{the address of a function or instruction minus the smallest
+  such address.  Author who use the ``a'' and ``t'' options of the Inform~6
+  compiler receive debug information that is indexed by code offset, so the
+  debugger prints such numbers to make cross-referencing easier.  (But note that
+  the code offsets given by the Inform~6 compiler are the offsets before jump
+  optimization, not the offsets used in the final story file---sometimes things
+  will be off just slightly.)}
+
+\term{Frame}{see \seeterm{call frame}.}
+
+\term{Function}{the Glulx name for a unit of code.  Though not strictly true,
+  for the purposes of this document we can think of Inform~6 routines and Glulx
+  functions being in one-to-one correspondence.  We therefore use the terms
+  interchangeably.}
+
+\term{git}{a popular and fast Glulx interpreter.  Here we mean git apart from
+  any input/output facilities, so, for instance, we do not mean Windows Git,
+  which is git plus support for input/output under the Windows operating system.
+  Often a single application for playing Glulx stories will contain both Glulxe
+  and git and let the player choose between the two.}
+
+\term{Glulx assembly}{a human-readable format for the code in a story file.
+  It's discussed briefly in Section~\ref{glulx-format}.}
+
+\term{Glulxe}{the reference Glulx interpreter.  Here we mean Glulxe apart from
+  any input/output facilities, so, for instance, we do not mean Windows Glulxe,
+  which is Glulxe plus support for input/output under the Windows operating
+  system.  One of Glulxe's purposes is to demonstrate what a Glulx interpreter
+  should do, in case the specification is unclear on some point.  Consequently,
+  its design leans more towards simplicity and clarity than git's, but it is
+  often slower.}
+
+\term{Hexadecimal}{an alternative way to write numbers where the usual digits
+  0--9 are supplemented by six more, A--F.  As far as the debugger is concerned,
+  hexadecimal is always prefixed by ``0x'' to avoid confusion with decimal.}
+
+\term{I6 line number}{the line number where an I6 line appears in the file
+  \texttt{auto.inf}, which is the translation of an Inform~7 story into
+  Inform~6.}
+
+\term{I7 line number}{not the line number where an Inform~7 line appear in the
+  source text (the would be what Inform calls the ``paragraph number''), but the
+  line number where it appears in the file \texttt{auto.inf}, which is the
+  translation of an Inform~7 story into Inform~6.}
+
+\term{IDE}{an integrated development environment.  Here we mean any of the
+  Inform applications that let us write a story and test it in the same
+  program.}
+
+\term{Kernel}{see \seeterm{routine kernel}.}
+
+\term{Label}{a name for a location in code, especially code written in assembly.}
+
+\term{Line number}{see \seeterm{I6 line number} or \seeterm{I7 line number}.}
+
+\term{Main story routine}{the routine that orchestrates the rest of the story
+  code.  It begins running as soon as the story is loaded and continues to do so
+  as long as the story is executing.}
+
+\term{Non-temporary named value}{a variable stored in general memory, as opposed
+  to in a call frame.  There is only ever one instance of a non-temporary named
+  value.}
+
+\term{Opcode}{see \seeterm{operation code}.}
+
+\term{Operation code}{the analog of a verb for assembly instructions.}
+
+\term{Preamble}{the part of a rule's source text that identifies it as a rule,
+  and possibly determines the conditions under which it applies.  ``When play
+  begins,'' ``Instead of jumping,'' and ``This is the silly rule'' are all
+  examples.}
+
+\term{Routine}{the Inform~6 name for a unit of code.  Inform~7 rules, phrases,
+  and definitions all end up being one or more routines, as do texts with
+  substitutions.}
+
+\term{Routine kernel}{a routine that implements the logic of a rule or phrase.
+  Inform rules and phrases that mention block values are split into two
+  routines: a routine shell for memory management and its callee, a routine
+  kernel.  Note that the I6 name of a routine kernel ends in
+  \lstinline{\_SHELL}, whereas the I6 name of a routine shell ordinarily does
+  not.}
+
+\term{Routine shell}{a routine that allocates memory for block values, calls a
+  routine kernel, and then frees the allocated memory again.  Note that the I6
+  name of a routine kernel ends in \lstinline{\_SHELL}, whereas the I6 name of a
+  routine shell ordinarily does not.}
+
+\term{Sequence point}{a point at which it is safe to break execution.  See the
+  Inform Technical Manual for a discussion of what constitutes ``safe'' and the
+  details of sequence point placement.}
+
+\term{Shell}{see \seeterm{routine shell}.}
+
+\term{Stack}{see \seeterm{call stack}.}
+
+\term{Symbolic link}{a relation between two file names such that the operation
+  system understands one as really meaning the other.  Because the debugger
+  needs to read debug information from Inform, but interpreters place
+  restrictions on the file names a story can refer to, we use symbolic links to
+  translate allowable file names into the names of files generated by Inform.
+  Note that, unlike other kinds of links or aliases, which relate a name to a
+  file, symbolic links aren't destroyed by recompilation.}
+
+\term{Temporary named value}{a variable stored in a call frame, as opposed to
+  general memory.  In particular, if a function invokes itself there will be two
+  copies of its temporary named values---one for the original run of the
+  function and another for the self-invocation.}
+
+\term{Veneer}{a set of hidden Inform~6 routines that handle low-level operations
+  like accessing the properties of objects or reporting runtime problems.  The
+  default implementations of the veneer routines are provided by the Inform~6
+  compiler and have no sequence points, but they can be overridden.}
+
+\end{document}

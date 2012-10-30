@@ -1,0 +1,471 @@
+/* Copyright 2012 Brady J. Garvin */
+
+/* This program is free software: you can redistribute it and/or modify it under the terms of the GNU General Public License as published by the Free Software Foundation, either version 3 of the License, or (at your option) any later version.
+
+This program is distributed in the hope that it will be useful, but WITHOUT ANY WARRANTY; without even the implied warranty of MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the GNU General Public License for more details.
+
+You should have received a copy of the GNU General Public License along with this program.  If not, see <http://www.gnu.org/licenses/>. */
+
+import java.io.*;
+import java.util.*;
+import javax.swing.*;
+
+public class Installer{
+    protected static String wordWrap(String message){
+	String[]words=message.replaceAll("\n"," ").split("\\s");
+	StringBuffer accumulator=new StringBuffer();
+	int spacesAccumulated=0;
+	int lineLength=0;
+	boolean sawWord=false;
+	for(String word:words){
+	    if(sawWord){
+		++spacesAccumulated;
+	    }else{
+		sawWord=true;
+	    }
+	    if(word.length()!=0){
+		lineLength+=spacesAccumulated+word.length();
+		if(lineLength>=80){
+		    if(word.length()<80){
+			accumulator.append('\n').append(word);
+			lineLength=word.length();
+		    }else{
+			for(int i=spacesAccumulated;i-->0;){
+			    accumulator.append(' ');
+			}
+			accumulator.append(word).append('\n');
+			lineLength=0;
+		    }
+		}else{
+		    for(int i=spacesAccumulated;i-->0;){
+			accumulator.append(' ');
+		    }
+		    accumulator.append(word);
+		}
+		spacesAccumulated=0;
+	    }
+	}
+	return accumulator.toString();
+    }
+
+    protected static void say(String message){
+	JOptionPane.showMessageDialog(null,wordWrap(message));
+    }
+    protected static void error(String message){
+	JOptionPane.showOptionDialog
+	    (null,
+	     wordWrap(message),
+	     "Error",
+	     JOptionPane.DEFAULT_OPTION,
+	     JOptionPane.ERROR_MESSAGE,
+	     null,null,null);
+	System.exit(1);
+    }
+    protected static boolean theAuthorConsents(String question,boolean alert){
+	return JOptionPane.YES_OPTION==
+	    JOptionPane.showOptionDialog
+	    (null,
+	     wordWrap(question),
+	     alert?"Alert":"Question",
+	     JOptionPane.YES_NO_OPTION,
+	     alert?JOptionPane.WARNING_MESSAGE:JOptionPane.INFORMATION_MESSAGE,
+	     null,null,null);
+    }
+
+    protected static boolean isMacOSX(){
+	String operatingSystem=System.getProperty("os.name");
+	return
+	    operatingSystem.equals("Mac OS X");
+    }
+    protected static boolean isNonMacUnixLike(){
+	String operatingSystem=System.getProperty("os.name");
+	return
+	    operatingSystem.equals("Linux")||
+	    operatingSystem.equals("Solaris")||
+	    operatingSystem.equals("SunOS")||
+	    operatingSystem.equals("HP-UX")||
+	    operatingSystem.equals("AIX")||
+	    operatingSystem.equals("FreeBSD")||
+	    operatingSystem.contains("Unix");
+    }
+    private static boolean linuxCommandLineChecked=false;
+    private static boolean linuxCommandLineResult;
+    protected static boolean isLinuxCommandLine(){
+	if(!linuxCommandLineChecked){
+	    if(isNonMacUnixLike()){
+		linuxCommandLineResult=!theAuthorConsents("Are you using the GNOME IDE (the graphical editor, as opposed to the command line interface)?",false);
+	    }else{
+		linuxCommandLineResult=false;
+	    }
+	    linuxCommandLineChecked=true;
+	}
+	return linuxCommandLineResult;
+    }
+    protected static boolean isRecentWindows(){
+	String operatingSystem=System.getProperty("os.name");
+	return
+	    operatingSystem.equals("Windows Vista")||
+	    operatingSystem.equals("Windows 7");
+    }
+    protected static boolean isSupportedOS(){
+	return isMacOSX()||isRecentWindows()||isNonMacUnixLike();
+    }
+
+    protected static void execute(String[]command,String processDescription) throws IOException{
+	Process child=Runtime.getRuntime().exec(command);
+	for(;;){
+	    try{
+		int exitCode=child.waitFor();
+		if(exitCode!=0){
+		    StringBuffer message=new StringBuffer();
+		    BufferedReader input=new BufferedReader(new InputStreamReader(child.getInputStream()));
+		    for(String line;(line=input.readLine())!=null;){
+			message.append(line).append('\n');
+		    }
+		    input.close();
+		    input=new BufferedReader(new InputStreamReader(child.getErrorStream()));
+		    for(String line;(line=input.readLine())!=null;){
+			message.append(line).append('\n');
+		    }
+		    input.close();
+		    throw new IOException(processDescription+" process exited with code "+exitCode+"."+((message.length()>0)?"  The message was: "+message:""));
+		}
+		return;
+	    }catch(InterruptedException interrupted){}
+	}
+    }
+
+    protected static void addInclusion(File sourceCode,String debugInfoName,String I6Name,String debugLogName){
+	try{
+	    BufferedReader input=new BufferedReader(new FileReader(sourceCode));
+	    StringBuffer holding=new StringBuffer();
+	    int lineCounter=0;
+	    for(String line;(line=input.readLine())!=null;){
+		switch(++lineCounter){
+		case 2:
+		    holding.append('\n')
+			.append("[Autogenerated inclusion of debugger ("+new Date()+")]\n")
+			.append("[Put the following lines in a comment when you don't want to use the extensions.]\n")
+			.append("[Most authors will want the following:]\n")
+			.append("Include Interactive Debugger by Brady Garvin.\n")
+			.append("[Another common alternative:]\n")
+			.append("[Include Verbose Diagnostics by Brady Garvin.\n")
+			.append("Include Debug File Parsing by Brady Garvin.\n")
+			.append("Include Printing according to Kind Names by Brady Garvin.]\n")
+			.append("[Either of the inclusion sets above require these lines:]\n")
+			.append("The name of the symbolic link to the debug information file is \""+debugInfoName+"\".\n")
+			.append("The name of the symbolic link to the intermediate I6 file is \""+I6Name+"\".\n")
+			.append("The name of the symbolic link to the debugging log file is \""+debugLogName+"\".\n\n");
+		}
+		holding.append(line).append('\n');
+	    }
+	    input.close();
+	    PrintWriter output=new PrintWriter(new BufferedWriter(new FileWriter(sourceCode)));
+	    output.write(holding.toString());
+	    output.close();
+	}catch(IOException exception){
+	    error("Encountered error when adding inclusions to ``"+sourceCode+"'': "+exception);
+	}
+    }
+
+    protected static void changeToGlulx(File propertyList){
+	try{
+	    BufferedReader input=new BufferedReader(new FileReader(propertyList));
+	    StringBuffer holding=new StringBuffer();
+	    boolean expectingZCodeVersion=false;
+	    for(String line;(line=input.readLine())!=null;){
+		if(expectingZCodeVersion){
+		    expectingZCodeVersion=false;
+		    if(line.matches("\\s*<integer>[0-9]+</integer>\\s*")){
+			holding.append("		<integer>256</integer>\n");
+			continue;
+		    }
+		}else if(line.matches("\\s*<key>IFSettingZCodeVersion</key>\\s*")){
+		    expectingZCodeVersion=true;
+		}
+		holding.append(line).append('\n');
+	    }
+	    input.close();
+	    PrintWriter output=new PrintWriter(new BufferedWriter(new FileWriter(propertyList)));
+	    output.write(holding.toString());
+	    output.close();
+	}catch(IOException exception){
+	    error("Encountered error when changing to Glulx in ``"+propertyList+"'': "+exception);
+	}
+    }
+
+    protected static String scriptEscape(String string){
+	return string.replaceAll("\\\\","\\\\\\\\");
+    }
+
+    protected static void escalateWindowsPrivileges(File writableDirectory,String escalationArgument){
+	File outerScript=new File(writableDirectory,"i7grip-escalator.bat");
+	File innerScript=new File(writableDirectory,"i7grip-escalator.js");
+	boolean mentionedPossibleConflict=false;
+	if(outerScript.exists()){
+	    if(outerScript.isFile()){
+		if(!theAuthorConsents
+		   ("It looks like privilege escalation is already underway; the temporary file ``"+outerScript.getPath()+
+		    "'' exists.  Continue anyway (the file will be replaced and then deleted)?",
+		    true)){
+		    System.exit(0);
+		}
+		mentionedPossibleConflict=true;
+	    }else{
+		error("The temporary file ``"+outerScript.getPath()+"'' already exists.  Normally I would ask permission to replace it, but in this case it's not marked as a ``normal'' file.");
+	    }
+	}
+	if(innerScript.exists()){
+	    if(innerScript.isFile()){
+		if(!theAuthorConsents
+		   ((mentionedPossibleConflict?"The related":"It looks like privilege escalation is already underway; the")+
+		    " temporary file ``"+innerScript.getPath()+"''"+(mentionedPossibleConflict?" also":"")+
+		    " exists.  Continue anyway (the file will be replaced and then deleted)?",
+		    true)){
+		    System.exit(0);
+		}
+	    }else{
+		error("The temporary file ``"+innerScript.getPath()+"'' already exists.  Normally I would ask permission to replace it, but in this case it's not marked as a ``normal'' file.");
+	    }
+	}
+	innerScript.delete();
+	outerScript.delete();
+	try{
+	    File enclosingJar=new File(Installer.class.getProtectionDomain().getCodeSource().getLocation().toURI().getSchemeSpecificPart());
+	    PrintWriter output=new PrintWriter(new BufferedWriter(new FileWriter(outerScript)));
+	    String candidateRoot=innerScript.getPath().substring(0,innerScript.getPath().indexOf(File.separatorChar));
+	    String candidateRootWithSeparator=candidateRoot+File.separator;
+	    for(File root:File.listRoots()){
+		if(candidateRootWithSeparator.equals(root.getPath())){
+		    output.write('@'+candidateRoot+'\n');
+		}
+	    }
+	    output.write("@wscript.exe \""+innerScript.getPath()+"\"\n");
+	    output.close();
+	    output=new PrintWriter(new BufferedWriter(new FileWriter(innerScript)));
+	    output.write
+		("new ActiveXObject(\"Shell.Application\").ShellExecute(\""+
+		 scriptEscape(System.getProperty("java.home")+File.separator+
+			      "bin"+File.separator+"javaw.exe")+
+		 "\",\"-jar \\\""+
+		 scriptEscape(enclosingJar.getPath())+
+		 "\\\" \\\""+
+		 scriptEscape(escalationArgument)+
+		 "\\\"\",\"\",\"runas\");\n");
+	    output.close();
+	    execute(new String[]{
+		    outerScript.getPath()
+		},"Privilege-escalating");
+	}catch(Exception exception){
+	    error("Encountered error when escalating privileges: "+exception);
+	}finally{
+	    innerScript.delete();
+	    outerScript.delete();
+	}
+    }
+
+    protected static void makeSymbolicLink(File source,File destination,String escalationArgument){
+	try{
+	    String[]command;
+	    if(isMacOSX()||isNonMacUnixLike()){
+		command=new String[]{
+		    "/bin/ln","-s",
+		    source.getAbsoluteFile().getPath(),
+		    destination.getAbsoluteFile().getPath()
+		};
+	    }else if(isRecentWindows()){
+		command=new String[]{
+		    "cmd","/c",
+		    "mklink \""+
+		    destination.getAbsoluteFile().getPath()+"\" \""+
+		    source.getAbsoluteFile().getPath()+"\""
+		};
+	    }else{
+		throw new UnsupportedOperationException("The operating system ``"+System.getProperty("os.name")+"'' is not supported.");
+	    }
+	    execute(command,"Link-creating");
+	}catch(Exception exception){
+	    if(escalationArgument==null){
+		error("Encountered error when making ``"+destination+"'' a symbolic link to ``"+source+"'': "+exception);
+	    }
+	    if(theAuthorConsents("Unable to create symbolic link.  Escalate privileges and try again?",true)){
+		escalateWindowsPrivileges(destination.getParentFile(),escalationArgument);
+		System.exit(0);
+	    }
+	    System.exit(1);
+	}
+    }
+
+    // Problem: On non-OS-X systems we end up opening the directory as a
+    // directory, not a project.
+    protected static void open(File project){
+	try{
+	    String[]command;
+	    if(isMacOSX()){
+		command=new String[]{
+		    "/usr/bin/open",
+		    project.getAbsoluteFile().getPath()
+		};
+	    }else if(isRecentWindows()){
+		command=new String[]{
+		    "cmd","/c",
+		    "start "+project.getAbsoluteFile().getPath()
+		};
+	    }else if(isNonMacUnixLike()){
+		command=new String[]{
+		    "/usr/bin/xdg-open",
+		    project.getAbsoluteFile().getPath()
+		};
+	    }else{
+		throw new UnsupportedOperationException("The operating system ``"+System.getProperty("os.name")+"'' is not supported.");
+	    }
+	    execute(command,"Project-opening");
+	}catch(IOException exception){
+	    error("Encountered error when opening ``"+project+"'': "+exception);
+	}
+    }
+
+    public static void main(String[]arguments){
+	if(!isSupportedOS()){
+	    error("The operating system ``"+System.getProperty("os.name")+"'' is not supported.");
+	}
+	if(arguments.length==0){
+	    say("This utility will include the i7grip extension ``Interactive Debugger'' in an Inform 7 project and set up all of the necessary symbolic links.  Make sure that the project is not open in any other programs.  You will be prompted to select it on the next screen.");
+	}
+	for(;;arguments=new String[]{}){
+	    File project;
+	    if(arguments.length==0){
+		JFileChooser chooser=new JFileChooser();
+		chooser.setDialogTitle("Choose the Inform 7 Project");
+		if(isMacOSX()){
+		    chooser.setFileFilter(new javax.swing.filechooser.FileFilter(){
+			    public String getDescription(){
+				return "Inform 7 Projects";
+			    }
+			    public boolean accept(File file){
+				return file.isDirectory();
+			    }
+			});
+		}else{
+		    chooser.setFileSelectionMode(JFileChooser.DIRECTORIES_ONLY);
+		}
+		if(chooser.showDialog(null,"Include Debugger")!=JFileChooser.APPROVE_OPTION){
+		    System.exit(0);
+		}
+		project=chooser.getSelectedFile().getAbsoluteFile();
+	    }else{
+		project=new File(arguments[0]);
+	    }
+	    File projectParent=project.getParentFile();
+	    String name=project.getPath()
+		.substring(projectParent.getPath().length()+1);
+	    if(!name.endsWith(".inform")){
+		say("The selected project is not a valid Inform project (its file name does not end in ``.inform'').");
+		continue;
+	    }
+	    /* Imitating the Glk spec, which reads:
+	       ``The library should take the given filename argument, and delete
+	       any characters illegal for a filename. This will include all of
+	       the following characters (and more, if the OS requires it):
+	       slash, backslash, angle brackets (less-than and greater-than),
+	       colon, double-quote, pipe (vertical bar), question-mark,
+	       asterisk. The library should also truncate the argument at the
+	       first period (delete the first period and any following
+	       characters). If the result is the empty string, change it to the
+	       string "null".'' */
+	    name=name
+		.replaceAll("[/\\\\<>:\"|?*]","")
+		.replaceAll("\\..*","")
+		.replaceAll("^$","null");
+	    File propertyList=new File(project,"Settings.plist");
+	    File sourceDirectory=new File(project,"Source");
+	    File sourceCode=new File(sourceDirectory,"story.ni");
+	    File buildDirectory=new File(project,"Build");
+	    File debugInfoSource=new File(isLinuxCommandLine()?project:buildDirectory,"gameinfo.dbg");
+	    File I6Source=new File(buildDirectory,"auto.inf");
+	    File debugLogSource=new File(buildDirectory,"Debug log.txt");
+	    String debugInfoName=name+"-info";
+	    String I6Name=name+"-i6";
+	    String debugLogName=name+"-log";
+	    File destinationDirectory;
+	    if(isNonMacUnixLike()){
+		if(isLinuxCommandLine()){
+		    destinationDirectory=project;
+		}else{
+		    destinationDirectory=new File(System.getProperty("user.home")).getAbsoluteFile();
+		}
+	    }else{
+		destinationDirectory=projectParent;
+	    }
+	    File debugInfoDestination=new File(destinationDirectory,debugInfoName+(isNonMacUnixLike()?"":".glkdata"));
+	    File I6Destination=new File(destinationDirectory,I6Name+(isNonMacUnixLike()?"":".glkdata"));
+	    File debugLogDestination=new File(destinationDirectory,debugLogName+(isNonMacUnixLike()?"":".glkdata"));
+	    if(!project.isDirectory()){
+		say("The selected project is not a valid Inform project (it is not a directory).");
+		continue;
+	    }
+	    if(!sourceDirectory.isDirectory()){
+		say("The selected project is not a valid Inform project (it does not contain a source directory).");
+		continue;
+	    }
+	    if(!propertyList.isFile()){
+		say("The selected project is not a valid Inform project (it does not contain a settings property list).");
+		continue;
+	    }
+	    if(!sourceCode.isFile()){
+		say("The selected project is not a valid Inform project (it does not contain a source text file).");
+		continue;
+	    }
+	    if(!buildDirectory.isDirectory()){
+		say("The selected project is not a valid Inform project (it does not contain a build directory).");
+		continue;
+	    }
+	    if(debugInfoSource.exists()&&!debugInfoSource.isFile()){
+		say("The selected project is not a valid Inform project (it contains the wrong kind of file for debug information).");
+		continue;
+	    }
+	    if(I6Source.exists()&&!I6Source.isFile()){
+		say("The selected project is not a valid Inform project (it contains the wrong kind of file for intermediate I6).");
+		continue;
+	    }
+	    if(debugLogSource.exists()&&!debugLogSource.isFile()){
+		say("The selected project is not a valid Inform project (it contains the wrong kind of file for the debugging log).");
+		continue;
+	    }
+	    if(!propertyList.canWrite()){
+		error("You do not have permission to include the debugger (you do not have write permission for the project's property list).");
+	    }
+	    if(!sourceCode.canWrite()){
+		error("You do not have permission to include the debugger (you do not have write permission for the project's source text).");
+	    }
+	    if(!destinationDirectory.canWrite()){
+		error("You do not have permission to create the necessary symbolic links (you do not have write permission for the project's parent directory).");
+	    }
+	    if(arguments.length==0&&debugInfoDestination.exists()&&!theAuthorConsents("The file ``"+debugInfoDestination+"'' already exists.  Continue anyway?",true)){
+		System.exit(0);
+	    }
+	    if(arguments.length==0&&I6Destination.exists()&&!theAuthorConsents("The file ``"+I6Destination+"'' already exists.  Continue anyway?",true)){
+		System.exit(0);
+	    }
+	    if(arguments.length==0&&debugLogDestination.exists()&&!theAuthorConsents("The file ``"+debugLogDestination+"'' already exists.  Continue anyway?",true)){
+		System.exit(0);
+	    }
+	    debugInfoDestination.delete();
+	    I6Destination.delete();
+	    debugLogDestination.delete();
+	    makeSymbolicLink(debugInfoSource,debugInfoDestination,arguments.length==0?project.getPath():null);
+	    makeSymbolicLink(I6Source,I6Destination,null);
+	    makeSymbolicLink(debugLogSource,debugLogDestination,null);
+	    addInclusion(sourceCode,debugInfoName,I6Name,debugLogName);
+	    changeToGlulx(propertyList);
+	    if(isMacOSX()){
+		if(theAuthorConsents("The setup succeeded.  Would you like to open the project now?",false)){
+		    open(project);
+		}
+	    }else{
+		say("The setup succeeded.");
+	    }
+	    break;
+	}
+    }
+}
