@@ -338,6 +338,7 @@ I6 Assembly Name	Operation Code	Parameter Count	Load Parameter Count	Fallthrough
 "jfge"	453	3	3	true	jump without call	true	2
 "jisnan"	456	2	2	true	jump without call	true	1
 "jisinf"	457	2	2	true	jump without call	true	1
+"git"	31040	1	1	true	ordinary control flow	false	0
 
 [To make writing literal operation codes easier, we define the following.  But we don't want them to take up any more space than necessary, so they are all inlined I6 constants.]
 To decide what number is op-nop: (- 0 -).
