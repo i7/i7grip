@@ -342,7 +342,7 @@ Section "The Parse Tree Rewrite Structure" - unindexed
 [Layout:
 	4 bytes for the rewriting phrase
 	4 bytes for the production]
-[The rewriting phrase should take two values, a parser and a production, and returning nothing.  The standard phrases are defined later in this file.]
+[The rewriting phrase should take a production, and returning nothing.  The standard phrases are defined later in this file.]
 
 To decide what number is the size of a parse tree rewrite: (- 8 -).
 
@@ -378,7 +378,7 @@ Chapter "Parse Steps" - unindexed
 
 A parse step is a kind of value.
 A parse step is an invalid parse step.  [See the note in the book "Extension Information."]
-The specification of a parse step is "A parse step represents mostly the same information as a parse tree vertex, except that parse steps are shared between trees, and possibly even separate branches of the same tree.  They therefore do not have unique parents, and may even end up with zero parents if we never synthesize one."
+The specification of a parse step is "A parse step represents mostly the same information as a parse tree vertex, except that parse steps are shared between trees, and possibly even separate branches of the same tree.  They therefore do not have unique parents, and may even end up with zero parents if none is ever synthesized."
 
 Section "The Parse Step Structure" - unindexed
 

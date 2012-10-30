@@ -1279,7 +1279,7 @@ The conversion phrase
 
 	(V - a number) converted to a unicode character
 
-changes a Unicode code-point into the corresponding character.
+changes a Unicode codepoint into the corresponding character.
 
 	let the character be 8212 converted to a unicode character;
 
