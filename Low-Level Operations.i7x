@@ -655,6 +655,16 @@ To decide whether address (A - a number) could not contain an object:
 		decide no;
 	decide on whether or not the byte at address A is an object type indicator.
 
+Chapter "Workarounds for Inform Bug ###"
+
+To decide whether (P - a phrase nothing -> nothing) applied (documented at ph_applied0): (- {-function-application} -).
+
+To decide whether (P - a phrase value of kind K -> nothing) applied to (X - a K) (documented at ph_applied1): (- {-function-application} -).
+
+To decide whether (P - a phrase (value of kind K, value of kind L) -> nothing) applied to (X - a K) and (Y - an L) (documented at ph_applied2): (- {-function-application} -).
+
+To decide whether (P - a phrase (value of kind K, value of kind L, value of kind M) -> nothing) applied to (X - a K) and (Y - an L) and (Z - an M) (documented at ph_applied3): (- {-function-application} -).
+
 Book "Loops"
 
 Chapter "Loops without Built-in End Conditions"
