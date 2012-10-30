@@ -33,7 +33,7 @@ To decide what number is the punctuated word terminal hash table size: (- PWPE_T
 
 Chapter "Text Constants"
 
-To decide what text is the parseme placeholder: (- "placeholderForAParseme" -).
+To decide what text is the parseme placeholder for understand lines: (- "placeholderForAParseme" -).
 
 Book "Runtime Checks"
 
@@ -284,10 +284,10 @@ Chapter "Understand Line Internals" - unindexed
 The flag for building parsemes from understand text is a truth state that varies.  The flag for building parsemes from understand text is false.
 The understand parseme linked list is a linked list that varies.
 
-Definition: a parseme is encoded if the flag for building parsemes from understand text is true.
+Definition: a parseme is understanding encoded if the flag for building parsemes from understand text is true.
 
-To say (A - an encoded parseme):
-	say "[the parseme placeholder]";
+To say (A - an understanding encoded parseme):
+	say "[the parseme placeholder for understand lines]";
 	push the key A onto the understand parseme linked list.
 
 To decide what punctuated word array is (T - some text) with parsemes recorded for understanding:
@@ -325,7 +325,7 @@ To understand (T - some text) as a new production for (S - a parseme), ignoring 
 	ensure that the punctuated word terminal hash table is initialized;
 	let the terminal be an invalid parseme;
 	repeat with the word running through the signature backwards:
-		if the synthetic text the word is identical to the parseme placeholder:
+		if the synthetic text the word is identical to the parseme placeholder for understand lines:
 			unless the terminal is an invalid parseme:
 				name the terminal as a punctuated word terminal;
 			now the terminal is an invalid parseme;
@@ -352,7 +352,7 @@ To decide what parseme is the sole parseme in (T - some text) (this is deciding 
 	let the signature be T with parsemes recorded for understanding;
 	always check that the word count of the signature is one or else fail at understanding as multiple tokens;
 	let the word be word zero of the signature;
-	always check that the synthetic text the word is identical to the parseme placeholder or else fail at understanding as a single literal word;
+	always check that the synthetic text the word is identical to the parseme placeholder for understand lines or else fail at understanding as a single literal word;
 	let the result be a parseme key popped off of the understand parseme linked list;
 	delete the signature;
 	delete the understand parseme linked list;
