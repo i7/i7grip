@@ -1520,6 +1520,31 @@ To repeat with (I - a nonexisting K variable) running through the (D - a descrip
 		}else for(llo_oneTime=true,llo_broken=true,llo_advance=true:llo_oneTime&&((llo_oneTime=false),true)||(llo_broken=false):)
 -).
 
+Chapter "Filter Interface"
+
+Section "Implementation the Filter Interface" - unindexed
+
+To decide what linked list is (A - a linked list) after filtering it with (F - a phrase linked list vertex -> nothing) (this is filtering a linked list):
+	let the first linked list vertex be A converted to a linked list vertex;
+	let the previous linked list vertex be a null linked list vertex;
+	let the linked list vertex be the first linked list vertex;
+	while the linked list vertex is not null:
+		let the next linked list vertex be the link of the linked list vertex;
+		if F applied to the linked list vertex:
+			now the previous linked list vertex is the linked list vertex;
+		otherwise:
+			if the previous linked list vertex is null:
+				now the first linked list vertex is the next linked list vertex;
+			otherwise:
+				write the link the next linked list vertex to the previous linked list vertex;
+			delete the linked list vertex;
+		now the linked list vertex is the next linked list vertex;
+	decide on the first linked list vertex converted to a linked list.
+
+Section "Filtration"
+
+To filter (A - a linked list) by (F - a phrase linked list vertex -> nothing): (- {A}=(llo_getField((+ filtering a linked list +),1))({A},{F}); -).
+
 Low-Level Linked Lists ends here.
 
 ---- DOCUMENTATION ----
@@ -2044,6 +2069,16 @@ and their variations.
 
 Note that it is safe to modify linked list vertices while looping over their
 enclosing list, but it is not safe to modify the list itself.
+
+Section: Filtration
+
+The phrase
+
+	filter (A - a linked list) by (F - a phrase linked list vertex -> truth state)
+
+can be used to alter a linked list while looping over it.  Each vertex of A is
+given to F, but only those vertices for which F decides on true are retained.
+The others are deleted.
 
 Chapter: Requirements, Limitations, and Bugs
 
