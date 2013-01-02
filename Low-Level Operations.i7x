@@ -655,7 +655,7 @@ To decide whether address (A - a number) could not contain an object:
 		decide no;
 	decide on whether or not the byte at address A is an object type indicator.
 
-Chapter "Workarounds for Inform Bug ###"
+Chapter "Workarounds for Inform Bug 473"
 
 To decide whether (P - a phrase nothing -> nothing) applied (documented at ph_applied0): (- {-function-application} -).
 
