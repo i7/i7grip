@@ -95,12 +95,12 @@ To enable the frame-local breakpoint in (F - a call frame):
 To disable the frame-local breakpoint in (F - a call frame):
 	write false to extra field frame-local breakpoint index of F.
 
-Chapter "Breakpoint Instruction Vertices"
+Chapter "Breakpoint Instruction Vertices" - unindexed
 
 [Note that the default phrase always returns zero.]
 The phrase that chooses the universal breakpoint flag index for a sequence point is a phrase number -> number that varies.
 
-[ @jnz b_universalBreakpointFlags-->I <constant>; ] [where I is deteremined by the phrase that chooses the universal breakpoint flag index for a sequence point, and b_universalBreakpointFlags-->I might already be replaced if the sequence point has a corresponding simple breakpoint]
+[ @jnz b_universalBreakpointFlags-->I <constant>; ] [where I is determined by the phrase that chooses the universal breakpoint flag index for a sequence point, and b_universalBreakpointFlags-->I might already be replaced if the sequence point has a corresponding simple breakpoint]
 [Layout:
 	4 bytes for the op-code
 	1 byte for the addressing modes
@@ -201,7 +201,7 @@ A GRIF setup rule (this is the find the breakpoint escape chunk rule):
 A GRIF shielding rule (this is the shield the breakpoint escape chunk rule):
 	shield the integer at address breakpoint escape chunk address's address against instrumentation.
 
-Chapter "Breakpoint Insertion"
+Chapter "Breakpoint Insertion" - unindexed
 
 The resume point adjustment list is a linked list that varies.
 
@@ -330,7 +330,7 @@ The record sequence points for yields rule is listed after the insert yields rul
 
 Book "Simple Breakpoints"
 
-Chapter "Breakpoint Flag Address Addresses"
+Chapter "Breakpoint Flag Address Addresses" - unindexed
 
 [Associates sequence points with breakpoint flag address addresses.]
 The breakpoint flag address address hash table is a permanent hash table that varies.
@@ -344,7 +344,7 @@ A GRIF setup rule (this is the allocate a hash table for the breakpoint flag add
 
 Chapter "Simple Breakpoints"
 
-Section "The Simple Breakpoint Kind" - unindexed
+Section "The Simple Breakpoint Kind"
 
 A simple breakpoint is a kind of value.
 A simple breakpoint is an invalid simple breakpoint.  [See the note in the book "Extension Information."]
@@ -361,7 +361,7 @@ Section "The Simple Breakpoint Structure" - unindexed
 
 To decide what number is the size of a simple breakpoint: (- 16 -).
 
-Section "Simple Breakpoint Construction and Destruction"
+Section "Simple Breakpoint Construction and Destruction" - unindexed
 
 The simple breakpoint object pool is an object pool that varies.
 
@@ -383,21 +383,26 @@ To delete (A - a simple breakpoint):
 		fail at deleting a simple breakpoint still in use;
 	free the memory allocation at address (A converted to a number) to the simple breakpoint object pool.
 
-Section "Simple Breakpoint Accessors and Mutators"
+Section "Private Simple Breakpoint Accessors and Mutators" - unindexed
 
-To decide what number is the sequence point of (A - a simple breakpoint): (- llo_getInt({A}) -).
 To write the sequence point (X - a number) to (A - a simple breakpoint): (- llo_setInt({A},{X}); -).
 
 To decide what number is the breakpoint flag address of (A - a simple breakpoint): (- ({A}+4) -).
-To decide whether the breakpoint flag is set in (A - a simple breakpoint): (- llo_getField({A},1) -).
 To reset the breakpoint flag in (A - a simple breakpoint): (- llo_setField({A},1,0); -).
 To set the breakpoint flag in (A - a simple breakpoint): (- llo_setField({A},1,1); -).
 
 To decide what number is the replaced breakpoint flag address of (A - a simple breakpoint): (- llo_getField({A},2) -).
 To write the replaced breakpoint flag address (X - a number) to (A - a simple breakpoint): (- llo_setField({A},2,{X}); -).
 
-To decide what linked list is the compound breakpoint list of (A - a simple breakpoint): (- ({A}-->3) -).
 To write the compound breakpoint list (X - a linked list) to (A - a simple breakpoint): (- llo_setField({A},3,{X}); -).
+
+Section "Simple Breakpoint Accessors and Mutators" - unindexed
+
+To decide what number is the sequence point of (A - a simple breakpoint): (- llo_getInt({A}) -).
+
+To decide whether the breakpoint flag is set in (A - a simple breakpoint): (- llo_getField({A},1) -).
+
+To decide what linked list is the compound breakpoint list of (A - a simple breakpoint): (- ({A}-->3) -).
 
 To decide whether (A - a simple breakpoint) is attached to an enabled compound breakpoint:
 	repeat with the compound breakpoint running through the compound breakpoint keys of the compound breakpoint list of A:
@@ -405,7 +410,7 @@ To decide whether (A - a simple breakpoint) is attached to an enabled compound b
 			decide yes;
 	decide no.
 
-Chapter "The Simple Breakpoint Hash Table"
+Chapter "The Simple Breakpoint Hash Table" - unindexed
 
 [Associates sequence points with simple breakpoints.]
 The simple breakpoint hash table is a hash table that varies.
@@ -432,7 +437,7 @@ Section "Public Simple Breakpoint Hash Table Accessors and Mutators"
 To decide what simple breakpoint is the simple breakpoint representing the sequence point (A - a number):
 	decide on the first simple breakpoint value matching the key A in the simple breakpoint hash table or an invalid simple breakpoint if there are no matches;
 
-To decide what simple breakpoint is the legal simple breakpoint representing the sequence point (A - a number) once attached to (C - a compound breakpoint):
+To decide what simple breakpoint is the valid simple breakpoint representing the sequence point (A - a number) once attached to (C - a compound breakpoint):
 	let the result be the first simple breakpoint value matching the key A in the simple breakpoint hash table or an invalid simple breakpoint if there are no matches;
 	if the result is an invalid simple breakpoint:
 		now the result is a new unhashed simple breakpoint for the sequence point A;
@@ -448,7 +453,7 @@ To decide what simple breakpoint is the legal simple breakpoint representing the
 	decide on the result.
 
 To attach the sequence point (A - a number) to (C - a compound breakpoint):
-	let the discarded value be the legal simple breakpoint representing the sequence point A once attached to C.
+	let the discarded value be the valid simple breakpoint representing the sequence point A once attached to C.
 
 To detach (B - a simple breakpoint) from (C - a compound breakpoint):
 	remove the first occurrence of the key B from the simple breakpoint list of C;
@@ -465,7 +470,7 @@ Book "Compound Breakpoints"
 
 Chapter "Compound Breakpoints"
 
-Section "The Compound Breakpoint Kind" - unindexed
+Section "The Compound Breakpoint Kind"
 
 A compound breakpoint is a kind of value.
 A compound breakpoint is an invalid compound breakpoint.  [See the note in the book "Extension Information."]
@@ -483,7 +488,7 @@ Section "The Compound Breakpoint Structure" - unindexed
 
 To decide what number is the size of a compound breakpoint: (- 16 -).
 
-Section "Breakpoint Counter"
+Section "Breakpoint Counter" - unindexed
 
 The breakpoint counter is a number that varies.  The breakpoint counter is zero.
 
@@ -513,21 +518,27 @@ To delete (A - a compound breakpoint):
 	clear A;
 	free the memory allocation at address A converted to a number.
 
-Section "Compound Breakpoint Accessors and Mutators"
+Section "Private Compound Breakpoint Mutators" - unindexed
 
-To decide what number is the numeric identifier of (A - a compound breakpoint): (- llo_getInt({A}) -).
 To write the numeric identifier (X - a number) to (A - a compound breakpoint): (- llo_setInt({A},{X}); -).
 
-To decide what text is the human-friendly name of (A - a compound breakpoint): (- llo_getField({A},1) -).
 To write the human-friendly name (X - some text) to (A - a compound breakpoint): (- llo_setField({A},1,{X}); -).
 
-To decide what linked list is the simple breakpoint list of (A - a compound breakpoint): (- ({A}-->2) -).
 To write the simple breakpoint list (X - a linked list) to (A - a compound breakpoint): (- llo_setField({A},2,{X}); -).
+
+To reset the enabled flag in (A - a compound breakpoint): (- llo_setField({A},3,0); -).
+To set the enabled flag in (A - a compound breakpoint): (- llo_setField({A},3,1); -).
+
+Section "Public Compound Breakpoint Accessors"
+
+To decide what number is the numeric identifier of (A - a compound breakpoint): (- llo_getInt({A}) -).
+
+To decide what text is the human-friendly name of (A - a compound breakpoint): (- llo_getField({A},1) -).
+
+To decide what linked list is the simple breakpoint list of (A - a compound breakpoint): (- ({A}-->2) -).
 
 To decide whether (A - a compound breakpoint) is disabled: (- (~~llo_getField({A},3)) -).
 To decide whether (A - a compound breakpoint) is enabled: (- llo_getField({A},3) -).
-To reset the enabled flag in (A - a compound breakpoint): (- llo_setField({A},3,0); -).
-To set the enabled flag in (A - a compound breakpoint): (- llo_setField({A},3,1); -).
 
 To disable (A - a compound breakpoint):
 	if A is enabled:
@@ -612,3 +623,315 @@ A GRIF shielding rule (this is the shield toggling the universal breakpoint from
 	shield the function address of enabling the universal breakpoint against instrumentation.
 
 Breakpoints ends here.
+
+---- DOCUMENTATION ----
+
+Chapter: Synopsis
+
+The extension Breakpoints interrupts story code at locations chosen by debugging
+code so that the debugging code can inspect and alter the story state.  It is
+mainly used by Interactive Debugger to pause and resume the story on the
+author's behalf.
+
+Chapter: Requirements, Limitations, and Bugs
+
+This version was tested with Inform 6G60.  It will probably function on newer
+versions, and it may function under slightly older versions, though there is no
+guarantee.
+
+Breakpoints is subject to the caveats for the Glulx Runtime Instrumentation
+Framework; see the requirements chapter in its documentation for the technical
+details.
+
+Section: Regarding bugs
+
+If you encounter a bug, check first on the project website
+(https://sourceforge.net/projects/i7grip/) to see whether a newer version of
+this extension is available.  If, even using the latest version, the fault
+remains, please file a bug report: On the website, choose "Support" from the
+toolbar and follow the link in the box titled "Best Way to Get Help".
+
+I will try to respond quickly, at least with an estimate of when the bug might
+be fixed, though sometimes I am away from the internet for a week or two at a
+time.
+
+Chapter: Acknowledgements
+
+Breakpoints was prepared as part of the Glulx Runtime Instrumentation
+Project (https://sourceforge.net/projects/i7grip/).  For this first edition of
+the project, special thanks go to these people, in chronological order:
+
+- Graham Nelson, Emily Short, and others, not only for Inform, but also for the
+  countless hours the high-quality technical documentation saved me and for the
+  work that made the Glulx VM possible,
+
+- Andrew Plotkin for the Glulx VM and the Glk library, as well as their clear,
+  always up-to-date specifications,
+
+- Jacqueline Lott, David Welbourn, and all of the other attendees for Club
+  Floyd, my first connection to the interactive fiction community,
+
+- Jesse McGrew and Emily Short for getting me involved with Inform 7,
+
+- all of the Inform 7 developers for their hard work, the ceaseless flow of
+  improvements, and their willingness to take me on as a collaborator,
+
+- Ron Newcomb and Esteban Montecristo for the idea to write Call Stack Tracking
+  and Verbose Diagnostics,
+
+- Roger Carbol, Jesse McGrew, Michael Martin, Dan Shiovitz, Johnny Rivera, and
+  everyone else for their helpful comments on ifMUD's I6 and I7 channels,
+
+- Esteban Montecristo, for invaluable alpha testing,
+
+- and all of the beta testers who are reading this.
+
+Chapter: Usage
+
+Section: Overview
+
+
+
+// The extension Breakpoints interrupts story code at locations chosen by debugging
+// code so that the debugging code can inspect and alter the story state.  It is
+// mainly used by Interactive Debugger to pause and resume the story on the
+// author's behalf.
+
+// inserted before each SP, before each computed jump, before each backjump that does not cross an SP
+// last-seen SP, etc. valid during select and yield if Glk Interception is included
+
+
+Section: Kinds of breakpoints
+
+Breakpoints in this extension come in five flavors: universal, frame-local,
+compound, simple, and forced.
+
+The universal breakpoint can interrupt execution anywhere.  It is, however,
+possible to split the universal breakpoint into nonoverlapping pieces and enable
+or disable them independently.  Interactive Debugger, for instance, uses this
+trick to obtain one breakpoint that governs all of the Inform-internal code and
+another that controls the non-internals.
+
+A frame-local breakpoint will interrupt execution anywhere within a particular
+invocation of a rule or phrase or I6 routine.  Such breakpoints are useful if a
+task might be waiting on others, and we don't want to pause until the others
+have completed.
+
+A compound breakpoint is the kind that most programmers think of when they hear
+the word.  Compound breakpoints affect a set of program locations, which usually
+have something in common, most often that they all came from the same line in
+the source text.
+
+A simple breakpoint, in contrast, can affect only one program location.
+
+And finally, a forced breakpoint is one requested by the story itself; it takes
+effect whenever the request is made.  Under the hood, a forced breakpoint works
+by enabling the universal breakpoint, but it also saves some text so that the
+reason for the request can be recovered later.
+
+Section: The universal breakpoint
+
+The universal breakpoint always exists, but by default is disabled.  It can be
+turned on with the phrase
+
+	enable the universal breakpoint
+
+and turned back off via
+
+	disable the universal breakpoint
+
+If debugging code wants to subdivide the universal breakpoint, it must specify,
+via a use option, the maximum number of possible subdivisions:
+
+	Use universal breakpoint flags of at least (N - a number).
+
+The subdivisions will be numbered from zero to N - 1.  It must also include a
+named phrase that takes each sequence point and decides on the index of the
+subdivision it belongs in.  For example,
+
+	To decide what number is the universal breakpoint flag index for the sequence point (A - a number) (this is choosing the universal breakpoint flag index for a sequence point):
+		decide on ....
+
+And it must assert that the phrase is the one to use according to the format
+
+	The phrase that chooses the universal breakpoint flag index for a sequence point is (P - a phrase number -> number).
+
+For the example, the appropriate assertion would be:
+
+	The phrase that chooses the universal breakpoint flag index for a sequence point is choosing the universal breakpoint flag index for a sequence point.
+
+It is then free to enable or disable subdivisions by index with the phrases
+
+	enable the universal breakpoint in flag (I - a number)
+
+and
+
+	disable the universal breakpoint in flag (I - a number)
+
+These states can be checked by writing
+
+	if universal breakpoint flag (I - a number) is set:
+		....
+
+The entire universal breakpoint can still be toggled with the phrases given
+earlier; that is the same as iterating over all of the possible indices and
+toggling them individually.
+
+Section: Frame-local breakpoints
+
+Frame-local breakpoints are similarly always in existence, but disabled by
+default.  If we obtain a call frame with the phrases in Call Stack Tracking, we
+can manipulate the corresponding breakpoints with the phrases
+
+	enable the frame-local breakpoint in (F - a call frame)
+
+and
+
+	disable the frame-local breakpoint in (F - a call frame)
+
+Section: Compound breakpoints
+
+Compound breakpoints, unlike the others, must be created and destroyed manually.
+A compound breakpoint variable will be initialized with the value
+
+	an invalid compound breakpoint
+
+which should not be passed to extension phrases.  To get other values, we use
+one of the two phrases that result in a new compound breakpoint:
+
+	a new compound breakpoint with human-friendly name (T - some text)
+
+and
+
+	a new unnumbered compound breakpoint with human-friendly name (T - some text)
+
+The difference is that the former will give the breakpoint a unique non-negative
+number, which can be gotten via
+
+	the numeric identifier of (C - a compound breakpoint)
+
+whereas the latter will set the numeric identifier to -1, even if another
+breakpoint already has that number.  The names, of course, depend on the phrase
+argument, and can be retrieved with
+
+	the human-friendly name of (C - a compound breakpoint)
+
+When a compound breakpoint is created, it will be set up to affect zero program
+locations.  But locations can be added to the set with the phrase
+
+	attach the sequence point (A - a number) to (C - a compound breakpoint)
+
+Internally, these locations are associated with simple breakpoints; if we are
+interested in the simple breakpoints, we can obtain them as the keys of a linked
+list (see the extension Low-Level Linked Lists) by way of
+
+	the simple breakpoint list of (C - a compound breakpoint)
+
+Having a simple breakpoint also allows us to remove a program location from a
+compound breakpoint; the phrase to use is
+
+	detach (B - a simple breakpoint) from (C - a compound breakpoint)
+
+(Note that this will invalidate the simple breakpoint list of C, so it should
+not be used while iterating over that list.)
+
+Or, if we want to start over with an empty set, we can apply the phrase
+
+	clear (C - a compound breakpoint)
+
+Once a compound breakpoint has its set of program locations, we may want to
+enable it.  The phrase
+
+	enable (C - a compound breakpoint)
+
+will do so, and the phrase
+
+	disable (C - a compound breakpoint)
+
+will disable it again.  The current state can be checked with
+
+	if (C - a compound breakpoint) is disabled:
+		....
+
+or
+
+	if (C - a compound breakpoint) is enabled:
+		....
+
+Finally, when a compound breakpoint is no longer needed, we simply write
+
+	delete (C - a compound breakpoint)
+
+Section: Simple breakpoints
+
+Simple breakpoints, like compound breakpoints are a kind of value that defaults
+to an invalid value, namely
+
+	an invalid simple breakpoint
+
+However, existing simple breakpoints, created by adding a sequence point to a
+compound breakpoint, can be gotten with
+
+	the simple breakpoint representing the sequence point (A - a number)
+
+Or, if we prefer, we can create a simple breakpoint, add it to a compound
+breakpoint, and decide on it all in one step:
+
+	the valid simple breakpoint representing the sequence point (A - a number) once attached to (C - a compound breakpoint)
+
+Once we have a valid simple breakpoint, we can inspect it by asking for
+
+	the sequence point of (A - a simple breakpoint)
+
+and also
+
+	the compound breakpoint list of (A - a simple breakpoint)
+
+which has compound breakpoints as keys.  The conditional
+
+	if the breakpoint flag is set in (A - a simple breakpoint):
+		....
+
+tests whether the story will stop at the simple breakpoint's location because of
+some enabled compound breakpoint.
+
+Section: Forced breakpoints
+
+Forced breakpoints cannot be referred to as values, since they defer to the
+universal breakpoint.  Consequently, there is only one forced breakpoint phrase
+used outside of a breakpoint handler, the phrase used by story code to trigger
+one:
+
+	force a breakpoint named (T - some text)
+
+The text T is made available to the breakpoint handler, as described in the next
+section.
+
+Section: Handling a breakpoint
+
+When a breakpoint does pause the story, it turns execution over to a rule called
+the breakpoint handler.  The handler should be written and asserted as such like
+this:
+
+	Handling a breakpoint (this is the example rule):
+		....
+
+	The breakpoint handler is the example rule.
+
+Execution of the story will automatically resume when the handler finishes.
+
+Inside of the handler, several values are available.  Most notable is
+
+	the last-seen sequence point before the last-seen breakpoint
+
+From that sequence point, the handler can lookup the corresponding simple
+breakpoint, and from that it can get the relevant compound breakpoints, if any.
+
+Forced breakpoints can also be identified, by asking
+
+	if the breakpoint was forced:
+		....
+
+And if the breakpoint was forced, the text given is available as
+
+	the name of the forced breakpoint
