@@ -806,9 +806,46 @@ Include (-
 			}
 		}
 	];
+
+	[ llo_shortCircuitTraverseRulebook rulebook i j k;
+		! We would like to think of the rulebook argument in terms of an array of rules, rather than as an index for rulebooks_array.
+		rulebook=llo_getField(rulebooks_array,rulebook);
+		! Inform has two formats for rulebooks, one of which is cued by an initial -2.
+		j=llo_getInt(rulebook);
+		if(j==-2){
+			! Rules are divided into blocks with headers that say when they apply and how large they are.
+			! We ignore the conditions, but we need to be sure that we don't dereference them as rules.
+			for(i=3:j~=NULL:i=i+2){                      ! An outer loop where i points to the beginning of a block's rules; the header size is two entries.
+				k=llo_getField(rulebook,i-1);        ! The block length is usually in the previous entry; let k be it
+				if(k<1||k>31){                       ! If k is not in fact a block length,
+					k=1;                         ! the block length is one
+					i--;                         ! and elided
+				}
+				for(j=llo_getField(rulebook,i),      ! i has moved each time we enter this inner loop, so we need to recompute j.
+				    k=i+k:                           ! Now let k be the index where the next block starts.
+				    i<k:                             ! Run the inner loop until the end of the block.
+				    ++i,j=llo_getField(rulebook,i)){ ! Increment in the same way as in the simple case.
+					if(j()){
+						rtrue;
+					}
+				}
+			}
+		}else{
+			! Everything in the array is a rule address; life is simple.
+			for(i=0:j~=NULL:++i,j=llo_getField(rulebook,i)){
+				if(j()){
+					rtrue;
+				}
+			}
+		}
+	];
 -).
 
 To traverse (R - a rulebook): (- llo_traverseRulebook({R}); -).
+
+To traverse (R - a rulebook) with short-circuiting: (- llo_shortCircuitTraverseRulebook({R}); -).
+
+To rule short-circuits rulebook traversal: (- rtrue; -).
 
 Book "Checking Gestalts"
 
@@ -1233,23 +1270,42 @@ Regarding rulebooks, besides "consider," "abide by," "anonymously abide by," and
 	traverse (R - a rulebook)
 
 Its job is to ignore the procedural rules (in older versions of Inform where the
-procedural rules still exist) as well as whatever decisions are made, and give
-every rule in the rulebook a chance to run.  For example, if we write
+procedural rules still exist) and give every rule in the rulebook a chance to
+run.  For example, if we write
 
 	The buy time rulebook is a rulebook.
 	A buy time rule:
-		say "Er...";
-		rule succeeds.
+		say "Er..."
 	A buy time rule:
-		say "Um...";
-		rule succeeds.
+		say "Um..."
+	A procedural rule:
+		ignore the first rule.
 
 Then
 
 	traverse the buy time rulebook;
 
-will say both "Er..." and "Um...," even though the first rule tried to make the
-rulebook succeed.
+will say both "Er..." and "Um...," even though the code tried to leave out the
+first rule.
+
+Rulebook traversal must be used with care: it does not have the infrastructure
+to handle rulebook outcomes, not even simple ones like
+
+	rule succeeds.
+
+Such outcomes might leak back to other rulebooks or even cause an eventual story
+crash.
+
+However, we can still give rules the power to halt a rulebook traversal if we
+write
+
+	traverse (R - a rulebook) with short-circuiting
+
+instead and then use the phrase
+
+	rule short-circuits rulebook traversal
+
+in the rule itself.
 
 Section: Characters
 
