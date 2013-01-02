@@ -876,6 +876,11 @@ To decide whether memory allocation is supported: (- llo_checkGestalt(7,0) -).
 To decide whether there are outstanding memory allocations: (- llo_checkGestalt(8,0) -).
 To decide whether function acceleration is supported: (- llo_checkGestalt(9,0) -).
 
+Book "Pushing and Popping"
+
+To push (X - a value of kind K): (- @push {X}; -).
+To pop/pull (X - a value of kind K variable): (- @pull {X}; -).
+
 Low-Level Operations ends here.
 
 ---- DOCUMENTATION ----
@@ -1166,6 +1171,18 @@ which will overwrite the I bytes beginning at address K with the I bytes
 beginning at address J, taking care not to lose data when the source and
 destination ranges overlap.  (This phrase does not require the interpreter to
 support block memory copies, but it will run faster if such support is present.)
+
+Values can also be saved to and restored from the call stack in non-addressable
+memory.  The phrase
+
+	push (X - a value of kind K)
+
+places a copy of X on the top of the stack.  The corresponding phrase
+
+	pop/pull (X - a value of kind K variable)
+
+sets X to a value taken off of the top of stack, converting it if necessary (see
+the section on conversions).
 
 Section: Obtaining addresses
 
