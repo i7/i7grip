@@ -968,7 +968,7 @@ To rotate away (P - a production) (this is rotating a production):
 			now the right sibling is the right sibling of the parent;
 			[Clobbering here.]
 			have the locus claim the detached parent as its first child;
-			write the parseme original parseme to the locus;
+			write the parseme the original parseme to the locus;
 			[Update everything else.]
 			now the locus is the parent;
 			now the parent is the grandparent;
