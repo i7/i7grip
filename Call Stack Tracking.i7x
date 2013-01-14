@@ -432,7 +432,7 @@ The catch tokens flag is a truth state that varies.  The catch tokens flag is fa
 The call stack simplification flag is a truth state that varies.  The call stack simplification flag is true.
 The call frame numbering flag is a truth state that varies.  The call frame numbering flag is false.
 The terse call stack numbers flag is a truth state that varies.  The terse call stack numbers flag is false.
-The call stack addresses flag is a truth state that varies.  The call stack addresses flag is true.
+The call stack addresses flag is a truth state that varies.  The call stack addresses flag is false.
 
 Chapter "Pretending to Ensure that All Routines have Names" (for use without Debug File Parsing by Brady Garvin)
 
@@ -1534,11 +1534,11 @@ interpreter is processing, which we can print for debugging.  For example,
 
 will produce text like
 
-	within saying the call stack (at address 205462),
-	within instead of waiting (at address 89340),
-	within the instead stage rule (at address 88013),
-	within the generate action rule (at address 69888),
-	within the main story routine (at address 69301).
+	within saying the call stack,
+	within instead of waiting,
+	within the instead stage rule,
+	within the generate action rule,
+	within the main story routine.
 
 Details are in the following chapters.
 
@@ -1549,11 +1549,11 @@ Section: Overview
 Call Stack Tracking is an extension that tracks what parts of the story file the
 interpreter is processing.  It is responsible for providing text like
 
-	within saying the call stack (at address 205462),
-	within instead of waiting (at address 89340),
-	within the instead stage rule (at address 88013),
-	within the generate action rule (at address 69888),
-	within the main story routine (at address 69301).
+	within saying the call stack,
+	within instead of waiting,
+	within the instead stage rule,
+	within the generate action rule,
+	within the main story routine.
 
 in error messages.  In technical parlance this text is called the "backtrace",
 or the "call stack".  The top line shows the rule or phrase in which the
@@ -1574,20 +1574,20 @@ We can request this extra data by changing some truth states.  For instance,
 
 causes all of the internal routines to become visible:
 
-	within saying the call stack (at address 205462),
-	within instead of waiting (at address 89340),
-	within the I6 routine ProcessRulebook (at address 163343),
-	within the I6 routine ProcessRulebook (at address 163343),
-	within the instead stage rule (at address 88013),
-	within the I6 routine ProcessRulebook (at address 163343),
-	within the I6 routine ProcessRulebook (at address 163343),
-	within the I6 routine ActionPrimitive (at address 132218),
-	within the I6 routine BeginAction (at address 132109),
-	within the generate action rule (at address 69888),
-	within the I6 routine ProcessRulebook (at address 163343),
-	within the I6 routine ProcessRulebook (at address 163343),
-	within the I6 routine FollowRulebook (at address 162568),
-	within the main story routine (at address 69301).
+	within saying the call stack,
+	within instead of waiting,
+	within the I6 routine ProcessRulebook,
+	within the I6 routine ProcessRulebook,
+	within the instead stage rule,
+	within the I6 routine ProcessRulebook,
+	within the I6 routine ProcessRulebook,
+	within the I6 routine ActionPrimitive,
+	within the I6 routine BeginAction,
+	within the generate action rule,
+	within the I6 routine ProcessRulebook,
+	within the I6 routine ProcessRulebook,
+	within the I6 routine FollowRulebook,
+	within the main story routine.
 
 Similarly,
 
@@ -1612,27 +1612,27 @@ source text:
 
 Its output is
 
-	within saying the call stack (at address 263689)
+	within saying the call stack
 		(no original arguments)
 		(no temporary named values)
 		(no catch tokens),
-	within barring (at address 205384)
+	within barring
 		(the original argument was
 			<temporary named value 0> = <unknown kind>: 55)
 		(the temporary named values are
 			<temporary named value 0> = <unknown kind>: 38 and
 			<temporary named value 1> = <unknown kind>: 395718)
 		(no catch tokens),
-	within when play begins (at address 87763)
+	within when play begins
 		(no original arguments)
 		(the temporary named value is
 			<temporary named value 0> = <unknown kind>: 92)
 		(no catch tokens),
-	within the when play begins stage rule (at address 87590)
+	within the when play begins stage rule
 		(no original arguments)
 		(no temporary named values)
 		(no catch tokens),
-	within the main story routine (at address 69301)
+	within the main story routine
 		(the original arguments are unknown)
 		(no temporary named values)
 		(no catch tokens).
@@ -1643,35 +1643,35 @@ Call Stack Tracking doesn't know the name of the result variable and calls it
 <temporary named value 1>.  But if we include and configure the extensions Debug
 File Parsing and Printing According to Kind Names, we get the following:
 
-	within saying the call stack (at address 288719)
+	within saying the call stack
 		(no original arguments)
 		(no temporary named values)
 		(no catch tokens),
-	within barring (at address 225236)
+	within barring
 		(the original argument was
 			x = number: 55)
 		(the temporary named values are
 			x = number: 38 and
 			the result = object: yourself)
 		(no catch tokens),
-	within when play begins (at address 94262)
+	within when play begins
 		(no original arguments)
 		(the temporary named value is
 			foo = number: 92)
 		(no catch tokens),
-	within the when play begins stage rule (at address 94089)
+	within the when play begins stage rule
 		(no original arguments)
 		(no temporary named values)
 		(no catch tokens),
-	within the main story routine (at address 70278)
+	within the main story routine
 		(the original arguments are unknown)
 		(no temporary named values)
 		(no catch tokens).
 
-We can also remove the memory addresses (normally included to help us
-distinguish like-named rules or phrases) with
+We can also include memory addresses (to help us distinguish like-named rules or
+phrases) with
 
-	now the call stack addresses flag is false;
+	now the call stack addresses flag is true;
 
 add call frame numbers with
 
@@ -1692,7 +1692,7 @@ To summarize:
 	the call stack simplification flag	true	whether internal routines are hidden
 	the call frame numbering flag	false	whether call frames are numbered
 	the terse call stack numbers flag	false	whether call frame numbers are shown without the text that explains that they are call frame numbers
-	the call stack addresses flag	true	whether function addresses are shown
+	the call stack addresses flag	false	whether function addresses are shown
 
 Section: Inspecting the call stack programmatically
 
@@ -1801,7 +1801,7 @@ and
 
 These phrases produce output like
 
-	within barring (at address 205137)
+	within barring
 
 	(the original argument was
 		x = number: 55)

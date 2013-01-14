@@ -63,7 +63,7 @@ The available flags are:
 	the call stack simplification flag	true	whether internal routines are hidden
 	the call frame numbering flag	false	whether call frames are numbered
 	the terse call stack numbers flag	false	whether call frame numbers are shown without the text that explains that they are call frame numbers
-	the call stack addresses flag	true	whether function addresses are shown
+	the call stack addresses flag	false	whether function addresses are shown
 
 If the extension Interactive Debugger is also included, Verbose Diagnostics
 forgoes the call stack and instead forces a breakpoint.  We can then use all of
