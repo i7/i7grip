@@ -1207,7 +1207,6 @@ The temporary named values flag is a truth state that varies.
 The catch tokens flag is a truth state that varies.
 The call stack simplification flag is a truth state that varies.
 The call frame numbering flag is a truth state that varies.
-The terse call stack numbers flag is a truth state that varies.
 The call stack addresses flag is a truth state that varies.]
 
 Section "Debug Modes"
