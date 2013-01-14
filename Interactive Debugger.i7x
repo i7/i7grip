@@ -1840,7 +1840,7 @@ To handle the debug command rooted at (V - a parse tree vertex that has the pars
 Chapter "Backtrace Commands" - unindexed
 
 To handle the debug command rooted at (V - a parse tree vertex that has the parseme the debugger's summary command):
-	say "[if the current debugger coexecution state is story interrupted]Execution paused[otherwise]Executing [bold type](not paused)[roman type][end if] [the location synopsis for the sequence point the sequence point to highlight in the call frame the debugger's current call frame].[paragraph break]".
+	say "[if the current debugger coexecution state is story interrupted]Execution paused[otherwise]Executing [bold type](not paused)[roman type][end if] [the location synopsis for the sequence point the sequence point to highlight in the call frame the debugger's current call frame][line break]".
 
 The backtrace flag is a truth state that varies.  The backtrace flag is false.
 Definition: a number is selected-by-the-backtrace if the backtrace flag is true and it is the debugger's current call frame number.
@@ -2301,34 +2301,30 @@ To handle the debug command rooted at (V - a parse tree vertex that has the pars
 	say "[variable letter spacing][line break]".
 
 To say the location synopsis for the sequence point (S - a number) in the call frame (F - a call frame):
-	say "(at ";
 	let the current line number be the I6 line number for the sequence point S;
 	if the current line number is zero:
-		say "an unnumbered line)[line break]";
+		say "on an unnumbered line";
 	otherwise:
 		let the routine record be the routine record owning the sequence point S;
 		always check that the routine record is not invalid routine record or else fail at finding a routine record for a sequence point with a source line record;
-		if the source version of the routine record is seven:
-			say "I6 line [the current line number] ";
-			let the current I7 line number be the I7 line number for the sequence point S in the routine record the routine record;
-			say "and I7 line [the current I7 line number])[line break][fixed letter spacing]";
-			say "[the unnumbered I7 for line number the current I7 line number]";
-			say "[the unnumbered I6 for line number the current line number]";
-		otherwise:
-			say "I6 line [the current line number])[line break][fixed letter spacing]";
-			say "[the unnumbered I6 for line number the current line number]";
-		say "[variable letter spacing]";
 		let the function address be the function address of the routine record;
 		ensure that all routines have names;
 		say "within [the human-friendly name for the function at address the function address]";
 		if the uninstrumented function address of F is not the function address:
-			say " on behalf of [the human-friendly name for the function at address the uninstrumented function address of F]".
+			say " on behalf of [the human-friendly name for the function at address the uninstrumented function address of F]";
+		say ":[line break][fixed letter spacing]";
+		if the source version of the routine record is seven and true is true [////]:
+			let the current I7 line number be the I7 line number for the sequence point S in the routine record the routine record;
+			say "[the I7 for line number the current I7 line number with line number the current I7 line number selected]";
+		otherwise:
+			say "[the I6 for line number the current line number with line number the current line number selected]";
+		say "[variable letter spacing]".
 
 To say the debug location synopsis:
-	say "Execution paused [the location synopsis for the sequence point the last-seen sequence point before the last-seen breakpoint in the call frame the leaf of the debugger's current call frame].";
+	say "Execution paused [the location synopsis for the sequence point the last-seen sequence point before the last-seen breakpoint in the call frame the leaf of the debugger's current call frame]";
 	let the sequence point be the sequence point to highlight;
 	if the last-seen sequence point before the last-seen breakpoint is not the sequence point:
-		say "[line break]Selecting the nearest location in the simplified call stack [the location synopsis for the sequence point the sequence point in the call frame the debugger's current call frame].";
+		say "[line break]Selecting the nearest location in the simplified call stack, which is [the location synopsis for the sequence point the sequence point in the call frame the debugger's current call frame]";
 		say "(Use the command 'prefer no simplification' to always select the point where execution is paused.)[line break]";
 	say "[line break]".
 
