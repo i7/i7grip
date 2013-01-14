@@ -31,10 +31,10 @@ symbolic links for Debug File Parsing, and when the story reports a runtime
 problem, it will also print a call stack like
 
 	*** Run-time problem P1: Tried to move the chorus (a backdrop) to the stage, which is not a region.
-	within instead of singing (at address 89493),
-	within the instead stage rule (at address 88166),
-	within the generate action rule (at address 70026),
-	within the main story routine (at address 69439).
+	within instead of singing,
+	within the instead stage rule,
+	within the generate action rule,
+	within the main story routine.
 
 to tell us where in the story the failure was detected.  Reports for programming
 errors and block value errors and many other I6-level runtime problems are

@@ -1346,7 +1346,7 @@ To decide what number is the address of the function whose name is named by (V -
 	let the option counter be zero;
 	repeat with the function address running through the number keys of the function list:
 		increment the option counter;
-		say "[the option counter]. '[the function name]' as '[the human-friendly name for the function at address the function address] (at address [the function address]), which begins like this:[line break]";
+		say "[the option counter]. '[the function name]' as '[the human-friendly name for the function at address the function address], which begins like this:[line break]";
 		let the routine record be the routine record for the function address;
 		let the debug mode be the preferred debug mode for the routine record;
 		list the routine record with the debug mode the debug mode and the sequence point the sequence point and the listing limit the disambiguation listing length;
@@ -1853,7 +1853,7 @@ To handle the debug command rooted at (V - a parse tree vertex that has the pars
 	if the debugger running flag is false:
 		say "The story is not running.  Use the command 'run' to run it.[paragraph break]";
 		stop;
-	say "[if the current debugger coexecution state is story interrupted]Execution paused[otherwise]Executing [bold type](not paused)[roman type][end if] (at address [the last-seen sequence point before the last-seen breakpoint])[line break]";
+	say "[if the current debugger coexecution state is story interrupted]Execution paused[otherwise]Executing [bold type](not paused)[roman type][end if][line break]";
 	if the call stack simplification flag is true and the leaf of the debugger's current call frame is elided in the simplified call stack:
 		say "within one or more elided call frames (use the command 'prefer no simplification' to make them visible)[line break]";
 	now the backtrace flag is true;
@@ -2302,28 +2302,28 @@ To handle the debug command rooted at (V - a parse tree vertex that has the pars
 	say "[variable letter spacing][line break]".
 
 To say the location synopsis for the sequence point (S - a number) in the call frame (F - a call frame):
-	say "(at address [S converted to a number], code offset [S minus the base address for code in hexadecimal], ";
+	say "(at ";
 	let the current line number be the I6 line number for the sequence point S;
 	if the current line number is zero:
-		say "and an unnumbered line)[line break]";
+		say "an unnumbered line)[line break]";
 	otherwise:
 		let the routine record be the routine record owning the sequence point S;
 		always check that the routine record is not invalid routine record or else fail at finding a routine record for a sequence point with a source line record;
 		if the source version of the routine record is seven:
-			say "I6 line [the current line number], ";
+			say "I6 line [the current line number] ";
 			let the current I7 line number be the I7 line number for the sequence point S in the routine record the routine record;
 			say "and I7 line [the current I7 line number])[line break][fixed letter spacing]";
 			say "[the unnumbered I7 for line number the current I7 line number]";
 			say "[the unnumbered I6 for line number the current line number]";
 		otherwise:
-			say "and I6 line [the current line number])[line break][fixed letter spacing]";
+			say "I6 line [the current line number])[line break][fixed letter spacing]";
 			say "[the unnumbered I6 for line number the current line number]";
 		say "[variable letter spacing]";
 		let the function address be the function address of the routine record;
 		ensure that all routines have names;
-		say "within [the human-friendly name for the function at address the function address] (at address [the function address])";
+		say "within [the human-friendly name for the function at address the function address]";
 		if the uninstrumented function address of F is not the function address:
-			say " on behalf of [the human-friendly name for the function at address the uninstrumented function address of F] (at address [the uninstrumented function address of F])".
+			say " on behalf of [the human-friendly name for the function at address the uninstrumented function address of F]".
 
 To say the debug location synopsis:
 	say "Execution paused [the location synopsis for the sequence point the last-seen sequence point before the last-seen breakpoint in the call frame the leaf of the debugger's current call frame].";
@@ -2420,7 +2420,7 @@ To decide what number is the I6 line number after the applicability test in (R -
 To break the function at address (A - a number):
 	let the routine record be the routine record for A;
 	if the routine record is an invalid routine record:
-		say "There is no debug information for that function, [the human-friendly name for the function at address A] (at address [A converted to a number]).[paragraph break]";
+		say "There is no debug information for that function, [the human-friendly name for the function at address A].[paragraph break]";
 		stop;
 	let the sequence point linked list be the sequence point linked list of the routine record;
 	if the sequence point linked list is empty:
@@ -2432,7 +2432,7 @@ To break the function at address (A - a number):
 		if the author consents:
 			say "[line break]";
 			now the function address for naming compound breakpoints is A;
-			let the discarded value be a breakpoint placed on I6 line number the first I6 line number with the human-friendly name "Pause when [the human-friendly name for the function at address the function address for naming compound breakpoints] (at address [the function address for naming compound breakpoints]) applies";
+			let the discarded value be a breakpoint placed on I6 line number the first I6 line number with the human-friendly name "Pause when [the human-friendly name for the function at address the function address for naming compound breakpoints] applies";
 			stop;
 		say "[line break]";
 	guess the routine kernel for A;
@@ -2451,7 +2451,7 @@ To break the function at address (A - a number):
 		say "[line break]";
 	let the sequence point be the sequence point key of the sequence point linked list converted to a linked list vertex;
 	now the function address for naming compound breakpoints is the function address;
-	let the discarded value be a breakpoint placed on the sequence point the sequence point with the human-friendly name "Pause when entering [the human-friendly name for the function at address the function address for naming compound breakpoints] (at address [the function address for naming compound breakpoints])".
+	let the discarded value be a breakpoint placed on the sequence point the sequence point with the human-friendly name "Pause when entering [the human-friendly name for the function at address the function address for naming compound breakpoints]".
 
 To handle the debug command rooted at (V - a parse tree vertex that has the parseme the debugger's break-by-function command):
 	let the function name vertex be the first match for a function name for the debugger among the children of V;

@@ -780,10 +780,10 @@ gets by without debug information---if we include it, runtime problems will be
 reported with a call stack, as in
 
 	*** Run-time problem P1: Tried to move the chorus (a backdrop) to the stage, which is not a region.
-	within instead of singing (at address 89493),
-	within the instead stage rule (at address 88166),
-	within the generate action rule (at address 70026),
-	within the main story routine (at address 69439).
+	within instead of singing,
+	within the instead stage rule,
+	within the generate action rule,
+	within the main story routine.
 
 but these call stacks will not always be able to use human-friendly names.
 
