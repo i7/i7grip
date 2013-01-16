@@ -104,6 +104,9 @@ To fail at being the first to run the story:
 To fail at recovering the debugger windows:
 	say "[low-level runtime failure in]Interactive Debugger[with explanation]I couldn't tell which of the existing windows are the ones belonging to the debugger, and am therefore unable to reclaim them.[terminating the story]".
 
+To fail at iterating from a given sequence point:
+	say "[runtime failure in]Interactive Debugger[with explanation]I failed to find the assembly instruction at what I believed to be a sequence point; either the code has changed while the story was running or I have become confused.[continuing anyway]".
+
 Book "User Interface" - unindexed
 
 Chapter "Window Wrapping" - unindexed
@@ -767,7 +770,9 @@ A GRIF setup rule (this is the set up the debug command parser rule):
 	understand "next sequence point anywhere" or "step sequence point" or "si" as the debugger's step sequence point command regardless of case;
 	understand "next sequence point" or "ni" as the debugger's next sequence point command regardless of case;
 	understand "next line anywhere" or "step" or "s" as the debugger's step command regardless of case;
+	understand "next [a debugging language] line anywhere" or "step [a debugging language]" or "s [a debugging language]" as the debugger's step command regardless of case;
 	understand "next line" or "next" or "n" as the debugger's next command regardless of case;
+	understand "next [a debugging language] line" or "next [a debugging language]" or "n [a debugging language]" as the debugger's next command regardless of case;
 	understand "finish this call" or "finish" or "fin" or "f" as the debugger's finish command regardless of case;
 	understand "go" or "continue" or "c" as the debugger's continue command regardless of case;
 	understand "run" or "r" as the debugger's run command regardless of case;
@@ -786,7 +791,7 @@ A GRIF setup rule (this is the set up the debug command parser rule):
 	understand "disable all breakpoints" or "disable all" or "disable" or "dis" or "dis b" as the debugger's disable all command regardless of case;
 	understand "delete all breakpoints" or "delete all" or "delete" or "del" or "d b" as the debugger's delete all command regardless of case;
 	[//]
-	understand "summary" as the debugger's summary command regardless of case;
+	understand "summary" or "[a debugging language] summary" as the debugger's summary command regardless of case;
 	understand "[examine] [--/the] [stack/call-stack/backtrace/bt]" or "[examine] [--/the] [annotated] [stack/call-stack/backtrace/bt]" as the debugger's backtrace command regardless of case;
 	understand "[showme] [--/the] [stack/call-stack/backtrace/bt]" or "[showme] [--/the] [annotated] [stack/call-stack/backtrace/bt]" as the debugger's backtrace command regardless of case;
 	understand "[stack/call-stack/backtrace/bt]" or "[annotated] [stack/call-stack/backtrace/bt]" or "[annotated]" as the debugger's backtrace command regardless of case;
@@ -1196,6 +1201,13 @@ The current debugger coexecution state is a debugger coexecution state that vari
 
 The debugger prompting flag is a truth state that varies.  The debugger prompting flag is true.
 
+Chapter "Debug Modes"
+
+A debug mode is a kind of value.  The debug modes are debugging at the I7 level, debugging at the I6 level, and debugging at the Glulx assembly level.
+The specification of a debug mode is "Debug modes represent an author's preferred language for debugging: I7, I6, or Glulx assembly."
+
+The currently preferred debug mode is a debug mode that varies.  The currently preferred debug mode is debugging at the I7 level.
+
 Chapter "Preferences"
 
 [GRIF defines:]
@@ -1208,11 +1220,6 @@ The catch tokens flag is a truth state that varies.
 The call stack simplification flag is a truth state that varies.
 The call frame numbering flag is a truth state that varies.
 The call stack addresses flag is a truth state that varies.]
-
-Section "Debug Modes"
-
-A debug mode is a kind of value.  The debug modes are debugging at the I7 level, debugging at the I6 level, and debugging at the Glulx assembly level.
-The specification of a debug mode is "Debug modes represent an author's preferred language for debugging: I7, I6, or Glulx assembly."
 
 Section "Warnings"
 
@@ -1840,6 +1847,13 @@ To handle the debug command rooted at (V - a parse tree vertex that has the pars
 Chapter "Backtrace Commands" - unindexed
 
 To handle the debug command rooted at (V - a parse tree vertex that has the parseme the debugger's summary command):
+	now the currently preferred debug mode is debugging at the I7 level;
+	let the language vertex be the first match for a debugging language among the children of V;
+	unless the language vertex is an invalid parse tree vertex:
+		if the Glulx language appears among the children of the language vertex:
+			now the currently preferred debug mode is debugging at the Glulx assembly level;
+		otherwise if the I6 language appears among the children of the language vertex:
+			now the currently preferred debug mode is debugging at the I6 level;
 	say "[if the current debugger coexecution state is story interrupted]Execution paused[otherwise]Executing [bold type](not paused)[roman type][end if] [the location synopsis for the sequence point the sequence point to highlight in the call frame the debugger's current call frame][line break]".
 
 The backtrace flag is a truth state that varies.  The backtrace flag is false.
@@ -2035,6 +2049,37 @@ To list Glulx assembly for (R - a routine record) and the sequence point (S - a 
 			say "  .L[the number value of the linked list vertex]:[line break]";
 		say "[if the source address of the instruction vertex is S]>[otherwise] [end if] [if the source address of the instruction vertex is a sequence point]<*>[otherwise]   [end if] [the source address of the instruction vertex in hexadecimal] [the I6-like assembly of the instruction vertex using labels][line break]";
 		decrement the listing limit;
+	delete the disassembly label hash table;
+	now the disassembly label hash table is the invalid hash table.
+
+To say the Glulx for the sequence point (S - a number):
+	if S is not a sequence point:
+		fail at iterating from a given sequence point;
+		stop;
+	let the routine record be the routine record owning the sequence point S;
+	if the routine record is an invalid routine record:
+		say "No disassembly is available because the function has no debug information.[line break]";
+		stop;
+	let the function address be the function address of the routine record;
+	parse the function at address the function address;
+	let the label count be zero;
+	now the disassembly label hash table is a new hash table with the GRIF disassembly label hash table size buckets;
+	repeat with the instruction vertex running through the scratch space:
+		if the jump predecessor linked list of the instruction vertex is not empty:
+			increment the label count;
+			insert the key the instruction vertex and the value the label count into the disassembly label hash table;
+	let the instruction vertex be the instruction vertex corresponding to source address S;
+	if the instruction vertex is an invalid instruction vertex:
+		fail at iterating from a given sequence point;
+		stop;
+	while the instruction vertex is not null:
+		if the source address of the instruction vertex is not S and the source address of the instruction vertex is a sequence point:
+			break;
+		let the linked list vertex be the first match for the key the instruction vertex in the disassembly label hash table;
+		if the linked list vertex is not null:
+			say "  .L[the number value of the linked list vertex]:[line break]";
+		say "[if the source address of the instruction vertex is S]> <*>[otherwise]     [end if] [the source address of the instruction vertex in hexadecimal] [the I6-like assembly of the instruction vertex using labels][line break]";
+		now the instruction vertex is the next link of the instruction vertex;
 	delete the disassembly label hash table;
 	now the disassembly label hash table is the invalid hash table.
 
@@ -2313,11 +2358,13 @@ To say the location synopsis for the sequence point (S - a number) in the call f
 		if the uninstrumented function address of F is not the function address:
 			say " on behalf of [the human-friendly name for the function at address the uninstrumented function address of F]";
 		say ":[line break][fixed letter spacing]";
-		if the source version of the routine record is seven and true is true [////]:
+		if the currently preferred debug mode is debugging at the I7 level and the source version of the routine record is seven:
 			let the current I7 line number be the I7 line number for the sequence point S in the routine record the routine record;
 			say "[the I7 for line number the current I7 line number with line number the current I7 line number selected]";
-		otherwise:
+		otherwise if the currently preferred debug mode is not debugging at the Glulx assembly level:
 			say "[the I6 for line number the current line number with line number the current line number selected]";
+		otherwise:
+			say "[the Glulx for the sequence point S]";
 		say "[variable letter spacing]".
 
 To say the debug location synopsis:
@@ -2627,6 +2674,7 @@ To handle a debug command for continuing execution:
 
 To force a breakpoint from the debugger:
 	now the debugger's control flow state is responding after a sequence point step;
+	now the currently preferred debug mode is debugging at the I7 level;
 	handle a debug command for continuing execution;
 	now the debugger prompting flag is false.	
 
@@ -2694,6 +2742,7 @@ To handle the debug command rooted at (V - a parse tree vertex that has the pars
 		restart the story from the debugger;
 	always check that the current debugger coexecution state is story interrupted or else fail at being the first to run the story;
 	now the debugger's control flow state is responding after a continue;
+	now the currently preferred debug mode is debugging at the I7 level;
 	handle a debug command for continuing execution.
 
 To handle the debug command rooted at (V - a parse tree vertex that has the parseme the debugger's continue command):
@@ -2704,6 +2753,7 @@ To handle the debug command rooted at (V - a parse tree vertex that has the pars
 		say "The story is already running.  To pause the story, [if the current debugger coexecution state is story waiting for input]give the command 'force a breakpoint' in the story window[otherwise]use the debug command 'force a breakpoint'[end if].[paragraph break]";
 		stop;
 	now the debugger's control flow state is responding after a continue;
+	now the currently preferred debug mode is debugging at the I7 level;
 	handle a debug command for continuing execution.
 
 To handle the debug command rooted at (V - a parse tree vertex that has the parseme the debugger's step sequence point command):
@@ -2714,6 +2764,7 @@ To handle the debug command rooted at (V - a parse tree vertex that has the pars
 		say "The story is already running.  To pause the story, [if the current debugger coexecution state is story waiting for input]give the command 'force a breakpoint' in the story window[otherwise]use the debug command 'force a breakpoint'[end if].[paragraph break]";
 		stop;
 	now the debugger's control flow state is responding after a sequence point step;
+	now the currently preferred debug mode is debugging at the Glulx assembly level;
 	handle a debug command for continuing execution.
 
 To handle the debug command rooted at (V - a parse tree vertex that has the parseme the debugger's next sequence point command):
@@ -2724,6 +2775,7 @@ To handle the debug command rooted at (V - a parse tree vertex that has the pars
 		say "The story is already running.  To pause the story, [if the current debugger coexecution state is story waiting for input]give the command 'force a breakpoint' in the story window[otherwise]use the debug command 'force a breakpoint'[end if].[paragraph break]";
 		stop;
 	now the debugger's control flow state is responding after a sequence point next;
+	now the currently preferred debug mode is debugging at the Glulx assembly level;
 	handle a debug command for continuing execution.
 
 To handle the debug command rooted at (V - a parse tree vertex that has the parseme the debugger's step command):
@@ -2734,6 +2786,7 @@ To handle the debug command rooted at (V - a parse tree vertex that has the pars
 		say "The story is already running.  To pause the story, [if the current debugger coexecution state is story waiting for input]give the command 'force a breakpoint' in the story window[otherwise]use the debug command 'force a breakpoint'[end if].[paragraph break]";
 		stop;
 	now the debugger's control flow state is responding after a step;
+	now the currently preferred debug mode is debugging at the I7 level;
 	handle a debug command for continuing execution.
 
 To handle the debug command rooted at (V - a parse tree vertex that has the parseme the debugger's next command):
@@ -2744,6 +2797,17 @@ To handle the debug command rooted at (V - a parse tree vertex that has the pars
 		say "The story is already running.  To pause the story, [if the current debugger coexecution state is story waiting for input]give the command 'force a breakpoint' in the story window[otherwise]use the debug command 'force a breakpoint'[end if].[paragraph break]";
 		stop;
 	now the debugger's control flow state is responding after a next;
+	let the language vertex be the first match for a debugging language among the children of V;
+	if the language vertex is an invalid parse tree vertex:
+		let the sequence point be the sequence point to highlight;
+		let the routine record be the routine record owning the sequence point the sequence point;
+		now the currently preferred debug mode is the preferred debug mode for the routine record;
+	otherwise if the Glulx language appears among the children of the language vertex:
+		now the currently preferred debug mode is debugging at the Glulx assembly level;
+	otherwise if the I6 language appears among the children of the language vertex:
+		now the currently preferred debug mode is debugging at the I6 level;
+	otherwise if the I7 language appears among the children of the language vertex:
+		now the currently preferred debug mode is debugging at the I7 level;
 	handle a debug command for continuing execution.
 
 To handle the debug command rooted at (V - a parse tree vertex that has the parseme the debugger's finish command):
@@ -2754,6 +2818,17 @@ To handle the debug command rooted at (V - a parse tree vertex that has the pars
 		say "The story is already running.  To pause the story, [if the current debugger coexecution state is story waiting for input]give the command 'force a breakpoint' in the story window[otherwise]use the debug command 'force a breakpoint'[end if].[paragraph break]";
 		stop;
 	now the debugger's control flow state is responding after a finish;
+	let the language vertex be the first match for a debugging language among the children of V;
+	if the language vertex is an invalid parse tree vertex:
+		let the sequence point be the sequence point to highlight;
+		let the routine record be the routine record owning the sequence point the sequence point;
+		now the currently preferred debug mode is the preferred debug mode for the routine record;
+	otherwise if the Glulx language appears among the children of the language vertex:
+		now the currently preferred debug mode is debugging at the Glulx assembly level;
+	otherwise if the I6 language appears among the children of the language vertex:
+		now the currently preferred debug mode is debugging at the I6 level;
+	otherwise if the I7 language appears among the children of the language vertex:
+		now the currently preferred debug mode is debugging at the I7 level;
 	handle a debug command for continuing execution.
 
 Chapter "Variable Inspection Commands" - unindexed
@@ -3121,15 +3196,14 @@ To decide whether this interruption should be ignored by the control flow comman
 	let the previous sequence point be the last-seen sequence point of the previous line comparison call frame or the last-seen sequence point for the last-seen call stack if it is innermost;
 	let the current sequence point be the last-seen sequence point of the current line comparison call frame or the last-seen sequence point before the last-seen breakpoint if it is innermost;
 	let the routine record be the routine record owning the sequence point the previous sequence point;
-	if the preferred debug mode for the routine record is:
-		-- debugging at the I6 level:
-			let the previous line number be the I6 line number for the sequence point the previous sequence point;
-			let the current line number be the I6 line number for the sequence point the current sequence point;
-			decide on whether or not the previous line number is the current line number;
-		-- debugging at the I7 level:
-			let the previous line number be the I7 line number for the sequence point the previous sequence point in the routine record the routine record;
-			let the current line number be the I7 line number for the sequence point the current sequence point in the routine record the routine record;
-			decide on whether or not the previous line number is the current line number;
+	if the currently preferred debug mode is debugging at the I7 level and the preferred debug mode for the routine record is debugging at the I7 level:
+		let the previous line number be the I7 line number for the sequence point the previous sequence point in the routine record the routine record;
+		let the current line number be the I7 line number for the sequence point the current sequence point in the routine record the routine record;
+		decide on whether or not the previous line number is the current line number;
+	otherwise if the preferred debug mode for the routine record is not debugging at the Glulx assembly level:
+		let the previous line number be the I6 line number for the sequence point the previous sequence point;
+		let the current line number be the I6 line number for the sequence point the current sequence point;
+		decide on whether or not the previous line number is the current line number;
 	decide yes.
 
 [Roughly speaking, true when the old selected frame is gone.]
@@ -3177,18 +3251,21 @@ To decide whether we should ignore the current interruption at (B - a simple bre
 	[Five cases to worry about:]
 	[I. a breakpoint was forced, meaning that we must stop]
 	if the breakpoint was forced:
+		now the currently preferred debug mode is debugging at the I7 level;
 		decide no;
 	[II. a new breakpoint was encountered, meaning that we must stop]
 	unless B is an invalid simple breakpoint:
 		repeat with the encountered compound breakpoint running through the compound breakpoint keys of the compound breakpoint list of B:
 			if the encountered compound breakpoint is enabled:
 				unless the last-seen compound breakpoint list contains the key the encountered compound breakpoint:
+					now the currently preferred debug mode is debugging at the I7 level;
 					decide no;
 	[III. an old breakpoint was encountered, but in a different frame, meaning that we must stop]
 	unless B is an invalid simple breakpoint:
 		repeat with the encountered compound breakpoint running through the compound breakpoint keys of the compound breakpoint list of B:
 			if the encountered compound breakpoint is enabled:
 				if the call frame changes warrant a distinction from the previous interruptions:
+					now the currently preferred debug mode is debugging at the I7 level;
 					decide no;
 				break;
 	[IV. we have reached a point where the control flow command is complete, meaning that we must stop]
