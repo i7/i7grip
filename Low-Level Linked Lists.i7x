@@ -2074,7 +2074,7 @@ Section: Filtration
 
 The phrase
 
-	filter (A - a linked list) by (F - a phrase linked list vertex -> truth state)
+	filter (L - a linked list) by (F - a phrase linked list vertex -> truth state)
 
 can be used to alter a linked list while looping over it.  Each vertex of A is
 given to F, but only those vertices for which F decides on true are retained.
