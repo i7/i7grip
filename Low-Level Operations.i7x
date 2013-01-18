@@ -21,6 +21,18 @@ Chapter "Use Options" - unindexed
 [For hunting down bugs involving CocoaGlk with a modded version of the Inform IDE; full Glk logging gets noisy fast if we swap streams in string-to-array conversions, so we forgo stream safety in favor of legibility.]
 Use quiet string printing under Cocoa Glk translates as (- Constant COCOA_QUIET; -).
 
+Book "Transfer Registers" - unindexed
+
+[We have some phrases that need to use their arguments as assembly operands.  For this to work, however, we need a place to store the argument between evaluation and the 
+assembly or between the assembly and assignment to an l-value.  We call such a place a transfer register; one is defined below.]
+
+Include (-
+	Global llo_transfer;
+-) after "Definitions.i6t".
+
+The low-level operations transfer register is a number that varies.
+The low-level operations transfer register variable translates into I6 as "llo_transfer".
+
 Book "Numbers"
 
 Chapter "Bitwise Operations"
@@ -878,8 +890,8 @@ To decide whether function acceleration is supported: (- llo_checkGestalt(9,0) -
 
 Book "Pushing and Popping"
 
-To push (X - a value of kind K): (- @push {X}; -).
-To pop/pull (X - a value of kind K variable): (- @pull {X}; -).
+To push (X - a value of kind K): (- llo_transfer={X};@push llo_transfer; -).
+To pop/pull (X - a value of kind K variable): (- @pull llo_transfer;{X}=llo_transfer; -).
 
 Low-Level Operations ends here.
 
