@@ -203,6 +203,14 @@ Section "Linked List Adjectives"
 Definition: a linked list is empty if it is zero converted to a linked list.
 Definition: a linked list is unit if the link of it converted to a linked list vertex is null.
 
+Section "Linked List Length"
+
+To decide what number is the length of (L - a linked list):
+	let the result be zero;
+	repeat with a linked list vertex running through L:
+		increment the result;
+	decide on the result.
+
 Section "Linked List Destruction"
 
 To delete (A - a linked list):
@@ -364,6 +372,14 @@ Section "Permanent Linked List Adjectives"
 [Performance note: If warranted, these definitions could be inlined.]
 Definition: a permanent linked list is empty if it is zero converted to a permanent linked list.
 Definition: a permanent linked list is unit if the link of it converted to a permanent linked list vertex is null.
+
+Section "Permanent Linked List Length"
+
+To decide what number is the length of (L - a permanent linked list):
+	let the result be zero;
+	repeat with a permanent linked list vertex running through L:
+		increment the result;
+	decide on the result.
 
 Book "Permanent Linked List Tails"
 
@@ -2069,6 +2085,18 @@ and their variations.
 
 Note that it is safe to modify linked list vertices while looping over their
 enclosing list, but it is not safe to modify the list itself.
+
+Section: Length
+
+The phrase
+
+	the length of (A - a linked list)
+
+counts the number of vertices in a linked list.  Similarly,
+
+	the length of (A - a permanent linked list)
+
+counts vertices in a permanent linked list.
 
 Section: Filtration
 
