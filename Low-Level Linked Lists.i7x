@@ -636,9 +636,9 @@ To enqueue the textual key (K - some text) in (A - a linked list) through (B - a
 
 To enqueue the key (K - a value) and the value (V - a value) in (A - a linked list) through (B - a linked list tail): (- {B}=(llo_getField((+ enqueuing a key and value in a linked list +),1))({B},{K},{V});if(~~{A}) {A}={B}; -).
 
-To enqueue the key (K - a value) and the underlying key (U - a value) and the value (V - a value) in (A - a linked list) through (B - a linked list tail): (- {B}=(llo_getField((+ enqueuing a key and underlying key in a linked list +),1))({B},{K},{U},{V});if(~~{A}) {A}={B}; -).
+To enqueue the key (K - a value) and the underlying key (U - a value) and the value (V - a value) in (A - a linked list) through (B - a linked list tail): (- {B}=(llo_getField((+ enqueuing a key and underlying key and value in a linked list +),1))({B},{K},{U},{V});if(~~{A}) {A}={B}; -).
 
-To enqueue the textual key (K - some text) and the value (V - a value) in (A - a linked list) through (B - a linked list tail): (- {B}=(llo_getField((+ enqueuing a key and underlying key in a linked list +),1))({B},llo_stringHash32({K}),{K},{V});if(~~{A}) {A}={B}; -).
+To enqueue the textual key (K - some text) and the value (V - a value) in (A - a linked list) through (B - a linked list tail): (- {B}=(llo_getField((+ enqueuing a key and underlying key and value in a linked list +),1))({B},llo_stringHash32({K}),{K},{V});if(~~{A}) {A}={B}; -).
 
 To enqueue the key (K - a value) in (A - a permanent linked list) through (B - a permanent linked list tail): (- {B}=(llo_getField((+ enqueuing a key in a permanent linked list +),1))({B},{K});if(~~{A}) {A}={B}; -).
 
@@ -648,9 +648,9 @@ To enqueue the textual key (K - some text) in (A - a permanent linked list) thro
 
 To enqueue the key (K - a value) and the value (V - a value) in (A - a permanent linked list) through (B - a permanent linked list tail): (- {B}=(llo_getField((+ enqueuing a key and value in a permanent linked list +),1))({B},{K},{V});if(~~{A}) {A}={B}; -).
 
-To enqueue the key (K - a value) and the underlying key (U - a value) and the value (V - a value) in (A - a permanent linked list) through (B - a permanent linked list tail): (- {B}=(llo_getField((+ enqueuing a key and underlying key in a permanent linked list +),1))({B},{K},{U},{V});if(~~{A}) {A}={B}; -).
+To enqueue the key (K - a value) and the underlying key (U - a value) and the value (V - a value) in (A - a permanent linked list) through (B - a permanent linked list tail): (- {B}=(llo_getField((+ enqueuing a key and underlying key and value in a permanent linked list +),1))({B},{K},{U},{V});if(~~{A}) {A}={B}; -).
 
-To enqueue the textual key (K - some text) and the value (V - a value) in (A - a permanent linked list) through (B - a permanent linked list tail): (- {B}=(llo_getField((+ enqueuing a key and underlying key in a permanent linked list +),1))({B},llo_stringHash32({K}),{K},{V});if(~~{A}) {A}={B}; -).
+To enqueue the textual key (K - some text) and the value (V - a value) in (A - a permanent linked list) through (B - a permanent linked list tail): (- {B}=(llo_getField((+ enqueuing a key and underlying key and value in a permanent linked list +),1))({B},llo_stringHash32({K}),{K},{V});if(~~{A}) {A}={B}; -).
 
 Section "Dequeuing"
 
