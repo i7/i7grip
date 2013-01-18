@@ -1695,13 +1695,23 @@ or
 
 	now (L - a linked list variable) is an empty linked list
 
+or, if we want to make a copy without the invalidation caveats given above, we
+can replace
+
+	an empty linked list
+
+with
+
+	a new copy of (L - a linked list)
+
 When we are done with a linked list (and any copies) we should invoke the phrase
 
 	delete (L - a linked list)
 
 so that the virtual machine can reclaim the list's memory.  As noted in the
-previous section, any copies of L will be invalidated by this change; there is
-no need to delete them, and, in fact, it would be dangerous to try.
+previous section, any copies of L not made by the copy phrase will be
+invalidated by this change; there is no need to delete them, and, in fact, it
+would be dangerous to try.
 
 Each entry in a linked list is represented by a "linked list vertex".  Again,
 the default value for this kind is an invalid instance:
@@ -1775,6 +1785,18 @@ Phrases for the permanent kinds run faster under some interpreters, but they
 are, as the name suggests, indestructible.  If we create a permanent linked
 list, we must keep it around forever.  If we add a vertex to a permanent linked
 list, we can change the entry, but we can never get rid of it.
+
+Most operations on permanent kinds are worded the same as the corresponding
+operations on the temporary kinds.  The creation and copying phrases, however
+are exceptions.  For an empty but permanent list, we use the wording
+
+	an empty permanent linked list
+
+and similarly include the word "permanent" when preparing permanent copies:
+
+	a new permanent copy of (L - a linked list)
+
+	a new permanent copy of (L - a permanent linked list)
 
 Section: Manipulating linked list vertices
 
