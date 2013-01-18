@@ -109,6 +109,15 @@ To clear the bucket for the textual key (K - some text) in (A - a hash table):
 	delete bucket number index of A;
 	write an empty linked list to bucket number index of A.
 
+Section "Hash Table Adjectives"
+
+Definition: a hash table (called A) is empty:
+	let the size be the number of buckets in A;
+	repeat with the index running from one to the size:
+		unless bucket number index of A is empty:
+			decide no;
+	decide yes.
+
 Chapter "The Permanent Hash Table Kind"
 
 A permanent hash table is a kind of value.
@@ -139,6 +148,15 @@ To decide what number is the bucket index of (K - a value) in (A - a permanent h
 
 To decide what permanent linked list is bucket number (I - a number) of (A - a permanent hash table): (- ({A})-->{I} -).
 To decide what permanent linked list is the bucket for (K - a value) in (A - a permanent hash table): (- ({A})-->(llht_bucketIndex({K},{A})) -).
+
+Section "Permanent Hash Table Adjectives"
+
+Definition: a permanent hash table (called A) is empty:
+	let the size be the number of buckets in A;
+	repeat with the index running from one to the size:
+		unless bucket number index of A is empty:
+			decide no;
+	decide yes.
 
 Book "Hash Table Interfaces"
 
