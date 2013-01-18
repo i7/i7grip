@@ -345,14 +345,14 @@ To write (S - a permanent linked list) to (D - a permanent linked list): (- {D}=
 
 Section "Deep Copying"
 
-To decide what permanent linked list is a new copy of (L - a linked list):
+To decide what permanent linked list is a new permanent copy of (L - a linked list):
 	let the result be an empty permanent linked list;
 	let the result's tail be an empty permanent linked list's tail;
 	repeat with the linked list vertex running through L:
 		enqueue the key the number key of the linked list vertex and the underlying key the underlying number key of the linked list vertex and the value the number value of the linked list vertex in the result through the result's tail;
 	decide on the result.
 
-To decide what permanent linked list is a new copy of (L - a permanent linked list):
+To decide what permanent linked list is a new permanent copy of (L - a permanent linked list):
 	let the result be an empty permanent linked list;
 	let the result's tail be an empty permanent linked list's tail;
 	repeat with the linked list vertex running through L:
