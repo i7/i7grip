@@ -195,7 +195,7 @@ Chapter "Unconditional Filtration"
 [Phase III: Nonsensical parse trees are filtered out.]
 [The filtration rulebook is invoked once per parse tree.  If any rule has the outcome ``filter out the parse tree'', the parse tree is discarded.]
 
-[Available to scoring rulebooks:
+[Available to filtration rulebooks:
 	the root of the parse tree to filter, an immutable variable
 	the root of the canonicalized parse tree to filter, an immutable variable
 	filter out the parse tree, a rulebook outcome to produce if the parse tree is rejected
@@ -410,7 +410,7 @@ Chapter "Local Disambiguation"
 [Phase VI: The set of interpretations is pared down to a singleton by asking multiple-choice questions.]
 [The phrase is given a set of mutually exclusive features and asked which one appears in the input's intended parse.  In some cases it may also be allowed to decide on "none of the offered disambiguation features", and it always has the option to decide on "aborting disambiguation".]
 
-[Available to local disambiguation phrase:
+[Available to local disambiguation phrases:
 	its first argument (a context-free parser), the parser from whom disambiguation is occuring
 	its second argument (a linked list), the available alternatives; each linked list vertex should be converted to a disambiguation feature
 	its third argument (a linked list), whether the phrase may decide on "none of the offered disambiguation features"]
