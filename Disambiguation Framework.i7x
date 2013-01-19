@@ -672,6 +672,19 @@ To decide what parse tree vertex is the root of the match for (S - a parseme) ca
 	delete the possibilities;
 	decide on the result.
 
+Book "Setup"
+
+Chapter "Setup Flag" -- unindexed
+
+The disambiguation framework setup flag is a truth state that varies.  The disambiguation framework setup flag is false.
+
+Chapter "Setup Phrase"
+
+To set up the disambiguation framework:
+	if the disambiguation framework setup flag is false:
+		traverse the disambiguation setup rulebook;
+		now the disambiguation framework setup flag is true.
+
 Disambiguation Framework ends here.
 
 ---- DOCUMENTATION ----
