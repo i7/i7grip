@@ -120,7 +120,7 @@ To decide whether the canonical tree rooted at (A - a parse tree vertex) is iden
 		decide no;
 	decide yes.
 
-Section "Canonicalization Phrase"
+Section "Canonicalization Phrase" - unindexed
 
 To decide what linked list is (L - a linked list) after canonicalizing with (C - a rulebook) the parse trees rooted at the keys and storing the resulting roots as values:
 	repeat with the linked list vertex running through L:
@@ -182,7 +182,7 @@ The parse tree score hash table stack is a linked list that varies.
 A disambiguation setup rule (this is the initialize the parse tree score hash table stack rule):
 	now the parse tree score hash table stack is an empty linked list.
 
-Section "Scoring Phrase"
+Section "Scoring Phrase" - unindexed
 
 To score the parse trees rooted at the keys and canonically rooted at the values of (L - a linked list) with (S - a rulebook):
 	push the key the parse tree score hash table onto the parse tree score hash table stack;
@@ -238,7 +238,7 @@ To decide whether the parse-tree-filtering rulebook retains (A - linked list ver
 		decide no;
 	decide yes.
 
-Section "Filtration Phrase"
+Section "Filtration Phrase" - unindexed
 
 To decide what linked list is (L - a linked list) after filtering with (F - a rulebook) the parse trees rooted at the keys and canonically rooted at the values:
 	push the parse-tree-filtering rulebook;
@@ -253,7 +253,7 @@ To decide what linked list is (L - a linked list) after filtering with (F - a ru
 	pop the parse-tree-filtering rulebook;
 	decide on L.
 
-Chapter "Global Disambiguation"
+Chapter "Global Disambiguation" - unindexed
 
 [Phase IV: The interpretation on the Pareto front is chosen, if it is unique.]
 
@@ -351,7 +351,7 @@ To decide what linked list is (L - a linked list) filtered to the vertex with th
 		delete the parse tree vertex value of the result vertex and its descendants;
 		delete the result vertex.
 
-Section "Global Disambiguation Phrase"
+Section "Global Disambiguation Phrase" - unindexed
 
 To decide what linked list is (L - a linked list) after choosing the Pareto front if it has a unique canonical parse tree:
 	let the result be a null parse tree vertex;
@@ -370,7 +370,7 @@ To decide what linked list is (L - a linked list) after choosing the Pareto fron
 		decide on L;
 	decide on L filtered to the vertex with the key the result.
 
-Chapter "Unification"
+Chapter "Unification" - unindexed
 
 [Phase V: Identical canonical trees are unified so that sameness can be checked by comparing addresses.]
 
@@ -387,7 +387,7 @@ The canonical tree count list stack is a linked list that varies.
 A disambiguation setup rule (this is the initialize the canonical tree count list stack rule):
 	now the canonical tree count list stack is an empty linked list.
 
-Section "Unification Phrase"
+Section "Unification Phrase" - unindexed
 
 To decide what linked list is (L - a linked list) after unifying identical canonical trees:
 	push the key the canonical tree count list onto the canonical tree count list stack;
@@ -610,7 +610,7 @@ To decide what number is the beginning lexeme index of (A - a disambiguation fea
 To decide what number is the end lexeme index of (A - a disambiguation feature):
 	decide on the underlying number key of A converted to a linked list vertex.
 
-Section "Local Disambiguation Phrase"
+Section "Local Disambiguation Phrase" - unindexed
 
 To decide what linked list is (L - a linked list) after disambiguating locally with (D - a phrase (context-free parser, linked list, truth state) -> disambiguation feature) for (A - a context-free parser):
 	while the canonical tree count list is not unit:
@@ -679,7 +679,7 @@ To decide what parse tree vertex is the root of the match for (S - a parseme) ca
 	delete the possibilities;
 	decide on the result.
 
-Book "Setup"
+Book "Setup" - unindexed
 
 Chapter "Setup Flag" -- unindexed
 
