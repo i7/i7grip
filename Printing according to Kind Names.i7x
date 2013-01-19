@@ -2145,6 +2145,7 @@ To say (X - a number) using the kind parse rooted at (V - a parse tree vertex) w
 Part "Public Phrases"
 
 To decide whether there is a kind named (T - some text):
+	set up kind printing;
 	now the kind name validity check flag is false;
 	write the punctuated words of T to the kind name parser;
 	let the result be false;
@@ -2155,6 +2156,7 @@ To decide whether there is a kind named (T - some text):
 	decide on the result.
 
 To say (X - a number) according to the kind named (T - some text) disambiguated by (D - a phrase (context-free parser, linked list, truth state) -> disambiguation feature):
+	set up kind printing;
 	now the kind name validity check flag is whether or not D is not the default value of a phrase (context-free parser, linked list, truth state) -> disambiguation feature;
 	now the value to check kind name validity with is X;
 	write the punctuated words of T to the kind name parser;
@@ -2172,15 +2174,16 @@ To say (X - a number) according to the kind named (T - some text):
 
 Book "Setup"
 
+Chapter "Setup Flag" -- unindexed
+
+The kind printing setup flag is a truth state that varies.  The kind printing setup flag is false.
+
+Chapter "Setup Phrase" - unindexed
+
 To set up kind printing:
-	traverse the kind printing setup rulebook.
-
-Chapter "GRIF Hooks" (for use with Glulx Runtime Instrumentation Framework by Brady Garvin)
-
-A GRIF setup rule (this is the set up kind printing as part of the GRIF setup rule):
-	set up kind printing.
-
-The set up kind printing as part of the GRIF setup rule is listed after the set up debug files as part of the GRIF setup rule in the GRIF setup rulebook.
+	if the kind printing setup flag is false:
+		traverse the kind printing setup rulebook;
+		now the kind printing setup flag is true.
 
 Printing according to Kind Names ends here.
 
@@ -2206,19 +2209,6 @@ Section: Preliminaries
 
 Printing according to Kind Names depends on Debug File Parsing, which requires
 some setup outside of the story file---see that extension's documentation.
-
-Additionally, we must invoke the phrase
-
-	set up kind printing
-
-before using any other phrases in Printing according to Kind Names.  This
-happens automatically for authors who include the Glulx Runtime Instrumentation
-Framework, thanks to
-
-	the set up kind printing as part of the GRIF setup rule
-
-It is okay to use the phrase more than once, but not preferable---repeated calls
-will waste both time and memory.
 
 Section: Phrases
 
