@@ -289,9 +289,9 @@ A Glk layering rule (this is the debugger window wrapper rule):
 
 Book "Parsers" - unindexed
 
-Chapter "Terminal Parsing" - unindexed
+Part "Terminal Parsing" - unindexed
 
-Section "Decimal Numbers" - unindexed
+Chapter "Decimal Numbers" - unindexed
 
 To decide whether the synthetic text (T - some text) is a decimal number, with an overflow check or with an overflow check for a negated number:
 	if the length of the synthetic text T is zero:
@@ -324,7 +324,12 @@ To decide what number is the decimal number named by (V - a parse tree vertex):
 	delete the synthetic text the decimal;
 	decide on the result.
 
-Section "Hexadecimal Numbers" - unindexed
+To parse for (S - a parseme) beginning at lexeme index (I - a number) by parsing a decimal number (this is parsing a decimal number):
+	let the array content be the punctuated word array content of the owner of S;
+	if I is less than the word count of the array content and the synthetic text word I of the array content is a decimal number:
+		match S from lexeme index I to lexeme index I plus one.
+
+Chapter "Hexadecimal Numbers" - unindexed
 
 To decide whether the synthetic text (T - some text) is a hexadecimal number, with an overflow check or with an overflow check for a negated number:
 	let the prefix counter be zero;
@@ -381,7 +386,20 @@ To decide what number is the hexadecimal number named by (V - a parse tree verte
 	delete the synthetic text the hexadecimal;
 	decide on the result.
 
-Section "Function Names" - unindexed
+To parse for (S - a parseme) beginning at lexeme index (I - a number) by parsing a hexadecimal number (this is parsing a hexadecimal number):
+	let the array content be the punctuated word array content of the owner of S;
+	if I is less than the word count of the array content and the synthetic text word I of the array content is a hexadecimal number:
+		match S from lexeme index I to lexeme index I plus one.
+
+Chapter "Arbitrary Words" - unindexed
+
+To parse for (S - a parseme) beginning at lexeme index (I - a number) by parsing arbitrary words (this is parsing arbitrary words):
+	let the array content be the punctuated word array content of the owner of S;
+	let the word count be the word count of the array content;
+	repeat with the end lexeme index running from I plus one to the word count:
+		match S from lexeme index I to lexeme index the end lexeme index.
+
+Chapter "Function Names" - unindexed
 
 To decide whether the synthetic text (T - some text) is a function name:
 	ensure that all routines have names;
@@ -390,7 +408,7 @@ To decide whether the synthetic text (T - some text) is a function name:
 	delete the list;
 	decide on the result.
 
-Section "Function Addresses" - unindexed
+Chapter "Function Addresses" - unindexed
 
 To decide what number is the function address named by (V - a parse tree vertex):
 	let the function address vertex be the first match for a decimal number for the debugger among the children of V;
@@ -399,7 +417,7 @@ To decide what number is the function address named by (V - a parse tree vertex)
 		decide on the hexadecimal number named by the function address vertex;
 	decide on the decimal number named by the function address vertex.
 
-Section "Global Names" - unindexed
+Chapter "Global Names" - unindexed
 
 To decide whether the synthetic text (T - some text) is a global name:
 	let the list be a new list of global records matching the global name T;
@@ -407,7 +425,7 @@ To decide whether the synthetic text (T - some text) is a global name:
 	delete the list;
 	decide on the result.
 
-Section "Memory Stack Variable Names" - unindexed
+Chapter "Memory Stack Variable Names" - unindexed
 
 To decide whether the synthetic text (T - some text) is a memory stack variable name:
 	let the list be a new list of memory stack variable records matching the memory stack variable name T;
@@ -415,7 +433,7 @@ To decide whether the synthetic text (T - some text) is a memory stack variable 
 	delete the list;
 	decide on the result.
 
-Section "Local Names" - unindexed
+Chapter "Local Names" - unindexed
 
 To decide what number is the index of the local with I7 name (T - some text) in the selected frame:
 	let the function address be the uninstrumented function address of the debugger's current call frame;
@@ -473,12 +491,12 @@ To decide whether the synthetic text (T - some text) is a local name:
 	now the result is the index of the local with I6 name T in the selected frame;
 	decide on whether or not the result is at least zero.
 
-Section "Kind Names" - unindexed
+Chapter "Kind Names" - unindexed
 
 To decide whether the synthetic text (T - some text) is a kind name:
 	decide on whether or not there is a kind named T.
 
-Section "Object Names" - unindexed
+Chapter "Object Names" - unindexed
 
 To decide whether the synthetic text (T - some text) is an object name:
 	let the downcased name be a new synthetic text copied from T;
@@ -489,31 +507,61 @@ To decide whether the synthetic text (T - some text) is an object name:
 	delete the list;
 	decide on the result.
 
-Chapter "Terminal Parsing Phrases" - unindexed
+Part "Authorial Consent Parser" - unindexed
 
-To parse for (S - a parseme) beginning at lexeme index (I - a number) by parsing a decimal number (this is parsing a decimal number):
-	let the array content be the punctuated word array content of the owner of S;
-	if I is less than the word count of the array content and the synthetic text word I of the array content is a decimal number:
-		match S from lexeme index I to lexeme index I plus one.
+Chapter "Authorial Consent Parser Components" - unindexed
 
-To parse for (S - a parseme) beginning at lexeme index (I - a number) by parsing a hexadecimal number (this is parsing a hexadecimal number):
-	let the array content be the punctuated word array content of the owner of S;
-	if I is less than the word count of the array content and the synthetic text word I of the array content is a hexadecimal number:
-		match S from lexeme index I to lexeme index I plus one.
+Section "The Authorial Consent Parser" - unindexed
 
-To parse for (S - a parseme) beginning at lexeme index (I - a number) by parsing arbitrary words (this is parsing arbitrary words):
-	let the array content be the punctuated word array content of the owner of S;
-	let the word count be the word count of the array content;
-	repeat with the end lexeme index running from I plus one to the word count:
-		match S from lexeme index I to lexeme index the end lexeme index.
+The authorial consent parser is a context-free parser that varies.
 
-Chapter "Main Parser Components" - unindexed
+Section "Authorial Consent Parsemes" - unindexed
 
-Section "The Main Parser" - unindexed
+An authorial assent and
+	a permanent authorial assent are parsemes that vary.
+
+Section "Authorial Consent Parser Setup and Grammar" - unindexed
+
+A GRIF setup rule (this is the set up the authorial consent parser rule):
+	now the authorial consent parser is a new context-free parser;
+	now an authorial assent is a new nonterminal in the authorial consent parser named "the answer 'yes'";
+	now a permanent authorial assent is a new nonterminal in the authorial consent parser named "the answer 'YES', uppercase to indicate that the debugger should assume assent from here on out";
+	understand "y" or "yes" as an authorial assent regardless of case;
+	understand "Y" or "Yes" or "YES" as a permanent authorial assent;
+	put the authorial consent parser into normal form.
+
+Part "Disambiguation Parser" - unindexed
+
+Chapter "Disambiguation Parser Components" - unindexed
+
+Section "The Disambiguation Parser" - unindexed
+
+The debug disambiguation parser is a context-free parser that varies.
+
+Section "Disambiguation Parsemes" - unindexed
+
+A decimal number for the debugger's disambiguator is a parseme that varies.
+A disambiguation number is a parseme that varies.
+
+Section "Disambiguation Parser Setup and Grammar" - unindexed
+
+A GRIF setup rule (this is the set up the debug disambiguation parser rule):
+	now the debug disambiguation parser is a new context-free parser;
+	now a decimal number for the debugger's disambiguator is a new terminal in the debug disambiguation parser named "a decimal number" and parsed by parsing a decimal number;
+	now a disambiguation number is a new nonterminal in the debug disambiguation parser named "a disambiguation choice";
+	understand "[a decimal number for the debugger's disambiguator]" as a disambiguation number;
+	understand "[a decimal number for the debugger's disambiguator].[no line break]" as a disambiguation number;
+	put the debug disambiguation parser into normal form.
+
+Part "Debug Command Parser" - unindexed
+
+Chapter "Debug Command Parser Components" - unindexed
+
+Section "Debug Command Parser Proper" - unindexed
 
 The debug command parser is a context-free parser that varies.
 
-Section "Main Parsemes" - unindexed
+Section "Debug Command Parsemes" - unindexed
 
 A decimal number for the debugger and
 	a hexadecimal number for the debugger and
@@ -607,7 +655,7 @@ A help topic for the debugger and
 	getting information about the debugger and
 	miscellaneous commands are parsemes that vary.
 
-Section "Main Parser Setup and Grammar" - unindexed
+Section "Debug Command Parser Setup and Grammar" - unindexed
 
 A GRIF setup rule (this is the set up the debug command parser rule):
 	now the debug command parser is a new context-free parser;
@@ -882,15 +930,15 @@ A GRIF setup rule (this is the set up the debug command parser rule):
 	[//]
 	put the debug command parser into normal form.
 
-Section "Debug Command Canonicalization" - unindexed
+Chapter "Debug Command Canonicalization" - unindexed
 
 The debug command canonicalization rules are [rulebook is] a rulebook.
 
-Section "Debug Command Scoring" - unindexed
+Chapter "Debug Command Scoring" - unindexed
 
 The debug command scoring rules are [rulebook is] a rulebook.
 
-Section "Debug Command Primary Filtration" - unindexed
+Chapter "Debug Command Primary Filtration" - unindexed
 
 The primary debug command filtration rules are [rulebook is] a rulebook.
 
@@ -950,51 +998,9 @@ A primary debug command filtration rule (this is the eschew name mismatches in d
 	if a debug command name error appears under the root of the parse tree to filter:
 		filter out the parse tree.
 
-Section "Debug Command Secondary Filtration" - unindexed
+Chapter "Debug Command Secondary Filtration" - unindexed
 
 The secondary debug command filtration rules are [rulebook is] a rulebook.
-
-Chapter "Disambiguation Parser Components" - unindexed
-
-Section "The Disambiguation Parser" - unindexed
-
-The debug disambiguation parser is a context-free parser that varies.
-
-Section "Disambiguation Parsemes" - unindexed
-
-A decimal number for the debugger's disambiguator is a parseme that varies.
-A disambiguation number is a parseme that varies.
-
-Section "Disambiguation Parser Setup and Grammar" - unindexed
-
-A GRIF setup rule (this is the set up the debug disambiguation parser rule):
-	now the debug disambiguation parser is a new context-free parser;
-	now a decimal number for the debugger's disambiguator is a new terminal in the debug disambiguation parser named "a decimal number" and parsed by parsing a decimal number;
-	now a disambiguation number is a new nonterminal in the debug disambiguation parser named "a disambiguation choice";
-	understand "[a decimal number for the debugger's disambiguator]" as a disambiguation number;
-	understand "[a decimal number for the debugger's disambiguator].[no line break]" as a disambiguation number;
-	put the debug disambiguation parser into normal form.
-
-Chapter "Authorial Consent Parser Components" - unindexed
-
-Section "The Authorial Consent Parser" - unindexed
-
-The authorial consent parser is a context-free parser that varies.
-
-Section "Authorial Consent Parsemes" - unindexed
-
-An authorial assent and
-	a permanent authorial assent are parsemes that vary.
-
-Section "Authorial Consent Parser Setup and Grammar" - unindexed
-
-A GRIF setup rule (this is the set up the authorial consent parser rule):
-	now the authorial consent parser is a new context-free parser;
-	now an authorial assent is a new nonterminal in the authorial consent parser named "the answer 'yes'";
-	now a permanent authorial assent is a new nonterminal in the authorial consent parser named "the answer 'YES', uppercase to indicate that the debugger should assume assent from here on out";
-	understand "y" or "yes" as an authorial assent regardless of case;
-	understand "Y" or "Yes" or "YES" as a permanent authorial assent;
-	put the authorial consent parser into normal form.
 
 Book "Input" - unindexed
 
