@@ -642,7 +642,7 @@ To decide what linked list is (L - a linked list) after disambiguating locally w
 
 Chapter "Orchestration"
 
-To decide what parse tree vertex is the root of the match for (S - a parseme) canonicalized by (C - a rulebook) and disambiguated by scores from (E - a rulebook) and filtration from (F - a rulebook) and disambiguated chioces by (D - a phrase (context-free parser, linked list, truth state) -> disambiguation feature):
+To decide what parse tree vertex is the root of the match for (S - a parseme) canonicalized by (C - a rulebook) and disambiguated by scores from (E - a rulebook) and filtration from (F - a rulebook) and disambiguating choices from (D - a phrase (context-free parser, linked list, truth state) -> disambiguation feature):
 	let the possibilities be an empty linked list;
 	repeat with the root running through matches for S:
 		let the possibility be the parse tree vertex corresponding to the root in a new clone of its tree;
@@ -665,10 +665,17 @@ To decide what parse tree vertex is the root of the match for (S - a parseme) ca
 					decide on a null parse tree vertex;
 				unless the possibilities are unit:
 					now the possibilities are the possibilities after disambiguating locally with D for the owner of S;
+
+					if the possibilities are empty:
+						decide on a null parse tree vertex;
 	let the result be the parse tree vertex value of the possibilities converted to a linked list vertex;
 	[There might be several, equivalent possibilities, so we are careful to delete all of them.]
-	repeat with the root running through the parse tree vertex keys of the possibilities:
+	repeat with the possibility running through the possibilities:
+		let the root be the parse tree vertex key of the possibility;
+		let the canonical root be the parse tree vertex value of the possibility;
 		delete the root and its descendants;
+		if the canonical root is not the result:
+			delete the canonical root and its descendants;
 	delete the possibilities;
 	decide on the result.
 
