@@ -665,7 +665,6 @@ To decide what parse tree vertex is the root of the match for (S - a parseme) ca
 					decide on a null parse tree vertex;
 				unless the possibilities are unit:
 					now the possibilities are the possibilities after disambiguating locally with D for the owner of S;
-
 					if the possibilities are empty:
 						decide on a null parse tree vertex;
 	let the result be the parse tree vertex value of the possibilities converted to a linked list vertex;
