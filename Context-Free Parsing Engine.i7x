@@ -7,6 +7,7 @@ Include Low-Level Operations by Brady Garvin.
 Include Low-Level Text by Brady Garvin.
 Include Low-Level Linked Lists by Brady Garvin.
 Include Low-Level Hash Tables by Brady Garvin.
+Include Object Pools by Brady Garvin.
 
 Use authorial modesty.
 
