@@ -503,9 +503,9 @@ To decide what number is the score of the feature alternative list (A - a linked
 	let the leftovers be a new copy of L;
 	let the entirety be the length of L;
 	repeat with the matching trees list running through the linked list values of A:
-		let the extent of matching be the length of the matching trees list;
-		always check that the extent of matching is not zero or else fail at scoring a valid feature alternative list;
-		if the extent of matching is the entirety:
+		let the match count be the length of the matching trees list;
+		always check that the match count is not zero or else fail at scoring a valid feature alternative list;
+		if the match count is the entirety:
 			delete the leftovers;
 			decide on 2147483647; [the maximum signed integer]
 		increase the result by the score of letting the matching trees list survive disambiguation;
