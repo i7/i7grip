@@ -519,6 +519,9 @@ To decide what parse tree vertex is a new parse tree vertex for (S - a parseme) 
 		write the last child the result to A;
 	decide on the result.
 
+To delete (A - a parse tree vertex) but not its descendants:
+	free the memory allocation at address (A converted to a number) to the parse tree vertex object pool.
+
 Section "Public Parse Tree Vertex Construction and Destruction"
 
 To decide what parse tree vertex is the parse tree vertex corresponding to (A - a parse tree vertex) in a new clone of its tree:
