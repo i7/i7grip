@@ -643,6 +643,7 @@ To decide what linked list is (L - a linked list) after disambiguating locally w
 Chapter "Orchestration"
 
 To decide what parse tree vertex is the root of the match for (S - a parseme) canonicalized by (C - a rulebook) and disambiguated by scores from (E - a rulebook) and filtration from (F - a rulebook) and disambiguating choices from (D - a phrase (context-free parser, linked list, truth state) -> disambiguation feature):
+	set up the disambiguation framework;
 	let the possibilities be an empty linked list;
 	repeat with the root running through matches for S:
 		let the possibility be the parse tree vertex corresponding to the root in a new clone of its tree;
@@ -684,7 +685,7 @@ Chapter "Setup Flag" -- unindexed
 
 The disambiguation framework setup flag is a truth state that varies.  The disambiguation framework setup flag is false.
 
-Chapter "Setup Phrase"
+Chapter "Setup Phrase" - unindexed
 
 To set up the disambiguation framework:
 	if the disambiguation framework setup flag is false:

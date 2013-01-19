@@ -404,9 +404,6 @@ A kind printing setup rule (this is the set up the kind name parser rule):
 	[//]
 	put the kind name parser into normal form.
 
-A kind printing setup rule (this is the set up disambiguation for the kind name parser rule):
-	set up the disambiguation framework.
-
 Chapter "Kind Name Canonicalization" - unindexed
 
 The kind name canonicalization rules are [rulebook is] a rulebook.
