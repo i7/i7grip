@@ -74,11 +74,11 @@ Chapter "Messages" - unindexed
 To fail at requesting multiple debug commands:
 	say "[low-level runtime failure in]Interactive Debugger[with explanation]I tried to request a debug command before the previous request had been fulfilled.[terminating the story]".
 
-To fail at finding a disambiguation choice:
-	say "[low-level runtime failure in]Interactive Debugger[with explanation]I tried to disambiguate a command, but I lost track of the disambiguation choices I had offered you.[terminating the story]".
+To fail at using debug command disambiguating for something other than a debug command:
+	say "[low-level runtime failure in]Interactive Debugger[with explanation]I was asked to ask a debug command disambiguation question about something other than a debug command, a case I'm not prepated to handle.[terminating the story]".
 
-To fail at synchronizing disambiguation trees:
-	say "[low-level runtime failure in]Interactive Debugger[with explanation]I tried to disambiguate a command, but I found ambiguities that should have already been resolved by the disambiguation choices I had offered you.[terminating the story]".
+To fail at using debug command disambiguating for a non-question:
+	say "[low-level runtime failure in]Interactive Debugger[with explanation]I was asked to ask a debug command disambiguation question with only one possible answer; the disambiguation machinery must have gone awry.[terminating the story]".
 
 To fail at finding a routine record for a sequence point with a source line record:
 	say "[low-level runtime failure in]Interactive Debugger[with explanation]I tried to find the debug information for a function, but couldn't, even though I have debug information for lines within that function.[terminating the story]".
@@ -882,6 +882,75 @@ A GRIF setup rule (this is the set up the debug command parser rule):
 	[//]
 	put the debug command parser into normal form.
 
+Section "Debug Command Canonicalization" - unindexed
+
+The debug command canonicalization rules are [rulebook is] a rulebook.
+
+Section "Debug Command Scoring" - unindexed
+
+The debug command scoring rules are [rulebook is] a rulebook.
+
+Section "Debug Command Filtration" - unindexed
+
+The debug command filtration rules are [rulebook is] a rulebook.
+
+
+To decide whether (V - a parse tree vertex) is a name error in a debug command:
+	decide no.
+
+To decide whether (V - a parse tree vertex that has the parseme a function name for the debugger) is a name error in a debug command:
+	let the function name be a new synthetic text representing the words matched by V;
+	let the correctness flag be whether or not the synthetic text the function name is a function name;
+	delete the synthetic text the function name;
+	decide on whether or not the correctness flag is false.
+
+To decide whether (V - a parse tree vertex that has the parseme a function address for the debugger) is a name error in a debug command:
+	let the function address be the function address named by V;
+	let the routine record be the routine record for the function address;
+	decide on whether or not the routine record is an invalid routine record.
+
+To decide whether (V - a parse tree vertex that has the parseme a global name for the debugger) is a name error in a debug command:
+	let the global name be a new synthetic text representing the words matched by V;
+	let the correctness flag be whether or not the synthetic text the global name is a global name;
+	delete the synthetic text the global name;
+	decide on whether or not the correctness flag is false.
+
+To decide whether (V - a parse tree vertex that has the parseme a memory stack variable name for the debugger) is a name error in a debug command:
+	let the memory stack variable name be a new synthetic text representing the words matched by V;
+	let the correctness flag be whether or not the synthetic text the memory stack variable name is a memory stack variable name;
+	delete the synthetic text the memory stack variable name;
+	decide on whether or not the correctness flag is false.
+
+To decide whether (V - a parse tree vertex that has the parseme a local name for the debugger) is a name error in a debug command:
+	let the local name be a new synthetic text representing the words matched by V;
+	let the correctness flag be whether or not the synthetic text the local name is a local name;
+	delete the synthetic text the local name;
+	decide on whether or not the correctness flag is false.
+
+To decide whether (V - a parse tree vertex that has the parseme a kind name for the debugger) is a name error in a debug command:
+	let the kind name be a new synthetic text representing the words matched by V;
+	let the correctness flag be whether or not the synthetic text the kind name is a kind name;
+	delete the synthetic text the kind name;
+	decide on whether or not the correctness flag is false.
+
+To decide whether (V - a parse tree vertex that has the parseme an object name for the debugger) is a name error in a debug command:
+	let the object name be a new synthetic text representing the words matched by V;
+	let the correctness flag be whether or not the synthetic text the object name is an object name;
+	delete the synthetic text the object name;
+	decide on whether or not the correctness flag is false.
+
+To decide whether a debug command name error appears under (V - a parse tree vertex):
+	if V is a name error in a debug command:
+		decide yes;
+	repeat with the child running through the children of V:
+		if a debug command name error appears under the child:
+			decide yes;
+	decide no.
+
+A debug command filtration rule (this is the eschew name mismatches in debug commands rule):
+	if a debug command name error appears under the root of the parse tree to filter:
+		filter out the parse tree.
+
 Chapter "Disambiguation Parser Components" - unindexed
 
 Section "The Disambiguation Parser" - unindexed
@@ -933,33 +1002,30 @@ Section "Debug Input Handler" - unindexed
 The last-seen debug command punctuated words are a punctuated word array that varies.
 The last-seen debug command vertex is a parse tree vertex that varies.
 
+The debug command disambiguation attempted flag is a truth state that varies.
+
 To dispatch the debug command (T - some text) (this is dispatching a debug command):
 	unless the current debugger coexecution state is story interrupted:
 		now the debugger's current call frame is the innermost call frame of a reconstructed call stack;
 		adjust the debugger's current call frame;
 	while within the debugger window via the debugger wrapping layer:
 		write the punctuated words of T to the debug command parser;
-		let the match list be an empty linked list;
-		repeat with the root running through matches for a debug command:
-			let the clone be the parse tree vertex corresponding to the root in a new clone of its tree;
-			push the key the clone and the value the clone onto the match list;
-		if the match list is empty:
-			say "[line break]I didn't understand that command.  Check for misspellings or type 'help' to see the commands I do know.[paragraph break]";
+		now the debug command disambiguation attempted flag is false;		
+		let the root be the root of the match for a debug command canonicalized by the debug command canonicalization rulebook and disambiguated by scores from the debug command scoring rulebook and filtration from the debug command filtration rulebook and disambiguating choices from disambiguating a debug command;
+		if the root is null:
+			if the debug command disambiguation attempted flag is false:
+				say "I didn't understand that command.  Check for misspellings or type 'help' to see the commands I do know.[paragraph break]";
 		otherwise:
-			let the root be the debugger's disambiguation of the match list;
-			unless the root is an invalid parse tree vertex:
-				let the command vertex be the first child of the root;
-				handle the debug command rooted at the command vertex using a workaround for Inform bug 825;
-				unless the command vertex has the parseme the debugger's again command:
-					unless the last-seen debug command vertex is an invalid parse tree vertex:
-						delete the last-seen debug command punctuated words;
-						delete the last-seen debug command vertex and its descendants;
-					now the last-seen debug command punctuated words are the punctuated word array content of the debug command parser;
-					now the last-seen debug command vertex is the command vertex;
-			repeat with the moribund root running through the parse tree vertex keys of the match list:
-				unless the moribund root is the parent of the last-seen debug command vertex:
-					delete the moribund root and its descendants;
-		delete the match list;
+			let the command vertex be the first child of the root;
+			handle the debug command rooted at the command vertex using a workaround for Inform bug 825;
+			if the command vertex has the parseme the debugger's again command:
+				delete the root and its descendants;
+			otherwise:
+				unless the last-seen debug command vertex is an invalid parse tree vertex:
+					delete the last-seen debug command punctuated words;
+					delete the last-seen debug command vertex and its descendants;
+				now the last-seen debug command punctuated words are the punctuated word array content of the debug command parser;
+				now the last-seen debug command vertex is the command vertex;
 	unless the current debugger coexecution state is story interrupted:
 		let the moribund call frame be the leaf of the debugger's current call frame;
 		delete the moribund call frame and its ancestors;
@@ -974,152 +1040,43 @@ To request a debug command:
 		say "Debug command? ";
 	request a debug input line to be handled by dispatching a debug command.
 
-Section "Sanity Checking Framework" - unindexed
-
-[To be overridden by special cases.]
-To decide whether (V - a parse tree vertex) is sane in a debug command:
-	decide yes.
-
-To decide whether (V - a parse tree vertex) and its descendants are sane in a debug command:
-	let the point be V;
-	while the point is not null:
-		unless the point is sane in a debug command:
-			decide no;
-		now the point is the parse tree vertex to visit after the point;
-	decide yes.
-
-To decide what linked list is a new filtration of (L - a linked list) using sanity checks:
-	let the survivors be an empty linked list;
-	repeat with the candidate running through L:
-		if the parse tree vertex key of the candidate and its descendants are sane in a debug command:
-			push the key the parse tree vertex key of the candidate and the value the parse tree vertex value of the candidate onto the survivors;
-	decide on the survivors.
-
 Section "Debug Command Disambiguation" - unindexed
 
-To decide what linked list is the replacements for (L - a linked list) after the debugger's disambiguation of keys given by (K - a phrase parse tree vertex -> value of kind Q) and values given by (V - a phrase parse tree vertex -> value of kind R) with linked list vertices printed by (P - phrase (linked list vertex, punctuated word array) -> nothing):
-	let the seen hash table be a new hash table with the debugger disambiguation hash table size buckets;
-	let the option counter be zero;
-	repeat with the point running through the parse tree vertex values of L:
-		let the key be K applied to the point;
-		let the value be V applied to the point;
-		unless the seen hash table contains the key the key:
-			insert the key the key and the value the value into the seen hash table;
-			increment the option counter;
-	if the option counter is at most one:
-		delete the seen hash table;
-		decide on L;
-	say "Which do you mean?[line break]";
+To say (F - a disambiguation feature) as a disambiguation choice for the debug command parser:
 	let the array content be the punctuated word array content of the debug command parser;
-	now the option counter is zero;
-	repeat with the linked list vertex running through the seen hash table:
-		increment the option counter;
-		say "[the option counter]. ";
-		apply P to the linked list vertex and the array content;
-	let the choice be the disambiguation choice among the option counter options;
-	if the choice is zero:
-		delete L;
-		delete the seen hash table;
-		decide on an empty linked list;
-	let the disambiguation be an invalid linked list vertex;
-	repeat with the linked list vertex running through the seen hash table:
-		decrement the choice;
-		if the choice is zero:
-			now the disambiguation is the linked list vertex;
-			break;
-	if the disambiguation is an invalid linked list vertex:
-		fail at finding a disambiguation choice;
-	let the disambiguation key be the number key of the disambiguation;
-	let the disambiguation value be the number value of the disambiguation;
-	let the survivors be an empty linked list;
-	repeat with the candidate running through L:
-		let the point be the parse tree vertex value of the candidate;
-		if (K applied to the point converted to a number) is the disambiguation key and (V applied to the point converted to a number) is the disambiguation value:
-			push the key the number key of the candidate and the value the point onto the survivors;
-	delete L;
-	delete the seen hash table;
-	decide on the survivors.
-
-To decide what number is the word range encoding for (V - a parse tree vertex) (this is finding a word range encoding):
-	decide on the beginning lexeme index of V shifted 16 bits left plus the end lexeme index of V.
-
-To decide what parseme is the word range disambiguation value for (V - a parse tree vertex) (this is finding a value for word range disambiguation):
-	decide on the parseme of V.
-
-To say (V - a linked list vertex) as a word range disambiguation choice for (A - a punctuated word array) (this is saying a word range disambiguation choice):
-	let the beginning lexeme index be the number key of V;
-	let the end lexeme index be the bitwise and of the beginning lexeme index and 65535;
-	let the beginning lexeme index be the beginning lexeme index logically shifted 16 bits right;
-	let the parseme be the parseme value of V;
 	say "'";
-	repeat with the lexeme index running over the half-open interval from the beginning lexeme index to the end lexeme index:
-		say "[if the lexeme index is not the beginning lexeme index] [end if][word lexeme index of A]";
-	say "' as [the human-friendly name of the parseme][line break]".
+	repeat with the lexeme index running over the half-open interval from the beginning lexeme index of F to the end lexeme index of F:
+		say "[if the lexeme index is not the beginning lexeme index of F] [end if][word lexeme index of the array content]";
+	say "' as [the human-friendly name of the parseme of F]".
 
-To decide what production is the production disambiguation key for (V - a parse tree vertex) (this is finding a key for production disambiguation):
-	decide on the production of V.
-
-[We use the serial comma whether the use option is active or not.  It makes us consistent with Call Stack Tracking (which uses the serial comma for other reasons), and we might as well be as unambiguous as possible when disambiguating.]
-To say (V - a linked list vertex) as a production disambiguation choice for (A - a punctuated word array) (this is saying a production disambiguation choice):
-	let the production be the production key of V;
-	let the beginning lexeme index be the number value of V;
-	let the end lexeme index be the bitwise and of the beginning lexeme index and 65535;
-	let the beginning lexeme index be the beginning lexeme index logically shifted 16 bits right;
-	say "'";
-	repeat with the lexeme index running over the half-open interval from the beginning lexeme index to the end lexeme index:
-		say "[if the lexeme index is not the beginning lexeme index] [end if][word lexeme index of A]";
-	say "' as ";
-	let the item counter be zero;
-	repeat with the linked list vertex running through the right-hand parseme linked list of the production:
-		let the parseme be the parseme key of the linked list vertex;
-		increment the item counter;
-		say "[if the item counter is one][otherwise if the item counter is two and the link of the linked list vertex is null] and [otherwise if the item counter is at least three and the link of the linked list vertex is null], and [otherwise], [end if][the human-friendly name of the parseme]";
-	say "[line break]".
-
-To decide what parse tree vertex is the debugger's disambiguation of (L - a linked list):
+To decide what disambiguation feature is the debug command disambiguation choice for (A - a context-free parser) from (L - a linked list) with a none-of-the-above flag (N - a truth state) (this is disambiguating a debug command):
+	always check that A is the debug command parser or else fail at using debug command disambiguating for something other than a debug command;
+	now the debug command disambiguation attempted flag is true;
 	if L is unit:
-		say "[line break]";
-		decide on the parse tree vertex key of L converted to a linked list vertex;
-	let the single parseme be an invalid parseme;
-	let the single parseme flag be true;
-	repeat with the root running through the parse tree vertex keys of L:
-		if the single parseme is an invalid parseme:
-			now the single parseme is the parseme of the root;
-		otherwise:
-			unless the single parseme is the parseme of the root:
-				now the single parseme flag is false;
-				break;
-	let the sanity survivors be a new filtration of L using sanity checks;
-	if the sanity survivors are unit:
-		let the result be a parse tree vertex key popped off of the sanity survivors;
-		if the single parseme flag is true:
-			say "[line break]";
-		otherwise:
-			say "(meaning [the human-friendly name of the parseme of the first child of the result])[paragraph break]";
-		decide on the result;
-	say "[line break]";
-	let the survivors be an empty linked list;
-	if the sanity survivors are empty:
-		repeat with the candidate running through the parse tree vertex keys of L:
-			push the key the candidate and the value the candidate onto the survivors;
+		always check that N is true or else fail at using debug command disambiguating for a non-question;
+		let the disambiguation feature be L converted to a disambiguation feature;
+		say "Do you mean [the disambiguation feature as a disambiguation choice for the debug command parser]? ";
+		if the author consents:
+			decide on the disambiguation feature;
+		decide on none of the offered disambiguation features;
 	otherwise:
-		now the survivors are the sanity survivors;
-	repeat until a break:
-		now the survivors are the replacements for the survivors after the debugger's disambiguation of keys given by finding a word range encoding and values given by finding a value for word range disambiguation with linked list vertices printed by saying a word range disambiguation choice;
-		if the survivors are empty:
-			decide on an invalid parse tree vertex;
-		otherwise if the survivors are unit:
-			decide on a parse tree vertex key popped off of the survivors;
-		now the survivors are the replacements for the survivors after the debugger's disambiguation of keys given by finding a key for production disambiguation and values given by finding a word range encoding with linked list vertices printed by saying a production disambiguation choice;
-		if the survivors are empty:
-			decide on an invalid parse tree vertex;
-		otherwise if the survivors are unit:
-			decide on a parse tree vertex key popped off of the survivors;
-		repeat with the linked list vertex running through the survivors:
-			let the point be the parse tree vertex value of the linked list vertex;
-			now the point is the parse tree vertex to visit after the point;
-			always check that the point is not null or else fail at synchronizing disambiguation trees;
-			write the value the point to the linked list vertex.
+		say "Which do you mean?[line break]";
+		let the option counter be zero;
+		repeat with the linked list vertex running through L:
+			let the disambiguation feature be the linked list vertex converted to a disambiguation feature;
+			increment the option counter;
+			say "[the option counter]. [the disambiguation feature as a disambiguation choice for the debug command parser][line break]";
+		if N is true:
+			increment the option counter;
+			say "[the option counter]. None of the above[line break]";
+		let the choice be the disambiguation choice among the option counter options;
+		if the choice is zero:
+			decide on aborting disambiguation;
+		repeat with the linked list vertex running through L:
+			decrement the choice;
+			if the choice is zero:
+				decide on the linked list vertex converted to a disambiguation feature;
+		decide on none of the offered disambiguation features.
 
 Chapter "Disambiguation Input" - unindexed
 
@@ -1142,8 +1099,8 @@ To dispatch the debug command disambiguation (T - some text) (this is dispatchin
 Section "Disambiguation Requests" - unindexed
 
 To decide what number is the disambiguation choice among (N - a number) options:
+	say "0. Nevermind; ignore this command and let me enter a different one[paragraph break]";
 	while within the debugger window via the debugger wrapping layer:
-		say "0. None of the above[paragraph break]";
 		now the chosen disambiguation number is -1;
 		while the chosen disambiguation number is less than zero or (the chosen disambiguation number is greater than N):
 			say "Enter the number of your selection: ";
@@ -1282,49 +1239,6 @@ A GRIF setup rule (this is the initialize the debugger state rule):
 	now the last-seen call stack divider is a null call frame;
 	now the last-seen compound breakpoint list is an empty linked list;
 	now the user breakpoint hash table is a new hash table with the user breakpoint hash table size buckets.
-
-Book "State-Aware Parsing Sanity Checks" - unindexed
-
-To decide whether (V - a parse tree vertex that has the parseme a function name for the debugger) is sane in a debug command:
-	let the function name be a new synthetic text representing the words matched by V;
-	let the result be whether or not the synthetic text the function name is a function name;
-	delete the synthetic text the function name;
-	decide on the result.
-
-To decide whether (V - a parse tree vertex that has the parseme a function address for the debugger) is sane in a debug command:
-	let the function address be the function address named by V;
-	let the routine record be the routine record for the function address;
-	decide on whether or not the routine record is not an invalid routine record.
-
-To decide whether (V - a parse tree vertex that has the parseme a global name for the debugger) is sane in a debug command:
-	let the global name be a new synthetic text representing the words matched by V;
-	let the result be whether or not the synthetic text the global name is a global name;
-	delete the synthetic text the global name;
-	decide on the result.
-
-To decide whether (V - a parse tree vertex that has the parseme a memory stack variable name for the debugger) is sane in a debug command:
-	let the memory stack variable name be a new synthetic text representing the words matched by V;
-	let the result be whether or not the synthetic text the memory stack variable name is a memory stack variable name;
-	delete the synthetic text the memory stack variable name;
-	decide on the result.
-
-To decide whether (V - a parse tree vertex that has the parseme a local name for the debugger) is sane in a debug command:
-	let the local name be a new synthetic text representing the words matched by V;
-	let the result be whether or not the synthetic text the local name is a local name;
-	delete the synthetic text the local name;
-	decide on the result.
-
-To decide whether (V - a parse tree vertex that has the parseme a kind name for the debugger) is sane in a debug command:
-	let the kind name be a new synthetic text representing the words matched by V;
-	let the result be whether or not the synthetic text the kind name is a kind name;
-	delete the synthetic text the kind name;
-	decide on the result.
-
-To decide whether (V - a parse tree vertex that has the parseme an object name for the debugger) is sane in a debug command:
-	let the object name be a new synthetic text representing the words matched by V;
-	let the result be whether or not the synthetic text the object name is an object name;
-	delete the synthetic text the object name;
-	decide on the result.
 
 Book "Specialized Post-Parsing Disambiguation" - unindexed
 
@@ -3294,12 +3208,12 @@ To decide whether we should ignore the current interruption at (B - a simple bre
 To announce breakpoints at (B - a simple breakpoint):
 	let the breakpoints announced flag be false;
 	if the breakpoint was forced and the debugger running flag is true:
-		say "[bold type]Breakpoint triggered by source text:[roman type] [the name of the forced breakpoint][line break]";
+		say "[line break][bold type]Breakpoint triggered by source text:[roman type] [the name of the forced breakpoint][line break]";
 		now the breakpoints announced flag is true;
 	unless B is an invalid simple breakpoint:
 		repeat with the encountered compound breakpoint running through the compound breakpoint keys of the compound breakpoint list of the B:
 			if the encountered compound breakpoint is enabled:
-				say "[bold type]Breakpoint [the numeric identifier of the encountered compound breakpoint]:[roman type] [the human-friendly name of the encountered compound breakpoint][line break]";
+				say "[if the breakpoints announced flag is false][line break][end if][bold type]Breakpoint [the numeric identifier of the encountered compound breakpoint]:[roman type] [the human-friendly name of the encountered compound breakpoint][line break]";
 				now the breakpoints announced flag is true;
 	if the breakpoints announced flag is true:
 		say "[line break]".
