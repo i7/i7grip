@@ -2227,10 +2227,10 @@ After the preliminaries, there are only two phrases to worry about.  The first,
 	if there is a kind named (T - some text):
 		....
 
-tests whether T is a legal and complete kind name; the condition will (usually)
-hold for "list of people", but (usually) fail for "list".  Kinds of kinds are
-not kinds, so, for instance, there is (again, usually) no kind named "sayable
-value".
+tests whether T is a legal and complete kind name; the condition will (in most
+stories) hold for "list of people", but (in most stories) fail for "list".
+Kinds of kinds are not kinds, so, for instance, there is (again, in most
+stories) no kind named "sayable value".
 
 The second phrase,
 
