@@ -890,10 +890,9 @@ Section "Debug Command Scoring" - unindexed
 
 The debug command scoring rules are [rulebook is] a rulebook.
 
-Section "Debug Command Filtration" - unindexed
+Section "Debug Command Primary Filtration" - unindexed
 
-The debug command filtration rules are [rulebook is] a rulebook.
-
+The primary debug command filtration rules are [rulebook is] a rulebook.
 
 To decide whether (V - a parse tree vertex) is a name error in a debug command:
 	decide no.
@@ -947,9 +946,13 @@ To decide whether a debug command name error appears under (V - a parse tree ver
 			decide yes;
 	decide no.
 
-A debug command filtration rule (this is the eschew name mismatches in debug commands rule):
+A primary debug command filtration rule (this is the eschew name mismatches in debug commands rule):
 	if a debug command name error appears under the root of the parse tree to filter:
 		filter out the parse tree.
+
+Section "Debug Command Secondary Filtration" - unindexed
+
+The secondary debug command filtration rules are [rulebook is] a rulebook.
 
 Chapter "Disambiguation Parser Components" - unindexed
 
@@ -1011,7 +1014,7 @@ To dispatch the debug command (T - some text) (this is dispatching a debug comma
 	while within the debugger window via the debugger wrapping layer:
 		write the punctuated words of T to the debug command parser;
 		now the debug command disambiguation attempted flag is false;		
-		let the root be the root of the match for a debug command canonicalized by the debug command canonicalization rulebook and disambiguated by scores from the debug command scoring rulebook and filtration from the debug command filtration rulebook and disambiguating choices from disambiguating a debug command;
+		let the root be the root of the match for a debug command canonicalized by the debug command canonicalization rulebook and disambiguated by scores from the debug command scoring rulebook and primary filtration from the primary debug command filtration rulebook and secondary filtration from the secondary debug command filtration rulebook and disambiguating choices from disambiguating a debug command;
 		if the root is null:
 			if the debug command disambiguation attempted flag is false:
 				say "I didn't understand that command.  Check for misspellings or type 'help' to see the commands I do know.[paragraph break]";

@@ -193,7 +193,7 @@ To score the parse trees rooted at the keys and canonically rooted at the values
 Chapter "Unconditional Filtration"
 
 [Phase III: Nonsensical parse trees are filtered out.]
-[The filtration rulebook is invoked once per parse tree.  If any rule has the outcome ``filter out the parse tree'', the parse tree is discarded.]
+[The primary filtration rulebook is invoked once per parse tree.  If any rule has the outcome ``filter out the parse tree'', the parse tree is discarded.  Then the same happens with the secondary filtration rulebook.]
 
 [Available to filtration rulebooks:
 	the root of the parse tree to filter, an immutable variable
@@ -642,7 +642,7 @@ To decide what linked list is (L - a linked list) after disambiguating locally w
 
 Chapter "Orchestration"
 
-To decide what parse tree vertex is the root of the match for (S - a parseme) canonicalized by (C - a rulebook) and disambiguated by scores from (E - a rulebook) and filtration from (F - a rulebook) and disambiguating choices from (D - a phrase (context-free parser, linked list, truth state) -> disambiguation feature):
+To decide what parse tree vertex is the root of the match for (S - a parseme) canonicalized by (C - a rulebook) and disambiguated by scores from (E - a rulebook) and primary filtration from (F - a rulebook) and secondary filtration from (G - a rulebook) and disambiguating choices from (D - a phrase (context-free parser, linked list, truth state) -> disambiguation feature):
 	set up the disambiguation framework;
 	let the possibilities be an empty linked list;
 	repeat with the root running through matches for S:
@@ -657,17 +657,21 @@ To decide what parse tree vertex is the root of the match for (S - a parseme) ca
 		if the possibilities are empty:
 			decide on a null parse tree vertex;
 		unless the possibilities are unit:
-			now the possibilities are the possibilities after choosing the Pareto front if it has a unique canonical parse tree;
+			now the possibilities are the possibilities after filtering with G the parse trees rooted at the keys and canonically rooted at the values;
 			if the possibilities are empty:
 				decide on a null parse tree vertex;
 			unless the possibilities are unit:
-				now the possibilities are the possibilities after unifying identical canonical trees;
+				now the possibilities are the possibilities after choosing the Pareto front if it has a unique canonical parse tree;
 				if the possibilities are empty:
 					decide on a null parse tree vertex;
 				unless the possibilities are unit:
-					now the possibilities are the possibilities after disambiguating locally with D for the owner of S;
+					now the possibilities are the possibilities after unifying identical canonical trees;
 					if the possibilities are empty:
 						decide on a null parse tree vertex;
+					unless the possibilities are unit:
+						now the possibilities are the possibilities after disambiguating locally with D for the owner of S;
+						if the possibilities are empty:
+							decide on a null parse tree vertex;
 	let the result be the parse tree vertex value of the possibilities converted to a linked list vertex;
 	[There might be several, equivalent possibilities, so we are careful to delete all of them.]
 	repeat with the possibility running through the possibilities:

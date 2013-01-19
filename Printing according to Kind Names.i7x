@@ -2157,7 +2157,7 @@ To say (X - a number) according to the kind named (T - some text) disambiguated 
 	now the kind name validity check flag is whether or not D is not the default value of a phrase (context-free parser, linked list, truth state) -> disambiguation feature;
 	now the value to check kind name validity with is X;
 	write the punctuated words of T to the kind name parser;
-	let the root be the root of the match for a kind in the singular canonicalized by the kind name canonicalization rulebook and disambiguated by scores from the kind name scoring rulebook and filtration from the kind name filtration rulebook and disambiguating choices from D;
+	let the root be the root of the match for a kind in the singular canonicalized by the kind name canonicalization rulebook and disambiguated by scores from the kind name scoring rulebook and primary filtration from the kind name filtration rulebook and secondary filtration from the kind name filtration rulebook and disambiguating choices from D;
 	if the root is null:
 		say "[X converted to a number] (unable to format a value of this kind)";
 	otherwise:
