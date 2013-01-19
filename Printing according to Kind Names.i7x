@@ -9,6 +9,7 @@ Include Low-Level Text by Brady Garvin.
 Include Low-Level Linked Lists by Brady Garvin.
 Include Low-Level Hash Tables by Brady Garvin.
 Include Punctuated Word Parsing Engine by Brady Garvin.
+Include Disambiguation Framework by Brady Garvin.
 Include Human-Friendly Function Names by Brady Garvin.
 Include Debug File Parsing by Brady Garvin.
 
@@ -49,10 +50,10 @@ To fail at building a semi-punctuated word array from changing text:
 	say "[low-level runtime failure in]Printing according to Kind Names[with explanation]I tried to build a semi-punctuated word array from some text, which means first counting the number of words and then recording each of them.  But the recording process came up with a different number of words than I had originally counted, which means that this text is changing as I print it.[terminating the story]".
 
 To fail at finding kind parameters in (V - a parse tree vertex):
-	say "[low-level runtime failure in]Printing according to Kind Names[with explanation]I was trying to print a value with a given parameterized kind, like 'list of _', but I wasn't able to fill in the blank.  In case it's helpful, the kind parse tree looked like this:[paragraph break][V converted to a parse tree vertex][terminating the story]".
+	say "[low-level runtime failure in]Printing according to Kind Names[with explanation]I was trying to print a value with a given parameterized kind, like 'list of _', but I wasn't able to fill in the blank.  In case it's helpful, the kind parse tree looked like this:[paragraph break][V converted to a parse tree vertex with indentation][terminating the story]".
 
-To fail at finding a kind parameter in the placeholder (V - a parse tree vertex):
-	say "[low-level runtime failure in]Printing according to Kind Names[with explanation]I was trying to print a value with a given kind, but I wasn't able to find the kind.  In case it's helpful, the kind parse tree looked like this:[paragraph break][V converted to a parse tree vertex][terminating the story]".
+To fail at finding the expected number of children when canonicalizing parse tree vertices for rules and rulebooks:
+	say "[low-level runtime failure in]Printing according to Kind Names[with explanation]I was cleaning up my parse of a kind name and found more parameterization of a rule or rulebook kind than should be possible.  That means that my canonicalization code, which performs that clean-up, must have failed recently.[terminating the story]".
 
 Book "Forced Inclusion of the Block Value Management Routines" - unindexed
 
@@ -70,10 +71,11 @@ A kind in the singular and
 	a kind in the plural and
 	a kind preferably in the singular and
 	a kind preferably in the plural and
-	a kind very preferably in the plural and
+	a kind pedantically in the plural [for cases where Inform would use the plural but a human would probably use the singular] and
 	an optional kind preferably in the singular and
-	a nonempty list of kinds and
 	a list of kinds and
+	a nonempty list of kinds and
+	a nothing kind and
 	a nonkind in the singular and
 	a truth state in the singular and
 	a truth state in the plural and
@@ -130,9 +132,13 @@ A kind in the singular and
 	a phrase in the singular and
 	a phrase in the plural and
 	a rule in the singular and
+	a based rule in the singular and
 	a rule in the plural and
+	a based rule in the plural and
 	a rulebook in the singular and
+	a based rulebook in the singular and
 	a rulebook in the plural and
+	a based rulebook in the plural and
 	an activity in the singular and
 	an activity in the plural are parsemes that vary.
 
@@ -146,10 +152,11 @@ A kind printing setup rule (this is the set up the kind name parser rule):
 	now a kind in the plural is a new nonterminal in the kind name parser named "a kind (written in the plural)";
 	now a kind preferably in the singular is a new nonterminal in the kind name parser named "a kind";
 	now a kind preferably in the plural is a new nonterminal in the kind name parser named "a kind";
-	now a kind very preferably in the plural is a new nonterminal in the kind name parser named "a kind";
+	now a kind pedantically in the plural is a new nonterminal in the kind name parser named "a kind";
 	now an optional kind preferably in the singular is a new nonterminal in the kind name parser named "an optional kind";
-	now a nonempty list of kinds is a new nonterminal in the kind name parser named "a partial list of kinds";
 	now a list of kinds is a new nonterminal in the kind name parser named "a (possibly empty) list of kinds";
+	now a nonempty list of kinds is a new nonterminal in the kind name parser named "a partial list of kinds";
+	now a nothing kind is a new nonterminal in the kind name parser named "nothing";
 	now a nonkind in the singular is a new nonterminal in the kind name parser named "an unknown or absent kind";
 	now a truth state in the singular is a new nonterminal in the kind name parser named "a truth state";
 	now a truth state in the plural is a new nonterminal in the kind name parser named "truth states";
@@ -206,9 +213,13 @@ A kind printing setup rule (this is the set up the kind name parser rule):
 	now a phrase in the singular is a new nonterminal in the kind name parser named "a phrase";
 	now a phrase in the plural is a new nonterminal in the kind name parser named "phrases";
 	now a rule in the singular is a new nonterminal in the kind name parser named "a rule";
+	now a based rule in the singular is a new nonterminal in the kind name parser named "a rule with its basis given";
 	now a rule in the plural is a new nonterminal in the kind name parser named "rules";
+	now a based rule in the plural is a new nonterminal in the kind name parser named "rules with their basis given";
 	now a rulebook in the singular is a new nonterminal in the kind name parser named "a rulebook";
+	now a based rulebook in the singular is a new nonterminal in the kind name parser named "a rulebook with its basis given";
 	now a rulebook in the plural is a new nonterminal in the kind name parser named "rulebooks";
+	now a based rulebook in the plural is a new nonterminal in the kind name parser named "rulebooks with their basis given";
 	now an activity in the singular is a new nonterminal in the kind name parser named "an activity";
 	now an activity in the plural is a new nonterminal in the kind name parser named "activities";
 	[//]
@@ -219,13 +230,15 @@ A kind printing setup rule (this is the set up the kind name parser rule):
 	[//]
 	understand "[a kind in the singular]" or "[a kind in the plural]" as a kind preferably in the singular;
 	understand "[a kind in the singular]" or "[a kind in the plural]" as a kind preferably in the plural;
-	understand "[a kind in the singular]" or "[a kind in the plural]" as a kind very preferably in the plural;
-	understand "[a kind preferably in the singular]" or "nothing" as an optional kind preferably in the singular regardless of case;
+	understand "[a kind in the singular]" or "[a kind in the plural]" as a kind pedantically in the plural;
+	understand "[a kind preferably in the singular]" or "[a nothing kind]" as an optional kind preferably in the singular;
 	[//]
-	understand "nothing" or "[a nonempty list of kinds]" as a list of kinds regardless of case;
+	understand "[a nothing kind]" or "[a nonempty list of kinds]" as a list of kinds regardless of case;
 	understand "([a list of kinds])" as a list of kinds;
 	understand "[a kind preferably in the singular]" as a nonempty list of kinds regardless of case;
 	understand "[a kind preferably in the singular], [a nonempty list of kinds]" as a nonempty list of kinds;
+	[//]
+	understand "nothing" as a nothing kind regardless of case;
 	[//]
 	understand "[a nonkind in the singular]" as a kind in the singular;
 	understand "[a truth state in the singular]" as a kind in the singular;
@@ -304,6 +317,7 @@ A kind printing setup rule (this is the set up the kind name parser rule):
 	understand "Unicode character" as a Unicode character in the singular regardless of case;
 	understand "Unicode characters" as a Unicode character in the plural regardless of case;
 	understand "text" as a text in the singular regardless of case;
+	understand "text" as a text in the plural regardless of case; [since it can be used as a mass noun]
 	understand "texts" as a text in the plural regardless of case;
 	understand "indexed text" as an indexed text in the singular regardless of case;
 	understand "indexed texts" as an indexed text in the plural regardless of case;
@@ -352,39 +366,183 @@ A kind printing setup rule (this is the set up the kind name parser rule):
 		now the global for saying a custom kind name is the debug plural of the kind-of-object name;
 		understand "[the global for saying a custom kind name]" as an object in the plural regardless of case;
 	[//]
-	understand "list of [a kind very preferably in the plural]" as a list in the singular regardless of case;
-	understand "lists of [a kind very preferably in the plural]" as a list in the plural regardless of case;
-	understand "[a kind preferably in the plural] valued table column" as a table column in the singular regardless of case;
-	understand "[a kind preferably in the plural] valued table columns" as a table column in the plural regardless of case;
-	understand "relation of [a kind preferably in the plural] to [a kind very preferably in the plural]" as a relation in the singular regardless of case;
-	understand "relations of [a kind preferably in the plural] to [a kind very preferably in the plural]" as a relation in the plural regardless of case;
-	understand "[a kind preferably in the plural] valued property" as a valued property in the singular regardless of case;
-	understand "[a kind preferably in the plural] valued properties" as a valued property in the plural regardless of case;
-	understand "description of [a kind very preferably in the plural]" as a description in the singular regardless of case;
-	understand "descriptions of [a kind very preferably in the plural]" as a description in the plural regardless of case;
+	understand "list of [a kind preferably in the plural]" as a list in the singular regardless of case;
+	understand "lists of [a kind preferably in the plural]" as a list in the plural regardless of case;
+	understand "[a kind pedantically in the plural] valued table column" as a table column in the singular regardless of case;
+	understand "[a kind pedantically in the plural] valued table columns" as a table column in the plural regardless of case;
+	understand "relation of [a kind preferably in the plural] to [a kind preferably in the plural]" as a relation in the singular regardless of case;
+	understand "relations of [a kind preferably in the plural] to [a kind preferably in the plural]" as a relation in the plural regardless of case;
+	understand "[a kind pedantically in the plural] valued property" as a valued property in the singular regardless of case;
+	understand "[a kind pedantically in the plural] valued properties" as a valued property in the plural regardless of case;
+	understand "description of [a kind preferably in the plural]" as a description in the singular regardless of case;
+	understand "descriptions of [a kind preferably in the plural]" as a description in the plural regardless of case;
 	understand "phrase [a list of kinds] -> [an optional kind preferably in the singular]" as a phrase in the singular regardless of case;
 	understand "phrases [a list of kinds] -> [an optional kind preferably in the singular]" as a phrase in the plural regardless of case;
 	understand "rule" as a rule in the singular regardless of case;
 	understand "routine" as a rule in the singular regardless of case;
 	understand "rule producing [a kind preferably in the plural]" as a rule in the singular regardless of case;
-	understand "[a kind preferably in the plural] based rule" as a rule in the singular regardless of case;
-	understand "[a kind preferably in the plural] based rule producing [a kind preferably in the plural]" as a rule in the singular regardless of case;
+	understand "[a based rule in the singular]" as a rule in the singular regardless of case;
+	understand "[a kind pedantically in the plural] based rule" as a based rule in the singular regardless of case;
+	understand "[a kind pedantically in the plural] based rule producing [a kind preferably in the plural]" as a based rule in the singular regardless of case;
 	understand "rules" as a rule in the plural regardless of case;
 	understand "rules producing [a kind preferably in the plural]" as a rule in the plural regardless of case;
-	understand "[a kind preferably in the plural] based rules" as a rule in the plural regardless of case;
-	understand "[a kind preferably in the plural] based rules producing [a kind preferably in the plural]" as a rule in the plural regardless of case;
+	understand "[a based rule in the plural]" as a rule in the singular regardless of case;
+	understand "[a kind pedantically in the plural] based rules" as a based rule in the plural regardless of case;
+	understand "[a kind pedantically in the plural] based rules producing [a kind preferably in the plural]" as a based rule in the plural regardless of case;
 	understand "rulebook" as a rulebook in the singular regardless of case;
 	understand "rulebook producing [a kind preferably in the plural]" as a rulebook in the singular regardless of case;
-	understand "[a kind preferably in the plural] based rulebook" as a rulebook in the singular regardless of case;
-	understand "[a kind preferably in the plural] based rulebook producing [a kind preferably in the plural]" as a rulebook in the singular regardless of case;
+	understand "[a based rulebook in the singular]" as a rule in the singular regardless of case;
+	understand "[a kind pedantically in the plural] based rulebook" as a based rulebook in the singular regardless of case;
+	understand "[a kind pedantically in the plural] based rulebook producing [a kind preferably in the plural]" as a based rulebook in the singular regardless of case;
 	understand "rulebooks" as a rulebook in the plural regardless of case;
 	understand "rulebooks producing [a kind preferably in the plural]" as a rulebook in the plural regardless of case;
-	understand "[a kind preferably in the plural] based rulebooks" as a rulebook in the plural regardless of case;
-	understand "[a kind preferably in the plural] based rulebooks producing [a kind preferably in the plural]" as a rulebook in the plural regardless of case;
+	understand "[a based rulebook in the plural]" as a rule in the singular regardless of case;
+	understand "[a kind pedantically in the plural] based rulebooks" as a based rulebook in the plural regardless of case;
+	understand "[a kind pedantically in the plural] based rulebooks producing [a kind preferably in the plural]" as a based rulebook in the plural regardless of case;
 	understand "activity on [a kind preferably in the plural]" as an activity in the singular regardless of case;
 	understand "activities on [a kind preferably in the plural]" as an activity in the plural regardless of case;
 	[//]
 	put the kind name parser into normal form.
+
+A kind printing setup rule (this is the set up disambiguation for the kind name parser rule):
+	set up the disambiguation framework.
+
+Chapter "Kind Name Canonicalization" - unindexed
+
+The kind name canonicalization rules are [rulebook is] a rulebook.
+
+A kind name canonicalization rule (this is the eliminate punctuated word terminals from kind parse trees rule):
+	let the previous child be a null parse tree vertex;
+	let the child be the first child of the parse tree vertex to canonicalize;
+	while the child is not null:
+		let the next child be the right sibling of the child;
+		if the parseme of the child is a punctuated word terminal:
+			delete the child and its descendants;
+		otherwise:
+			if the previous child is null:
+				write the first child the child to the parse tree vertex to canonicalize;
+			otherwise:
+				write the right sibling the child to the previous child;
+			write the left sibling the previous child to the child;
+			now the previous child is the child;
+		now the child is the next child;
+	if the previous child is null:
+		write the first child a null parse tree vertex to the parse tree vertex to canonicalize;
+	otherwise:
+		write the right sibling a null parse tree vertex to the previous child;
+	write the last child the previous child to the parse tree vertex to canonicalize.
+
+A kind name canonicalization rule (this is the substitute into non-root placeholders in kind parse trees rule):
+	let the previous child be a null parse tree vertex;
+	let the child be the first child of the parse tree vertex to canonicalize;
+	while the child is not null:
+		let the next child be the right sibling of the child;
+		if the parseme of the child is a kind in the singular or the parseme of the child is a kind in the plural or the parseme of the child is a kind preferably in the singular or the parseme of the child is a kind preferably in the plural or the parseme of the child is a kind pedantically in the plural or the parseme of the child is list of kinds or the parseme of the child is a nonempty list of kinds:
+			let the grandchild be the first child of the child;
+			delete the child but not its descendants;
+			if the grandchild is not null:
+				if the previous child is null:
+					write the first child the grandchild to the parse tree vertex to canonicalize;
+				otherwise:
+					write the right sibling the grandchild to the previous child;
+				write the left sibling the previous child to the grandchild;
+				while the grandchild is not null:
+					write the parent (the parse tree vertex to canonicalize) to the grandchild;
+					now the previous child is the grandchild;
+					now the grandchild is the right sibling of the grandchild;
+		otherwise:
+			if the previous child is null:
+				write the first child the child to the parse tree vertex to canonicalize;
+			otherwise:
+				write the right sibling the child to the previous child;
+			write the left sibling the previous child to the child;
+			now the previous child is the child;
+		now the child is the next child;
+	if the previous child is null:
+		write the first child a null parse tree vertex to the parse tree vertex to canonicalize;
+	otherwise:
+		write the right sibling a null parse tree vertex to the previous child;
+	write the last child the previous child to the parse tree vertex to canonicalize.
+
+A last kind name canonicalization rule (this is the canonicalize rules and rulebooks in kind parse trees to two children rule):
+	let the parseme be the parseme of the parse tree vertex to canonicalize;
+	let the first child be the first child of the parse tree vertex to canonicalize;
+	let the last child be the last child of the parse tree vertex to canonicalize;
+	if the parseme is a based rule in the singular or the parseme is a based rule in the plural or the parseme is a based rulebook in the singular or the parseme is a based rulebook in the plural:
+		always check that first child is not null or else fail at finding the expected number of children when canonicalizing parse tree vertices for rules and rulebooks;
+		if the first child is the last child:
+			let the outcome child be a new parse tree vertex for a nothing kind with the parent the parse tree vertex to canonicalize;
+		otherwise:
+			always check that right sibling of the first child is the last child or else fail at finding the expected number of children when canonicalizing parse tree vertices for rules and rulebooks;
+	otherwise if the parseme is a rule in the singular or the parseme is a rule in the plural or the parseme is a rulebook in the singular or the parseme is a rulebook in the plural:
+		if the first child is null:
+			let the basis child be a new parse tree vertex for a nothing kind with the parent the parse tree vertex to canonicalize;
+			let the outcome child be a new parse tree vertex for a nothing kind with the parent the parse tree vertex to canonicalize;
+		otherwise if the first child is the last child:
+			now the parseme is the parseme of the first child;
+			if the parseme is a based rule in the singular or the parseme is a based rule in the plural or the parseme is a based rulebook in the singular or the parseme is a based rulebook in the plural:
+				let the basis child be the first child of the first child;
+				let the outcome child be the last child of the first child;
+				always check that right sibling of the basis child is the outcome child or else fail at finding the expected number of children when canonicalizing parse tree vertices for rules and rulebooks;
+				delete the first child but not its descendants;
+				write the first child the basis child to the parse tree vertex to canonicalize;
+				write the last child the outcome child to the parse tree vertex to canonicalize;
+				write the parent (the parse tree vertex to canonicalize) to the basis child;
+				write the parent (the parse tree vertex to canonicalize) to the outcome child;
+			otherwise:
+				let the basis child be a new parse tree vertex for a nothing kind with the parent the parse tree vertex to canonicalize, placed on the left;
+		otherwise:
+			always check that right sibling of the first child is the last child or else fail at finding the expected number of children when canonicalizing parse tree vertices for rules and rulebooks.
+
+Chapter "Kind Name Scoring" - unindexed
+
+The kind name scoring rules are [rulebook is] a rulebook.
+
+Section "Pluralization Errors" - unindexed
+
+To decide what number is the weighted pluralization error count of (V - a parse tree vertex):
+	decide on zero.
+
+To decide what number is the weighted pluralization error count of (V - a parse tree vertex that has the parseme a kind preferably in the singular):
+	if the parseme of the first child of V is a kind in the singular:
+		decide on zero;
+	decide on two.
+
+To decide what number is the weighted pluralization error count of (V - a parse tree vertex that has the parseme a kind preferably in the plural):
+	if the parseme of the first child of V is a kind in the plural:
+		decide on zero;
+	decide on two.
+
+To decide what number is the weighted pluralization error count of (V - a parse tree vertex that has the parseme a kind pedantically in the plural):
+	if the parseme of the first child of V is a kind in the plural:
+		decide on zero;
+	decide on one.
+
+To decide what number is the weighted pluralization error count under (V - a parse tree vertex):
+	let the result be the weighted pluralization error count of V;
+	repeat with the child running through the children of V:
+		increase the result by the weighted pluralization error count under the child;
+	decide on the result.
+
+A kind name scoring rule (this is the penalize pluralization errors rule):
+	let the result be the weighted pluralization error count under the root of the parse tree to score;
+	give the parse tree to score zero minus the result points for "pluralization errors".
+
+Section "Value Validity" - unindexed
+
+The kind name validity check flag is a truth state that varies.
+The value to check kind name validity with is a number that varies.
+
+A kind name scoring rule (this is the reward value validity rule):
+	if the kind name validity check flag is true:
+		if the value to check kind name validity with is completely valid using the kind parse rooted at the root of the canonicalized parse tree to score:
+			give the parse tree to score one point for "value validity";
+		otherwise:
+			give the parse tree to score zero points for "value validity".
+
+Chapter "Kind Name Filtration" - unindexed
+
+The kind name filtration rules are [rulebook is] a rulebook.
 
 Book "Validation and Printing" - unindexed
 
@@ -829,19 +987,23 @@ To say the topic match value (X - a number) of the command (T - some text):
 
 Part "Validation and Printing Phrases" - unindexed
 
+Chapter "All Values" - unindexed
+
+To decide what text is the validation error for (X - a number) using the kind parse rooted at (V - a parse tree vertex that has the parseme a kind in the singular):
+	decide on the validation error for X using the kind parse rooted at the first child of V and a workaround for Inform bug 848.
+
+To say (X - a number) using the kind parse rooted at (V - a parse tree vertex that has the parseme a kind in the singular):
+	say "[X using the kind parse rooted at the first child of V with paranoia]".
+
 Chapter "General Values" - unindexed
 
 To decide whether (X - a number) is completely valid using the kind parse rooted at (V - a parse tree vertex):
-	decide on whether or not the validation error for X using the kind parse rooted at V and a workaround for Inform bug 848 is empty.
-
-To decide what number is the weighted pluralization error count of (V - a parse tree vertex):
-	decide on zero.
-
-To decide what number is the weighted pluralization error count under (V - a parse tree vertex):
-	let the result be the weighted pluralization error count of V;
-	repeat with the child running through the children of V:
-		increase the result by the weighted pluralization error count under the child;
-	decide on the result.
+	[//// Workaround for Inform bug ### ////]
+	if V has the parseme a list in the singular or V has the parseme a list in the plural:
+		decide on whether or not the list value X is completely valid using the kind parse rooted at V;
+	[//// Workaround for Inform bug ### ////]
+	let the error be the validation error for X using the kind parse rooted at V and a workaround for Inform bug 848;
+	decide on whether or not the error is empty.
 
 Chapter "Nonkind Values" - unindexed
 
@@ -1395,7 +1557,7 @@ To decide what text is the validation error for (X - a number) using the kind pa
 To decide whether the list value (X - a number) is completely valid using the kind parse rooted at (V - a parse tree vertex):
 	if the validation error for the list value X is not empty:
 		decide no;
-	let the subkind vertex be the first match for a kind very preferably in the plural among the children of V;
+	let the subkind vertex be the first child of V;
 	always check that the subkind vertex is not null or else fail at finding kind parameters in V;
 	let the block be X converted to a memory block;
 	let the length be datum number list length datum index of the block;
@@ -1407,13 +1569,14 @@ To decide whether the list value (X - a number) is completely valid using the ki
 				decide no;
 	decide yes.
 
-To decide whether (X - a number) is completely valid using the kind parse rooted at (V - a parse tree vertex that has the parseme a list in the singular):
+[//// Workaround for Inform bug ### above ////]
+[To decide whether (X - a number) is completely valid using the kind parse rooted at (V - a parse tree vertex that has the parseme a list in the singular):
 	decide on whether or not the list value X is completely valid using the kind parse rooted at V.
 To decide whether (X - a number) is completely valid using the kind parse rooted at (V - a parse tree vertex that has the parseme a list in the plural):
-	decide on whether or not the list value X is completely valid using the kind parse rooted at V.
+	decide on whether or not the list value X is completely valid using the kind parse rooted at V.]
 
 To say the list value (X - a number) using the kind parse rooted at (V - a parse tree vertex):
-	let the subkind vertex be the first match for a kind very preferably in the plural among the children of V;
+	let the subkind vertex be the first child of V;
 	always check that the subkind vertex is not null or else fail at finding kind parameters in V;
 	let the block be X converted to a memory block;
 	let the length be datum number list length datum index of the block;
@@ -1970,68 +2133,6 @@ To say (X - a number) using the kind parse rooted at (V - a parse tree vertex th
 To say (X - a number) using the kind parse rooted at (V - a parse tree vertex that has the parseme an activity in the plural):
 	say "[the activity value X]".
 
-Chapter "Placeholder Values" - unindexed
-
-To decide what parse tree vertex is the subkind vertex of the placeholder vertex (V - a parse tree vertex):
-	let the result be the first child of V;
-	while the result is not null and the parseme of the result is a terminal:
-		now the result is the right sibling of the result;
-	always check that the result is not null or else fail at finding a kind parameter in the placeholder V;
-	decide on the result.
-
-To decide what text is the validation error for (X - a number) using the kind parse rooted at (V - a parse tree vertex that has the parseme a kind in the singular):
-	decide on "".
-
-To say (X - a number) using the kind parse rooted at (V - a parse tree vertex that has the parseme a kind in the singular):
-	let the subkind vertex be the subkind vertex of the placeholder vertex V;
-	say "[X using the kind parse rooted at the subkind vertex with paranoia]".
-
-To decide what text is the validation error for (X - a number) using the kind parse rooted at (V - a parse tree vertex that has the parseme a kind in the plural):
-	decide on "".
-
-To say (X - a number) using the kind parse rooted at (V - a parse tree vertex that has the parseme a kind in the plural):
-	let the subkind vertex be the subkind vertex of the placeholder vertex V;
-	say "[X using the kind parse rooted at the subkind vertex with paranoia]".
-
-To decide what text is the validation error for (X - a number) using the kind parse rooted at (V - a parse tree vertex that has the parseme a kind preferably in the singular):
-	decide on "".
-
-To say (X - a number) using the kind parse rooted at (V - a parse tree vertex that has the parseme a kind preferably in the singular):
-	let the subkind vertex be the subkind vertex of the placeholder vertex V;
-	say "[X using the kind parse rooted at the subkind vertex with paranoia]".
-
-To decide what number is the weighted pluralization error count of (V - a parse tree vertex that has the parseme a kind preferably in the singular):
-	let the subkind vertex be the subkind vertex of the placeholder vertex V;
-	if the parseme of the subkind vertex is a kind in the singular:
-		decide on zero;
-	decide on two.
-
-To decide what text is the validation error for (X - a number) using the kind parse rooted at (V - a parse tree vertex that has the parseme a kind preferably in the plural):
-	decide on "".
-
-To say (X - a number) using the kind parse rooted at (V - a parse tree vertex that has the parseme a kind preferably in the plural):
-	let the subkind vertex be the subkind vertex of the placeholder vertex V;
-	say "[X using the kind parse rooted at the subkind vertex with paranoia]".
-
-To decide what number is the weighted pluralization error count of (V - a parse tree vertex that has the parseme a kind preferably in the plural):
-	let the subkind vertex be the subkind vertex of the placeholder vertex V;
-	if the parseme of the subkind vertex is a kind in the plural:
-		decide on zero;
-	decide on one.
-
-To decide what text is the validation error for (X - a number) using the kind parse rooted at (V - a parse tree vertex that has the parseme a kind very preferably in the plural):
-	decide on "".
-
-To say (X - a number) using the kind parse rooted at (V - a parse tree vertex that has the parseme a kind very preferably in the plural):
-	let the subkind vertex be the subkind vertex of the placeholder vertex V;
-	say "[X using the kind parse rooted at the subkind vertex with paranoia]".
-
-To decide what number is the weighted pluralization error count of (V - a parse tree vertex that has the parseme a kind very preferably in the plural):
-	let the subkind vertex be the subkind vertex of the placeholder vertex V;
-	if the parseme of the subkind vertex is a kind in the plural:
-		decide on zero;
-	decide on two.
-
 Part "Redispatch Phrases" - unindexed
 
 To say (X - a number) using the kind parse rooted at (V - a parse tree vertex) with paranoia:
@@ -2044,6 +2145,7 @@ To say (X - a number) using the kind parse rooted at (V - a parse tree vertex) w
 Part "Public Phrases"
 
 To decide whether there is a kind named (T - some text):
+	now the kind name validity check flag is false;
 	write the punctuated words of T to the kind name parser;
 	let the result be false;
 	repeat with the root running through matches for a kind in the singular:
@@ -2052,55 +2154,21 @@ To decide whether there is a kind named (T - some text):
 	delete the punctuated words from the kind name parser;
 	decide on the result.
 
-To say (X - a number) according to the kind named (T - some text):
+To say (X - a number) according to the kind named (T - some text) disambiguated by (D - a phrase (context-free parser, linked list, truth state) -> disambiguation feature):
+	now the kind name validity check flag is whether or not D is not the default value of a phrase (context-free parser, linked list, truth state) -> disambiguation feature;
+	now the value to check kind name validity with is X;
 	write the punctuated words of T to the kind name parser;
-	let the parse list be an empty linked list;
-	let the minimum weighted pluralization error count be -1 [unsigned];
-	repeat with the root running through matches for a kind in the singular:
-		let the weighted pluralization error count be the weighted pluralization error count under the root;
-		if the weighted pluralization error count is unsigned less than the minimum weighted pluralization error count:
-			now the minimum weighted pluralization error count is the weighted pluralization error count;
-			repeat with the alternative running through the parse tree vertex keys of the parse list:
-				delete the alternative and its descendants;
-			delete the parse list;
-			now the parse list is an empty linked list;
-		if the weighted pluralization error count is the minimum weighted pluralization error count:
-			push the key the parse tree vertex corresponding to the root in a new clone of its tree onto the parse list;
-	if the parse list is empty:
-		delete the punctuated words from the kind name parser;
+	let the root be the root of the match for a kind in the singular canonicalized by the kind name canonicalization rulebook and disambiguated by scores from the kind name scoring rulebook and filtration from the kind name filtration rulebook and disambiguating choices from D;
+	if the root is null:
 		say "[X converted to a number] (unable to format a value of this kind)";
-		stop;
-	let the backup parse list be an empty linked list;
-	let the previous linked list vertex be a null linked list vertex;
-	let the current linked list vertex be the parse list converted to a linked list vertex;
-	while the current linked list vertex is not null:
-		let the root be the parse tree vertex key of the current linked list vertex;
-		if X is completely valid using the kind parse rooted at the root:
-			now the previous linked list vertex is the current linked list vertex;
-			now the current linked list vertex is the link of the current linked list vertex;
-		otherwise:
-			push the key the root onto the backup parse list;
-			let the next linked list vertex be the link of the current linked list vertex;
-			if the previous linked list vertex is null:
-				now the parse list is the next linked list vertex converted to a linked list;
-			otherwise:
-				write the link the next linked list vertex to the previous linked list vertex;
-			delete the current linked list vertex;
-			now the current linked list vertex is the next linked list vertex;
-	if the parse list is empty:
-		now the parse list is the backup parse list;
 	otherwise:
-		repeat with the alternative running through the parse tree vertex keys of the backup parse list:
-			delete the alternative and its descendants;
-		delete the backup parse list;
-	[//// NLZ: more disambiguation here]
-	let the root be a parse tree vertex key popped off of the parse list;
-	say X using the kind parse rooted at the root with paranoia;
-	delete the root and its descendants;
-	repeat with the alternative running through the parse tree vertex keys of the parse list:
-		delete the alternative and its descendants;
-	delete the parse list;
+		say "[X using the kind parse rooted at the root with paranoia]";
+		delete the root and its descendants;
 	delete the punctuated words from the kind name parser.
+
+To say (X - a number) according to the kind named (T - some text):
+	let the null disambiguator be the default value of a phrase (context-free parser, linked list, truth state) -> disambiguation feature;
+	say "[X according to the kind named T disambiguated by null disambiguator]".
 
 Book "Setup"
 
