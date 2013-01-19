@@ -52,9 +52,9 @@ Section "The Object Pool Structure" - unindexed
 
 [Layout:
 	4 bytes for the object size (in bytes, which we call M [it must be at least four; see the layout below]) (at offset -8 bytes)
-	4 bytes for the pool size (the total in bytes, which, letting N be the number of objects, is N times M) (at offset -4 bytes)
+	4 bytes for the pool size (the total in bytes, which, letting N be the number of available objects, is N times M) (at offset -4 bytes)
 	4 bytes for the next available object address
-	M*N_0 bytes for the reserved memory (N_0 means the initial value of N)]
+	M*N_0 bytes for the reserved memory (N_0 means the initial value of N, which must be nonnegative)]
 [Layout of an unallocated object:
 	4 bytes for the pointer to the next unallocated object
 	M-4 bytes left over]
@@ -62,7 +62,8 @@ Section "The Object Pool Structure" - unindexed
 Section "Object Pool Construction"
 
 Include (-
-	[ op_newPool count objectSize poolSize result objectAddress otherObjectAddress limit;
+	[ op_newPool count objectSize
+		poolSize result objectAddress otherObjectAddress limit;
 		poolSize=12+count*objectSize;
 		result=llo_permanentMalloc(poolSize);
 		poolSize=poolSize-12;
@@ -93,7 +94,8 @@ To decide what object pool is a new permanent object pool with (N - a number) ob
 Section "Object Pool Allocators"
 
 Include (-
-	[ op_poolAllocate pool result objectSize poolSize objectAddress otherObjectAddress limit;
+	[ op_poolAllocate pool
+		result objectSize poolSize objectAddress otherObjectAddress limit;
 		@aload pool 0 result;
 		if(result){
 			@mcopy 4 result pool;
@@ -106,8 +108,8 @@ Include (-
 		limit=result+poolSize;
 		poolSize=poolSize+poolSize;
 		@astore pool (-1) poolSize;
+		@astore pool 0 objectAddress;
 		if(objectAddress~=limit){
-			@astore pool 0 objectAddress;
 			for(::){
 				otherObjectAddress=objectAddress+objectSize;
 				if(otherObjectAddress==limit){
@@ -123,7 +125,6 @@ Include (-
 				@astore otherObjectAddress 0 objectAddress;
 			}
 		}
-		@astore pool 0 objectAddress;
 		return result;
 	];
 	[ op_poolFree pool address;
