@@ -397,6 +397,12 @@ To decide what text is a new synthetic text representing the words matched by (V
 			now the matched punctuated words accumulator is the accumulator replacement;
 	decide on the matched punctuated words accumulator.
 
+Chapter "Identifying Punctuated Word Terminals"
+
+Definition: a parseme (called S) is a punctuated word terminal:
+	let the parsing phrase be the parsing phrase of S;
+	decide on whether or not the parsing phrase is parsing a punctuated word terminal or the parsing phrase is parsing a punctuated word terminal ignoring case.
+
 Chapter "Saying and Debugging Parse Tree Vertices"
 
 Section "Recursive Phrase for Saying and Debugging Parse Tree Vertices" - unindexed
@@ -516,6 +522,11 @@ we add the words "regardless of case" to the end of the phrase:
 	When play begins:
 		understand "" or "the" as "[the/--]" regardless of case;
 		understand "Zoe" or "[the/--] enemy" as "[Zoe's name]" regardless of case.
+
+Both terminals can be later identified with the test
+
+	if (S - a parseme) is a punctuated word terminal:
+		....
 
 Section: Loading input
 
