@@ -511,7 +511,7 @@ Part "Authorial Consent Parser" - unindexed
 
 Chapter "Authorial Consent Parser Components" - unindexed
 
-Section "The Authorial Consent Parser" - unindexed
+Section "Authorial Consent Parser Proper" - unindexed
 
 The authorial consent parser is a context-free parser that varies.
 
@@ -530,11 +530,40 @@ A GRIF setup rule (this is the set up the authorial consent parser rule):
 	understand "Y" or "Yes" or "YES" as a permanent authorial assent;
 	put the authorial consent parser into normal form.
 
+Chapter "Authorial Consent Input" - unindexed
+
+Section "Authorial Consent Handler" - unindexed
+
+The authorial consent result is a truth state that varies.  The authorial consent result is false.
+The authorial consent permanence is a truth state that varies.  The authorial consent permanence is false.
+
+To dispatch the authorial consent (T - some text) (this is dispatching authorial consent):
+	now the authorial consent result is false;
+	now the authorial consent permanence is false;
+	write the punctuated words of T to the authorial consent parser;
+	repeat with the root running through matches for authorial assent:
+		now the authorial consent result is true;
+	repeat with the root running through matches for permanent authorial assent:
+		now the authorial consent permanence is true;
+	delete the punctuated words from the authorial consent parser.
+
+Section "Authorial Consent Requests" - unindexed
+
+To decide whether the author consents:
+	while within the debugger window via the debugger wrapping layer:
+		request a debug input line to be handled by dispatching authorial consent;
+		while the debugger's line input handler is dispatching authorial consent:
+			wait for the next foreign event using the debugger wrapping layer;
+	decide on the authorial consent result.
+
+To decide whether the consent was permanent:
+	decide on the authorial consent permanence.
+
 Part "Disambiguation Parser" - unindexed
 
 Chapter "Disambiguation Parser Components" - unindexed
 
-Section "The Disambiguation Parser" - unindexed
+Section "Disambiguation Parser Proper" - unindexed
 
 The debug disambiguation parser is a context-free parser that varies.
 
@@ -552,6 +581,40 @@ A GRIF setup rule (this is the set up the debug disambiguation parser rule):
 	understand "[a decimal number for the debugger's disambiguator]" as a disambiguation number;
 	understand "[a decimal number for the debugger's disambiguator].[no line break]" as a disambiguation number;
 	put the debug disambiguation parser into normal form.
+
+Chapter "Disambiguation Input" - unindexed
+
+Section "Disambiguation Handler" - unindexed
+
+The chosen disambiguation number is a number that varies.  The chosen disambiguation number is -1.
+
+To dispatch the debug command disambiguation (T - some text) (this is dispatching a debug command disambiguation):
+	write the punctuated words of T to the debug disambiguation parser;
+	repeat with the root running through matches for a disambiguation number:
+		let the response index be the beginning lexeme index of the first child of the root;
+		let the array content be the punctuated word array content of the debug disambiguation parser;
+		let the response be word response index of the array content;
+		if the synthetic text the response is a decimal number, with an overflow check:
+			now the chosen disambiguation number is the synthetic text the response as a decimal number;
+		otherwise:
+			now the chosen disambiguation number is -1;
+	delete the punctuated words from the debug disambiguation parser.
+
+Section "Disambiguation Requests" - unindexed
+
+To decide what number is the disambiguation choice among (N - a number) options:
+	say "0. Nevermind; ignore this command and let me enter a different one[paragraph break]";
+	while within the debugger window via the debugger wrapping layer:
+		now the chosen disambiguation number is -1;
+		while the chosen disambiguation number is less than zero or (the chosen disambiguation number is greater than N):
+			say "Enter the number of your selection: ";
+			request a debug input line to be handled by dispatching a debug command disambiguation;
+			while the debugger's line input handler is dispatching a debug command disambiguation:
+				wait for the next foreign event using the debugger wrapping layer;
+			if the chosen disambiguation number is less than zero or the chosen disambiguation number is greater than N:
+				say "Please enter a number from 0 to [N converted to a number].  Be sure to use digits, not words.[paragraph break]";
+	say "[line break]";
+	decide on the chosen disambiguation number.
 
 Part "Debug Command Parser" - unindexed
 
@@ -1002,11 +1065,47 @@ Chapter "Debug Command Secondary Filtration" - unindexed
 
 The secondary debug command filtration rules are [rulebook is] a rulebook.
 
-Book "Input" - unindexed
+Chapter "Debug Command Disambiguation" - unindexed
 
-Chapter "Debug Input" - unindexed
+To say (F - a disambiguation feature) as a disambiguation choice for the debug command parser:
+	let the array content be the punctuated word array content of the debug command parser;
+	say "'";
+	repeat with the lexeme index running over the half-open interval from the beginning lexeme index of F to the end lexeme index of F:
+		say "[if the lexeme index is not the beginning lexeme index of F] [end if][word lexeme index of the array content]";
+	say "' as [the human-friendly name of the parseme of F]".
 
-Section "Debug Input Handler" - unindexed
+To decide what disambiguation feature is the debug command disambiguation choice for (A - a context-free parser) from (L - a linked list) with a none-of-the-above flag (N - a truth state) (this is disambiguating a debug command):
+	always check that A is the debug command parser or else fail at using debug command disambiguating for something other than a debug command;
+	now the debug command disambiguation attempted flag is true;
+	if L is unit:
+		always check that N is true or else fail at using debug command disambiguating for a non-question;
+		let the disambiguation feature be L converted to a disambiguation feature;
+		say "Do you mean [the disambiguation feature as a disambiguation choice for the debug command parser]? ";
+		if the author consents:
+			decide on the disambiguation feature;
+		decide on none of the offered disambiguation features;
+	otherwise:
+		say "Which do you mean?[line break]";
+		let the option counter be zero;
+		repeat with the linked list vertex running through L:
+			let the disambiguation feature be the linked list vertex converted to a disambiguation feature;
+			increment the option counter;
+			say "[the option counter]. [the disambiguation feature as a disambiguation choice for the debug command parser][line break]";
+		if N is true:
+			increment the option counter;
+			say "[the option counter]. None of the above[line break]";
+		let the choice be the disambiguation choice among the option counter options;
+		if the choice is zero:
+			decide on aborting disambiguation;
+		repeat with the linked list vertex running through L:
+			decrement the choice;
+			if the choice is zero:
+				decide on the linked list vertex converted to a disambiguation feature;
+		decide on none of the offered disambiguation features.
+
+Chapter "Debug Command Input" - unindexed
+
+Section "Debug Command Input Handler" - unindexed
 
 The last-seen debug command punctuated words are a punctuated word array that varies.
 The last-seen debug command vertex is a parse tree vertex that varies.
@@ -1048,107 +1147,6 @@ To request a debug command:
 	while within the debugger window via the debugger wrapping layer:
 		say "Debug command? ";
 	request a debug input line to be handled by dispatching a debug command.
-
-Section "Debug Command Disambiguation" - unindexed
-
-To say (F - a disambiguation feature) as a disambiguation choice for the debug command parser:
-	let the array content be the punctuated word array content of the debug command parser;
-	say "'";
-	repeat with the lexeme index running over the half-open interval from the beginning lexeme index of F to the end lexeme index of F:
-		say "[if the lexeme index is not the beginning lexeme index of F] [end if][word lexeme index of the array content]";
-	say "' as [the human-friendly name of the parseme of F]".
-
-To decide what disambiguation feature is the debug command disambiguation choice for (A - a context-free parser) from (L - a linked list) with a none-of-the-above flag (N - a truth state) (this is disambiguating a debug command):
-	always check that A is the debug command parser or else fail at using debug command disambiguating for something other than a debug command;
-	now the debug command disambiguation attempted flag is true;
-	if L is unit:
-		always check that N is true or else fail at using debug command disambiguating for a non-question;
-		let the disambiguation feature be L converted to a disambiguation feature;
-		say "Do you mean [the disambiguation feature as a disambiguation choice for the debug command parser]? ";
-		if the author consents:
-			decide on the disambiguation feature;
-		decide on none of the offered disambiguation features;
-	otherwise:
-		say "Which do you mean?[line break]";
-		let the option counter be zero;
-		repeat with the linked list vertex running through L:
-			let the disambiguation feature be the linked list vertex converted to a disambiguation feature;
-			increment the option counter;
-			say "[the option counter]. [the disambiguation feature as a disambiguation choice for the debug command parser][line break]";
-		if N is true:
-			increment the option counter;
-			say "[the option counter]. None of the above[line break]";
-		let the choice be the disambiguation choice among the option counter options;
-		if the choice is zero:
-			decide on aborting disambiguation;
-		repeat with the linked list vertex running through L:
-			decrement the choice;
-			if the choice is zero:
-				decide on the linked list vertex converted to a disambiguation feature;
-		decide on none of the offered disambiguation features.
-
-Chapter "Disambiguation Input" - unindexed
-
-Section "Disambiguation Handler" - unindexed
-
-The chosen disambiguation number is a number that varies.  The chosen disambiguation number is -1.
-
-To dispatch the debug command disambiguation (T - some text) (this is dispatching a debug command disambiguation):
-	write the punctuated words of T to the debug disambiguation parser;
-	repeat with the root running through matches for a disambiguation number:
-		let the response index be the beginning lexeme index of the first child of the root;
-		let the array content be the punctuated word array content of the debug disambiguation parser;
-		let the response be word response index of the array content;
-		if the synthetic text the response is a decimal number, with an overflow check:
-			now the chosen disambiguation number is the synthetic text the response as a decimal number;
-		otherwise:
-			now the chosen disambiguation number is -1;
-	delete the punctuated words from the debug disambiguation parser.
-
-Section "Disambiguation Requests" - unindexed
-
-To decide what number is the disambiguation choice among (N - a number) options:
-	say "0. Nevermind; ignore this command and let me enter a different one[paragraph break]";
-	while within the debugger window via the debugger wrapping layer:
-		now the chosen disambiguation number is -1;
-		while the chosen disambiguation number is less than zero or (the chosen disambiguation number is greater than N):
-			say "Enter the number of your selection: ";
-			request a debug input line to be handled by dispatching a debug command disambiguation;
-			while the debugger's line input handler is dispatching a debug command disambiguation:
-				wait for the next foreign event using the debugger wrapping layer;
-			if the chosen disambiguation number is less than zero or the chosen disambiguation number is greater than N:
-				say "Please enter a number from 0 to [N converted to a number].  Be sure to use digits, not words.[paragraph break]";
-	say "[line break]";
-	decide on the chosen disambiguation number.
-
-Chapter "Authorial Consent Input" - unindexed
-
-Section "Authorial Consent Handler" - unindexed
-
-The authorial consent result is a truth state that varies.  The authorial consent result is false.
-The authorial consent permanence is a truth state that varies.  The authorial consent permanence is false.
-
-To dispatch the authorial consent (T - some text) (this is dispatching authorial consent):
-	now the authorial consent result is false;
-	now the authorial consent permanence is false;
-	write the punctuated words of T to the authorial consent parser;
-	repeat with the root running through matches for authorial assent:
-		now the authorial consent result is true;
-	repeat with the root running through matches for permanent authorial assent:
-		now the authorial consent permanence is true;
-	delete the punctuated words from the authorial consent parser.
-
-Section "Authorial Consent Requests" - unindexed
-
-To decide whether the author consents:
-	while within the debugger window via the debugger wrapping layer:
-		request a debug input line to be handled by dispatching authorial consent;
-		while the debugger's line input handler is dispatching authorial consent:
-			wait for the next foreign event using the debugger wrapping layer;
-	decide on the authorial consent result.
-
-To decide whether the consent was permanent:
-	decide on the authorial consent permanence.
 
 Book "State"
 
