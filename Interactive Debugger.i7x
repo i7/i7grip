@@ -1148,6 +1148,157 @@ To request a debug command:
 		say "Debug command? ";
 	request a debug input line to be handled by dispatching a debug command.
 
+Chapter "Debug Command Demand-Driven Disambiguation" - unindexed
+
+Section "Function Name Disambiguation" - unindexed
+
+To decide what number is the address of the function whose name is named by (V - a parse tree vertex):
+	let the function name be a new synthetic text representing the words matched by V;
+	ensure that all routines have names;
+	let the function list be the list of addresses matching the function name the function name;
+	repeat with the linked list vertex running through the function list:
+		let the key be the number key of the linked list vertex;
+		let the moribund vertex be the first match for the key the key after the linked list vertex;
+		while the moribund vertex is not null:
+			let the discarded value be the linked list vertex converted to a linked list after removing the moribund vertex;
+			now the moribund vertex is the first match for the key the key after the linked list vertex;
+	if the function list is empty:
+		say "I couldn't find any such function.  Check for misspellings.[paragraph break]";
+		delete the synthetic text the function name;
+		decide on zero;
+	if the function list is unit:
+		delete the synthetic text the function name;
+		decide on a number key popped off of the function list;
+	let the sequence point be the sequence point to highlight;
+	say "Which do you mean?[line break]";
+	let the option counter be zero;
+	repeat with the function address running through the number keys of the function list:
+		increment the option counter;
+		say "[the option counter]. '[the function name]' as '[the human-friendly name for the function at address the function address], which begins like this:[line break]";
+		let the routine record be the routine record for the function address;
+		let the debug mode be the preferred debug mode for the routine record;
+		list the routine record with the debug mode the debug mode and the sequence point the sequence point and the listing limit the disambiguation listing length;
+	delete the synthetic text the function name;
+	let the choice be the disambiguation choice among the option counter options;
+	repeat with the function address running through the number keys of the function list:
+		decrement the choice;
+		if the choice is zero:
+			delete the function list;
+			decide on the function address;
+	delete the function list;
+	decide on zero.
+
+Section "Global Name Disambiguation" - unindexed
+
+To decide what global record is the global record named by (V - a parse tree vertex):
+	let the global name be a new synthetic text representing the words matched by V;
+	let the global record list be a new list of global records matching the global name the global name;
+	repeat with the linked list vertex running through the global record list:
+		let the key be the global record key of the linked list vertex;
+		let the address be the address of the key;
+		let the remaining list be the link of the linked list vertex converted to a linked list;
+		if the source version of the key is six:
+			repeat with the potentially moribund vertex running through the remaining list:
+				let the potentially moribund key be the global record key of the potentially moribund vertex;
+				if the address of the potentially moribund key is the address and the source version of the potentially moribund key is seven:
+					now the key is the potentially moribund key;
+					write the key the key to the linked list vertex;
+					let the discarded value be the linked list vertex converted to a linked list after removing the potentially moribund vertex;
+					now the remaining list is the link of the linked list vertex converted to a linked list;
+					break;
+		if the source version of the key is seven:
+			repeat with the potentially moribund vertex running through the remaining list:
+				let the potentially moribund key be the global record key of the potentially moribund vertex;
+				if the address of the potentially moribund key is the address and the source version of the potentially moribund key is six:
+					let the discarded value be the linked list vertex converted to a linked list after removing the potentially moribund vertex;
+	if the global record list is empty:
+		say "I couldn't find any such non-temporary named value.  Check for misspellings.[paragraph break]";
+		delete the synthetic text the global name;
+		decide on an invalid global record;
+	if the global record list is unit:
+		delete the synthetic text the global name;
+		decide on a global record key popped off of the global record list;
+	say "Which do you mean?[line break]";
+	let the option counter be zero;
+	repeat with the global record running through the global record keys of the global record list:
+		increment the option counter;
+		say "[the option counter]. '[the global name]' as '[the human-friendly name of the global record]', an I[the source version of the global record] non-temporary named value[line break]";
+	delete the synthetic text the global name;
+	let the choice be the disambiguation choice among the option counter options;
+	repeat with the global record running through the global record keys of the global record list:
+		decrement the choice;
+		if the choice is zero:
+			delete the global record list;
+			decide on the global record;
+	delete the global record list;
+	decide on an invalid global record.
+
+Section "Memory Stack Variable Name Disambiguation" - unindexed
+
+[Inform should guarantee either zero or one matches, so we really don't disambiguate.]
+To decide what memory stack variable record is the memory stack variable record named by (V - a parse tree vertex):
+	let the memory stack variable name be a new synthetic text representing the words matched by V;
+	let the memory stack variable record list be a new list of memory stack variable records matching the memory stack variable name the memory stack variable name;
+	if the memory stack variable record list is empty:
+		say "I couldn't find any such rulebook or action variable.  Check for misspellings.[paragraph break]";
+		delete the synthetic text the memory stack variable name;
+		decide on an invalid memory stack variable record;
+	let the result be a memory stack variable record key popped off of the memory stack variable record list;
+	delete the synthetic text the memory stack variable name;
+	delete the memory stack variable record list;
+	decide on the result.
+
+Section "Local Name Disambiguation" - unindexed
+
+To decide what number is the local index named by (V - a parse tree vertex):
+	let the local name be a new synthetic text representing the words matched by V;
+	let the I7 result be the index of the local with I7 name the local name in the selected frame;
+	let the I6 result be the index of the local with I6 name the local name in the selected frame;
+	if the I7 result is at least zero:
+		if the I6 result is at least zero:
+			say "Which do you mean?[line break]";
+			say "1. '[the local name]' as '[the local name]', an I6 temporary named value[line break]";
+			say "2. '[the local name]' as '[the local name]', an I7 temporary named value[line break]";
+			delete the synthetic text the local name;
+			let the choice be the disambiguation choice among the two options;
+			if the choice is:
+				-- 1:
+					decide on the I6 result;
+				-- 2:
+					decide on the I7 result;
+				-- otherwise:
+					decide on -1;
+		otherwise:
+			delete the synthetic text the local name;
+			decide on the I7 result;
+	otherwise if the I6 result is at least zero:
+		delete the synthetic text the local name;
+		decide on the I6 result;
+	otherwise:
+		say "I couldn't find any such temporary named value in the selected call frame.  Check for misspellings or use the command 'backtrace' to see which call frame is selected.[paragraph break]";
+		delete the synthetic text the local name;
+		decide on -1.
+
+Section "Kind Name Disambiguation" - unindexed
+
+[////]
+
+Section "Object Name Disambiguation" - unindexed
+
+[Inform should guarantee either zero or one matches, so we really don't disambiguate.]
+To decide what number is the object value named by (V - a parse tree vertex):
+	let the object name be a new synthetic text representing the words matched by V;
+	downcase the synthetic text the object name;
+	let the object address list be a new list of object addresses matching the object name the object name;
+	if the object address list is empty:
+		say "I couldn't find any such object.  Note that I only understand object by their full source text names, as printed in the world index.[paragraph break]";
+		delete the synthetic text the object name;
+		decide on -1;
+	let the result be a number key popped off of the object address list;
+	delete the synthetic text the object name;
+	delete the object address list;
+	decide on the result.
+
 Book "State"
 
 Chapter "Running and Continuing Flags" - unindexed
@@ -1246,157 +1397,6 @@ A GRIF setup rule (this is the initialize the debugger state rule):
 	now the last-seen call stack divider is a null call frame;
 	now the last-seen compound breakpoint list is an empty linked list;
 	now the user breakpoint hash table is a new hash table with the user breakpoint hash table size buckets.
-
-Book "Specialized Post-Parsing Disambiguation" - unindexed
-
-Chapter "Function Name Disambiguation" - unindexed
-
-To decide what number is the address of the function whose name is named by (V - a parse tree vertex):
-	let the function name be a new synthetic text representing the words matched by V;
-	ensure that all routines have names;
-	let the function list be the list of addresses matching the function name the function name;
-	repeat with the linked list vertex running through the function list:
-		let the key be the number key of the linked list vertex;
-		let the moribund vertex be the first match for the key the key after the linked list vertex;
-		while the moribund vertex is not null:
-			let the discarded value be the linked list vertex converted to a linked list after removing the moribund vertex;
-			now the moribund vertex is the first match for the key the key after the linked list vertex;
-	if the function list is empty:
-		say "I couldn't find any such function.  Check for misspellings.[paragraph break]";
-		delete the synthetic text the function name;
-		decide on zero;
-	if the function list is unit:
-		delete the synthetic text the function name;
-		decide on a number key popped off of the function list;
-	let the sequence point be the sequence point to highlight;
-	say "Which do you mean?[line break]";
-	let the option counter be zero;
-	repeat with the function address running through the number keys of the function list:
-		increment the option counter;
-		say "[the option counter]. '[the function name]' as '[the human-friendly name for the function at address the function address], which begins like this:[line break]";
-		let the routine record be the routine record for the function address;
-		let the debug mode be the preferred debug mode for the routine record;
-		list the routine record with the debug mode the debug mode and the sequence point the sequence point and the listing limit the disambiguation listing length;
-	delete the synthetic text the function name;
-	let the choice be the disambiguation choice among the option counter options;
-	repeat with the function address running through the number keys of the function list:
-		decrement the choice;
-		if the choice is zero:
-			delete the function list;
-			decide on the function address;
-	delete the function list;
-	decide on zero.
-
-Chapter "Global Name Disambiguation" - unindexed
-
-To decide what global record is the global record named by (V - a parse tree vertex):
-	let the global name be a new synthetic text representing the words matched by V;
-	let the global record list be a new list of global records matching the global name the global name;
-	repeat with the linked list vertex running through the global record list:
-		let the key be the global record key of the linked list vertex;
-		let the address be the address of the key;
-		let the remaining list be the link of the linked list vertex converted to a linked list;
-		if the source version of the key is six:
-			repeat with the potentially moribund vertex running through the remaining list:
-				let the potentially moribund key be the global record key of the potentially moribund vertex;
-				if the address of the potentially moribund key is the address and the source version of the potentially moribund key is seven:
-					now the key is the potentially moribund key;
-					write the key the key to the linked list vertex;
-					let the discarded value be the linked list vertex converted to a linked list after removing the potentially moribund vertex;
-					now the remaining list is the link of the linked list vertex converted to a linked list;
-					break;
-		if the source version of the key is seven:
-			repeat with the potentially moribund vertex running through the remaining list:
-				let the potentially moribund key be the global record key of the potentially moribund vertex;
-				if the address of the potentially moribund key is the address and the source version of the potentially moribund key is six:
-					let the discarded value be the linked list vertex converted to a linked list after removing the potentially moribund vertex;
-	if the global record list is empty:
-		say "I couldn't find any such non-temporary named value.  Check for misspellings.[paragraph break]";
-		delete the synthetic text the global name;
-		decide on an invalid global record;
-	if the global record list is unit:
-		delete the synthetic text the global name;
-		decide on a global record key popped off of the global record list;
-	say "Which do you mean?[line break]";
-	let the option counter be zero;
-	repeat with the global record running through the global record keys of the global record list:
-		increment the option counter;
-		say "[the option counter]. '[the global name]' as '[the human-friendly name of the global record]', an I[the source version of the global record] non-temporary named value[line break]";
-	delete the synthetic text the global name;
-	let the choice be the disambiguation choice among the option counter options;
-	repeat with the global record running through the global record keys of the global record list:
-		decrement the choice;
-		if the choice is zero:
-			delete the global record list;
-			decide on the global record;
-	delete the global record list;
-	decide on an invalid global record.
-
-Chapter "Memory Stack Variable Name Disambiguation" - unindexed
-
-[Inform should guarantee either zero or one matches, so we really don't disambiguate.]
-To decide what memory stack variable record is the memory stack variable record named by (V - a parse tree vertex):
-	let the memory stack variable name be a new synthetic text representing the words matched by V;
-	let the memory stack variable record list be a new list of memory stack variable records matching the memory stack variable name the memory stack variable name;
-	if the memory stack variable record list is empty:
-		say "I couldn't find any such rulebook or action variable.  Check for misspellings.[paragraph break]";
-		delete the synthetic text the memory stack variable name;
-		decide on an invalid memory stack variable record;
-	let the result be a memory stack variable record key popped off of the memory stack variable record list;
-	delete the synthetic text the memory stack variable name;
-	delete the memory stack variable record list;
-	decide on the result.
-
-Chapter "Local Name Disambiguation" - unindexed
-
-To decide what number is the local index named by (V - a parse tree vertex):
-	let the local name be a new synthetic text representing the words matched by V;
-	let the I7 result be the index of the local with I7 name the local name in the selected frame;
-	let the I6 result be the index of the local with I6 name the local name in the selected frame;
-	if the I7 result is at least zero:
-		if the I6 result is at least zero:
-			say "Which do you mean?[line break]";
-			say "1. '[the local name]' as '[the local name]', an I6 temporary named value[line break]";
-			say "2. '[the local name]' as '[the local name]', an I7 temporary named value[line break]";
-			delete the synthetic text the local name;
-			let the choice be the disambiguation choice among the two options;
-			if the choice is:
-				-- 1:
-					decide on the I6 result;
-				-- 2:
-					decide on the I7 result;
-				-- otherwise:
-					decide on -1;
-		otherwise:
-			delete the synthetic text the local name;
-			decide on the I7 result;
-	otherwise if the I6 result is at least zero:
-		delete the synthetic text the local name;
-		decide on the I6 result;
-	otherwise:
-		say "I couldn't find any such temporary named value in the selected call frame.  Check for misspellings or use the command 'backtrace' to see which call frame is selected.[paragraph break]";
-		delete the synthetic text the local name;
-		decide on -1.
-
-Chapter "Kind Name Disambiguation" - unindexed
-
-[////]
-
-Chapter "Object Name Disambiguation" - unindexed
-
-[Inform should guarantee either zero or one matches, so we really don't disambiguate.]
-To decide what number is the object value named by (V - a parse tree vertex):
-	let the object name be a new synthetic text representing the words matched by V;
-	downcase the synthetic text the object name;
-	let the object address list be a new list of object addresses matching the object name the object name;
-	if the object address list is empty:
-		say "I couldn't find any such object.  Note that I only understand object by their full source text names, as printed in the world index.[paragraph break]";
-		delete the synthetic text the object name;
-		decide on -1;
-	let the result be a number key popped off of the object address list;
-	delete the synthetic text the object name;
-	delete the object address list;
-	decide on the result.
 
 Book "Commands" - unindexed
 
