@@ -107,7 +107,70 @@ To fail at recovering the debugger windows:
 To fail at iterating from a given sequence point:
 	say "[runtime failure in]Interactive Debugger[with explanation]I failed to find the assembly instruction at what I believed to be a sequence point; either the code has changed while the story was running or I have become confused.[continuing anyway]".
 
-Book "User Interface" - unindexed
+Book "Simulated Parallelism"
+
+Part "Parallelism State" - unindexed
+
+Chapter "Running and Continuing Flags" - unindexed
+
+The debugger's story-has-run flag is a truth state that varies.  The debugger's story-has-run flag is false.
+The debugger story-running flag is a truth state that varies.  The debugger story-running flag is false.
+The debugger story-continuing flag is a truth state that varies.  The debugger story-continuing flag is false.
+
+Chapter "Coexecution State" - unindexed
+
+A debugger coexecution state is a kind of value.
+The debugger coexecution states are story interrupted, story waiting for input, and story unpaused.
+
+The current debugger coexecution state is a debugger coexecution state that varies.  The current debugger coexecution state is story unpaused.
+
+The debugger prompting flag is a truth state that varies.  The debugger prompting flag is true.
+
+Part "Separation of the VM and Story Startup"
+
+Chapter "Initial Breakpoint"
+
+A last GRIF instrumented post-hijacking rule (this is the initial breakpoint rule):
+	force a breakpoint named "The initial breakpoint";
+	now the debugger story-running flag is true.
+
+Part "Separation of the VM and Story Shutdown"
+
+Chapter "Idle on Quit" - unindexed
+
+Include (-
+	Array id_ignoredEvent --> 4;
+	[ id_idleOnQuit;
+		(+ the debugger story-running flag +)=false;
+		for(::){
+			glk_select(id_ignoredEvent);
+		}
+	];
+-).
+
+To decide what number is the address of the idle-on-quit routine: (- id_idleOnQuit -).
+
+Chapter "Limiting Story Quits"
+
+A GRIF instrumentation rule (this is the limit effects of story quits to the story rule):
+	if the no more than one line input request at a time option is not active:
+		repeat with the instruction vertex running through occurrences of the operation code op-quit in the scratch space:
+			write the operation code op-callf to the instruction vertex;
+			write the addressing mode constant addressing mode to parameter zero of the instruction vertex;
+			write the address of the idle-on-quit routine to parameter zero of the instruction vertex;
+			write the addressing mode zero-or-discard addressing mode to parameter one of the instruction vertex.
+
+Part "Transfer of Control"
+
+Chapter "Forcing a Breakpoint as an Out-of-World Action"
+
+Forcing a breakpoint is an action out of world applying to nothing.
+Understand "force a breakpoint" as forcing a breakpoint.
+
+Carry out forcing a breakpoint:
+	force a breakpoint named "The out-of-world action 'forcing a breakpoint'".
+
+Part "User Interface" - unindexed
 
 Chapter "Window Wrapping" - unindexed
 
@@ -286,6 +349,365 @@ Section "The Layering Rule" - unindexed
 
 A Glk layering rule (this is the debugger window wrapper rule):
 	install hiding the debugger window wrapping as the debugger wrapping layer whose Glk layer notifications are handled by handling a Glk layer notification for the debugger wrapping layer and whose foreign events are handled by handling a wrapped event for the debugger wrapping layer.
+
+Book "Debugger State"
+
+Chapter "Debug Modes"
+
+A debug mode is a kind of value.  The debug modes are debugging at the I7 level, debugging at the I6 level, and debugging at the Glulx assembly level.
+The specification of a debug mode is "Debug modes represent a preferred language for debugging: I7, I6, or Glulx assembly."
+
+The currently preferred debug mode is a debug mode that varies.  The currently preferred debug mode is debugging at the I7 level.
+
+Chapter "Preferences"
+
+[GRIF defines:]
+[The GRIF allows saves flag is a truth state that varies.]
+
+[Call Stack Tracking defines:]
+[The original arguments flag is a truth state that varies.
+The temporary named values flag is a truth state that varies.
+The catch tokens flag is a truth state that varies.
+The call stack simplification flag is a truth state that varies.
+The call frame numbering flag is a truth state that varies.
+The call stack addresses flag is a truth state that varies.]
+
+Section "Warnings"
+
+The showme warnings flag is a truth state that varies.
+The lengthly listing warnings flag is a truth state that varies.
+
+Section "Default Preferences"
+
+A GRIF setup rule (this is the default debugger preferences rule):
+	now the original arguments flag is true;
+	now the temporary named values flag is true;
+	now the catch tokens flag is false;
+	now the call stack simplification flag is true;
+	now the call frame numbering flag is true;
+	now the showme warnings flag is true;
+	now the lengthly listing warnings flag is false;
+	now the GRIF allows saves flag is false.
+
+Chapter "Current Call Frame" - unindexed
+
+The debugger's current call frame number is a number that varies.
+The debugger's current call frame is a call frame that varies.
+
+Chapter "Control Flow Manipulation" - unindexed
+
+A debugger control flow state is a kind of value.  The debugger control flow states are responding after a continue, responding after a sequence point step, responding after a sequence point next, responding after a step, responding after a next, and responding after a finish.  The specification of a debugger control flow state is "Debugger control flow states are used by the debugger to remember what it was doing when it receives a breakpoint notification.  Generally they record the last command executed."
+
+A debugger control flow attitude is a kind of value.  The debugger control flow attitude are responding after a cautious advance and responding after an assured advance.  The specification of a debugger control flow attitude is "Debugger control flow attitudes are used by the debugger to remember how it was proceeding when it receives a breakpoint notification.  Cautious advances, those that check on the story state at every opportunity, are used until the debugger is free from at least one previously seen breakpoint.  Assured advances are used thereafter, and pause only as needed for the command they carry out."
+
+[This is the control flow state, as described above.]
+The debugger's control flow state is a debugger control flow state that varies.
+
+[This is the control flow attitude, as described above.]
+The debugger's control flow attitude is a debugger control flow attitude that varies.
+
+[We remember what the call stack looked like by keeping a copy here.  More specifically, we store the *outermost* call frame, since that makes life easier in the main debugger routine.  Be careful: not all call frame phrases work if we've changed the call stack in the meantime.]
+The last-seen call stack root is a call frame that varies.
+
+[We also keep track of the frame that was selected.]
+The last-seen call stack divider is a call frame that varies.
+
+[And on top of that, the sequence point last seen.]
+The last-seen sequence point for the last-seen call stack is a number that varies.
+
+[If we were stopped by one or more breakpoints last time we talked with the author we don't want to report those breakpoints again unless the set has changed.  So we keep the old set here.]
+The last-seen compound breakpoint list is a linked list that varies.
+
+Chapter "User Breakpoints" - unindexed
+
+[Maps breakpoint numbers to compound breakpoints]
+The user breakpoint hash table is a hash table that varies.
+
+Chapter "Debugger Initialization" - unindexed
+
+A GRIF setup rule (this is the initialize the debugger state rule):
+	now the debugger's control flow state is responding after a continue;
+	now the debugger's control flow attitude is responding after an assured advance;
+	now the debugger's current call frame is a null call frame;
+	now the last-seen call stack root is a null call frame;
+	now the last-seen call stack divider is a null call frame;
+	now the last-seen compound breakpoint list is an empty linked list;
+	now the user breakpoint hash table is a new hash table with the user breakpoint hash table size buckets.
+
+Book "Main Debugger Routine" - unindexed
+
+Chapter "Interruption Control" - unindexed
+
+To decide what number is the universal breakpoint flag index for the sequence point (A - a number) according to the debugger (this is choosing the universal breakpoint flag index for a sequence point according to the debugger):
+	let the routine record be the routine record owning the sequence point A;
+	if the routine record is not an invalid routine record and the function at address the function address of the routine record is elided in the simplified call stack:
+		decide on zero;
+	decide on one.
+
+The phrase that chooses the universal breakpoint flag index for a sequence point is choosing the universal breakpoint flag index for a sequence point according to the debugger.
+
+[Roughly speaking, true unless all call frames and call sites in the current stack and the last-seen one match up.]
+To decide whether the call frame changes warrant a distinction from the previous interruptions:
+	let the previous call frame be the last-seen call stack root;
+	let the current call frame be the root of the debugger's current call frame;
+	if the current call frame is null or the previous call frame is null:
+		decide on whether or not the current call frame is not the previous call frame;
+	let the call site consistency flag be true;
+	repeat until a break:
+		if the current call frame is null or the previous call frame is null:
+			decide on whether or not the current call frame is not the previous call frame;
+		unless the call site consistency flag is true:
+			decide yes;
+		unless the uninstrumented function address of the current call frame is the uninstrumented function address of the previous call frame:
+			decide yes;
+		now the call site consistency flag is whether or not the most recent instruction address of the current call frame is the most recent instruction address of the previous call frame;
+		now the current call frame is the inward link of the current call frame;
+		now the previous call frame is the inward link of the previous call frame.
+
+A debugger change direction is a kind of value.  The debugger change directions are a change inward from the reference frame, a change within the reference frame, and a change outward from the reference frame.  The specification of a debugger change direction is "When one of the internal breakpoints for commands like step and next is triggered, the debugger uses debugger change directions to decide whether the breakpoint was fired in the expected way or is merely a false alarm."
+
+To decide whether this interruption should be ignored by the control flow command:
+	[The continue command ignores every such thing.]
+	if the debugger's control flow state is responding after a continue:
+		decide yes;
+	[While the sequence point step command never ignores anything.]
+	if the debugger's control flow state is responding after a sequence point step:
+		decide no;
+	let the previous call frame be the last-seen call stack root;
+	let the current call frame be the root of the debugger's current call frame;
+	[We ought not obliterate the call stack, but, if we do, let us take notice.]
+	if the previous call frame is null or the current call frame is null:
+		decide no;
+	let the change direction be a debugger change direction;
+	let the function change flag be false;
+	let the previous line comparison call frame be an invalid call frame;
+	let the current line comparison call frame be an invalid call frame;
+	[Find where the change is and what it is.]
+	repeat until a break:
+		unless the call stack simplification flag is true and the current call frame is elided in the simplified call stack:
+			now the previous line comparison call frame is the previous call frame;
+			now the current line comparison call frame is the current call frame;
+		unless the uninstrumented function address of the current call frame is the uninstrumented function address of the previous call frame:
+			now the change direction is a change outward from the reference frame;
+			now the function change flag is true;
+			break;
+		if the inward link of the previous call frame is null:
+			now the change direction is a change within the reference frame;
+			break;
+		if the inward link of the current call frame is null:
+			if the previous call frame is the last-seen call stack divider:
+				now the change direction is a change within the reference frame;
+				break;
+			now the change direction is a change outward from the reference frame;
+			break;
+		if the previous call frame is the last-seen call stack divider:
+			if the most recent instruction address of the current call frame is the most recent instruction address of the previous call frame:
+				now the change direction is a change inward from the reference frame;
+				break;
+			now the change direction is a change within the reference frame;
+			break;
+		unless the most recent instruction address of the current call frame is the most recent instruction address of the previous call frame:
+			now the change direction is a change outward from the reference frame;
+			break;
+		now the current call frame is the inward link of the current call frame;
+		now the previous call frame is the inward link of the previous call frame;
+	if the function change flag is true:
+		decide no;
+	[Some commands ignore or acknowledge all changes in a given direction.]
+	if the change direction is:
+		-- a change inward from the reference frame:
+			unless the debugger's control flow state is responding after a step:
+				[As things currently stand, this shouldn't be possible.  But we want to be friendly to other extensions.]
+				decide yes;
+		-- a change within the reference frame:
+			if the debugger's control flow state is responding after a finish:
+				[As things currently stand, this shouldn't be possible.  But we want to be friendly to other extensions.]
+				decide yes;
+		-- a change outward from the reference frame:
+			if the debugger's control flow state is responding after a finish:
+				decide no;
+	[In fact, sequence point next cannot ignore for any other reason.]
+	if the debugger's control flow state is responding after a sequence point next:
+		decide no;
+	[But the other commands can ignore the breakpoint if the story hasn't moved off of the previously seen line.]
+	[If we can already tell that it has, or that we don't know, then we don't ignore the breakpoint.]
+	if the previous line comparison call frame is null or the current line comparison call frame is null:
+		decide no;
+	[When stepping, entering a non-elided frame is tantamount to moving off the previously seen line.]
+	if the debugger's control flow state is responding after a step:
+		let the inward call frame be the inward link of the current line comparison call frame;
+		while the inward call frame is not null:
+			unless the call stack simplification flag is true and the inward call frame is elided in the simplified call stack:
+				decide no;
+			now the inward call frame is the inward link of the inward call frame;
+	[Otherwise, we do the line comparison.]
+	let the previous sequence point be the last-seen sequence point of the previous line comparison call frame or the last-seen sequence point for the last-seen call stack if it is innermost;
+	let the current sequence point be the last-seen sequence point of the current line comparison call frame or the last-seen sequence point before the last-seen breakpoint if it is innermost;
+	let the routine record be the routine record owning the sequence point the previous sequence point;
+	if the currently preferred debug mode is debugging at the I7 level and the preferred debug mode for the routine record is debugging at the I7 level:
+		let the previous line number be the I7 line number for the sequence point the previous sequence point in the routine record the routine record;
+		let the current line number be the I7 line number for the sequence point the current sequence point in the routine record the routine record;
+		decide on whether or not the previous line number is the current line number;
+	otherwise if the preferred debug mode for the routine record is not debugging at the Glulx assembly level:
+		let the previous line number be the I6 line number for the sequence point the previous sequence point;
+		let the current line number be the I6 line number for the sequence point the current sequence point;
+		decide on whether or not the previous line number is the current line number;
+	decide yes.
+
+[Roughly speaking, true when the old selected frame is gone.]
+To decide whether the call frame changes allow an assured advance:
+	let the previous call frame be the last-seen call stack root;
+	let the current call frame be the root of the debugger's current call frame;
+	repeat until a break:
+		if the current call frame is null:
+			decide yes;
+		always check that the previous call frame is not null or else fail at encountering a divider in the last-seen call stack;
+		if the previous call frame is the last-seen call stack divider:
+			decide no;
+		unless the uninstrumented function address of the current call frame is the uninstrumented function address of the previous call frame:
+			decide yes;
+		unless the most recent instruction address of the current call frame is the most recent instruction address of the previous call frame:
+			decide yes;
+		now the current call frame is the inward link of the current call frame;
+		now the previous call frame is the inward link of the previous call frame.
+
+To begin advancing assuredly:
+	now the debugger's control flow attitude is responding after an assured advance;
+	if the debugger's control flow state is:
+		-- responding after a sequence point next:
+			let the current call frame be the leaf of the debugger's current call frame;
+			disable frame-local breakpoints in the current call frame and outward, considering only elided frames;
+		-- responding after a next:
+			let the current call frame be the leaf of the debugger's current call frame;
+			disable frame-local breakpoints in the current call frame and outward, considering only elided frames;
+		-- responding after a finish:
+			let the current call frame be the leaf of the debugger's current call frame;
+			disable frame-local breakpoints in the current call frame and outward, considering only elided frames;
+			let the previous call frame be the last-seen call stack root;
+			let the current call frame be the root of the debugger's current call frame;
+			while the previous call frame is not the last-seen call stack divider:
+				always check that the current call frame is not null or else fail at matching a divider when finish is ignoring an interruption;
+				always check that the previous call frame is not null or else fail at encountering a divider in the last-seen call stack;
+				now the current call frame is the inward link of the current call frame;
+				now the previous call frame is the inward link of the previous call frame;
+			always check that the current call frame is not null or else fail at matching a divider when finish is ignoring an interruption;
+			disable the frame-local breakpoint in the current call frame;
+		-- otherwise:
+			disable all frame-local breakpoints.
+
+To decide whether we should ignore the current interruption at (B - a simple breakpoint):
+	[Five cases to worry about:]
+	[I. a breakpoint was forced, meaning that we must stop]
+	if the breakpoint was forced:
+		now the currently preferred debug mode is debugging at the I7 level;
+		decide no;
+	[II. a new breakpoint was encountered, meaning that we must stop]
+	unless B is an invalid simple breakpoint:
+		repeat with the encountered compound breakpoint running through the compound breakpoint keys of the compound breakpoint list of B:
+			if the encountered compound breakpoint is enabled:
+				unless the last-seen compound breakpoint list contains the key the encountered compound breakpoint:
+					now the currently preferred debug mode is debugging at the I7 level;
+					decide no;
+	[III. an old breakpoint was encountered, but in a different frame, meaning that we must stop]
+	unless B is an invalid simple breakpoint:
+		repeat with the encountered compound breakpoint running through the compound breakpoint keys of the compound breakpoint list of B:
+			if the encountered compound breakpoint is enabled:
+				if the call frame changes warrant a distinction from the previous interruptions:
+					now the currently preferred debug mode is debugging at the I7 level;
+					decide no;
+				break;
+	[IV. we have reached a point where the control flow command is complete, meaning that we must stop]
+	unless this interruption should be ignored by the control flow command:
+		decide no;
+	[V. we have no reason to stop, but we need to prune the old breakpoints, and we might have reason to advance with assurance]
+	let the previous linked list vertex be a null linked list vertex;
+	let the current linked list vertex be the last-seen compound breakpoint list converted to a linked list vertex;
+	while the current linked list vertex is not null:
+		let the surviving compound breakpoint be the compound breakpoint key of the current linked list vertex;
+		if B is not an invalid simple breakpoint and the compound breakpoint list of B contains the key the surviving compound breakpoint:
+			now the previous linked list vertex is the current linked list vertex;
+			now the current linked list vertex is the link of the current linked list vertex;
+		otherwise:
+			let the next linked list vertex be the link of the current linked list vertex;
+			if the previous linked list vertex is null:
+				now the last-seen compound breakpoint list is the next linked list vertex converted to a linked list;
+			otherwise:
+				write the link the next linked list vertex to the previous linked list vertex;
+			delete the current linked list vertex;
+			now the current linked list vertex is the next linked list vertex;
+	if the last-seen compound breakpoint list is empty or the call frame changes allow an assured advance:
+		begin advancing assuredly;
+	decide yes.
+
+Chapter "Responding to a Break" - unindexed
+
+To announce breakpoints at (B - a simple breakpoint):
+	let the breakpoints announced flag be false;
+	if the breakpoint was forced and the debugger story-running flag is true:
+		say "[line break][bold type]Breakpoint triggered by source text:[roman type] [the name of the forced breakpoint][line break]";
+		now the breakpoints announced flag is true;
+	unless B is an invalid simple breakpoint:
+		repeat with the encountered compound breakpoint running through the compound breakpoint keys of the compound breakpoint list of the B:
+			if the encountered compound breakpoint is enabled:
+				say "[if the breakpoints announced flag is false][line break][end if][bold type]Breakpoint [the numeric identifier of the encountered compound breakpoint]:[roman type] [the human-friendly name of the encountered compound breakpoint][line break]";
+				now the breakpoints announced flag is true;
+	if the breakpoints announced flag is true:
+		say "[line break]".
+
+To adjust the debugger's current call frame:
+	if the call stack simplification flag is true:
+		let the current call frame be the debugger's current call frame;
+		while the current call frame is not null and the current call frame is elided in the simplified call stack:
+			now the current call frame is the outward link of the current call frame;
+		if the current call frame is null:
+			now the call stack simplification flag is false;
+			say "(disabling simplification because it would elide all of the present call frames)[line break]";
+		otherwise:
+			now the debugger's current call frame is the current call frame;
+	now the debugger's current call frame number is zero.
+
+Handling a breakpoint (this is the interactive debugger breakpoint response rule):
+	now the debugger's current call frame is the innermost call frame of a reconstructed call stack;
+	let the encountered simple breakpoint be the simple breakpoint representing the sequence point the last-seen sequence point before the last-seen breakpoint;
+	unless we should ignore the current interruption at the encountered simple breakpoint:
+		cancel any request for a debug input line;
+		now the current debugger coexecution state is story interrupted;
+		now the debugger prompting flag is true;
+		while within the debugger window via the debugger wrapping layer:
+			disable the universal breakpoint;
+			disable all frame-local breakpoints;
+			announce breakpoints at the encountered simple breakpoint;
+			now the debugger story-continuing flag is false;
+			adjust the debugger's current call frame;
+			unless the last-seen call stack root is null:
+				let the moribund call frame be the leaf of the last-seen call stack root;
+				delete the moribund call frame and its ancestors;
+				now the last-seen call stack root is a null call frame;
+			now the last-seen call stack divider is a null call frame;
+			delete the last-seen compound breakpoint list;
+			now the last-seen compound breakpoint list is an empty linked list;
+			if the debugger story-running flag is true:
+				say "[the debug location synopsis]";
+			request a debug command;
+			while the debugger story-continuing flag is false:
+				wait for the next foreign event using the debugger wrapping layer;
+			now the debugger's control flow attitude is responding after an assured advance;
+			if the encountered simple breakpoint is not an invalid simple breakpoint:
+				repeat with the encountered compound breakpoint running through the compound breakpoint keys of the compound breakpoint list of the encountered simple breakpoint:
+					if the encountered compound breakpoint is enabled:
+						push the key the encountered compound breakpoint onto the last-seen compound breakpoint list;
+						now the debugger's control flow attitude is responding after a cautious advance;
+			if the debugger's control flow attitude is responding after a cautious advance:
+				enable frame-local breakpoints in the debugger's current call frame and outward;
+			now the last-seen call stack root is the root of the debugger's current call frame;
+			now the last-seen call stack divider is the debugger's current call frame;
+			now the last-seen sequence point for the last-seen call stack is the last-seen sequence point before the last-seen breakpoint;
+		now the current debugger coexecution state is story unpaused.
+
+The breakpoint handler is the interactive debugger breakpoint response rule.
+
+A GRIF shielding rule (this is the shield the interactive debugger breakpoint response rule rule):
+	shield the interactive debugger breakpoint response rule against instrumentation.
 
 Book "Parsers" - unindexed
 
@@ -1299,105 +1721,6 @@ To decide what number is the object value named by (V - a parse tree vertex):
 	delete the object address list;
 	decide on the result.
 
-Book "State"
-
-Chapter "Running and Continuing Flags" - unindexed
-
-The debugger has-run flag is a truth state that varies.  The debugger has-run flag is false.
-The debugger running flag is a truth state that varies.  The debugger running flag is false.
-The debugger continuing flag is a truth state that varies.  The debugger continuing flag is false.
-
-Chapter "Coexecution State" - unindexed
-
-A debugger coexecution state is a kind of value.
-The debugger coexecution states are story interrupted, story waiting for input, and story unpaused.
-
-The current debugger coexecution state is a debugger coexecution state that varies.  The current debugger coexecution state is story unpaused.
-
-The debugger prompting flag is a truth state that varies.  The debugger prompting flag is true.
-
-Chapter "Debug Modes"
-
-A debug mode is a kind of value.  The debug modes are debugging at the I7 level, debugging at the I6 level, and debugging at the Glulx assembly level.
-The specification of a debug mode is "Debug modes represent an author's preferred language for debugging: I7, I6, or Glulx assembly."
-
-The currently preferred debug mode is a debug mode that varies.  The currently preferred debug mode is debugging at the I7 level.
-
-Chapter "Preferences"
-
-[GRIF defines:]
-[The GRIF allows saves flag is a truth state that varies.]
-
-[Call Stack Tracking defines:]
-[The original arguments flag is a truth state that varies.
-The temporary named values flag is a truth state that varies.
-The catch tokens flag is a truth state that varies.
-The call stack simplification flag is a truth state that varies.
-The call frame numbering flag is a truth state that varies.
-The call stack addresses flag is a truth state that varies.]
-
-Section "Warnings"
-
-The showme warnings flag is a truth state that varies.
-The lengthly listing warnings flag is a truth state that varies.
-
-Section "Default Preferences"
-
-A GRIF setup rule (this is the default debugger preferences rule):
-	now the original arguments flag is true;
-	now the temporary named values flag is true;
-	now the catch tokens flag is false;
-	now the call stack simplification flag is true;
-	now the call frame numbering flag is true;
-	now the showme warnings flag is true;
-	now the lengthly listing warnings flag is false;
-	now the GRIF allows saves flag is false.
-
-Chapter "Current Call Frame" - unindexed
-
-The debugger's current call frame number is a number that varies.
-The debugger's current call frame is a call frame that varies.
-
-Chapter "Control Flow Manipulation" - unindexed
-
-A debugger control flow state is a kind of value.  The debugger control flow states are responding after a continue, responding after a sequence point step, responding after a sequence point next, responding after a step, responding after a next, and responding after a finish.  The specification of a debugger control flow state is "Debugger control flow states are used by the debugger to remember what it was doing when it receives a breakpoint notification.  Generally they record the last command executed."
-
-A debugger control flow attitude is a kind of value.  The debugger control flow attitude are responding after a cautious advance and responding after an assured advance.  The specification of a debugger control flow attitude is "Debugger control flow attitudes are used by the debugger to remember how it was proceeding when it receives a breakpoint notification.  Cautious advances, those that check on the story state at every opportunity, are used until the debugger is free from at least one previously seen breakpoint.  Assured advances are used thereafter, and pause only as needed for the command they carry out."
-
-[This is the control flow state, as described above.]
-The debugger's control flow state is a debugger control flow state that varies.
-
-[This is the control flow attitude, as described above.]
-The debugger's control flow attitude is a debugger control flow attitude that varies.
-
-[We remember what the call stack looked like by keeping a copy here.  More specifically, we store the *outermost* call frame, since that makes life easier in the main debugger routine.  Be careful: not all call frame phrases work if we've changed the call stack in the meantime.]
-The last-seen call stack root is a call frame that varies.
-
-[We also keep track of the frame that was selected.]
-The last-seen call stack divider is a call frame that varies.
-
-[And on top of that, the sequence point last seen.]
-The last-seen sequence point for the last-seen call stack is a number that varies.
-
-[If we were stopped by one or more breakpoints last time we talked with the author we don't want to report those breakpoints again unless the set has changed.  So we keep the old set here.]
-The last-seen compound breakpoint list is a linked list that varies.
-
-Chapter "User Breakpoints" - unindexed
-
-[Maps breakpoint numbers to compound breakpoints]
-The user breakpoint hash table is a hash table that varies.
-
-Chapter "Debugger Initialization" - unindexed
-
-A GRIF setup rule (this is the initialize the debugger state rule):
-	now the debugger's control flow state is responding after a continue;
-	now the debugger's control flow attitude is responding after an assured advance;
-	now the debugger's current call frame is a null call frame;
-	now the last-seen call stack root is a null call frame;
-	now the last-seen call stack divider is a null call frame;
-	now the last-seen compound breakpoint list is an empty linked list;
-	now the user breakpoint hash table is a new hash table with the user breakpoint hash table size buckets.
-
 Book "Commands" - unindexed
 
 Chapter "Default Handler for Unimplemented Commands" - unindexed
@@ -1784,7 +2107,7 @@ To say call frame number (I - a selected-by-the-backtrace number):
 	say " (call frame #[I converted to a number], currently selected)".
 
 To handle the debug command rooted at (V - a parse tree vertex that has the parseme the debugger's backtrace command):
-	if the debugger running flag is false:
+	if the debugger story-running flag is false:
 		say "The story is not running.  Use the command 'run' to run it.[paragraph break]";
 		stop;
 	say "[if the current debugger coexecution state is story interrupted]Execution paused[otherwise]Executing [bold type](not paused)[roman type][end if][line break]";
@@ -1840,7 +2163,7 @@ To move out (N - a number) call frame/frames:
 		say "There is no call frame [N in words] layer[unless N is one]s[end if] outward from the current selection.  You can see the placement of the current selection with the command 'backtrace'.[paragraph break]".
 
 To handle the debug command rooted at (V - a parse tree vertex that has the parseme the debugger's select command):
-	if the debugger running flag is false:
+	if the debugger story-running flag is false:
 		say "The story is not running.  Use the command 'run' to run it.[paragraph break]";
 		stop;
 	if the current debugger coexecution state is not story interrupted:
@@ -1858,7 +2181,7 @@ To handle the debug command rooted at (V - a parse tree vertex that has the pars
 		say "The selected frame is unchanged,[line break]  [the location of the debugger's current call frame with frame number the debugger's current call frame number].[paragraph break]".
 
 To handle the debug command rooted at (V - a parse tree vertex that has the parseme the debugger's inward command):
-	if the debugger running flag is false:
+	if the debugger story-running flag is false:
 		say "The story is not running.  Use the command 'run' to run it.[paragraph break]";
 		stop;
 	if the current debugger coexecution state is not story interrupted:
@@ -1867,7 +2190,7 @@ To handle the debug command rooted at (V - a parse tree vertex that has the pars
 	move in one call frame.
 
 To handle the debug command rooted at (V - a parse tree vertex that has the parseme the debugger's inward-by-distance command):
-	if the debugger running flag is false:
+	if the debugger story-running flag is false:
 		say "The story is not running.  Use the command 'run' to run it.[paragraph break]";
 		stop;
 	if the current debugger coexecution state is not story interrupted:
@@ -1878,7 +2201,7 @@ To handle the debug command rooted at (V - a parse tree vertex that has the pars
 	move in count call frames.
 
 To handle the debug command rooted at (V - a parse tree vertex that has the parseme the debugger's outward command):
-	if the debugger running flag is false:
+	if the debugger story-running flag is false:
 		say "The story is not running.  Use the command 'run' to run it.[paragraph break]";
 		stop;
 	if the current debugger coexecution state is not story interrupted:
@@ -1887,7 +2210,7 @@ To handle the debug command rooted at (V - a parse tree vertex that has the pars
 	move out one call frame.
 
 To handle the debug command rooted at (V - a parse tree vertex that has the parseme the debugger's outward-by-distance command):
-	if the debugger running flag is false:
+	if the debugger story-running flag is false:
 		say "The story is not running.  Use the command 'run' to run it.[paragraph break]";
 		stop;
 	if the current debugger coexecution state is not story interrupted:
@@ -2138,7 +2461,7 @@ To list I7 lines (A - a number) through (B - a number) for the sequence point (S
 		say "There are no matching I7 lines.  Use the 'list as I6' command to list I6.[line break]".
 
 To handle the debug command rooted at (V - a parse tree vertex that has the parseme the debugger's list-by-inference command):
-	if the debugger running flag is false:
+	if the debugger story-running flag is false:
 		say "The story is not running.  Use the command 'run' to run it.[paragraph break]";
 		stop;
 	let the sequence point be the sequence point to highlight;
@@ -2468,7 +2791,7 @@ To handle the debug command rooted at (V - a parse tree vertex that has the pars
 	let the discarded value be a breakpoint placed on I6 line number the line number with the human-friendly name "Pause on I6 line [the nonnegative number the line number for naming compound breakpoints as at least six digits]".
 
 To handle the debug command rooted at (V - a parse tree vertex that has the parseme the debugger's break-by-inference command):
-	if the debugger running flag is false:
+	if the debugger story-running flag is false:
 		say "The story is not running.  Use the command 'run' to run it.[paragraph break]";
 		stop;
 	if the current debugger coexecution state is not story interrupted:
@@ -2589,7 +2912,7 @@ To handle a debug command for continuing execution:
 		-- responding after a finish:
 			unless the debugger's current call frame is null:
 				enable frame-local breakpoints in the outward link of the debugger's current call frame and outward, considering only visible frames;
-	now the debugger continuing flag is true;
+	now the debugger story-continuing flag is true;
 	unless the multiple windows supported flag is set in the debugger wrapping layer and the no more than one line input request at a time option is not active:
 		now the debugger prompting flag is false.
 
@@ -2617,7 +2940,7 @@ To force a breakpoint from the debugger after checking the coexecution state:
 			force a breakpoint from the debugger.
 
 To handle the debug command rooted at (V - a parse tree vertex that has the parseme the debugger's force a breakpoint command):
-	if the debugger running flag is false:
+	if the debugger story-running flag is false:
 		say "The story is not running.  Use the command 'run' to run it.[paragraph break]";
 		stop;
 	force a breakpoint from the debugger after checking the coexecution state.
@@ -2641,12 +2964,12 @@ A GRIF shielding rule (this is the shield restarting the story from the debugger
 	shield restarting the story from the debugger against instrumentation.
 
 To handle the debug command rooted at (V - a parse tree vertex that has the parseme the debugger's restart command):
-	if the debugger has-run flag is false:
+	if the debugger's story-has-run flag is false:
 		say "The story hasn't been run yet.  Restart anyway (y or n)? ";
 		unless the author consents:
 			say "[line break]";
 			stop;
-	otherwise if the debugger running flag is true:
+	otherwise if the debugger story-running flag is true:
 		say "Really restart the story (y or n)? ";
 		unless the author consents:
 			say "[line break]";
@@ -2654,12 +2977,12 @@ To handle the debug command rooted at (V - a parse tree vertex that has the pars
 	restart the story from the debugger.
 
 To handle the debug command rooted at (V - a parse tree vertex that has the parseme the debugger's run command):
-	if the debugger running flag is true:
+	if the debugger story-running flag is true:
 		say "The story is currently running.  Restart it (y or n)? ";
 		unless the author consents:
 			say "[line break]";
 			stop;
-	if the debugger running flag is true or the debugger has-run flag is true:
+	if the debugger story-running flag is true or the debugger's story-has-run flag is true:
 		restart the story from the debugger;
 	always check that the current debugger coexecution state is story interrupted or else fail at being the first to run the story;
 	now the debugger's control flow state is responding after a continue;
@@ -2667,7 +2990,7 @@ To handle the debug command rooted at (V - a parse tree vertex that has the pars
 	handle a debug command for continuing execution.
 
 To handle the debug command rooted at (V - a parse tree vertex that has the parseme the debugger's continue command):
-	if the debugger running flag is false:
+	if the debugger story-running flag is false:
 		say "The story is not running.  Use the command 'run' to run it.[paragraph break]";
 		stop;
 	if the current debugger coexecution state is not story interrupted:
@@ -2678,7 +3001,7 @@ To handle the debug command rooted at (V - a parse tree vertex that has the pars
 	handle a debug command for continuing execution.
 
 To handle the debug command rooted at (V - a parse tree vertex that has the parseme the debugger's step sequence point command):
-	if the debugger running flag is false:
+	if the debugger story-running flag is false:
 		say "The story is not running.  Use the command 'run' to run it.[paragraph break]";
 		stop;
 	if the current debugger coexecution state is not story interrupted:
@@ -2689,7 +3012,7 @@ To handle the debug command rooted at (V - a parse tree vertex that has the pars
 	handle a debug command for continuing execution.
 
 To handle the debug command rooted at (V - a parse tree vertex that has the parseme the debugger's next sequence point command):
-	if the debugger running flag is false:
+	if the debugger story-running flag is false:
 		say "The story is not running.  Use the command 'run' to run it.[paragraph break]";
 		stop;
 	if the current debugger coexecution state is not story interrupted:
@@ -2700,7 +3023,7 @@ To handle the debug command rooted at (V - a parse tree vertex that has the pars
 	handle a debug command for continuing execution.
 
 To handle the debug command rooted at (V - a parse tree vertex that has the parseme the debugger's step command):
-	if the debugger running flag is false:
+	if the debugger story-running flag is false:
 		say "The story is not running.  Use the command 'run' to run it.[paragraph break]";
 		stop;
 	if the current debugger coexecution state is not story interrupted:
@@ -2711,7 +3034,7 @@ To handle the debug command rooted at (V - a parse tree vertex that has the pars
 	handle a debug command for continuing execution.
 
 To handle the debug command rooted at (V - a parse tree vertex that has the parseme the debugger's next command):
-	if the debugger running flag is false:
+	if the debugger story-running flag is false:
 		say "The story is not running.  Use the command 'run' to run it.[paragraph break]";
 		stop;
 	if the current debugger coexecution state is not story interrupted:
@@ -2732,7 +3055,7 @@ To handle the debug command rooted at (V - a parse tree vertex that has the pars
 	handle a debug command for continuing execution.
 
 To handle the debug command rooted at (V - a parse tree vertex that has the parseme the debugger's finish command):
-	if the debugger running flag is false:
+	if the debugger story-running flag is false:
 		say "The story is not running.  Use the command 'run' to run it.[paragraph break]";
 		stop;
 	if the current debugger coexecution state is not story interrupted:
@@ -2925,7 +3248,7 @@ To apply the debugger's showme to (V - a number):
 	say "[line break]".
 
 To handle the debug command rooted at (V - a parse tree vertex that has the parseme the debugger's showme command):
-	if the debugger running flag is false:
+	if the debugger story-running flag is false:
 		say "The story is not running.  Use the command 'run' to run it.[paragraph break]";
 		stop;
 	let the object vertex be the first match for a object name for the debugger among the children of V;
@@ -3006,319 +3329,6 @@ To handle the debug command rooted at (V - a parse tree vertex that has the pars
 
 To handle the debug command rooted at (V - a parse tree vertex that has the parseme the debugger's plugh command):
 	say "Twice as much happens.[paragraph break]".
-
-Book "To File" - unindexed
-
-To decide what number is the universal breakpoint flag index for the sequence point (A - a number) according to the debugger (this is choosing the universal breakpoint flag index for a sequence point according to the debugger):
-	let the routine record be the routine record owning the sequence point A;
-	if the routine record is not an invalid routine record and the function at address the function address of the routine record is elided in the simplified call stack:
-		decide on zero;
-	decide on one.
-
-The phrase that chooses the universal breakpoint flag index for a sequence point is choosing the universal breakpoint flag index for a sequence point according to the debugger.
-
-Book "Main Debugger Routine" - unindexed
-
-[Roughly speaking, true unless all call frames and call sites in the current stack and the last-seen one match up.]
-To decide whether the call frame changes warrant a distinction from the previous interruptions:
-	let the previous call frame be the last-seen call stack root;
-	let the current call frame be the root of the debugger's current call frame;
-	if the current call frame is null or the previous call frame is null:
-		decide on whether or not the current call frame is not the previous call frame;
-	let the call site consistency flag be true;
-	repeat until a break:
-		if the current call frame is null or the previous call frame is null:
-			decide on whether or not the current call frame is not the previous call frame;
-		unless the call site consistency flag is true:
-			decide yes;
-		unless the uninstrumented function address of the current call frame is the uninstrumented function address of the previous call frame:
-			decide yes;
-		now the call site consistency flag is whether or not the most recent instruction address of the current call frame is the most recent instruction address of the previous call frame;
-		now the current call frame is the inward link of the current call frame;
-		now the previous call frame is the inward link of the previous call frame.
-
-A debugger change direction is a kind of value.  The debugger change directions are a change inward from the reference frame, a change within the reference frame, and a change outward from the reference frame.  The specification of a debugger change direction is "When one of the internal breakpoints for commands like step and next is triggered, the debugger uses debugger change directions to decide whether the breakpoint was fired in the expected way or is merely a false alarm."
-
-To decide whether this interruption should be ignored by the control flow command:
-	[The continue command ignores every such thing.]
-	if the debugger's control flow state is responding after a continue:
-		decide yes;
-	[While the sequence point step command never ignores anything.]
-	if the debugger's control flow state is responding after a sequence point step:
-		decide no;
-	let the previous call frame be the last-seen call stack root;
-	let the current call frame be the root of the debugger's current call frame;
-	[We ought not obliterate the call stack, but, if we do, let us take notice.]
-	if the previous call frame is null or the current call frame is null:
-		decide no;
-	let the change direction be a debugger change direction;
-	let the function change flag be false;
-	let the previous line comparison call frame be an invalid call frame;
-	let the current line comparison call frame be an invalid call frame;
-	[Find where the change is and what it is.]
-	repeat until a break:
-		unless the call stack simplification flag is true and the current call frame is elided in the simplified call stack:
-			now the previous line comparison call frame is the previous call frame;
-			now the current line comparison call frame is the current call frame;
-		unless the uninstrumented function address of the current call frame is the uninstrumented function address of the previous call frame:
-			now the change direction is a change outward from the reference frame;
-			now the function change flag is true;
-			break;
-		if the inward link of the previous call frame is null:
-			now the change direction is a change within the reference frame;
-			break;
-		if the inward link of the current call frame is null:
-			if the previous call frame is the last-seen call stack divider:
-				now the change direction is a change within the reference frame;
-				break;
-			now the change direction is a change outward from the reference frame;
-			break;
-		if the previous call frame is the last-seen call stack divider:
-			if the most recent instruction address of the current call frame is the most recent instruction address of the previous call frame:
-				now the change direction is a change inward from the reference frame;
-				break;
-			now the change direction is a change within the reference frame;
-			break;
-		unless the most recent instruction address of the current call frame is the most recent instruction address of the previous call frame:
-			now the change direction is a change outward from the reference frame;
-			break;
-		now the current call frame is the inward link of the current call frame;
-		now the previous call frame is the inward link of the previous call frame;
-	if the function change flag is true:
-		decide no;
-	[Some commands ignore or acknowledge all changes in a given direction.]
-	if the change direction is:
-		-- a change inward from the reference frame:
-			unless the debugger's control flow state is responding after a step:
-				[As things currently stand, this shouldn't be possible.  But we want to be friendly to other extensions.]
-				decide yes;
-		-- a change within the reference frame:
-			if the debugger's control flow state is responding after a finish:
-				[As things currently stand, this shouldn't be possible.  But we want to be friendly to other extensions.]
-				decide yes;
-		-- a change outward from the reference frame:
-			if the debugger's control flow state is responding after a finish:
-				decide no;
-	[In fact, sequence point next cannot ignore for any other reason.]
-	if the debugger's control flow state is responding after a sequence point next:
-		decide no;
-	[But the other commands can ignore the breakpoint if the story hasn't moved off of the previously seen line.]
-	[If we can already tell that it has, or that we don't know, then we don't ignore the breakpoint.]
-	if the previous line comparison call frame is null or the current line comparison call frame is null:
-		decide no;
-	[When stepping, entering a non-elided frame is tantamount to moving off the previously seen line.]
-	if the debugger's control flow state is responding after a step:
-		let the inward call frame be the inward link of the current line comparison call frame;
-		while the inward call frame is not null:
-			unless the call stack simplification flag is true and the inward call frame is elided in the simplified call stack:
-				decide no;
-			now the inward call frame is the inward link of the inward call frame;
-	[Otherwise, we do the line comparison.]
-	let the previous sequence point be the last-seen sequence point of the previous line comparison call frame or the last-seen sequence point for the last-seen call stack if it is innermost;
-	let the current sequence point be the last-seen sequence point of the current line comparison call frame or the last-seen sequence point before the last-seen breakpoint if it is innermost;
-	let the routine record be the routine record owning the sequence point the previous sequence point;
-	if the currently preferred debug mode is debugging at the I7 level and the preferred debug mode for the routine record is debugging at the I7 level:
-		let the previous line number be the I7 line number for the sequence point the previous sequence point in the routine record the routine record;
-		let the current line number be the I7 line number for the sequence point the current sequence point in the routine record the routine record;
-		decide on whether or not the previous line number is the current line number;
-	otherwise if the preferred debug mode for the routine record is not debugging at the Glulx assembly level:
-		let the previous line number be the I6 line number for the sequence point the previous sequence point;
-		let the current line number be the I6 line number for the sequence point the current sequence point;
-		decide on whether or not the previous line number is the current line number;
-	decide yes.
-
-[Roughly speaking, true when the old selected frame is gone.]
-To decide whether the call frame changes allow an assured advance:
-	let the previous call frame be the last-seen call stack root;
-	let the current call frame be the root of the debugger's current call frame;
-	repeat until a break:
-		if the current call frame is null:
-			decide yes;
-		always check that the previous call frame is not null or else fail at encountering a divider in the last-seen call stack;
-		if the previous call frame is the last-seen call stack divider:
-			decide no;
-		unless the uninstrumented function address of the current call frame is the uninstrumented function address of the previous call frame:
-			decide yes;
-		unless the most recent instruction address of the current call frame is the most recent instruction address of the previous call frame:
-			decide yes;
-		now the current call frame is the inward link of the current call frame;
-		now the previous call frame is the inward link of the previous call frame.
-
-To begin advancing assuredly:
-	now the debugger's control flow attitude is responding after an assured advance;
-	if the debugger's control flow state is:
-		-- responding after a sequence point next:
-			let the current call frame be the leaf of the debugger's current call frame;
-			disable frame-local breakpoints in the current call frame and outward, considering only elided frames;
-		-- responding after a next:
-			let the current call frame be the leaf of the debugger's current call frame;
-			disable frame-local breakpoints in the current call frame and outward, considering only elided frames;
-		-- responding after a finish:
-			let the current call frame be the leaf of the debugger's current call frame;
-			disable frame-local breakpoints in the current call frame and outward, considering only elided frames;
-			let the previous call frame be the last-seen call stack root;
-			let the current call frame be the root of the debugger's current call frame;
-			while the previous call frame is not the last-seen call stack divider:
-				always check that the current call frame is not null or else fail at matching a divider when finish is ignoring an interruption;
-				always check that the previous call frame is not null or else fail at encountering a divider in the last-seen call stack;
-				now the current call frame is the inward link of the current call frame;
-				now the previous call frame is the inward link of the previous call frame;
-			always check that the current call frame is not null or else fail at matching a divider when finish is ignoring an interruption;
-			disable the frame-local breakpoint in the current call frame;
-		-- otherwise:
-			disable all frame-local breakpoints.
-
-To decide whether we should ignore the current interruption at (B - a simple breakpoint):
-	[Five cases to worry about:]
-	[I. a breakpoint was forced, meaning that we must stop]
-	if the breakpoint was forced:
-		now the currently preferred debug mode is debugging at the I7 level;
-		decide no;
-	[II. a new breakpoint was encountered, meaning that we must stop]
-	unless B is an invalid simple breakpoint:
-		repeat with the encountered compound breakpoint running through the compound breakpoint keys of the compound breakpoint list of B:
-			if the encountered compound breakpoint is enabled:
-				unless the last-seen compound breakpoint list contains the key the encountered compound breakpoint:
-					now the currently preferred debug mode is debugging at the I7 level;
-					decide no;
-	[III. an old breakpoint was encountered, but in a different frame, meaning that we must stop]
-	unless B is an invalid simple breakpoint:
-		repeat with the encountered compound breakpoint running through the compound breakpoint keys of the compound breakpoint list of B:
-			if the encountered compound breakpoint is enabled:
-				if the call frame changes warrant a distinction from the previous interruptions:
-					now the currently preferred debug mode is debugging at the I7 level;
-					decide no;
-				break;
-	[IV. we have reached a point where the control flow command is complete, meaning that we must stop]
-	unless this interruption should be ignored by the control flow command:
-		decide no;
-	[V. we have no reason to stop, but we need to prune the old breakpoints, and we might have reason to advance with assurance]
-	let the previous linked list vertex be a null linked list vertex;
-	let the current linked list vertex be the last-seen compound breakpoint list converted to a linked list vertex;
-	while the current linked list vertex is not null:
-		let the surviving compound breakpoint be the compound breakpoint key of the current linked list vertex;
-		if B is not an invalid simple breakpoint and the compound breakpoint list of B contains the key the surviving compound breakpoint:
-			now the previous linked list vertex is the current linked list vertex;
-			now the current linked list vertex is the link of the current linked list vertex;
-		otherwise:
-			let the next linked list vertex be the link of the current linked list vertex;
-			if the previous linked list vertex is null:
-				now the last-seen compound breakpoint list is the next linked list vertex converted to a linked list;
-			otherwise:
-				write the link the next linked list vertex to the previous linked list vertex;
-			delete the current linked list vertex;
-			now the current linked list vertex is the next linked list vertex;
-	if the last-seen compound breakpoint list is empty or the call frame changes allow an assured advance:
-		begin advancing assuredly;
-	decide yes.
-
-To announce breakpoints at (B - a simple breakpoint):
-	let the breakpoints announced flag be false;
-	if the breakpoint was forced and the debugger running flag is true:
-		say "[line break][bold type]Breakpoint triggered by source text:[roman type] [the name of the forced breakpoint][line break]";
-		now the breakpoints announced flag is true;
-	unless B is an invalid simple breakpoint:
-		repeat with the encountered compound breakpoint running through the compound breakpoint keys of the compound breakpoint list of the B:
-			if the encountered compound breakpoint is enabled:
-				say "[if the breakpoints announced flag is false][line break][end if][bold type]Breakpoint [the numeric identifier of the encountered compound breakpoint]:[roman type] [the human-friendly name of the encountered compound breakpoint][line break]";
-				now the breakpoints announced flag is true;
-	if the breakpoints announced flag is true:
-		say "[line break]".
-
-To adjust the debugger's current call frame:
-	if the call stack simplification flag is true:
-		let the current call frame be the debugger's current call frame;
-		while the current call frame is not null and the current call frame is elided in the simplified call stack:
-			now the current call frame is the outward link of the current call frame;
-		if the current call frame is null:
-			now the call stack simplification flag is false;
-			say "(disabling simplification because it would elide all of the present call frames)[line break]";
-		otherwise:
-			now the debugger's current call frame is the current call frame;
-	now the debugger's current call frame number is zero.
-
-Handling a breakpoint (this is the interactive debugger breakpoint response rule):
-	now the debugger's current call frame is the innermost call frame of a reconstructed call stack;
-	let the encountered simple breakpoint be the simple breakpoint representing the sequence point the last-seen sequence point before the last-seen breakpoint;
-	unless we should ignore the current interruption at the encountered simple breakpoint:
-		cancel any request for a debug input line;
-		now the current debugger coexecution state is story interrupted;
-		now the debugger prompting flag is true;
-		while within the debugger window via the debugger wrapping layer:
-			disable the universal breakpoint;
-			disable all frame-local breakpoints;
-			announce breakpoints at the encountered simple breakpoint;
-			now the debugger continuing flag is false;
-			adjust the debugger's current call frame;
-			unless the last-seen call stack root is null:
-				let the moribund call frame be the leaf of the last-seen call stack root;
-				delete the moribund call frame and its ancestors;
-				now the last-seen call stack root is a null call frame;
-			now the last-seen call stack divider is a null call frame;
-			delete the last-seen compound breakpoint list;
-			now the last-seen compound breakpoint list is an empty linked list;
-			if the debugger running flag is true:
-				say "[the debug location synopsis]";
-			request a debug command;
-			while the debugger continuing flag is false:
-				wait for the next foreign event using the debugger wrapping layer;
-			now the debugger's control flow attitude is responding after an assured advance;
-			if the encountered simple breakpoint is not an invalid simple breakpoint:
-				repeat with the encountered compound breakpoint running through the compound breakpoint keys of the compound breakpoint list of the encountered simple breakpoint:
-					if the encountered compound breakpoint is enabled:
-						push the key the encountered compound breakpoint onto the last-seen compound breakpoint list;
-						now the debugger's control flow attitude is responding after a cautious advance;
-			if the debugger's control flow attitude is responding after a cautious advance:
-				enable frame-local breakpoints in the debugger's current call frame and outward;
-			now the last-seen call stack root is the root of the debugger's current call frame;
-			now the last-seen call stack divider is the debugger's current call frame;
-			now the last-seen sequence point for the last-seen call stack is the last-seen sequence point before the last-seen breakpoint;
-		now the current debugger coexecution state is story unpaused.
-
-The breakpoint handler is the interactive debugger breakpoint response rule.
-
-A GRIF shielding rule (this is the shield the interactive debugger breakpoint response rule rule):
-	shield the interactive debugger breakpoint response rule against instrumentation.
-
-Book "Limiting Story Quits"
-
-Chapter "Idle on Quit" - unindexed
-
-Include (-
-	Array id_ignoredEvent --> 4;
-	[ id_idleOnQuit;
-		(+ the debugger running flag +)=false;
-		for(::){
-			glk_select(id_ignoredEvent);
-		}
-	];
--).
-
-To decide what number is the address of the idle-on-quit routine: (- id_idleOnQuit -).
-
-Chapter "Limiting Story Quits"
-
-A GRIF instrumentation rule (this is the limit story quits to the story rule):
-	if the no more than one line input request at a time option is not active:
-		repeat with the instruction vertex running through occurrences of the operation code op-quit in the scratch space:
-			write the operation code op-callf to the instruction vertex;
-			write the addressing mode constant addressing mode to parameter zero of the instruction vertex;
-			write the address of the idle-on-quit routine to parameter zero of the instruction vertex;
-			write the addressing mode zero-or-discard addressing mode to parameter one of the instruction vertex.
-
-Book "Initial Breakpoint"
-
-A last GRIF instrumented post-hijacking rule (this is the initial breakpoint rule):
-	force a breakpoint named "The initial breakpoint";
-	now the debugger running flag is true.
-
-Book "Forcing a Breakpoint as an Out-of-World Action"
-
-Forcing a breakpoint is an action out of world applying to nothing.
-Understand "force a breakpoint" as forcing a breakpoint.
-
-Carry out forcing a breakpoint:
-	force a breakpoint named "The out-of-world action 'forcing a breakpoint'".
 
 Book "Extra Global Names"
 
