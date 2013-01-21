@@ -431,6 +431,42 @@ A GRIF setup rule (this is the initialize the debugger state rule):
 	now the last-seen compound breakpoint list is an empty linked list;
 	now the user breakpoint hash table is a new hash table with the user breakpoint hash table size buckets.
 
+Book "Debugger Instrumentation" - unindexed
+
+Chapter "Finish Detection in Follow-on Calls" - unindexed
+
+Section "Frame-Local Flag for Tripwires" - unindexed
+
+The follow-on call tripwire flag index is a number that varies.
+
+A GRIF setup rule (this is the allocate the follow-on call tripwire flag rule):
+	now the follow-on call tripwire flag index is the index of a newly reserved call frame field.
+
+Section "Tripwire Insertion" - unindexed
+
+[ @jz <frame-local-tripwire-flag> <constant>; ]
+To decide what instruction vertex is a new tripwire instruction vertex:
+	let the result be a new artificial instruction vertex;
+	write the operation code op-jz to the result;
+	write the addressing mode zero-based-dereference addressing mode to parameter zero of the result;
+	write extra field address follow-on call tripwire flag index of call frames for the chunk being instrumented as seen by that chunk to parameter zero of the result;
+	write the addressing mode constant addressing mode to parameter one of the result;
+	decide on the result.
+
+A GRIF instrumentation rule (this is the insert tripwires to detect follow-on calls when the debugger is executing its finish command rule):
+	repeat with the instruction vertex running through occurrences of function call in the scratch space:
+		unless the instruction vertex is artificial or the source address of the instruction vertex is a sequence point:
+			let the pre-call tripwire instruction vertex be a new tripwire instruction vertex;
+			let the pre-call breakpoint-enabling instruction vertex be a new artificial instruction vertex for a zero-argument call to the function at address the function address of enabling the universal breakpoint with return mode the zero-or-discard addressing mode;
+			let the post-call tripwire instruction vertex be a new tripwire instruction vertex;
+			let the post-call breakpoint-disabling instruction vertex be a new artificial instruction vertex for a zero-argument call to the function at address the function address of disabling the universal breakpoint with return mode the zero-or-discard addressing mode;
+			insert the pre-call tripwire instruction vertex before the instruction vertex;
+			insert the pre-call breakpoint-enabling instruction vertex before the instruction vertex;
+			insert the post-call breakpoint-disabling instruction vertex after the instruction vertex;
+			insert the post-call tripwire instruction vertex after the instruction vertex;
+			establish a jump link from the pre-call tripwire instruction vertex to the instruction vertex;
+			establish a jump link from the post-call tripwire instruction vertex to the next link of the post-call breakpoint-disabling instruction vertex.
+
 Book "Main Debugger Routine" - unindexed
 
 Chapter "Interruption Control" - unindexed
@@ -673,6 +709,7 @@ Handling a breakpoint (this is the interactive debugger breakpoint response rule
 		while within the debugger window via the debugger wrapping layer:
 			disable the universal breakpoint;
 			disable all frame-local breakpoints;
+			disable all frame-local tripwires;
 			announce breakpoints at the encountered simple breakpoint;
 			now the debugger story-continuing flag is false;
 			adjust the debugger's current call frame;
@@ -2885,6 +2922,24 @@ To disable all frame-local breakpoints:
 		disable the frame-local breakpoint in the current call frame;
 		now the current call frame is the outward link of the current call frame.
 
+To enable frame-local tripwires in (F - a call frame):
+	write true to extra field follow-on call tripwire flag index of F.
+
+To disable frame-local tripwires in (F - a call frame):
+	write false to extra field follow-on call tripwire flag index of F.
+
+To enable frame-local tripwires in (F - a call frame) and outward:
+	let the current call frame be F;
+	while the current call frame is not null:
+		enable frame-local tripwires in the current call frame;
+		now the current call frame is the outward link of the current call frame.
+
+To disable all frame-local tripwires:
+	let the current call frame be the leaf of the debugger's current call frame;
+	while the current call frame is not null:
+		disable frame-local tripwires in the current call frame;
+		now the current call frame is the outward link of the current call frame.
+
 To handle a debug command for continuing execution:
 	if the debugger's control flow state is:
 		-- responding after a sequence point step:
@@ -2904,6 +2959,7 @@ To handle a debug command for continuing execution:
 		-- responding after a finish:
 			unless the debugger's current call frame is null:
 				enable frame-local breakpoints in the outward link of the debugger's current call frame and outward, considering only visible frames;
+				enable frame-local tripwires in the outward link of the debugger's current call frame and outward;
 	now the debugger story-continuing flag is true;
 	unless the multiple windows supported flag is set in the debugger wrapping layer and the no more than one line input request at a time option is not active:
 		now the debugger prompting flag is false.
