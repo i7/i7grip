@@ -3110,17 +3110,7 @@ To handle the debug command rooted at (V - a parse tree vertex that has the pars
 		say "The story is already running.  To pause the story, [if the current debugger coexecution state is story waiting for input]give the command 'force a breakpoint' in the story window[otherwise]use the debug command 'force a breakpoint'[end if].[paragraph break]";
 		stop;
 	now the debugger's control flow state is responding after a finish;
-	let the language vertex be the first match for a debugging language among the children of V;
-	if the language vertex is an invalid parse tree vertex:
-		let the sequence point be the sequence point to highlight;
-		let the routine record be the routine record owning the sequence point the sequence point;
-		now the currently preferred debug mode is the preferred debug mode for the routine record;
-	otherwise if the Glulx language appears among the children of the language vertex:
-		now the currently preferred debug mode is debugging at the Glulx assembly level;
-	otherwise if the I6 language appears among the children of the language vertex:
-		now the currently preferred debug mode is debugging at the I6 level;
-	otherwise if the I7 language appears among the children of the language vertex:
-		now the currently preferred debug mode is debugging at the I7 level;
+	now the currently preferred debug mode is debugging at the I7 level;
 	handle a debug command for continuing execution.
 
 Chapter "Variable Inspection Commands" - unindexed
