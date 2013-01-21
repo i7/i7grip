@@ -1856,8 +1856,9 @@ we can write
 
 as in
 
+	The scratch variable index is a number that varies.
 	A GRIF setup rule (this is the allocate the scratch variable rule):
-		let the scratch variable index be the index of a newly reserved call frame field.
+		now the scratch variable index is the index of a newly reserved call frame field.
 
 to reserve space for one such variable.  The instrumentation can access it by
 reading and writing to the address given by this phrase:
