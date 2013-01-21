@@ -76,6 +76,8 @@ A kind in the singular and
 	a kind preferably in the plural and
 	a kind pedantically in the plural [for cases where Inform would use the plural but a human would probably use the singular] and
 	an optional kind preferably in the singular and
+	an optional kind preferably in the plural and
+	an optional kind pedantically in the plural and
 	a list of kinds and
 	a nonempty list of kinds and
 	a nothing kind and
@@ -157,6 +159,8 @@ A kind printing setup rule (this is the set up the kind name parser rule):
 	now a kind preferably in the plural is a new nonterminal in the kind name parser named "a kind";
 	now a kind pedantically in the plural is a new nonterminal in the kind name parser named "a kind";
 	now an optional kind preferably in the singular is a new nonterminal in the kind name parser named "an optional kind";
+	now an optional kind preferably in the plural is a new nonterminal in the kind name parser named "an optional kind";
+	now an optional kind pedantically in the plural is a new nonterminal in the kind name parser named "an optional kind";
 	now a list of kinds is a new nonterminal in the kind name parser named "a (possibly empty) list of kinds";
 	now a nonempty list of kinds is a new nonterminal in the kind name parser named "a partial list of kinds";
 	now a nothing kind is a new nonterminal in the kind name parser named "nothing";
@@ -235,6 +239,8 @@ A kind printing setup rule (this is the set up the kind name parser rule):
 	understand "[a kind in the singular]" or "[a kind in the plural]" as a kind preferably in the plural;
 	understand "[a kind in the singular]" or "[a kind in the plural]" as a kind pedantically in the plural;
 	understand "[a kind preferably in the singular]" or "[a nothing kind]" as an optional kind preferably in the singular;
+	understand "[a kind preferably in the plural]" or "[a nothing kind]" as an optional kind preferably in the plural;
+	understand "[a kind pedantically in the plural]" or "[a nothing kind]" as an optional kind pedantically in the plural;
 	[//]
 	understand "[a nothing kind]" or "[a nonempty list of kinds]" as a list of kinds regardless of case;
 	understand "([a list of kinds])" as a list of kinds;
@@ -383,27 +389,27 @@ A kind printing setup rule (this is the set up the kind name parser rule):
 	understand "phrases [a list of kinds] -> [an optional kind preferably in the singular]" as a phrase in the plural regardless of case;
 	understand "rule" as a rule in the singular regardless of case;
 	understand "routine" as a rule in the singular regardless of case;
-	understand "rule producing [a kind preferably in the plural]" as a rule in the singular regardless of case;
+	understand "rule producing [an optional kind preferably in the plural]" as a rule in the singular regardless of case;
 	understand "[a based rule in the singular]" as a rule in the singular regardless of case;
-	understand "[a kind pedantically in the plural] based rule" as a based rule in the singular regardless of case;
-	understand "[a kind pedantically in the plural] based rule producing [a kind preferably in the plural]" as a based rule in the singular regardless of case;
+	understand "[an optional kind pedantically in the plural] based rule" as a based rule in the singular regardless of case;
+	understand "[an optional kind pedantically in the plural] based rule producing [an optional kind preferably in the plural]" as a based rule in the singular regardless of case;
 	understand "rules" as a rule in the plural regardless of case;
-	understand "rules producing [a kind preferably in the plural]" as a rule in the plural regardless of case;
+	understand "rules producing [an optional kind preferably in the plural]" as a rule in the plural regardless of case;
 	understand "[a based rule in the plural]" as a rule in the singular regardless of case;
-	understand "[a kind pedantically in the plural] based rules" as a based rule in the plural regardless of case;
-	understand "[a kind pedantically in the plural] based rules producing [a kind preferably in the plural]" as a based rule in the plural regardless of case;
+	understand "[an optional kind pedantically in the plural] based rules" as a based rule in the plural regardless of case;
+	understand "[an optional kind pedantically in the plural] based rules producing [an optional kind preferably in the plural]" as a based rule in the plural regardless of case;
 	understand "rulebook" as a rulebook in the singular regardless of case;
-	understand "rulebook producing [a kind preferably in the plural]" as a rulebook in the singular regardless of case;
-	understand "[a based rulebook in the singular]" as a rule in the singular regardless of case;
-	understand "[a kind pedantically in the plural] based rulebook" as a based rulebook in the singular regardless of case;
-	understand "[a kind pedantically in the plural] based rulebook producing [a kind preferably in the plural]" as a based rulebook in the singular regardless of case;
+	understand "rulebook producing [an optional kind preferably in the plural]" as a rulebook in the singular regardless of case;
+	understand "[a based rulebook in the singular]" as a rulebook in the singular regardless of case;
+	understand "[an optional kind pedantically in the plural] based rulebook" as a based rulebook in the singular regardless of case;
+	understand "[an optional kind pedantically in the plural] based rulebook producing [an optional kind preferably in the plural]" as a based rulebook in the singular regardless of case;
 	understand "rulebooks" as a rulebook in the plural regardless of case;
-	understand "rulebooks producing [a kind preferably in the plural]" as a rulebook in the plural regardless of case;
-	understand "[a based rulebook in the plural]" as a rule in the singular regardless of case;
-	understand "[a kind pedantically in the plural] based rulebooks" as a based rulebook in the plural regardless of case;
-	understand "[a kind pedantically in the plural] based rulebooks producing [a kind preferably in the plural]" as a based rulebook in the plural regardless of case;
-	understand "activity on [a kind preferably in the plural]" as an activity in the singular regardless of case;
-	understand "activities on [a kind preferably in the plural]" as an activity in the plural regardless of case;
+	understand "rulebooks producing [an optional kind preferably in the plural]" as a rulebook in the plural regardless of case;
+	understand "[a based rulebook in the plural]" as a rulebook in the singular regardless of case;
+	understand "[an optional kind pedantically in the plural] based rulebooks" as a based rulebook in the plural regardless of case;
+	understand "[an optional kind pedantically in the plural] based rulebooks producing [an optional kind preferably in the plural]" as a based rulebook in the plural regardless of case;
+	understand "activity on [an optional kind preferably in the plural]" as an activity in the singular regardless of case;
+	understand "activities on [an optional kind preferably in the plural]" as an activity in the plural regardless of case;
 	[//]
 	put the kind name parser into normal form.
 
@@ -437,7 +443,8 @@ A kind name canonicalization rule (this is the substitute into non-root placehol
 	let the child be the first child of the parse tree vertex to canonicalize;
 	while the child is not null:
 		let the next child be the right sibling of the child;
-		if the parseme of the child is a kind in the singular or the parseme of the child is a kind in the plural or the parseme of the child is a kind preferably in the singular or the parseme of the child is a kind preferably in the plural or the parseme of the child is a kind pedantically in the plural or the parseme of the child is list of kinds or the parseme of the child is a nonempty list of kinds:
+		let the parseme be the parseme of the child;
+		if the parseme is a kind in the singular or the parseme is a kind in the plural or the parseme is a kind preferably in the singular or the parseme is a kind preferably in the plural or the parseme is a kind pedantically in the plural or the parseme is an optional kind preferably in the singular or the parseme is an optional kind preferably in the plural or the parseme is an optional kind pedantically in the plural or the parseme is list of kinds or the parseme is a nonempty list of kinds:
 			let the grandchild be the first child of the child;
 			delete the child but not its descendants;
 			if the grandchild is not null:
@@ -514,9 +521,10 @@ To decide what number is the weighted pluralization error count of (V - a parse 
 	decide on two.
 
 To decide what number is the weighted pluralization error count of (V - a parse tree vertex that has the parseme a kind pedantically in the plural):
-	if the parseme of the first child of V is a kind in the plural:
+	[if the parseme of the first child of V is a kind in the plural:
 		decide on zero;
-	decide on one.
+	decide on one.] [Frankly, I find Inform's conventions here unusual enough that I'd rather not expect the author to know and follow them.]
+	decide on zero.
 
 To decide what number is the weighted pluralization error count under (V - a parse tree vertex):
 	let the result be the weighted pluralization error count of V;
