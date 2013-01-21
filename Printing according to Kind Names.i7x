@@ -27,6 +27,12 @@ You should have received a copy of the GNU General Public License along with thi
 
 Book "Extension Information"
 
+Chapter "Use Options" - unindexed
+
+Use a kind name hash table size of at least 311 translates as (- Constant PKN_NAME_HASH_SIZE={N}; -).
+
+To decide what number is the kind name hash table size: (- PKN_NAME_HASH_SIZE -).
+
 Chapter "Rulebooks"
 
 The kind printing setup rules are [rulebook is] a rulebook.
@@ -42,6 +48,9 @@ To say the understood value (X - a number) with the base kind code (C - a number
 To decide what text is the validation error for (X - a number) using the kind parse rooted at (V - a parse tree vertex) and a workaround for Inform bug 848:
 	decide on the validation error for X using the kind parse rooted at V.
 
+To say the kind parse rooted at (V - a parse tree vertex) with plural flag (F - a truth state) and a workaround for Inform bug 848:
+	say "[the kind parse rooted at V with plural flag F]".
+
 Book "Runtime Checks"
 
 Chapter "Messages" - unindexed
@@ -56,7 +65,16 @@ To fail at finding the expected number of children when canonicalizing parse tre
 	say "[low-level runtime failure in]Printing according to Kind Names[with explanation]I was cleaning up my parse of a kind name and found more parameterization of a rule or rulebook kind than should be possible.  That means that my canonicalization code, which performs that clean-up, must have failed recently.[terminating the story]".
 
 To fail at saying a value according to a nonexistent previous kind name parse:
-	say "[low-level runtime failure in]Printing according to Kind Names[with explanation]I was ask to say a value according to the most recently parsed kind name, but there way no most recently parsed kind name.[terminating the story]".
+	say "[low-level runtime failure in]Printing according to Kind Names[with explanation]I was asked to say a value according to the most recently parsed kind name, but there way no most recently parsed kind name.[terminating the story]".
+
+To fail at saying a nonexistent previous kind name parse:
+	say "[low-level runtime failure in]Printing according to Kind Names[with explanation]I was asked to say the most recently parsed kind name, but there way no most recently parsed kind name.[terminating the story]".
+
+To fail at saying a previous kind name parse that was not understood:
+	say "[low-level runtime failure in]Printing according to Kind Names[with explanation]I was asked to say the most recently parsed kind name unambiguously, but I didn't understand it, so I can't then identify or remove any ambiguities.[terminating the story]".
+
+To say fail at saying a kind:
+	say "[low-level runtime failure in]Printing according to Kind Names[with explanation]I was asked to say a kind, but was unable to find all of the entries in my kind name bookkeeping; it might be corrupted.[terminating the story]".
 
 Book "Forced Inclusion of the Block Value Management Routines" - unindexed
 
@@ -81,6 +99,7 @@ A kind in the singular and
 	a list of kinds and
 	a nonempty list of kinds and
 	a nothing kind and
+	a nothing meaning action kind and
 	a nonkind in the singular and
 	a truth state in the singular and
 	a truth state in the plural and
@@ -92,6 +111,8 @@ A kind in the singular and
 	a time in the plural and
 	a value in the singular and
 	a value in the plural and
+	a value in the particular singular and
+	a value in the particular plural and
 	a use option in the singular and
 	a use option in the plural and
 	a Unicode character in the singular and
@@ -128,6 +149,8 @@ A kind in the singular and
 	a relation in the plural and
 	an object in the singular and
 	an object in the plural and
+	an object in the particular singular and
+	an object in the particular plural and
 	an either/or property in the singular and
 	an either/or property in the plural and
 	a valued property in the singular and
@@ -147,12 +170,29 @@ A kind in the singular and
 	an activity in the singular and
 	an activity in the plural are parsemes that vary.
 
+Chapter "Kind Name Printing Hash Tables" - unindexed
+
+[Maps kind parsemes to the singular and plural names (without articles) for their kinds, unless those names are parameterized.]
+The singular kind name hash table is a hash table that varies.
+The plural kind name hash table is a hash table that varies.
+
+To associate the kind name parseme (S - a parseme) with the singular (T - some text) and the plural (U - some text):
+	insert the key S and the value T into the singular kind name hash table;
+	insert the key S and the value U into the plural kind name hash table.
+
+To decide what text is the kind name for (S - a parseme) with plural flag (F - a truth state):
+	if F is true:
+		decide on the first text value matching the key S in the plural kind name hash table or "[fail at saying a kind]" if there are no matches;
+	decide on the first text value matching the key S in the singular kind name hash table or "[fail at saying a kind]" if there are no matches.
+
 Chapter "Kind Name Parser Setup and Grammar" - unindexed
 
 The global for saying a custom kind name is some text that varies.
 
 A kind printing setup rule (this is the set up the kind name parser rule):
 	now the kind name parser is a new context-free parser;
+	now the singular kind name hash table is a new hash table with the kind name hash table size buckets;
+	now the plural kind name hash table is a new hash table with the kind name hash table size buckets;
 	now a kind in the singular is a new nonterminal in the kind name parser named "a kind (written in the singular)";
 	now a kind in the plural is a new nonterminal in the kind name parser named "a kind (written in the plural)";
 	now a kind preferably in the singular is a new nonterminal in the kind name parser named "a kind";
@@ -164,55 +204,98 @@ A kind printing setup rule (this is the set up the kind name parser rule):
 	now a list of kinds is a new nonterminal in the kind name parser named "a (possibly empty) list of kinds";
 	now a nonempty list of kinds is a new nonterminal in the kind name parser named "a partial list of kinds";
 	now a nothing kind is a new nonterminal in the kind name parser named "nothing";
+	associate the kind name parseme a nothing kind with the singular "nothing" and the plural "nothing";
+	now a nothing meaning action kind is a new nonterminal in the kind name parser named "action";
+	associate the kind name parseme a nothing meaning action kind with the singular "action" and the plural "action";
 	now a nonkind in the singular is a new nonterminal in the kind name parser named "an unknown or absent kind";
 	now a truth state in the singular is a new nonterminal in the kind name parser named "a truth state";
+	associate the kind name parseme a truth state in the singular with the singular "truth state" and the plural "truth states";
 	now a truth state in the plural is a new nonterminal in the kind name parser named "truth states";
+	associate the kind name parseme a truth state in the plural with the singular "truth state" and the plural "truth states";
 	now a rulebook outcome in the singular is a new nonterminal in the kind name parser named "a rulebook outcome";
+	associate the kind name parseme a rulebook outcome in the singular with the singular "rulebook outcome" and the plural "a rulebook outcomes";
 	now a rulebook outcome in the plural is a new nonterminal in the kind name parser named "rulebook outcomes";
+	associate the kind name parseme a rulebook outcome in the plural with the singular "rulebook outcome" and the plural "rulebook outcomes";
 	now a number in the singular is a new nonterminal in the kind name parser named "a number";
+	associate the kind name parseme a number in the singular with the singular "number" and the plural "numbers";
 	now a number in the plural is a new nonterminal in the kind name parser named "numbers";
+	associate the kind name parseme a number in the plural with the singular "number" and the plural "numbers";
 	now a time in the singular is a new nonterminal in the kind name parser named "a time";
+	associate the kind name parseme a time in the singular with the singular "time" and the plural "times";
 	now a time in the plural is a new nonterminal in the kind name parser named "times";
+	associate the kind name parseme a time in the plural with the singular "time" and the plural "times";
 	now a value in the singular is a new nonterminal in the kind name parser named "a custom kind of value";
 	now a value in the plural is a new nonterminal in the kind name parser named "a custom kind of value";
 	now a use option in the singular is a new nonterminal in the kind name parser named "a use option";
+	associate the kind name parseme a use option in the singular with the singular "use option" and the plural "use options";
 	now a use option in the plural is a new nonterminal in the kind name parser named "use options";
+	associate the kind name parseme a use option in the plural with the singular "use option" and the plural "use options";
 	now a Unicode character in the singular is a new nonterminal in the kind name parser named "a Unicode character";
+	associate the kind name parseme a Unicode character in the singular with the singular "Unicode character" and the plural "Unicode characters";
 	now a Unicode character in the plural is a new nonterminal in the kind name parser named "Unicode characters";
+	associate the kind name parseme a Unicode character in the plural with the singular "Unicode character" and the plural "Unicode characters";
 	now a text in the singular is a new nonterminal in the kind name parser named "a text";
+	associate the kind name parseme a text in the singular with the singular "text" and the plural "texts";
 	now a text in the plural is a new nonterminal in the kind name parser named "texts";
+	associate the kind name parseme a text in the plural with the singular "text" and the plural "texts";
 	now an indexed text in the singular is a new nonterminal in the kind name parser named "an indexed text";
+	associate the kind name parseme an indexed text in the singular with the singular "indexed text" and the plural "indexed texts";
 	now an indexed text in the plural is a new nonterminal in the kind name parser named "indexed texts";
+	associate the kind name parseme an indexed text in the plural with the singular "indexed text" and the plural "indexed texts";
 	now a snippet in the singular is a new nonterminal in the kind name parser named "a snippet";
+	associate the kind name parseme a snippet in the singular with the singular "snippet" and the plural "snippets";
 	now a snippet in the plural is a new nonterminal in the kind name parser named "snippets";
+	associate the kind name parseme a snippet in the plural with the singular "snippet" and the plural "snippets";
 	now a topic in the singular is a new nonterminal in the kind name parser named "a topic";
+	associate the kind name parseme a topic in the singular with the singular "topic" and the plural "topics";
 	now a topic in the plural is a new nonterminal in the kind name parser named "topics";
+	associate the kind name parseme a topic in the plural with the singular "topic" and the plural "topics";
 	now an action name in the singular is a new nonterminal in the kind name parser named "an action name";
+	associate the kind name parseme an action name in the singular with the singular "action name" and the plural "action names";
 	now an action name in the plural is a new nonterminal in the kind name parser named "action names";
+	associate the kind name parseme an action name in the plural with the singular "action name" and the plural "action names";
 	now a stored action in the singular is a new nonterminal in the kind name parser named "a stored action";
+	associate the kind name parseme a stored action in the singular with the singular "stored action" and the plural "stored actions";
 	now a stored action in the plural is a new nonterminal in the kind name parser named "stored actions";
+	associate the kind name parseme a stored action in the plural with the singular "stored action" and the plural "stored actions";
 	now a scene in the singular is a new nonterminal in the kind name parser named "a scene";
+	associate the kind name parseme a scene in the singular with the singular "scene" and the plural "scenes";
 	now a scene in the plural is a new nonterminal in the kind name parser named "scenes";
+	associate the kind name parseme a scene in the plural with the singular "scene" and the plural "scenes";
 	now a figure name in the singular is a new nonterminal in the kind name parser named "a figure name";
+	associate the kind name parseme a figure name in the singular with the singular "figure name" and the plural "figure names";
 	now a figure name in the plural is a new nonterminal in the kind name parser named "figure names";
+	associate the kind name parseme a figure name in the plural with the singular "figure name" and the plural "figure names";
 	now a sound name in the singular is a new nonterminal in the kind name parser named "a sound name";
+	associate the kind name parseme a sound name in the singular with the singular "sound name" and the plural "sound names";
 	now a sound name in the plural is a new nonterminal in the kind name parser named "sound names";
+	associate the kind name parseme a sound name in the plural with the singular "sound name" and the plural "sound names";
 	now an external file in the singular is a new nonterminal in the kind name parser named "an external file";
+	associate the kind name parseme an external file in the singular with the singular "external file" and the plural "external files";
 	now an external file in the plural is a new nonterminal in the kind name parser named "external files";
+	associate the kind name parseme an external file in the plural with the singular "external file" and the plural "external files";
 	now a list in the singular is a new nonterminal in the kind name parser named "a list";
 	now a list in the plural is a new nonterminal in the kind name parser named "lists";
 	now a table name in the singular is a new nonterminal in the kind name parser named "a table name";
+	associate the kind name parseme a table name in the singular with the singular "table name" and the plural "table names";
 	now a table name in the plural is a new nonterminal in the kind name parser named "table names";
+	associate the kind name parseme a table name in the plural with the singular "table name" and the plural "table names";
 	now a table column in the singular is a new nonterminal in the kind name parser named "a table column";
 	now a table column in the plural is a new nonterminal in the kind name parser named "table columns";
 	now an equation name in the singular is a new nonterminal in the kind name parser named "an equation name";
+	associate the kind name parseme an equation name in the singular with the singular "equation name" and the plural "equation names";
 	now an equation name in the plural is a new nonterminal in the kind name parser named "equation names";
+	associate the kind name parseme an equation name in the plural with the singular "equation name" and the plural "equation names";
 	now a relation in the singular is a new nonterminal in the kind name parser named "a relation";
 	now a relation in the plural is a new nonterminal in the kind name parser named "relations";
 	now an object in the singular is a new nonterminal in the kind name parser named "a kind of object";
+	associate the kind name parseme an object in the singular with the singular "object" and the plural "objects";
 	now an object in the plural is a new nonterminal in the kind name parser named "a kind of object";
+	associate the kind name parseme an object in the plural with the singular "object" and the plural "objects";
 	now an either/or property in the singular is a new nonterminal in the kind name parser named "an either/or property";
+	associate the kind name parseme an either/or property in the singular with the singular "either/or property" and the plural "either/or properties";
 	now an either/or property in the plural is a new nonterminal in the kind name parser named "either/or properties";
+	associate the kind name parseme an either/or property in the plural with the singular "either/or property" and the plural "either/or properties";
 	now a valued property in the singular is a new nonterminal in the kind name parser named "a valued property";
 	now a valued property in the plural is a new nonterminal in the kind name parser named "valued properties";
 	now a description in the singular is a new nonterminal in the kind name parser named "a description";
@@ -354,10 +437,16 @@ A kind printing setup rule (this is the set up the kind name parser rule):
 	understand "either/or properties" as an either/or property in the plural regardless of case;
 	[//]
 	repeat with the kind-of-value name running through the underlying text keys of the kind-of-value hash table:
+		now a value in the particular singular is a new nonterminal in the kind name parser named "a custom kind of value";
 		now the global for saying a custom kind name is the kind-of-value name;
-		understand "[the global for saying a custom kind name]" as a value in the singular regardless of case;
+		understand "[the global for saying a custom kind name]" as a value in the particular singular regardless of case;
+		understand "[a value in the particular singular]" as a value in the singular;
+		associate the kind name parseme a value in the particular singular with the singular the kind-of-value name and the plural the debug plural of the kind-of-value name;
+		now a value in the particular plural is a new nonterminal in the kind name parser named "a custom kind of value";
 		now the global for saying a custom kind name is the debug plural of the kind-of-value name;
-		understand "[the global for saying a custom kind name]" as a value in the plural regardless of case;
+		understand "[the global for saying a custom kind name]" as a value in the particular plural regardless of case;
+		understand "[a value in the particular plural]" as a value in the plural;
+		associate the kind name parseme a value in the particular plural with the singular the kind-of-value name and the plural the debug plural of the kind-of-value name;
 	[//]
 	understand "object" as an object in the singular regardless of case;
 	understand "objects" as an object in the plural regardless of case;
@@ -370,10 +459,16 @@ A kind printing setup rule (this is the set up the kind name parser rule):
 	understand "region" as an object in the singular regardless of case;
 	understand "regions" as an object in the plural regardless of case;
 	repeat with the kind-of-object name running through the underlying text keys of the kind-of-object hash table:
+		now an object in the particular singular is a new nonterminal in the kind name parser named "a custom kind of object";
 		now the global for saying a custom kind name is the kind-of-object name;
-		understand "[the global for saying a custom kind name]" as an object in the singular regardless of case;
+		understand "[the global for saying a custom kind name]" as an object in the particular singular regardless of case;
+		understand "[an object in the particular singular]" as an object in the singular;
+		associate the kind name parseme an object in the particular singular with the singular the kind-of-object name and the plural the debug plural of the kind-of-object name;
+		now an object in the particular plural is a new nonterminal in the kind name parser named "a custom kind of object";
 		now the global for saying a custom kind name is the debug plural of the kind-of-object name;
-		understand "[the global for saying a custom kind name]" as an object in the plural regardless of case;
+		understand "[the global for saying a custom kind name]" as an object in the particular plural regardless of case;
+		understand "[an object in the particular plural]" as an object in the plural;
+		associate the kind name parseme an object in the particular plural with the singular the kind-of-object name and the plural the debug plural of the kind-of-object name;
 	[//]
 	understand "list of [a kind preferably in the plural]" as a list in the singular regardless of case;
 	understand "lists of [a kind preferably in the plural]" as a list in the plural regardless of case;
@@ -387,24 +482,32 @@ A kind printing setup rule (this is the set up the kind name parser rule):
 	understand "descriptions of [a kind preferably in the plural]" as a description in the plural regardless of case;
 	understand "phrase [a list of kinds] -> [an optional kind preferably in the singular]" as a phrase in the singular regardless of case;
 	understand "phrases [a list of kinds] -> [an optional kind preferably in the singular]" as a phrase in the plural regardless of case;
-	understand "rule" as a rule in the singular regardless of case;
 	understand "routine" as a rule in the singular regardless of case;
+	understand "rule" as a rule in the singular regardless of case;
+	understand "action based rule" as a rule in the singular regardless of case;
 	understand "rule producing [an optional kind preferably in the plural]" as a rule in the singular regardless of case;
+	understand "action based rule producing [an optional kind preferably in the plural]" as a rule in the singular regardless of case;
 	understand "[a based rule in the singular]" as a rule in the singular regardless of case;
 	understand "[an optional kind pedantically in the plural] based rule" as a based rule in the singular regardless of case;
 	understand "[an optional kind pedantically in the plural] based rule producing [an optional kind preferably in the plural]" as a based rule in the singular regardless of case;
 	understand "rules" as a rule in the plural regardless of case;
+	understand "action based rules" as a rule in the plural regardless of case;
 	understand "rules producing [an optional kind preferably in the plural]" as a rule in the plural regardless of case;
+	understand "action based rules producing [an optional kind preferably in the plural]" as a rule in the plural regardless of case;
 	understand "[a based rule in the plural]" as a rule in the singular regardless of case;
 	understand "[an optional kind pedantically in the plural] based rules" as a based rule in the plural regardless of case;
 	understand "[an optional kind pedantically in the plural] based rules producing [an optional kind preferably in the plural]" as a based rule in the plural regardless of case;
 	understand "rulebook" as a rulebook in the singular regardless of case;
+	understand "action based rulebook" as a rulebook in the singular regardless of case;
 	understand "rulebook producing [an optional kind preferably in the plural]" as a rulebook in the singular regardless of case;
+	understand "action based rulebook producing [an optional kind preferably in the plural]" as a rulebook in the singular regardless of case;
 	understand "[a based rulebook in the singular]" as a rulebook in the singular regardless of case;
 	understand "[an optional kind pedantically in the plural] based rulebook" as a based rulebook in the singular regardless of case;
 	understand "[an optional kind pedantically in the plural] based rulebook producing [an optional kind preferably in the plural]" as a based rulebook in the singular regardless of case;
 	understand "rulebooks" as a rulebook in the plural regardless of case;
+	understand "action based rulebooks" as a rulebook in the plural regardless of case;
 	understand "rulebooks producing [an optional kind preferably in the plural]" as a rulebook in the plural regardless of case;
+	understand "action based rulebooks producing [an optional kind preferably in the plural]" as a rulebook in the plural regardless of case;
 	understand "[a based rulebook in the plural]" as a rulebook in the singular regardless of case;
 	understand "[an optional kind pedantically in the plural] based rulebooks" as a based rulebook in the plural regardless of case;
 	understand "[an optional kind pedantically in the plural] based rulebooks producing [an optional kind preferably in the plural]" as a based rulebook in the plural regardless of case;
@@ -483,7 +586,7 @@ A last kind name canonicalization rule (this is the canonicalize rules and ruleb
 			always check that right sibling of the first child is the last child or else fail at finding the expected number of children when canonicalizing parse tree vertices for rules and rulebooks;
 	otherwise if the parseme is a rule in the singular or the parseme is a rule in the plural or the parseme is a rulebook in the singular or the parseme is a rulebook in the plural:
 		if the first child is null:
-			let the basis child be a new parse tree vertex for a nothing kind with the parent the parse tree vertex to canonicalize;
+			let the basis child be a new parse tree vertex for a nothing meaning action kind with the parent the parse tree vertex to canonicalize;
 			let the outcome child be a new parse tree vertex for a nothing kind with the parent the parse tree vertex to canonicalize;
 		otherwise if the first child is the last child:
 			now the parseme is the parseme of the first child;
@@ -497,7 +600,7 @@ A last kind name canonicalization rule (this is the canonicalize rules and ruleb
 				write the parent (the parse tree vertex to canonicalize) to the basis child;
 				write the parent (the parse tree vertex to canonicalize) to the outcome child;
 			otherwise:
-				let the basis child be a new parse tree vertex for a nothing kind with the parent the parse tree vertex to canonicalize, placed on the left;
+				let the basis child be a new parse tree vertex for a nothing meaning action kind with the parent the parse tree vertex to canonicalize, placed on the left;
 		otherwise:
 			always check that right sibling of the first child is the last child or else fail at finding the expected number of children when canonicalizing parse tree vertices for rules and rulebooks.
 
@@ -997,16 +1100,14 @@ Part "Validation and Printing Phrases" - unindexed
 
 Chapter "All Values" - unindexed
 
+To say the kind parse rooted at (V - a parse tree vertex) with plural flag (F - a truth state):
+	say "[the kind name for the parseme of V with plural flag F]".
+
+To say the kind parse rooted at (V - a parse tree vertex that has the parseme a kind in the singular) with plural flag (F - a truth state):
+	say "[the kind parse rooted at the first child of V with plural flag F and brackets as necessary]".
+
 To decide what text is the validation error for (X - a number) using the kind parse rooted at (V - a parse tree vertex that has the parseme a kind in the singular):
 	decide on the validation error for X using the kind parse rooted at the first child of V and a workaround for Inform bug 848.
-
-To say (X - a number) using the kind parse rooted at (V - a parse tree vertex):
-	say "[the human-friendly name of the parseme of V]".
-
-To say (X - a number) using the kind parse rooted at (V - a parse tree vertex that has the parseme a kind in the singular):
-	say "[X using the kind parse rooted at the first child of V with paranoia]".
-
-Chapter "General Values" - unindexed
 
 To decide whether (X - a number) is completely valid using the kind parse rooted at (V - a parse tree vertex):
 	[//// Workaround for Inform bug ### ////]
@@ -1015,6 +1116,12 @@ To decide whether (X - a number) is completely valid using the kind parse rooted
 	[//// Workaround for Inform bug ### ////]
 	let the error be the validation error for X using the kind parse rooted at V and a workaround for Inform bug 848;
 	decide on whether or not the error is empty.
+
+To say (X - a number) using the kind parse rooted at (V - a parse tree vertex):
+	say "[the human-friendly name of the parseme of V]".
+
+To say (X - a number) using the kind parse rooted at (V - a parse tree vertex that has the parseme a kind in the singular):
+	say "[X using the kind parse rooted at the first child of V with paranoia]".
 
 Chapter "Nonkind Values" - unindexed
 
@@ -1539,6 +1646,12 @@ To say (X - a number) using the kind parse rooted at (V - a parse tree vertex th
 
 Chapter "List Values" - unindexed
 
+To say the kind parse rooted at (V - a parse tree vertex that has the parseme a list in the singular) with plural flag (F - a truth state):
+	say "list[if F is true]s[end if] of [the kind parse rooted at the first child of V with plural flag true and brackets as necessary]".
+
+To say the kind parse rooted at (V - a parse tree vertex that has the parseme a list in the plural) with plural flag (F - a truth state):
+	say "list[if F is true]s[end if] of [the kind parse rooted at the first child of V with plural flag true and brackets as necessary]".
+
 To decide what number is the list length datum index: (- LIST_LENGTH_F -).
 To decide what number is the list element kind datum index: (- LIST_ITEM_KOV_F -).
 To decide what number is the list contents datum offset: (- LIST_ITEM_BASE -).
@@ -1641,6 +1754,12 @@ To say (X - a number) using the kind parse rooted at (V - a parse tree vertex th
 
 Chapter "Table Column Values" - unindexed
 
+To say the kind parse rooted at (V - a parse tree vertex that has the parseme a table column in the singular) with plural flag (F - a truth state):
+	say "[the kind parse rooted at the first child of V with plural flag true and brackets as necessary] valued table column[if F is true]s[end if]".
+
+To say the kind parse rooted at (V - a parse tree vertex that has the parseme a table column in the plural) with plural flag (F - a truth state):
+	say "[the kind parse rooted at the first child of V with plural flag true and brackets as necessary] valued table column[if F is true]s[end if]".
+
 To decide what number is the minimum table column value: (- 100 -).
 To decide whether the table column value (X - a number) is an unknown table column: (- (TC_KOV({X})==UNKNOWN_TY) -).
 To decide what number is the address of I6_TC_KOV: (- TC_KOV -).
@@ -1706,6 +1825,12 @@ To say (X - a number) using the kind parse rooted at (V - a parse tree vertex th
 
 Chapter "Relation Values" - unindexed
 
+To say the kind parse rooted at (V - a parse tree vertex that has the parseme a relation in the singular) with plural flag (F - a truth state):
+	say "relation[if F is true]s[end if] of [the kind parse rooted at the first child of V with plural flag true and brackets as necessary] to [the kind parse rooted at the last child of V with plural flag true and brackets as necessary]".
+
+To say the kind parse rooted at (V - a parse tree vertex that has the parseme a relation in the plural) with plural flag (F - a truth state):
+	say "relation[if F is true]s[end if] of [the kind parse rooted at the first child of V with plural flag true and brackets as necessary] to [the kind parse rooted at the last child of V with plural flag true and brackets as necessary]".
+
 To decide what number is the relation name offset: (- (4*RR_NAME) -).
 
 The anonymous relation string is a text that varies.
@@ -1746,6 +1871,12 @@ To say (X - a number) using the kind parse rooted at (V - a parse tree vertex th
 
 Chapter "Custom Values" - unindexed
 
+To say the kind parse rooted at (V - a parse tree vertex that has the parseme a value in the singular) with plural flag (F - a truth state):
+	say "[the kind parse rooted at the first child of V with plural flag F and brackets as necessary]".
+
+To say the kind parse rooted at (V - a parse tree vertex that has the parseme a value in the plural) with plural flag (F - a truth state):
+	say "[the kind parse rooted at the first child of V with plural flag F and brackets as necessary]".
+
 The kind name for validating custom values is a text that varies.
 The value for validating custom values is a number that varies.
 The base kind code for validating custom values is a number that varies.
@@ -1780,6 +1911,18 @@ To say (X - a number) using the kind parse rooted at (V - a parse tree vertex th
 	say "[the custom value X using the kind parse rooted at V]".
 
 Chapter "Object Values" - unindexed
+
+To say the kind parse rooted at (V - a parse tree vertex that has the parseme a object in the singular) with plural flag (F - a truth state):
+	if the first child of V is null:
+		say "[the kind name for the parseme of V with plural flag F]";
+	otherwise:
+		say "[the kind parse rooted at the first child of V with plural flag F and brackets as necessary]".
+
+To say the kind parse rooted at (V - a parse tree vertex that has the parseme a object in the plural) with plural flag (F - a truth state):
+	if the first child of V is null:
+		say "[the kind name for the parseme of V with plural flag F]";
+	otherwise:
+		say "[the kind parse rooted at the first child of V with plural flag F and brackets as necessary]".
 
 To decide what number is the address of the I6 class Class: (- Class -).
 To decide what number is the address of the I6 class String: (- String -).
@@ -1851,6 +1994,12 @@ To say (X - a number) using the kind parse rooted at (V - a parse tree vertex th
 	say "[the object value X]".
 
 Chapter "Property Values" - unindexed
+
+To say the kind parse rooted at (V - a parse tree vertex that has the parseme a valued property in the singular) with plural flag (F - a truth state):
+	say "[the kind parse rooted at the first child of V with plural flag true and brackets as necessary] valued propert[if F is true]ies[otherwise]y[end if]".
+
+To say the kind parse rooted at (V - a parse tree vertex that has the parseme a valued property in the plural) with plural flag (F - a truth state):
+	say "[the kind parse rooted at the first child of V with plural flag true and brackets as necessary] valued propert[if F is true]ies[otherwise]y[end if]".
 
 To decide what number is the limit on attributed properties: (- attributed_property_offsets_SIZE -).
 To decide what number is the limit on valued properties: (- valued_property_offsets_SIZE -).
@@ -1966,6 +2115,12 @@ To say (X - a number) using the kind parse rooted at (V - a parse tree vertex th
 
 Chapter "Description Values" - unindexed
 
+To say the kind parse rooted at (V - a parse tree vertex that has the parseme a description in the singular) with plural flag (F - a truth state):
+	say "description[if F is true]s[end if] of [the kind parse rooted at the first child of V with plural flag true and brackets as necessary]".
+
+To say the kind parse rooted at (V - a parse tree vertex that has the parseme a description in the plural) with plural flag (F - a truth state):
+	say "description[if F is true]s[end if] of [the kind parse rooted at the first child of V with plural flag true and brackets as necessary]".
+
 [We use I6 macros to include brackets without causing ni to emit a text routine.]
 To decide what text is the nonsynthetic second-line description comment prefix: (- "! [ " -).
 To decide what text is the nonsynthetic second-line description comment suffix: (- " ]" -).
@@ -2024,6 +2179,24 @@ To say (X - a number) using the kind parse rooted at (V - a parse tree vertex th
 
 Chapter "Phrase Values" - unindexed
 
+To say the kind parse rooted at (V - a parse tree vertex that has the parseme a phrase in the singular) with plural flag (F - a truth state):
+	let the first child be the first child of V;
+	let the last child be the last child of V;
+	say "phrase[if F is true]s[end if] (";
+	repeat with the child running through the children of V:
+		if the child is not the last child:
+			say "[if the child is not the first child], [end if][the kind parse rooted at the child with plural flag false and brackets as necessary]";
+	say ") -> [the kind parse rooted at the last child with plural flag true and brackets as necessary]".
+
+To say the kind parse rooted at (V - a parse tree vertex that has the parseme a phrase in the plural) with plural flag (F - a truth state):
+	let the first child be the first child of V;
+	let the last child be the last child of V;
+	say "phrase[if F is true]s[end if] (";
+	repeat with the child running through the children of V:
+		if the child is not the last child:
+			say "[if the child is not the first child], [end if][the kind parse rooted at the child with plural flag false and brackets as necessary]";
+	say ") -> [the kind parse rooted at the last child with plural flag true and brackets as necessary]".
+
 To decide what text is the validation error for the phrase value (X - a number):
 	let the name address be the name address of the phrase at address X;
 	if the name address is an invalid integer address:
@@ -2054,6 +2227,12 @@ To say (X - a number) using the kind parse rooted at (V - a parse tree vertex th
 
 Chapter "Rulebook Values" - unindexed
 
+To say the kind parse rooted at (V - a parse tree vertex that has the parseme a rulebook in the singular) with plural flag (F - a truth state):
+	say "[the kind parse rooted at the first child of V with plural flag true and brackets as necessary] based rulebook[if F is true]s[end if] producing [the kind parse rooted at the last child of V with plural flag true and brackets as necessary]".
+
+To say the kind parse rooted at (V - a parse tree vertex that has the parseme a rulebook in the plural) with plural flag (F - a truth state):
+	say "[the kind parse rooted at the first child of V with plural flag true and brackets as necessary] based rulebook[if F is true]s[end if] producing [the kind parse rooted at the last child of V with plural flag true and brackets as necessary]".
+
 To decide what number is the number of rulebooks created: (- NUMBER_RULEBOOKS_CREATED -).
 To decide what text is the name of rulebook (X - a number): (- RulebookNames-->{X} -).
 
@@ -2077,6 +2256,12 @@ To say (X - a number) using the kind parse rooted at (V - a parse tree vertex th
 
 Chapter "Rule Values" - unindexed
 
+To say the kind parse rooted at (V - a parse tree vertex that has the parseme a rule in the singular) with plural flag (F - a truth state):
+	say "[the kind parse rooted at the first child of V with plural flag true and brackets as necessary] based rule[if F is true]s[end if] producing [the kind parse rooted at the last child of V with plural flag true and brackets as necessary]".
+
+To say the kind parse rooted at (V - a parse tree vertex that has the parseme a rule in the plural) with plural flag (F - a truth state):
+	say "[the kind parse rooted at the first child of V with plural flag true and brackets as necessary] based rule[if F is true]s[end if] producing [the kind parse rooted at the last child of V with plural flag true and brackets as necessary]".
+
 To decide what text is the validation error for the rule value (X - a number):
 	unless address X could contain a function:
 		decide on "<invalid rule>";
@@ -2096,6 +2281,12 @@ To say (X - a number) using the kind parse rooted at (V - a parse tree vertex th
 	say "[the rule value X]".
 
 Chapter "Activity Values" - unindexed
+
+To say the kind parse rooted at (V - a parse tree vertex that has the parseme an activity in the singular) with plural flag (F - a truth state):
+	say "activit[if F is true]ies[otherwise]y[end if] on [the kind parse rooted at the first child of V with plural flag true and brackets as necessary]".
+
+To say the kind parse rooted at (V - a parse tree vertex that has the parseme an activity in the plural) with plural flag (F - a truth state):
+	say "activit[if F is true]ies[otherwise]y[end if] on [the kind parse rooted at the first child of V with plural flag true and brackets as necessary]".
 
 To decide what number is the address of the array of rulebooks for activities: (- Activity_for_rulebooks -).
 To decide what number is the rulebook index for activity number (I - a number): (- (Activity_for_rulebooks-->{I}) -).
@@ -2146,6 +2337,12 @@ To say (X - a number) using the kind parse rooted at (V - a parse tree vertex th
 
 Part "Redispatch Phrases" - unindexed
 
+To say the kind parse rooted at (V - a parse tree vertex) with plural flag (F - a truth state) and brackets as necessary:
+	if V is not a root and the parent of V is not a root and the first child of V is not null:
+		say "([the kind parse rooted at V with plural flag F and a workaround for Inform bug 848])";
+	otherwise:
+		say "[the kind parse rooted at V with plural flag F and a workaround for Inform bug 848]".
+
 To say (X - a number) using the kind parse rooted at (V - a parse tree vertex) with paranoia:
 	let the validation error be the validation error for X using the kind parse rooted at V and a workaround for Inform bug 848;
 	if the validation error is empty:
@@ -2191,6 +2388,11 @@ To parse the kind name (T - some text) for (X - a number):
 
 To decide whether the most recently parsed kind name was understood:
 	decide on whether or not the root of the kind parse in holding is not null.
+
+To say the most recently parsed kind name:
+	always check that the root of the kind parse in holding is not an invalid parse tree vertex or else fail at saying a nonexistent previous kind name parse;
+	always check that the root of the kind parse in holding is not null or else fail at saying a previous kind name parse that was not understood;
+	say "[the kind parse rooted at the root of the kind parse in holding with plural flag false and a workaround for Inform bug 848]".
 
 To say (X - a number) according to the most recently parsed kind name:
 	always check that the root of the kind parse in holding is not an invalid parse tree vertex or else fail at saying a value according to a nonexistent previous kind name parse;
