@@ -55,6 +55,9 @@ To fail at finding kind parameters in (V - a parse tree vertex):
 To fail at finding the expected number of children when canonicalizing parse tree vertices for rules and rulebooks:
 	say "[low-level runtime failure in]Printing according to Kind Names[with explanation]I was cleaning up my parse of a kind name and found more parameterization of a rule or rulebook kind than should be possible.  That means that my canonicalization code, which performs that clean-up, must have failed recently.[terminating the story]".
 
+To fail at saying a value according to a nonexistent previous kind name parse:
+	say "[low-level runtime failure in]Printing according to Kind Names[with explanation]I was ask to say a value according to the most recently parsed kind name, but there way no most recently parsed kind name.[terminating the story]".
+
 Book "Forced Inclusion of the Block Value Management Routines" - unindexed
 
 The variable that forces inclusion of the block value management routines is some indexed text that varies.
@@ -988,6 +991,9 @@ Chapter "All Values" - unindexed
 
 To decide what text is the validation error for (X - a number) using the kind parse rooted at (V - a parse tree vertex that has the parseme a kind in the singular):
 	decide on the validation error for X using the kind parse rooted at the first child of V and a workaround for Inform bug 848.
+
+To say (X - a number) using the kind parse rooted at (V - a parse tree vertex):
+	say "[the human-friendly name of the parseme of V]".
 
 To say (X - a number) using the kind parse rooted at (V - a parse tree vertex that has the parseme a kind in the singular):
 	say "[X using the kind parse rooted at the first child of V with paranoia]".
@@ -2139,10 +2145,23 @@ To say (X - a number) using the kind parse rooted at (V - a parse tree vertex) w
 	otherwise:
 		say "[the validation error]".
 
+Part "Private State and Phrases for the Public Phrases" - unindexed
+
+The root of the kind parse in holding is a parse tree vertex that varies.
+
+To clear the kind parse in holding:
+	if the root of the kind parse in holding is an invalid parse tree vertex:
+		set up kind printing;
+	otherwise:
+		unless the root of the kind parse in holding is null:
+			delete the root of the kind parse in holding and its descendants;
+		delete the punctuated words from the kind name parser;
+	now the root of the kind parse in holding is an invalid parse tree vertex.
+
 Part "Public Phrases"
 
 To decide whether there is a kind named (T - some text):
-	set up kind printing;
+	clear the kind parse in holding;
 	now the kind name validity check flag is false;
 	write the punctuated words of T to the kind name parser;
 	let the result be false;
@@ -2152,22 +2171,26 @@ To decide whether there is a kind named (T - some text):
 	delete the punctuated words from the kind name parser;
 	decide on the result.
 
-To say (X - a number) according to the kind named (T - some text) disambiguated by (D - a phrase (context-free parser, linked list, truth state) -> disambiguation feature):
-	set up kind printing;
+To parse the kind name (T - some text) for (X - a number) with disambiguation by (D - a phrase (context-free parser, linked list, truth state) -> disambiguation feature):
+	clear the kind parse in holding;
 	now the kind name validity check flag is whether or not D is not the default value of a phrase (context-free parser, linked list, truth state) -> disambiguation feature;
 	now the value to check kind name validity with is X;
 	write the punctuated words of T to the kind name parser;
-	let the root be the root of the match for a kind in the singular canonicalized by the kind name canonicalization rulebook and disambiguated by scores from the kind name scoring rulebook and primary filtration from the kind name filtration rulebook and secondary filtration from the kind name filtration rulebook and disambiguating choices from D;
-	if the root is null:
+	now the root of the kind parse in holding is the root of the match for a kind in the singular canonicalized by the kind name canonicalization rulebook and disambiguated by scores from the kind name scoring rulebook and primary filtration from the kind name filtration rulebook and secondary filtration from the kind name filtration rulebook and disambiguating choices from D.
+
+To parse the kind name (T - some text) for (X - a number):
+	parse the kind name T for X with disambiguation by the default value of a phrase (context-free parser, linked list, truth state) -> disambiguation feature.
+
+To say (X - a number) according to the most recently parsed kind name:
+	always check that the root of the kind parse in holding is not an invalid parse tree vertex or else fail at saying a value according to a nonexistent previous kind name parse;
+	if the root of the kind parse in holding is null:
 		say "[X converted to a number] (unable to format a value of this kind)";
 	otherwise:
-		say "[X using the kind parse rooted at the root with paranoia]";
-		delete the root and its descendants;
-	delete the punctuated words from the kind name parser.
+		say "[X using the kind parse rooted at the root of the kind parse in holding with paranoia]".
 
 To say (X - a number) according to the kind named (T - some text):
-	let the null disambiguator be the default value of a phrase (context-free parser, linked list, truth state) -> disambiguation feature;
-	say "[X according to the kind named T disambiguated by null disambiguator]".
+	parse the kind name T for X;
+	say "[X according to the most recently parsed kind name]".
 
 Book "Setup"
 

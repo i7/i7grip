@@ -74,9 +74,6 @@ Chapter "Messages" - unindexed
 To fail at requesting multiple debug commands:
 	say "[low-level runtime failure in]Interactive Debugger[with explanation]I tried to request a debug command before the previous request had been fulfilled.[terminating the story]".
 
-To fail at using debug command disambiguating for something other than a debug command:
-	say "[low-level runtime failure in]Interactive Debugger[with explanation]I was asked to ask a debug command disambiguation question about something other than a debug command, a case I'm not prepated to handle.[terminating the story]".
-
 To fail at using debug command disambiguating for a non-question:
 	say "[low-level runtime failure in]Interactive Debugger[with explanation]I was asked to ask a debug command disambiguation question with only one possible answer; the disambiguation machinery must have gone awry.[terminating the story]".
 
@@ -1489,20 +1486,19 @@ The secondary debug command filtration rules are [rulebook is] a rulebook.
 
 Chapter "Debug Command Disambiguation" - unindexed
 
-To say (F - a disambiguation feature) as a disambiguation choice for the debug command parser:
-	let the array content be the punctuated word array content of the debug command parser;
+To say (F - a disambiguation feature) as a disambiguation choice for (A - a context-free parser):
+	let the array content be the punctuated word array content of A;
 	say "'";
 	repeat with the lexeme index running over the half-open interval from the beginning lexeme index of F to the end lexeme index of F:
 		say "[if the lexeme index is not the beginning lexeme index of F] [end if][word lexeme index of the array content]";
 	say "' as [the human-friendly name of the parseme of F]".
 
 To decide what disambiguation feature is the debug command disambiguation choice for (A - a context-free parser) from (L - a linked list) with a none-of-the-above flag (N - a truth state) (this is disambiguating a debug command):
-	always check that A is the debug command parser or else fail at using debug command disambiguating for something other than a debug command;
 	now the debug command disambiguation attempted flag is true;
 	if L is unit:
 		always check that N is true or else fail at using debug command disambiguating for a non-question;
 		let the disambiguation feature be L converted to a disambiguation feature;
-		say "Do you mean [the disambiguation feature as a disambiguation choice for the debug command parser]? ";
+		say "Do you mean [the disambiguation feature as a disambiguation choice for A]? ";
 		if the author consents:
 			decide on the disambiguation feature;
 		decide on none of the offered disambiguation features;
@@ -1512,7 +1508,7 @@ To decide what disambiguation feature is the debug command disambiguation choice
 		repeat with the linked list vertex running through L:
 			let the disambiguation feature be the linked list vertex converted to a disambiguation feature;
 			increment the option counter;
-			say "[the option counter]. [the disambiguation feature as a disambiguation choice for the debug command parser][line break]";
+			say "[the option counter]. [the disambiguation feature as a disambiguation choice for A][line break]";
 		if N is true:
 			increment the option counter;
 			say "[the option counter]. None of the above[line break]";
@@ -1700,10 +1696,6 @@ To decide what number is the local index named by (V - a parse tree vertex):
 		say "I couldn't find any such temporary named value in the selected call frame.  Check for misspellings or use the command 'backtrace' to see which call frame is selected.[paragraph break]";
 		delete the synthetic text the local name;
 		decide on -1.
-
-Section "Kind Name Disambiguation" - unindexed
-
-[////]
 
 Section "Object Name Disambiguation" - unindexed
 
@@ -3087,7 +3079,8 @@ To handle the debug command rooted at (V - a parse tree vertex that has the pars
 		if the address is zero:
 			say "I am not able to find the storage for that non-temporary named value.[paragraph break]";
 		otherwise if the address is a valid integer address:
-			say "[the human-friendly name of the global record] = [the kind name of the global record]: [the integer at address address according to the kind named the kind name of the global record][paragraph break]";
+			parse the kind name the kind name of the global record for the integer at address address with disambiguation by disambiguating a debug command;
+			say "[the human-friendly name of the global record] = [the kind name of the global record]: [the integer at address address according to the most recently parsed kind name][paragraph break]";
 		otherwise:
 			say "The storage for that non-temporary named value is outside of memory.[paragraph break]";
 		stop;
@@ -3100,7 +3093,8 @@ To handle the debug command rooted at (V - a parse tree vertex that has the pars
 		if the address is zero:
 			say "That variable doesn't exist right now.[paragraph break]";
 		otherwise if the address is a valid integer address:
-			say "[the human-friendly name of the memory stack variable record] = [the kind name of the memory stack variable record]: [the integer at address address according to the kind named the kind name of the memory stack variable record][paragraph break]";
+			parse the kind name the kind name of the memory stack variable record for the integer at address address with disambiguation by disambiguating a debug command;
+			say "[the human-friendly name of the memory stack variable record] = [the kind name of the memory stack variable record]: [the integer at address address according to the most recently parsed kind name][paragraph break]";
 		otherwise:
 			say "The storage for that variable is outside of memory.[paragraph break]";
 		stop;
@@ -3117,7 +3111,8 @@ To handle the debug command rooted at (V - a parse tree vertex that has the pars
 			now the kind name is "<unknown kind>";
 		otherwise:
 			now the kind name is I7 local kind name number local index of the routine record;
-		say "[temporary name local index of the debugger's current call frame] = [the kind name]: [temporary named value local index of the debugger's current call frame according to the kind named the kind name][paragraph break]";
+		parse the kind name the kind name for temporary named value local index of the debugger's current call frame with disambiguation by disambiguating a debug command;
+		say "[temporary name local index of the debugger's current call frame] = [the kind name]: [temporary named value local index of the debugger's current call frame according to the most recently parsed kind name][paragraph break]";
 		stop;
 	let the function name vertex be the first match for a function name for the debugger among the children of V;
 	unless the function name vertex is an invalid parse tree vertex:
@@ -3126,19 +3121,22 @@ To handle the debug command rooted at (V - a parse tree vertex that has the pars
 			stop;
 		let the input name be a new synthetic text representing the words matched by the function name vertex;
 		let the kind name be "routine";
-		say "[the input name] = [the kind name]: [the function address according to the kind named the kind name][paragraph break]";
+		parse the kind name the kind name for the function address with disambiguation by disambiguating a debug command;
+		say "[the input name] = [the kind name]: [the function address according to the most recently parsed kind name][paragraph break]";
 		stop;
 	let the decimal vertex be the first match for a decimal number for the debugger among the children of V;
 	unless the decimal vertex is an invalid parse tree vertex:
 		let the value be the decimal number named by the decimal vertex;
 		let the kind name be "number";
-		say "[the value] = [the kind name]: [the value according to the kind named the kind name][paragraph break]";
+		parse the kind name the kind name for the value with disambiguation by disambiguating a debug command;
+		say "[the value] = [the kind name]: [the value according to the most recently parsed kind name][paragraph break]";
 		stop;
 	let the hexadecimal vertex be the first match for a hexadecimal number for the debugger among the children of V;
 	unless the hexadecimal vertex is an invalid parse tree vertex:
 		let the value be the hexadecimal number named by the hexadecimal vertex;
 		let the kind name be "number";
-		say "[the value in hexadecimal] = [the kind name]: [the value according to the kind named the kind name][paragraph break]";
+		parse the kind name the kind name for the value with disambiguation by disambiguating a debug command;
+		say "[the value in hexadecimal] = [the kind name]: [the value according to the most recently parsed kind name][paragraph break]";
 		stop;
 	let the object vertex be the first match for a object name for the debugger among the children of V;
 	unless the object vertex is an invalid parse tree vertex:
@@ -3147,7 +3145,8 @@ To handle the debug command rooted at (V - a parse tree vertex that has the pars
 			stop;
 		let the input name be a new synthetic text representing the words matched by the object vertex;
 		let the kind name be "object";
-		say "[the input name] = [the kind name]: [the value according to the kind named the kind name][paragraph break]";
+		parse the kind name the kind name for the value with disambiguation by disambiguating a debug command;
+		say "[the input name] = [the kind name]: [the value according to the most recently parsed kind name][paragraph break]";
 		delete the synthetic text the input name;
 		stop.
 
@@ -3164,7 +3163,8 @@ To handle the debug command rooted at (V - a parse tree vertex that has the pars
 		if the address is zero:
 			say "I am not able to find the storage for that non-temporary named value.[paragraph break]";
 		otherwise if the address is a valid integer address:
-			say "[the human-friendly name of the global record] as [the kind name] = [the kind name]: [the integer at address address according to the kind named the kind name][paragraph break]";
+			parse the kind name the kind name for the integer at address address with disambiguation by disambiguating a debug command;
+			say "[the human-friendly name of the global record] as [the kind name] = [the kind name]: [the integer at address address according to the most recently parsed kind name][paragraph break]";
 		otherwise:
 			say "The storage for that non-temporary named value is outside of memory.[paragraph break]";
 		delete the synthetic text the kind name;
@@ -3179,7 +3179,8 @@ To handle the debug command rooted at (V - a parse tree vertex that has the pars
 		if the address is zero:
 			say "That variable doesn't exist right now.[paragraph break]";
 		otherwise if the address is a valid integer address:
-			say "[the human-friendly name of the memory stack variable record] = [the kind name]: [the integer at address address according to the kind named the kind name][paragraph break]";
+			parse the kind name the kind name for the integer at address address with disambiguation by disambiguating a debug command;
+			say "[the human-friendly name of the memory stack variable record] = [the kind name]: [the integer at address address according to the most recently parsed kind name][paragraph break]";
 		otherwise:
 			say "The storage for that variable is outside of memory.[paragraph break]";
 		delete the synthetic text the kind name;
@@ -3190,7 +3191,8 @@ To handle the debug command rooted at (V - a parse tree vertex that has the pars
 		if the local index is less than zero:
 			delete the synthetic text the kind name;
 			stop;
-		say "[temporary name local index of the debugger's current call frame] as [the kind name] = [the kind name]: [temporary named value local index of the debugger's current call frame according to the kind named the kind name][paragraph break]";
+		parse the kind name the kind name for temporary named value local index of the debugger's current call frame with disambiguation by disambiguating a debug command;
+		say "[temporary name local index of the debugger's current call frame] as [the kind name] = [the kind name]: [temporary named value local index of the debugger's current call frame according to the most recently parsed kind name][paragraph break]";
 		delete the synthetic text the kind name;
 		stop;
 	let the function name vertex be the first match for a function name for the debugger among the children of V;
@@ -3200,19 +3202,22 @@ To handle the debug command rooted at (V - a parse tree vertex that has the pars
 			delete the synthetic text the kind name;
 			stop;
 		let the input name be a new synthetic text representing the words matched by the function name vertex;
-		say "[the input name] as [the kind name] = [the kind name]: [the function address according to the kind named the kind name][paragraph break]";
+		parse the kind name the kind name for the function address with disambiguation by disambiguating a debug command;
+		say "[the input name] as [the kind name] = [the kind name]: [the function address according to the most recently parsed kind name][paragraph break]";
 		delete the synthetic text the kind name;
 		stop;
 	let the decimal vertex be the first match for a decimal number for the debugger among the children of V;
 	unless the decimal vertex is an invalid parse tree vertex:
 		let the value be the decimal number named by the decimal vertex;
-		say "[the value] as [the kind name] = [the kind name]: [the value according to the kind named the kind name][paragraph break]";
+		parse the kind name the kind name for the value with disambiguation by disambiguating a debug command;
+		say "[the value] as [the kind name] = [the kind name]: [the value according to the most recently parsed kind name][paragraph break]";
 		delete the synthetic text the kind name;
 		stop;
 	let the hexadecimal vertex be the first match for a hexadecimal number for the debugger among the children of V;
 	unless the hexadecimal vertex is an invalid parse tree vertex:
 		let the value be the hexadecimal number named by the hexadecimal vertex;
-		say "[the value in hexadecimal] as [the kind name] = [the kind name]: [the value according to the kind named the kind name][paragraph break]";
+		parse the kind name the kind name for the value with disambiguation by disambiguating a debug command;
+		say "[the value in hexadecimal] as [the kind name] = [the kind name]: [the value according to the most recently parsed kind name][paragraph break]";
 		delete the synthetic text the kind name;
 		stop;
 	let the object vertex be the first match for a object name for the debugger among the children of V;
@@ -3220,7 +3225,8 @@ To handle the debug command rooted at (V - a parse tree vertex that has the pars
 		let the value be the object value named by the object vertex;
 		unless the value is -1:
 			let the input name be a new synthetic text representing the words matched by the object vertex;
-			say "[the input name] as [the kind name] = [the kind name]: [the value according to the kind named the kind name][paragraph break]";
+			parse the kind name the kind name for the value with disambiguation by disambiguating a debug command;
+			say "[the input name] as [the kind name] = [the kind name]: [the value according to the most recently parsed kind name][paragraph break]";
 			delete the synthetic text the input name;
 		delete the synthetic text the kind name;
 		stop.
