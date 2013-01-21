@@ -786,7 +786,7 @@ Chapter "Saying a Call Stack after Introducing another Call Frame" - unindexed
 To say the call stack after introducing another call frame (this is saying the call stack after introducing another call frame):
 	let the innermost call frame be the innermost call frame of a reconstructed call stack;
 	if the innermost call frame is a null call frame or the innermost call frame is an invalid call frame:
-		say "within no instrumented functions.";
+		say "within no instrumented functions.[paragraph break]";
 	otherwise:
 		let the frame number be zero;
 		repeat with the call frame running through the innermost call frame and its ancestors:
