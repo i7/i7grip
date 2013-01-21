@@ -16,6 +16,8 @@
 \title{Glulx Runtime Instrumentation\\Version 2}
 \author{Brady Garvin}
 \date{1 September 2012}
+\newcommand{\downloadurl}{\url{https://sourceforge.net/projects/i7grip/}}
+\newcommand{\downloadclick}{click on the big green download button}
 
 % General packages
 \usepackage{bbding}
@@ -281,9 +283,8 @@ Section~\ref{installing-hard}.
 \textbf{1. Download and unzip the files}
 
 If you're reading this manual, you've probably already downloaded the zip file
-and extracted its contents.  But if not, point your browser at
-\url{https://sourceforge.net/projects/i7grip/} and click on the big green
-download button.  The browser might unarchive the content for you, or you might
+and extracted its contents.  But if not, point your browser at \downloadurl\ and
+\downloadclick.  The browser might unarchive the content for you, or you might
 have to unzip it yourself.  In either case, a folder should appear containing
 the files that you will need.
 
@@ -303,9 +304,8 @@ on the file and ask to open it with the Java runtime environment.)
 \textbf{1. Download and unzip the files}
 
 If you're reading this manual, you've probably already downloaded the zip file
-and extracted its contents.  But if not, point your browser at
-\url{https://sourceforge.net/projects/i7grip/} and click on the big green
-download button.  The browser might unarchive the content for you, or you might
+and extracted its contents.  But if not, point your browser at \downloadurl\ and
+\downloadclick.  The browser might unarchive the content for you, or you might
 have to double-click on the zip file in Finder.  In either case, a folder should
 appear containing the files that you will need.
 
@@ -349,9 +349,8 @@ you will have to consult that application's documentation.
 \textbf{1. Download and unzip the files}
 
 If you're reading this manual, you've probably already downloaded the zip file
-and extracted its contents.  But if not, point your browser at
-\url{https://sourceforge.net/projects/i7grip/} and click on the big green
-download button.  The browser might unarchive the content for you, or you might
+and extracted its contents.  But if not, point your browser at \downloadurl\ and
+\downloadclick.  The browser might unarchive the content for you, or you might
 have to right-click on the zip file and choose ``Extract all\dots.''  In either
 case, a folder should appear containing the files that you will need.
 
@@ -397,9 +396,8 @@ documentation.
 \textbf{1. Download and unzip the files}
 
 If you're reading this manual, you've probably already downloaded the zip file
-and extracted its contents.  But if not, point your browser at
-\url{https://sourceforge.net/projects/i7grip/} and click on the big green
-download button.  The browser might unarchive the content for you, or you might
+and extracted its contents.  But if not, point your browser at \downloadurl\ and
+\downloadclick.  The browser might unarchive the content for you, or you might
 have to unzip it yourself.
 
 \textbf{2. Install the extensions}
@@ -441,9 +439,8 @@ you will have to consult that application's documentation.
 \textbf{1. Download and unzip the files}
 
 If you're reading this manual, you've probably already downloaded the zip file
-and extracted its contents.  But if not, point your browser at
-\url{https://sourceforge.net/projects/i7grip/} and click on the big green
-download button.  The browser might unarchive the content for you, or you might
+and extracted its contents.  But if not, point your browser at \downloadurl\ and
+\downloadclick.  The browser might unarchive the content for you, or you might
 have to unzip it yourself.
 
 \textbf{2. Install the extensions}
@@ -522,20 +519,6 @@ Inform, however, lets you give rules specific names:
 
 You may want add such rule names before debugging.
 
-The same argument applies to phrases, except that names are even more important;
-unnamed rules can at least be described by their preambles, whereas unnamed
-phrases cannot.  You are advised to convert code like
-
-\begin{quote}
-  \lstinputlisting{anonymous-phrase.ni}
-\end{quote}
-
-to code like
-
-\begin{quote}
-  \lstinputlisting{phrase.ni}
-\end{quote}
-
 \lastpagebreak
 
 \section{Story Setup (The Hard Way)}
@@ -584,9 +567,10 @@ Unfortunately, we cannot use Finder's ``make alias'' function because Finder's
 aliases are destroyed by Inform's compile process.  Instead we choose another
 kind of alias, a symbolic link.
 
-In Finder, locate the \texttt{.glkdata} files created by the when-play-begins
-rule.  They should be in same folder as the project itself, unless you're
-running the story in an interpreter outside of the IDE.
+In Finder, locate the data files created by the when-play-begins rule.  They
+should be in same folder as the project itself and have the file extension
+\texttt{.glkdata}, unless you're running the story in an interpreter outside of
+the IDE.
 
 Next, right-click (or control-click) on the project.  Choose ``Show Package
 Contents.''  In the new Finder window, open the ``Build'' folder and find the
@@ -610,7 +594,7 @@ and a third for \texttt{Debug log.txt} and the file filling the role of
 \textbf{4. Include the extension and tell it about the symbolic links}
 
 Remove the source text added earlier, and replace it with the following,
-adjusting file names as appropriate:
+adjusting the extension name and file names as appropriate:
 
 \begin{quote}
   \lstinputlisting{inclusion.ni}
@@ -633,20 +617,6 @@ Inform, however, lets you give rules specific names:
 \end{quote}
 
 You may want add such rule names before debugging.
-
-The same argument applies to phrases, except that names are even more important;
-unnamed rules can at least be described by their preambles, whereas unnamed
-phrases cannot.  You are advised to convert code like
-
-\begin{quote}
-  \lstinputlisting{anonymous-phrase.ni}
-\end{quote}
-
-to code like
-
-\begin{quote}
-  \lstinputlisting{phrase.ni}
-\end{quote}
 
 \textbf{6. Avoid release builds when debugging}
 
@@ -712,9 +682,10 @@ shortcuts are themselves valid data files, so the debugger would end up trying
 to read the shortcut information as if it were debug information.  Instead we
 choose another kind of alias, a symbolic link.
 
-To start off, locate the \texttt{.glkdata} files created by the when-play-begins
-rule.  They should be in same folder as the project itself, unless you're
-running the story in an interpreter outside of the IDE.
+To start off, locate the files created by the when-play-begins rule.  They
+should be in same folder as the project itself and have the file extension
+\texttt{.glkdata}, unless you're running the story in an interpreter outside of
+the IDE.
 
 Next, right-click on the project and choose ``Open in new window.''  Open the
 ``Build'' folder that appears and find the files \texttt{gameinfo.dbg},
@@ -760,7 +731,7 @@ and the file filling the role of \texttt{exampleLog.glkdata}.
 \textbf{5. Include the extension and tell it about the symbolic links}
 
 Remove the source text added earlier, and replace it with the following,
-adjusting file names as appropriate:
+adjusting the extension name and file names as appropriate:
 
 \begin{quote}
   \lstinputlisting{inclusion.ni}
@@ -785,20 +756,6 @@ Inform, however, lets you give rules specific names:
 You may want add such rule names before debugging.
 
 \lastpagebreak
-
-The same argument applies to phrases, except that names are even more important;
-unnamed rules can at least be described by their preambles, whereas unnamed
-phrases cannot.  You are advised to convert code like
-
-\begin{quote}
-  \lstinputlisting{anonymous-phrase.ni}
-\end{quote}
-
-to code like
-
-\begin{quote}
-  \lstinputlisting{phrase.ni}
-\end{quote}
 
 \textbf{7. Avoid release builds when debugging}
 
@@ -831,8 +788,8 @@ be sure that Glulx is selected as the story file format.
 \textbf{3. Collect information for a batch file}
 
 Windows XP does not support symbolic links like the other operating systems, and
-renaming debug files after every compilation is a little tedious.  Therefore,
-I'd advise a batch file.
+renaming debug files after every compilation is a little tedious.  A batch file,
+while not perfect, can eliminate some of the burden.
 
 First, we need some information.  For security reasons, a story cannot access
 files unless they are in a particular folder and have a file name with a
@@ -855,13 +812,13 @@ Enter the following source text, substituting the file names you have chosen:
 \end{quote}
 
 Then run the story so that the new when-play-begins rule can execute.  Locate
-the three files that were created; they will have the file name extension
-\texttt{.glkdata} and appear in the same folder as the project if you're
-running the story in the IDE.
+the three files that were created; if you're running the story in the IDE, they
+will have the file name extension \texttt{.glkdata} and appear in the same
+folder as the project.
 
 \textbf{4. Create the batch file}
 
-Open notepad and enter the following program.  You will have to replace
+Open Notepad and enter the following program.  You will have to replace
 ``\texttt{Example}'' everywhere with the name of your project.  If you are
 running the story in an interpreter outside of the IDE, you must also change the
 ``\texttt{glkdata}'' extension on the files to match your interpreter, and
@@ -881,7 +838,7 @@ unused file name that ends in \texttt{.bat}, and click ``Save.''
 \textbf{5. Include the extension and tell it about the copied files}
 
 Remove the source text added earlier, and replace it with the following,
-adjusting file names as appropriate:
+adjusting the extension name and file names as appropriate:
 
 \begin{quote}
   \lstinputlisting{inclusion.ni}
@@ -904,20 +861,6 @@ Inform, however, lets you give rules specific names:
 \end{quote}
 
 You may want add such rule names before debugging.
-
-The same argument applies to phrases, except that names are even more important;
-unnamed rules can at least be described by their preambles, whereas unnamed
-phrases cannot.  You are advised to convert code like
-
-\begin{quote}
-  \lstinputlisting{anonymous-phrase.ni}
-\end{quote}
-
-to code like
-
-\begin{quote}
-  \lstinputlisting{phrase.ni}
-\end{quote}
 
 \textbf{7. Invoke the batch file when recompiling}
 
@@ -998,7 +941,7 @@ file filling the role of \texttt{exampleLog.glkdata}.
 \textbf{4. Include the extension and tell it about the symbolic links}
 
 Remove the source text added earlier, and replace it with the following,
-adjusting file names as appropriate:
+adjusting the extension name and file names as appropriate:
 
 \begin{quote}
   \lstinputlisting{inclusion.ni}
@@ -1021,20 +964,6 @@ Inform, however, lets you give rules specific names:
 \end{quote}
 
 You may want add such rule names before debugging.
-
-The same argument applies to phrases, except that names are even more important;
-unnamed rules can at least be described by their preambles, whereas unnamed
-phrases cannot.  You are advised to convert code like
-
-\begin{quote}
-  \lstinputlisting{anonymous-phrase.ni}
-\end{quote}
-
-to code like
-
-\begin{quote}
-  \lstinputlisting{phrase.ni}
-\end{quote}
 
 \textbf{6. Avoid release builds when debugging}
 
@@ -1100,7 +1029,7 @@ example, using \texttt{ln} from within the \texttt{.inform} directory:
 \textbf{4. Include the extension and tell it about the symbolic links}
 
 Remove the source text added earlier, and replace it with the following,
-adjusting file names as appropriate:
+adjusting the extension name and file names as appropriate:
 
 \begin{quote}
   \lstinputlisting{inclusion.ni}
@@ -1126,20 +1055,6 @@ Inform, however, lets you give rules specific names:
 
 You may want add such rule names before debugging.
 
-The same argument applies to phrases, except that names are even more important;
-unnamed rules can at least be described by their preambles, whereas unnamed
-phrases cannot.  You are advised to convert code like
-
-\begin{quote}
-  \lstinputlisting{anonymous-phrase.ni}
-\end{quote}
-
-to code like
-
-\begin{quote}
-  \lstinputlisting{phrase.ni}
-\end{quote}
-
 \textbf{6. Avoid release builds when debugging}
 
 When you compile a release version of a story, a substantial amount of internal
@@ -1163,31 +1078,26 @@ these tasks.  Also contrary to the term, they are not exclusively for bug
 hunting.  For instance, if we're trying to decipher someone else's code, we
 might want to watch the program run in slow motion.
 
-Most debuggers let us do at three things not otherwise possible:
+Most debuggers let us do at least three things not otherwise possible:
 
 \begin{itemize}
   \item{pause execution when certain conditions hold, with the option to resume
     it later,}
-  \item{inspect the program's internal state,}
-\end{itemize}
-
-\noindent and
-
-\begin{itemize}
+  \item{inspect the program's internal state, and}
   \item{change the internal state of a paused program, to see how program
     behavior is affected.}
 \end{itemize}
 
 \noindent Generally speaking then, a debugger is most helpful when we have
-questions of the form ``What is the state of X when Y happens?''\ or ``What is
-the significance of X's state when Y happens?''  When we face a higher-level
-problem, like ``How did that character just walk through a closed door?,'' it's
-up to us to decide on a fruitful line of inquiry.  In this manual we will ignore
-the art of asking the right questions and focus on the mechanics of using
-Interactive Debugger.i7x once we have a question to ask.  Therefore, we are
-mainly interested in three things: (1) how one pauses the story when something
-happens, (2) how one determines the state of the story, and (3) how one alters
-that state.
+questions of the form ``What is the state of X when Y happens?''\ or ``What
+would happen if X's state were different when Y happens?''  When we face a
+higher-level problem, like ``How did that character just walk through a closed
+door?,'' it's up to us to decide on a fruitful line of inquiry.  In this manual
+we will ignore the art of asking the right questions and focus on the mechanics
+of using Interactive Debugger.i7x once we have a question to ask.  Therefore, we
+are mainly interested in three things: (1) how one pauses the story when
+something happens, (2) how one determines the state of the story, and (3) how
+one alters that state.
 
 Two debugging tutorials cover these topics in Sections~\ref{first} and
 \ref{second}.  At the end of each tutorial is a summary of the commands that
@@ -1211,7 +1121,7 @@ the story, the screen should look something like this:
 
 \terp{\null}{%
   \glkheading{An Interactive Debugger for Inform~7}\n
-  \glkheading{Version 2 (1 September 2012)}\n
+  \glkheading{Version 2 (4 February 2013)}\n
   \n
   This extension comes with ABSOLUTELY NO WARRANTY; for details type ``warranty'' at the debug prompt.\n
   \n
@@ -1245,7 +1155,7 @@ that, we arrive at something familiar looking.
 \terp{\glkstatusline{Lists}{0/1}\n
   \glkheading{Tournament}\n
   An Interactive Fiction\n
-  Release 1 / Serial number 120204 / Inform~7 build 6G60 (I6/v6.32 lib 6/12N) SD\n
+  Release 1 / Serial number 130204 / Inform~7 build 6G60 (I6/v6.32 lib 6/12N) SD\n
   \n
   \glkheading{Lists}\n
   You can see a target and a willow wand here.\n
@@ -1269,7 +1179,7 @@ At this point we should be able to interact with the story normally:
 \terp{\glkstatusline{Lists}{0/2}\n
   \glkheading{Tournament}\n
   An Interactive Fiction\n
-  Release 1 / Serial number 120204 / Inform~7 build 6G60 (I6/v6.32 lib 6/12N) SD\n
+  Release 1 / Serial number 130204 / Inform~7 build 6G60 (I6/v6.32 lib 6/12N) SD\n
   \n
   \glkheading{Lists}\n
   You can see a target and a willow wand here.\n
@@ -1302,7 +1212,7 @@ a time, for which case we have the out-of-world action ``forcing a breakpoint.''
 \terp{\glkstatusline{Lists}{0/2}\n
   \glkheading{Tournament}\n
   An Interactive Fiction\n
-  Release 1 / Serial number 120204 / Inform~7 build 6G60 (I6/v6.32 lib 6/12N) SD\n
+  Release 1 / Serial number 130204 / Inform~7 build 6G60 (I6/v6.32 lib 6/12N) SD\n
   \n
   \glkheading{Lists}\n
   You can see a target and a willow wand here.\n
@@ -1371,7 +1281,7 @@ answer \glkinput{yes}, to put the breakpoint after the applicability check.
 \terp{\glkstatusline{Lists}{0/2}\n
   \glkheading{Tournament}\n
   An Interactive Fiction\n
-  Release 1 / Serial number 120204 / Inform~7 build 6G60 (I6/v6.32 lib 6/12N) SD\n
+  Release 1 / Serial number 130204 / Inform~7 build 6G60 (I6/v6.32 lib 6/12N) SD\n
   \n
   \glkheading{Lists}\n
   You can see a target and a willow wand here.\n
@@ -1405,7 +1315,7 @@ shoot the target to see the breakpoint in action.
 \terp{\glkstatusline{Lists}{0/2}\n
   \glkheading{Tournament}\n
   An Interactive Fiction\n
-  Release 1 / Serial number 120204 / Inform~7 build 6G60 (I6/v6.32 lib 6/12N) SD\n
+  Release 1 / Serial number 130204 / Inform~7 build 6G60 (I6/v6.32 lib 6/12N) SD\n
   \n
   \glkheading{Lists}\n
   You can see a target and a willow wand here.\n
@@ -1444,7 +1354,7 @@ nearby lines in the current rule or phrase:
 \terp{\glkstatusline{Lists}{0/2}\n
   \glkheading{Tournament}\n
   An Interactive Fiction\n
-  Release 1 / Serial number 120204 / Inform~7 build 6G60 (I6/v6.32 lib 6/12N) SD\n
+  Release 1 / Serial number 130204 / Inform~7 build 6G60 (I6/v6.32 lib 6/12N) SD\n
   \n
   \glkheading{Lists}\n
   You can see a target and a willow wand here.\n
@@ -1482,7 +1392,7 @@ rule or phrase.  For example, let's place one on the hit-the-noun line:
 \terp{\glkstatusline{Lists}{0/2}\n
   \glkheading{Tournament}\n
   An Interactive Fiction\n
-  Release 1 / Serial number 120204 / Inform~7 build 6G60 (I6/v6.32 lib 6/12N) SD\n
+  Release 1 / Serial number 130204 / Inform~7 build 6G60 (I6/v6.32 lib 6/12N) SD\n
   \n
   \glkheading{Lists}\n
   You can see a target and a willow wand here.\n
@@ -1523,7 +1433,7 @@ tools).
 \terp{\glkstatusline{Lists}{0/2}\n
   \glkheading{Tournament}\n
   An Interactive Fiction\n
-  Release 1 / Serial number 120204 / Inform~7 build 6G60 (I6/v6.32 lib 6/12N) SD\n
+  Release 1 / Serial number 130204 / Inform~7 build 6G60 (I6/v6.32 lib 6/12N) SD\n
   \n
   \glkheading{Lists}\n
   You can see a target and a willow wand here.\n
@@ -1597,7 +1507,7 @@ different source text listing:
 \terp{\glkstatusline{Lists}{0/2}\n
   \glkheading{Tournament}\n
   An Interactive Fiction\n
-  Release 1 / Serial number 120204 / Inform~7 build 6G60 (I6/v6.32 lib 6/12N) SD\n
+  Release 1 / Serial number 130204 / Inform~7 build 6G60 (I6/v6.32 lib 6/12N) SD\n
   \n
   \glkheading{Lists}\n
   You can see a target and a willow wand here.\n
@@ -1641,7 +1551,7 @@ can just enter \glkinput{go}.
 \terp{\glkstatusline{Lists}{0/2}\n
   \glkheading{Tournament}\n
   An Interactive Fiction\n
-  Release 1 / Serial number 120204 / Inform~7 build 6G60 (I6/v6.32 lib 6/12N) SD\n
+  Release 1 / Serial number 130204 / Inform~7 build 6G60 (I6/v6.32 lib 6/12N) SD\n
   \n
   \glkheading{Lists}\n
   You can see a target and a willow wand here.\n
@@ -1681,7 +1591,7 @@ debuggers).
 \terp{\glkstatusline{Lists}{0/2}\n
   \glkheading{Tournament}\n
   An Interactive Fiction\n
-  Release 1 / Serial number 120204 / Inform~7 build 6G60 (I6/v6.32 lib 6/12N) SD\n
+  Release 1 / Serial number 130204 / Inform~7 build 6G60 (I6/v6.32 lib 6/12N) SD\n
   \n
   \glkheading{Lists}\n
   You can see a target and a willow wand here.\n
@@ -1725,7 +1635,7 @@ an action name:
 \terp{\glkstatusline{Lists}{0/2}\n
   \glkheading{Tournament}\n
   An Interactive Fiction\n
-  Release 1 / Serial number 120204 / Inform~7 build 6G60 (I6/v6.32 lib 6/12N) SD\n
+  Release 1 / Serial number 130204 / Inform~7 build 6G60 (I6/v6.32 lib 6/12N) SD\n
   \n
   \glkheading{Lists}\n
   You can see a target and a willow wand here.\n
@@ -1763,7 +1673,7 @@ line but no further.
 \terp{\glkstatusline{Lists}{0/2}\n
   \glkheading{Tournament}\n
   An Interactive Fiction\n
-  Release 1 / Serial number 120204 / Inform~7 build 6G60 (I6/v6.32 lib 6/12N) SD\n
+  Release 1 / Serial number 130204 / Inform~7 build 6G60 (I6/v6.32 lib 6/12N) SD\n
   \n
   \glkheading{Lists}\n
   You can see a target and a willow wand here.\n
@@ -1803,7 +1713,7 @@ out and move on to the second possibility:
 \terp{\glkstatusline{Lists}{0/2}\n
   \glkheading{Tournament}\n
   An Interactive Fiction\n
-  Release 1 / Serial number 120204 / Inform~7 build 6G60 (I6/v6.32 lib 6/12N) SD\n
+  Release 1 / Serial number 130204 / Inform~7 build 6G60 (I6/v6.32 lib 6/12N) SD\n
   \n
   \glkheading{Lists}\n
   You can see a target and a willow wand here.\n
@@ -1838,7 +1748,7 @@ opportunity to mention that \glkinput{again} (which can be abbreviated as
 \terp{\glkstatusline{Lists}{0/2}\n
   \glkheading{Tournament}\n
   An Interactive Fiction\n
-  Release 1 / Serial number 120204 / Inform~7 build 6G60 (I6/v6.32 lib 6/12N) SD\n
+  Release 1 / Serial number 130204 / Inform~7 build 6G60 (I6/v6.32 lib 6/12N) SD\n
   \n
   \glkheading{Lists}\n
   You can see a target and a willow wand here.\n
@@ -1889,7 +1799,7 @@ ignoring any rules or phrases the story uses to get there.
 \terp{\glkstatusline{Lists}{0/2}\n
   \glkheading{Tournament}\n
   An Interactive Fiction\n
-  Release 1 / Serial number 120204 / Inform~7 build 6G60 (I6/v6.32 lib 6/12N) SD\n
+  Release 1 / Serial number 130204 / Inform~7 build 6G60 (I6/v6.32 lib 6/12N) SD\n
   \n
   \glkheading{Lists}\n
   You can see a target and a willow wand here.\n
@@ -1932,7 +1842,7 @@ breakpoints.
 \terp{\glkstatusline{Lists}{0/2}\n
   \glkheading{Tournament}\n
   An Interactive Fiction\n
-  Release 1 / Serial number 120204 / Inform~7 build 6G60 (I6/v6.32 lib 6/12N) SD\n
+  Release 1 / Serial number 130204 / Inform~7 build 6G60 (I6/v6.32 lib 6/12N) SD\n
   \n
   \glkheading{Lists}\n
   You can see a target and a willow wand here.\n
@@ -1972,7 +1882,7 @@ Let's disable them for now.  We can enter the commands \glkinput{disable 0} and
 \terp{\glkstatusline{Lists}{0/2}\n
   \glkheading{Tournament}\n
   An Interactive Fiction\n
-  Release 1 / Serial number 120204 / Inform~7 build 6G60 (I6/v6.32 lib 6/12N) SD\n
+  Release 1 / Serial number 130204 / Inform~7 build 6G60 (I6/v6.32 lib 6/12N) SD\n
   \n
   \glkheading{Lists}\n
   You can see a target and a willow wand here.\n
@@ -2005,7 +1915,7 @@ Let's disable them for now.  We can enter the commands \glkinput{disable 0} and
 Once the breakpoints are disabled, continue and shoot the willow wand.
 
 \terp{\glkstatusline{Lists}{0/3}\n
-  Release 1 / Serial number 120204 / Inform~7 build 6G60 (I6/v6.32 lib 6/12N) SD\n
+  Release 1 / Serial number 130204 / Inform~7 build 6G60 (I6/v6.32 lib 6/12N) SD\n
   \n
   \glkheading{Lists}\n
   You can see a target and a willow wand here.\n
@@ -2361,7 +2271,7 @@ Inform's addendum, so answer no and continue.
 \terp{\glkstatusline{Drawing Room}{0/1}\n
   \glkheading{Monochrome}\n
   An Interactive Fiction\n
-  Release 1 / Serial number 120204 / Inform~7 build 6G60 (I6/v6.32 lib 6/12N) SD\n
+  Release 1 / Serial number 130204 / Inform~7 build 6G60 (I6/v6.32 lib 6/12N) SD\n
   \n
   \glkheading{Drawing Room}\n
   You can see a table (on which is a bowl (in which is some fruit)) here.\n
@@ -2387,7 +2297,7 @@ we can attempt to list the routine shell:
 \terp{\glkstatusline{Drawing Room}{0/1}\n
   \glkheading{Monochrome}\n
   An Interactive Fiction\n
-  Release 1 / Serial number 120204 / Inform~7 build 6G60 (I6/v6.32 lib 6/12N) SD\n
+  Release 1 / Serial number 130204 / Inform~7 build 6G60 (I6/v6.32 lib 6/12N) SD\n
   \n
   \glkheading{Drawing Room}\n
   You can see a table (on which is a bowl (in which is some fruit)) here.\n
@@ -2423,7 +2333,7 @@ First, let's have a look at the current settings.  Enter the command
 \terp{\glkstatusline{Drawing Room}{0/1}\n
   \glkheading{Monochrome}\n
   An Interactive Fiction\n
-  Release 1 / Serial number 120204 / Inform~7 build 6G60 (I6/v6.32 lib 6/12N) SD\n
+  Release 1 / Serial number 130204 / Inform~7 build 6G60 (I6/v6.32 lib 6/12N) SD\n
   \n
   \glkheading{Drawing Room}\n
   You can see a table (on which is a bowl (in which is some fruit)) here.\n
@@ -2447,7 +2357,7 @@ command \glkinput{prefer}.  Let's alter the first preference by writing
 \terp{\glkstatusline{Drawing Room}{0/1}\n
   \glkheading{Monochrome}\n
   An Interactive Fiction\n
-  Release 1 / Serial number 120204 / Inform~7 build 6G60 (I6/v6.32 lib 6/12N) SD\n
+  Release 1 / Serial number 130204 / Inform~7 build 6G60 (I6/v6.32 lib 6/12N) SD\n
   \n
   \glkheading{Drawing Room}\n
   You can see a table (on which is a bowl (in which is some fruit)) here.\n
@@ -2467,7 +2377,7 @@ Listing again, we see much more detail:
 \terp{\glkstatusline{Drawing Room}{0/1}\n
   \glkheading{Monochrome}\n
   An Interactive Fiction\n
-  Release 1 / Serial number 120204 / Inform~7 build 6G60 (I6/v6.32 lib 6/12N) SD\n
+  Release 1 / Serial number 130204 / Inform~7 build 6G60 (I6/v6.32 lib 6/12N) SD\n
   \n
   \glkheading{Drawing Room}\n
   You can see a table (on which is a bowl (in which is some fruit)) here.\n
@@ -2496,7 +2406,7 @@ recognizable name:
 \terp{\glkstatusline{Drawing Room}{0/1}\n
   \glkheading{Monochrome}\n
   An Interactive Fiction\n
-  Release 1 / Serial number 120204 / Inform~7 build 6G60 (I6/v6.32 lib 6/12N) SD\n
+  Release 1 / Serial number 130204 / Inform~7 build 6G60 (I6/v6.32 lib 6/12N) SD\n
   \n
   \glkheading{Drawing Room}\n
   You can see a table (on which is a bowl (in which is some fruit)) here.\n
@@ -2524,7 +2434,7 @@ what we don't want it to do.  So type \glkinput{prefer no call stack
 \terp{\glkstatusline{Drawing Room}{0/1}\n
   \glkheading{Monochrome}\n
   An Interactive Fiction\n
-  Release 1 / Serial number 120204 / Inform~7 build 6G60 (I6/v6.32 lib 6/12N) SD\n
+  Release 1 / Serial number 130204 / Inform~7 build 6G60 (I6/v6.32 lib 6/12N) SD\n
   \n
   \glkheading{Drawing Room}\n
   You can see a table (on which is a bowl (in which is some fruit)) here.\n
@@ -2550,7 +2460,7 @@ original arguments and temporary named values:
 \terp{\glkstatusline{Drawing Room}{0/1}\n
   \glkheading{Monochrome}\n
   An Interactive Fiction\n
-  Release 1 / Serial number 120204 / Inform~7 build 6G60 (I6/v6.32 lib 6/12N) SD\n
+  Release 1 / Serial number 130204 / Inform~7 build 6G60 (I6/v6.32 lib 6/12N) SD\n
   \n
   \glkheading{Drawing Room}\n
   You can see a table (on which is a bowl (in which is some fruit)) here.\n
@@ -2573,7 +2483,7 @@ And examine the call stack:
 \terp{\glkstatusline{Drawing Room}{0/1}\n
   \glkheading{Monochrome}\n
   An Interactive Fiction\n
-  Release 1 / Serial number 120204 / Inform~7 build 6G60 (I6/v6.32 lib 6/12N) SD\n
+  Release 1 / Serial number 130204 / Inform~7 build 6G60 (I6/v6.32 lib 6/12N) SD\n
   \n
   \glkheading{Drawing Room}\n
   You can see a table (on which is a bowl (in which is some fruit)) here.\n
@@ -2616,7 +2526,7 @@ reach the next interesting line, in \lstinline{KindAtomic}.
 \terp{\glkstatusline{Drawing Room}{0/1}\n
   \glkheading{Monochrome}\n
   An Interactive Fiction\n
-  Release 1 / Serial number 120204 / Inform~7 build 6G60 (I6/v6.32 lib 6/12N) SD\n
+  Release 1 / Serial number 130204 / Inform~7 build 6G60 (I6/v6.32 lib 6/12N) SD\n
   \n
   \glkheading{Drawing Room}\n
   You can see a table (on which is a bowl (in which is some fruit)) here.\n
@@ -2667,7 +2577,7 @@ followed by \glkinput{list} to see an example.
 \terp{\glkstatusline{Drawing Room}{0/1}\n
   \glkheading{Monochrome}\n
   An Interactive Fiction\n
-  Release 1 / Serial number 120204 / Inform~7 build 6G60 (I6/v6.32 lib 6/12N) SD\n
+  Release 1 / Serial number 130204 / Inform~7 build 6G60 (I6/v6.32 lib 6/12N) SD\n
   \n
   \glkheading{Drawing Room}\n
   You can see a table (on which is a bowl (in which is some fruit)) here.\n
@@ -2727,7 +2637,7 @@ In decimal that's the number 98, which we can discover with the examine command.
 \terp{\glkstatusline{Drawing Room}{0/1}\n
   \glkheading{Monochrome}\n
   An Interactive Fiction\n
-  Release 1 / Serial number 120204 / Inform~7 build 6G60 (I6/v6.32 lib 6/12N) SD\n
+  Release 1 / Serial number 130204 / Inform~7 build 6G60 (I6/v6.32 lib 6/12N) SD\n
   \n
   \glkheading{Drawing Room}\n
   You can see a table (on which is a bowl (in which is some fruit)) here.\n
@@ -2762,7 +2672,7 @@ line.  We will use \glkinput{next sequence point} and then \glkinput{list}.
 \terp{\glkstatusline{Drawing Room}{0/1}\n
   \glkheading{Monochrome}\n
   An Interactive Fiction\n
-  Release 1 / Serial number 120204 / Inform~7 build 6G60 (I6/v6.32 lib 6/12N) SD\n
+  Release 1 / Serial number 130204 / Inform~7 build 6G60 (I6/v6.32 lib 6/12N) SD\n
   \n
   \glkheading{Drawing Room}\n
   You can see a table (on which is a bowl (in which is some fruit)) here.\n
@@ -2793,7 +2703,7 @@ its support function is.
 \terp{\glkstatusline{Drawing Room}{0/1}\n
   \glkheading{Monochrome}\n
   An Interactive Fiction\n
-  Release 1 / Serial number 120204 / Inform~7 build 6G60 (I6/v6.32 lib 6/12N) SD\n
+  Release 1 / Serial number 130204 / Inform~7 build 6G60 (I6/v6.32 lib 6/12N) SD\n
   \n
   \glkheading{Drawing Room}\n
   You can see a table (on which is a bowl (in which is some fruit)) here.\n
@@ -2825,7 +2735,7 @@ an Inform 6 variable and has no associated kind.  Instead, we turn to
 \terp{\glkstatusline{Drawing Room}{0/1}\n
   \glkheading{Monochrome}\n
   An Interactive Fiction\n
-  Release 1 / Serial number 120204 / Inform~7 build 6G60 (I6/v6.32 lib 6/12N) SD\n
+  Release 1 / Serial number 130204 / Inform~7 build 6G60 (I6/v6.32 lib 6/12N) SD\n
   \n
   \glkheading{Drawing Room}\n
   You can see a table (on which is a bowl (in which is some fruit)) here.\n
@@ -2853,7 +2763,7 @@ And step, as expected, takes us into exactly that routine:
 \terp{\glkstatusline{Drawing Room}{0/1}\n
   \glkheading{Monochrome}\n
   An Interactive Fiction\n
-  Release 1 / Serial number 120204 / Inform~7 build 6G60 (I6/v6.32 lib 6/12N) SD\n
+  Release 1 / Serial number 130204 / Inform~7 build 6G60 (I6/v6.32 lib 6/12N) SD\n
   \n
   \glkheading{Drawing Room}\n
   You can see a table (on which is a bowl (in which is some fruit)) here.\n
@@ -3115,8 +3025,8 @@ expect the next version to contain a fix or a clarification whether or not I'm
 the one posting the response.
 
 2. If you know you are encountering a bug, first go to the project website
-(\url{https://sourceforge.net/projects/i7grip/}) and see whether a newer version
-is available.  If so, download it, install it, and check for the problem again.
+(\downloadurl) and see whether a newer version is available.  If so, download
+it, install it, and check for the problem again.
 
 3. Should the fault remain in the latest version, look for it in the project's
 bug database.  To get there, navigate to the website, choose "Support" from the
