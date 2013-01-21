@@ -128,6 +128,9 @@ To fail at finding a reference point for finding the declaration of I7 globals:
 To fail at finding the base address for I6 globals:
 	say "[low-level runtime failure in]Debug File Parsing[with explanation]I tried to find the location of I6 globals in memory, a location that should exist for all story files, but the debug information files never told me where it is.[terminating the story]".
 
+To fail at associating I7 object names with object numbers:
+	say "[low-level runtime failure in]Debug File Parsing[with explanation]I tried to associate I7 object names with object numbers, but found more object names than there are objects in the object tree.  My parsing of the debug information must be wrong.[terminating the story]".
+
 Book "Data Structures"
 
 Chapter "Routine Records"
@@ -2061,6 +2064,7 @@ The plural infix is a text that varies.
 The plural suffix is a text that varies.
 
 The object prefix is a text that varies.
+The object suffix is a text that varies.
 The named object prefix is a text that varies.
 The named object suffix is a text that varies.
 
@@ -2092,6 +2096,7 @@ A debug file setup rule (this is the allocate synthetic text for the substrings 
 	now the plural infix is a new permanent synthetic text copied from "> as <";
 	now the plural suffix is a new permanent synthetic text copied from ">";
 	now the object prefix is a new permanent synthetic text copied from "Created instance: ";
+	now the object suffix is a new permanent synthetic text copied from "(kind object)";
 	now the named object prefix is a new permanent synthetic text copied from the nonsynthetic named object prefix;
 	now the named object suffix is a new permanent synthetic text copied from the nonsynthetic named object suffix.
 
@@ -2324,7 +2329,7 @@ To decide whether a plural can be extracted from the synthetic text (T - some te
 Chapter "Extracting Object Names" - unindexed
 
 To decide whether an object name can be extracted from the synthetic text (T - some text):
-	if the index of the synthetic text the object prefix in the synthetic text T is zero:
+	if the index of the synthetic text the object prefix in the synthetic text T is zero or the index of the synthetic text the object suffix in the synthetic text T is zero:
 		decide no;
 	let the object name be a new synthetic text extracted from the synthetic text T between the synthetic prefix the named object prefix and the synthetic suffix the named object suffix or the interned empty string if there is no match;
 	unless the object name is empty:
@@ -2348,6 +2353,7 @@ To adjust the object numbers and associate addresses:
 		increase the iterator by the offset to an object link;
 		now the iterator is the integer at address iterator;
 	let the adjustment be the parallel counter minus the object counter;
+	always check that the adjustment is greater than zero or else fail at associating I7 object names with object numbers;
 	repeat with the linked list vertex running through the object number lookup hash table:
 		let the adjusted value be the adjustment plus the number value of the linked list vertex;
 		write the value the adjusted value to the linked list vertex;
