@@ -2189,6 +2189,9 @@ To parse the kind name (T - some text) for (X - a number) with disambiguation by
 To parse the kind name (T - some text) for (X - a number):
 	parse the kind name T for X with disambiguation by the default value of a phrase (context-free parser, linked list, truth state) -> disambiguation feature.
 
+To decide whether the most recently parsed kind name was understood:
+	decide on whether or not the root of the kind parse in holding is not null.
+
 To say (X - a number) according to the most recently parsed kind name:
 	always check that the root of the kind parse in holding is not an invalid parse tree vertex or else fail at saying a value according to a nonexistent previous kind name parse;
 	if the root of the kind parse in holding is null:
