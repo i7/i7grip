@@ -73,8 +73,8 @@ To fail at saying a nonexistent previous kind name parse:
 To fail at saying a previous kind name parse that was not understood:
 	say "[low-level runtime failure in]Printing according to Kind Names[with explanation]I was asked to say the most recently parsed kind name unambiguously, but I didn't understand it, so I can't then identify or remove any ambiguities.[terminating the story]".
 
-To say fail at saying a kind:
-	say "[low-level runtime failure in]Printing according to Kind Names[with explanation]I was asked to say a kind, but was unable to find all of the entries in my kind name bookkeeping; it might be corrupted.[terminating the story]".
+To fail at saying a kind because of (S - a parseme):
+	say "[low-level runtime failure in]Printing according to Kind Names[with explanation]I was asked to say a kind, but was unable to find all of the entries in my kind name bookkeeping; it might be corrupted.  In case it's helpful, one offending parseme was [S converted to a parseme].[terminating the story]".
 
 Book "Forced Inclusion of the Block Value Management Routines" - unindexed
 
@@ -181,9 +181,14 @@ To associate the kind name parseme (S - a parseme) with the singular (T - some t
 	insert the key S and the value U into the plural kind name hash table.
 
 To decide what text is the kind name for (S - a parseme) with plural flag (F - a truth state):
+	let the result be some text;
 	if F is true:
-		decide on the first text value matching the key S in the plural kind name hash table or "[fail at saying a kind]" if there are no matches;
-	decide on the first text value matching the key S in the singular kind name hash table or "[fail at saying a kind]" if there are no matches.
+		now the result is the first text value matching the key S in the plural kind name hash table or "" if there are no matches;
+	otherwise:
+		now the result is the first text value matching the key S in the singular kind name hash table or "" if there are no matches;
+	if the result is empty:
+		fail at saying a kind because of S;
+	decide on the result.
 
 Chapter "Kind Name Parser Setup and Grammar" - unindexed
 
