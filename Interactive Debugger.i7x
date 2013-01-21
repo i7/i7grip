@@ -876,7 +876,10 @@ To decide what number is the function address named by (V - a parse tree vertex)
 Chapter "Global Names" - unindexed
 
 To decide whether the synthetic text (T - some text) is a global name:
-	let the list be a new list of global records matching the global name T;
+	let the downcased name be a new synthetic text copied from T;
+	downcase the synthetic text the downcased name;
+	let the list be a new list of global records matching the global name the downcased name;
+	delete the synthetic text the downcased name;
 	let the result be whether or not the list is not empty;
 	delete the list;
 	decide on the result.
@@ -884,7 +887,10 @@ To decide whether the synthetic text (T - some text) is a global name:
 Chapter "Memory Stack Variable Names" - unindexed
 
 To decide whether the synthetic text (T - some text) is a memory stack variable name:
-	let the list be a new list of memory stack variable records matching the memory stack variable name T;
+	let the downcased name be a new synthetic text copied from T;
+	downcase the synthetic text the downcased name;
+	let the list be a new list of memory stack variable records matching the memory stack variable name the downcased name;
+	delete the synthetic text the downcased name;
 	let the result be whether or not the list is not empty;
 	delete the list;
 	decide on the result.
@@ -941,6 +947,7 @@ To decide what number is the index of the local with I6 name (T - some text) in 
 	decide on -1.
 
 To decide whether the synthetic text (T - some text) is a local name:
+	[(No downcasing is necessary.)]
 	let the result be the index of the local with I7 name T in the selected frame;
 	if the result is at least zero:
 		decide yes;
@@ -1647,6 +1654,7 @@ Section "Global Name Disambiguation" - unindexed
 
 To decide what global record is the global record named by (V - a parse tree vertex):
 	let the global name be a new synthetic text representing the words matched by V;
+	downcase the synthetic text the global name;
 	let the global record list be a new list of global records matching the global name the global name;
 	repeat with the linked list vertex running through the global record list:
 		let the key be the global record key of the linked list vertex;
@@ -1693,6 +1701,7 @@ Section "Memory Stack Variable Name Disambiguation" - unindexed
 [Inform should guarantee either zero or one matches, so we really don't disambiguate.]
 To decide what memory stack variable record is the memory stack variable record named by (V - a parse tree vertex):
 	let the memory stack variable name be a new synthetic text representing the words matched by V;
+	downcase the synthetic text the memory stack variable name;
 	let the memory stack variable record list be a new list of memory stack variable records matching the memory stack variable name the memory stack variable name;
 	if the memory stack variable record list is empty:
 		say "I couldn't find any such rulebook or action variable.  Check for misspellings.[paragraph break]";
@@ -1707,6 +1716,7 @@ Section "Local Name Disambiguation" - unindexed
 
 To decide what number is the local index named by (V - a parse tree vertex):
 	let the local name be a new synthetic text representing the words matched by V;
+	[(No downcasing is necessary.)]
 	let the I7 result be the index of the local with I7 name the local name in the selected frame;
 	let the I6 result be the index of the local with I6 name the local name in the selected frame;
 	if the I7 result is at least zero:
