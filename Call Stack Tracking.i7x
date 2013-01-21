@@ -9,6 +9,7 @@ Include Low-Level Text by Brady Garvin.
 Include Low-Level Linked Lists by Brady Garvin.
 Include Low-Level Hash Tables by Brady Garvin.
 Include I6 Routine Names by Brady Garvin.
+Include Human-Friendly Function Names by Brady Garvin.
 Include Glulx Runtime Instrumentation Framework by Brady Garvin.
 
 Use authorial modesty.
@@ -524,6 +525,21 @@ To elide calls to the routine at address (A - a number) with the routine name (T
 
 A GRIF setup rule (this is the elide standard template routines rule):
 	traverse the standard template routines with the visitor eliding calls to each standard template routine.
+
+Chapter "Simplification by Eliding Resolvers" - unindexed
+
+The resolver index for capturing names of potentially elidable resolvers is a number that varies.
+
+A GRIF setup rule (this is the elide resolvers rule):
+	now the resolver index for capturing names of potentially elidable resolvers is zero;
+	repeat until a break:
+		let the resolver name be a new synthetic text copied from "resolver _ [the resolver index for capturing names of potentially elidable resolvers]";
+		let the resolver addresses be the list of function addresses for the routines with the canonical name the resolver name;
+		if the resolver addresses are empty:
+			break;
+		repeat with the resolver address running through the number keys of the resolver addresses:
+			insert the key the resolver address into the elided function hash table;
+		increment the resolver index for capturing names of potentially elidable resolvers.
 
 Chapter "Voluntary Elision"
 
@@ -1822,9 +1838,10 @@ or
 	if (F - a call frame) is not elided in the simplified call stack:
 		....
 
-Calls to the functions tabulated in the extension I6 Routine Names are
-ordinarily the only calls to have their frames hidden.  We can add more rules,
-phrases, or I6 routines to the set with the phrase
+Calls to the functions tabulated in the extension I6 Routine Names and calls to
+functions whose I6 names are Resolver_ followed by a number (if Debug File
+Parsing is included) are ordinarily the only calls to have their frames hidden.
+We can add more rules, phrases, or I6 routines to the set with the phrase
 
 	elide calls to (A - a value) in the simplified call stack
 

@@ -182,14 +182,12 @@ Section "Routine Hash Table Mutators"
 To give the veneer routine at address (A - a number) the override flag (F - a truth state) and the routine name (T - some text) and the annotation (Z - some text) (this is naming each veneer routine):
 	insert the key A and the value F into the veneer routine override hash table;
 	insert the key A and the value T into the routine name hash table;
-	[Performance: Routine names should be I6 names, which are canonical in most ways, but not in case.  We could optimize to just a case conversion here.]
 	let the canonical input form be the canonical input form of the function name T;
 	insert the textual key the canonical input form and the value A into the routine lookup hash table;
 	insert the key A and the value Z into the function annotation hash table.
 
 To give the routine at address (A - a number) the routine name (T - some text) (this is naming each standard template routine):
 	insert the key A and the value T into the routine name hash table;
-	[Performance: Routine names should be I6 names, which are canonical in most ways, but not in case.  We could optimize to just a case conversion here.]
 	let the canonical input form be the canonical input form of the function name T;
 	insert the textual key the canonical input form and the value A into the routine lookup hash table.
 
