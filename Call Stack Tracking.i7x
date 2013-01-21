@@ -531,6 +531,7 @@ Chapter "Simplification by Eliding Resolvers" - unindexed
 The resolver index for capturing names of potentially elidable resolvers is a number that varies.
 
 A GRIF setup rule (this is the elide resolvers rule):
+	ensure that all routines have names;
 	now the resolver index for capturing names of potentially elidable resolvers is zero;
 	repeat until a break:
 		let the resolver name be a new synthetic text copied from "resolver _ [the resolver index for capturing names of potentially elidable resolvers]";
@@ -540,6 +541,8 @@ A GRIF setup rule (this is the elide resolvers rule):
 		repeat with the resolver address running through the number keys of the resolver addresses:
 			insert the key the resolver address into the elided function hash table;
 		increment the resolver index for capturing names of potentially elidable resolvers.
+
+The elide resolvers rule is listed after the set up debug files as part of the GRIF setup rule in the GRIF setup rulebook.
 
 Chapter "Voluntary Elision"
 
