@@ -2621,7 +2621,7 @@ To handle the debug command rooted at (V - a parse tree vertex that has the pars
 To say the location synopsis for the sequence point (S - a number) in the call frame (F - a call frame):
 	let the current line number be the I6 line number for the sequence point S;
 	if the current line number is zero:
-		say "on an unnumbered line";
+		say "on an unnumbered line.";
 	otherwise:
 		let the routine record be the routine record owning the sequence point S;
 		always check that the routine record is not invalid routine record or else fail at finding a routine record for a sequence point with a source line record;
@@ -2644,7 +2644,7 @@ To say the debug location synopsis:
 	say "Execution paused [the location synopsis for the sequence point the last-seen sequence point before the last-seen breakpoint in the call frame the leaf of the debugger's current call frame]";
 	let the sequence point be the sequence point to highlight;
 	if the last-seen sequence point before the last-seen breakpoint is not the sequence point:
-		say "[line break]Selecting the nearest location in the simplified call stack, which is [the location synopsis for the sequence point the sequence point in the call frame the debugger's current call frame]";
+		say "[line break]Selecting the nearest location in the simplified call stack, which is [the location synopsis for the sequence point the sequence point in the call frame the debugger's current call frame][line break]";
 		say "(Use the command 'prefer no simplification' to always select the point where execution is paused.)[line break]";
 	say "[line break]".
 
