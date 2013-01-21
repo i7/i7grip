@@ -159,6 +159,8 @@ A kind in the singular and
 	a description in the plural and
 	a phrase in the singular and
 	a phrase in the plural and
+	a routine in the singular and
+	a routine in the plural and
 	a rule in the singular and
 	a based rule in the singular and
 	a rule in the plural and
@@ -213,6 +215,7 @@ A kind printing setup rule (this is the set up the kind name parser rule):
 	now a nothing meaning action kind is a new nonterminal in the kind name parser named "action";
 	associate the kind name parseme a nothing meaning action kind with the singular "action" and the plural "action";
 	now a nonkind in the singular is a new nonterminal in the kind name parser named "an unknown or absent kind";
+	associate the kind name parseme a nonkind in the singular with the singular "<unknown kind>" and the plural "<unknown kind>";
 	now a truth state in the singular is a new nonterminal in the kind name parser named "a truth state";
 	associate the kind name parseme a truth state in the singular with the singular "truth state" and the plural "truth states";
 	now a truth state in the plural is a new nonterminal in the kind name parser named "truth states";
@@ -307,6 +310,10 @@ A kind printing setup rule (this is the set up the kind name parser rule):
 	now a description in the plural is a new nonterminal in the kind name parser named "descriptions";
 	now a phrase in the singular is a new nonterminal in the kind name parser named "a phrase";
 	now a phrase in the plural is a new nonterminal in the kind name parser named "phrases";
+	now a routine in the singular is a new nonterminal in the kind name parser named "a routine";
+	associate the kind name parseme a routine in the singular with the singular "routine" and the plural "routines";
+	now a routine in the plural is a new nonterminal in the kind name parser named "routines";
+	associate the kind name parseme a routine in the plural with the singular "routine" and the plural "routines";
 	now a rule in the singular is a new nonterminal in the kind name parser named "a rule";
 	now a based rule in the singular is a new nonterminal in the kind name parser named "a rule with its basis given";
 	now a rule in the plural is a new nonterminal in the kind name parser named "rules";
@@ -365,6 +372,7 @@ A kind printing setup rule (this is the set up the kind name parser rule):
 	understand "[a valued property in the singular]" as a kind in the singular;
 	understand "[a description in the singular]" as a kind in the singular;
 	understand "[a phrase in the singular]" as a kind in the singular;
+	understand "[a routine in the singular]" as a kind in the singular;
 	understand "[a rule in the singular]" as a kind in the singular;
 	understand "[a rulebook in the singular]" as a kind in the singular;
 	understand "[an activity in the singular]" as a kind in the singular;
@@ -396,6 +404,7 @@ A kind printing setup rule (this is the set up the kind name parser rule):
 	understand "[a valued property in the plural]" as a kind in the plural;
 	understand "[a description in the plural]" as a kind in the plural;
 	understand "[a phrase in the plural]" as a kind in the plural;
+	understand "[a routine in the plural]" as a kind in the plural;
 	understand "[a rule in the plural]" as a kind in the plural;
 	understand "[a rulebook in the plural]" as a kind in the plural;
 	understand "[an activity in the plural]" as a kind in the plural;
@@ -487,7 +496,8 @@ A kind printing setup rule (this is the set up the kind name parser rule):
 	understand "descriptions of [a kind preferably in the plural]" as a description in the plural regardless of case;
 	understand "phrase [a list of kinds] -> [an optional kind preferably in the singular]" as a phrase in the singular regardless of case;
 	understand "phrases [a list of kinds] -> [an optional kind preferably in the singular]" as a phrase in the plural regardless of case;
-	understand "routine" as a rule in the singular regardless of case;
+	understand "routine" as a routine in the singular regardless of case;
+	understand "routines" as a routine in the plural regardless of case;
 	understand "rule" as a rule in the singular regardless of case;
 	understand "action based rule" as a rule in the singular regardless of case;
 	understand "rule producing [an optional kind preferably in the plural]" as a rule in the singular regardless of case;
@@ -2272,6 +2282,11 @@ To decide what text is the validation error for the rule value (X - a number):
 		decide on "<invalid rule>";
 	decide on "".
 
+To decide what text is the validation error for (X - a number) using the kind parse rooted at (V - a parse tree vertex that has the parseme a routine in the singular):
+	decide on the validation error for the rule value X.
+To decide what text is the validation error for (X - a number) using the kind parse rooted at (V - a parse tree vertex that has the parseme a routine in the plural):
+	decide on the validation error for the rule value X.
+
 To decide what text is the validation error for (X - a number) using the kind parse rooted at (V - a parse tree vertex that has the parseme a rule in the singular):
 	decide on the validation error for the rule value X.
 To decide what text is the validation error for (X - a number) using the kind parse rooted at (V - a parse tree vertex that has the parseme a rule in the plural):
@@ -2279,6 +2294,11 @@ To decide what text is the validation error for (X - a number) using the kind pa
 
 To say the rule value (X - a number):
 	say "[the human-friendly name for the function at address X]".
+
+To say (X - a number) using the kind parse rooted at (V - a parse tree vertex that has the parseme a routine in the singular):
+	say "[the rule value X]".
+To say (X - a number) using the kind parse rooted at (V - a parse tree vertex that has the parseme a routine in the plural):
+	say "[the rule value X]".
 
 To say (X - a number) using the kind parse rooted at (V - a parse tree vertex that has the parseme a rule in the singular):
 	say "[the rule value X]".
