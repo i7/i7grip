@@ -1579,6 +1579,7 @@ To dispatch the debug command (T - some text) (this is dispatching a debug comma
 		now the debugger's current call frame is the innermost call frame of a reconstructed call stack;
 		adjust the debugger's current call frame;
 	while within the debugger window via the debugger wrapping layer:
+		say "[line break]";
 		write the punctuated words of T to the debug command parser;
 		now the debug command disambiguation attempted flag is false;		
 		let the root be the root of the match for a debug command canonicalized by the debug command canonicalization rulebook and disambiguated by scores from the debug command scoring rulebook and primary filtration from the primary debug command filtration rulebook and secondary filtration from the secondary debug command filtration rulebook and disambiguating choices from disambiguating a debug command;
