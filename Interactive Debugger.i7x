@@ -2143,8 +2143,8 @@ To handle the debug command rooted at (V - a parse tree vertex that has the pars
 The backtrace flag is a truth state that varies.  The backtrace flag is false.
 Definition: a number is selected-by-the-backtrace if the backtrace flag is true and it is the debugger's current call frame number.
 
-To say call frame number (I - a selected-by-the-backtrace number):
-	say " (call frame #[I converted to a number], currently selected)".
+To say custom annotations for (A - a call frame) with frame number (I - a selected-by-the-backtrace number):
+	say " (currently selected)".
 
 To handle the debug command rooted at (V - a parse tree vertex that has the parseme the debugger's backtrace command):
 	if the debugger story-running flag is false:

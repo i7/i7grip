@@ -561,6 +561,9 @@ To say delimiter index (I - a number) for (N - a number) items with a comma if t
 
 Chapter "Saying a Location"
 
+To say custom annotations for (A - a call frame) with frame number (I - a number):
+	say "".
+
 To say the location of (A - a call frame) with frame number (I - a number) (this is saying the location of each call frame):
 	ensure that all routines have names;
 	let the function address be the uninstrumented function address of A;
@@ -577,7 +580,8 @@ To say the location of (A - a call frame) with frame number (I - a number) (this
 		say ")";
 	otherwise:
 		if the function address is not the actual function address:
-			say " (a substitution for [the human-friendly name] at address [the function address])".
+			say " (a substitution for [the human-friendly name] at address [the function address])";
+	say "[custom annotations for A with frame number I]".
 
 Chapter "Saying Original Arguments"
 
