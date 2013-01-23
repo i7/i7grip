@@ -2157,21 +2157,17 @@ To handle the debug command rooted at (V - a parse tree vertex that has the pars
 	let the old call frame numbering flag be the call frame numbering flag;
 	let the old original arguments flag be the original arguments flag;
 	let the old temporary named values flag be the temporary named values flag;
-	let the old catch tokens flag be the catch tokens flag;
 	now the call frame numbering flag is true;
 	if annotated appears among the children of V:
 		now the original arguments flag is true;
 		now the temporary named values flag is true;
-		now the catch tokens flag is true;
 	otherwise:
 		now the original arguments flag is false;
 		now the temporary named values flag is false;
-		now the catch tokens flag is false;
 	say "[the call stack]";
 	now the call frame numbering flag is the old call frame numbering flag;
 	let the original arguments flag be the old original arguments flag;
 	let the temporary named values flag be the old temporary named values flag;
-	let the catch tokens flag be the old catch tokens flag;
 	now the backtrace flag is false.
 
 To move in (N - a number) call frame/frames:
