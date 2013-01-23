@@ -46,6 +46,7 @@
   keywordstyle=,%
   emphstyle=\underbar,%
   breaklines=true,%
+  breakatwhitespace=true,%
   numbers=none,%
   firstnumber=auto,%
   extendedchars=true,%
@@ -108,8 +109,8 @@
 \newcommand{\glkstatusline}[2]{\centerline{\colorbox{black}{\hbox to 0.45\textwidth{\textcolor{white}{#1\hfil #2}}}}}
 \newcommand{\storyprompt}{\raisebox{1.5pt}{\(>\)}}
 \newcommand{\cursor}{\raisebox{-1.5pt}{\RectangleThin}}
-\newcommand{\markedindent}{\(>\)\qquad}
-\newcommand{\unmarkedindent}{\hphantom{\(>\)}\qquad}
+\newcommand{\markedindent}{\(>\)}
+\newcommand{\unmarkedindent}{\hphantom{\(>\)}}
 \newcommand{\unmarkedindentb}{\qquad\hphantom{\(>\)}}
 \newcommand{\markeddip}{\(>\)\ }
 \newcommand{\unmarkeddip}{\hphantom{\(>\)}\ }
@@ -1230,11 +1231,11 @@ a time, for which case we have the out-of-world action ``forcing a breakpoint.''
   Debug command?\ \glkinput{run}\n
   \n
   Debug command?\ (input interrupted)\n
+  \n
   \glkheading{Breakpoint triggered by source text:} The out-of-world action ``forcing a breakpoint''\n
   \n
-  Execution paused (at address 164423, code offset 0x2820B, I6 line 24600, and I7 line 24599)\n
-  \markedindent \lstinline{force a breakpoint named "The out-of-world action `forcing a breakpoint'".}\n
-  within carry out forcing a breakpoint (at address 164370).\n
+  Execution paused within carry out forcing a breakpoint:\n
+  \markedindent \lstinline{\ 024600 \ \ \ \ force a breakpoint named "The out-of-world action `forcing a breakpoint'".}\n
   \n
   Debug command?\ \cursor}
 
@@ -1254,10 +1255,6 @@ that reads
   \lstinline{force a breakpoint named "The out-of-world action `forcing a breakpoint'".}
 \end{quote}
 
-(We will ignore for the moment the parenthetical addresses, code offset, and
-line numbers, except to note that they are each ways to identify a location in
-the story's code.)
-
 If we wanted, we could use the same phrase,
 
 \begin{quote}
@@ -1270,13 +1267,12 @@ fly.  Let's place one on the carry out attacking rule using the command
 \glkinput{break} (or one of its synonyms \glkinput{stop}, \glkinput{bre}, or
 \glkinput{b}) followed by the rule's preamble, \lstinline{carry out attacking}.
 The debugger ordinarily understands rules and phrases by their name, but it can
-also recognize unnamed rules---like this one---by their preamble.  There is,
-unfortunately, no such backup mechanism for phrases.
+also recognize unnamed rules and phrases---like this one---by their preamble.
 
 Because we're dealing with a conditional rule, the debugger won't generate a
 breakpoint immediately, but will first ask us whether we want execution to pause
 every time the rule is considered or just when the rule applies.  Give the
-answer \glkinput{yes}, to put the breakpoint after the applicability check.
+answer \glkinput{y}, to put the breakpoint after the applicability check.
 
 \terp{\glkstatusline{Lists}{0/2}\n
   \glkheading{Tournament}\n
@@ -1293,17 +1289,17 @@ answer \glkinput{yes}, to put the breakpoint after the applicability check.
   \n
   \storyprompt\glkinput{force a breakpoint}}{%
   Debug command?\ (input interrupted)\n
+  \n
   \glkheading{Breakpoint triggered by source text:} The out-of-world action ``forcing a breakpoint''\n
   \n
-  Execution paused (at address 164423, code offset 0x2820B, I6 line 24600, and I7 line 24599)\n
-  \markedindent \lstinline{force a breakpoint named "The out-of-world action `forcing a breakpoint'".}\n
-  within carry out forcing a breakpoint (at address 164370).\n
+  Execution paused within carry out forcing a breakpoint:\n
+  \markedindent \lstinline{\ 024600\ \ \ \ force a breakpoint named "The out-of-world action `forcing a breakpoint'".}\n
   \n
   Debug command?\ \glkinput{break carry out attacking}\n
   \n
-  Would you like to place the breakpoint after the rule's applicability check, so that it only pauses the story when the rule applies? \glkinput{yes}\n
+  Would you like to place the breakpoint after the rule's applicability check, so that it only pauses the story when the rule applies (y or n)? \glkinput{y}\n
   \n
-  Breakpoint 0 (enabled): Pause when carry out attacking (at address 126171) applies\n
+  Breakpoint 0 (enabled): Pause when carry out attacking applies\n
   \n
   Debug command?\ \cursor}
 
@@ -1330,17 +1326,18 @@ shoot the target to see the breakpoint in action.
   \n
   Debug command?\ \glkinput{break carry out attacking}\n
   \n
-  Would you like to place the breakpoint after the rule's applicability check, so that it only pauses the story when the rule applies? \glkinput{yes}\n
+  Would you like to place the breakpoint after the rule's applicability check, so that it only pauses the story when the rule applies? \glkinput{y}\n
   \n
-  Breakpoint 0 (enabled): Pause when carry out attacking (at address 126171) applies\n
+  Breakpoint 0 (enabled): Pause when carry out attacking applies\n
   \n
   Debug command?\ \glkinput{go}\n
   \n
-  \glkheading{Breakpoint 0:} Pause when carry out attacking (at address 126171) applies\n
+  Debug command?\ (input interrupted)\n
   \n
-  Execution paused (at address 126184, code offset 0x1ECAC, I6 line 18142, and I7 line 18137)\n
-  \markedindent \lstinline{Carry out attacking:}\n
-  within carry out attacking (at address 126171).\n
+  \glkheading{Breakpoint 0:} Pause when carry out attacking applies\n
+  \n
+  Execution paused within carry out attacking:\n
+  \markedindent \lstinline{\ 018142 Carry out attacking:}\n
   \n
   Debug command?\ \cursor}
 
@@ -1366,22 +1363,21 @@ nearby lines in the current rule or phrase:
   \n
   \storyprompt\glkinput{force a breakpoint}\n
   \storyprompt\glkinput{shoot target}}{%
-  attacking (at address 126171) applies\n
+  attacking applies\n
   \n
   Debug command?\ \glkinput{go}\n
   \n
-  \glkheading{Breakpoint 0:} Pause when carry out attacking (at address 126171) applies\n
+  \glkheading{Breakpoint 0:} Pause when carry out attacking applies\n
   \n
-  Execution paused (at address 126184, code offset 0x1ECAC, I6 line 18142, and I7 line 18137)\n
-  \markedindent \lstinline{Carry out attacking:}\n
-  within carry out attacking (at address 126171).\n
+  Execution paused within carry out attacking:\n
+  \markedindent \lstinline{\ 018142 Carry out attacking:}\n
   \n
   Debug command?\ \glkinput{list}\n
   \n
-  \markedindent \lstinline{018137 Carry out attacking:}\n
-  \unmarkedindent \lstinline{018144 \ \ \ \ if the player carries an arrow ( called the missile )}\lstinline{\ begin;}\n
-  \unmarkedindent \lstinline{018147 \ \ \ \ \ \ \ \ hit the noun with the missile;}\n
-  \unmarkedindent \lstinline{018150 \ \ \ \ end if}\n
+  \markedindent \lstinline{\ 018137 Carry out attacking:}\n
+  \unmarkedindent \lstinline{\ 018144 \ \ \ \ if the player carries an arrow ( called the missile )}\lstinline{\ begin;}\n
+  \unmarkedindent \lstinline{\ 018147 \ \ \ \ \ \ \ \ hit the noun with the missile;}\n
+  \unmarkedindent \lstinline{\ 018150 \ \ \ \ end if}\n
   \n
   Debug command?\ \cursor}
 
@@ -1404,18 +1400,17 @@ rule or phrase.  For example, let's place one on the hit-the-noun line:
   \n
   \storyprompt\glkinput{force a breakpoint}\n
   \storyprompt\glkinput{shoot target}}{%
-  \glkheading{Breakpoint 0:} Pause when carry out attacking (at address 126171) applies\n
+  \glkheading{Breakpoint 0:} Pause when carry out attacking applies\n
   \n
-  Execution paused (at address 126184, code offset 0x1ECAC, I6 line 18142, and I7 line 18137)\n
-  \markedindent \lstinline{Carry out attacking:}\n
-  within carry out attacking (at address 126171).\n
+  Execution paused within carry out attacking:\n
+  \markedindent \lstinline{\ 018142 Carry out attacking:}\n
   \n
   Debug command?\ \glkinput{list}\n
   \n
-  \markedindent \lstinline{018137 Carry out attacking:}\n
-  \unmarkedindent \lstinline{018144 \ \ \ \ if the player carries an arrow ( called the missile )}\lstinline{\ begin;}\n
-  \unmarkedindent \lstinline{018147 \ \ \ \ \ \ \ \ hit the noun with the missile;}\n
-  \unmarkedindent \lstinline{018150 \ \ \ \ end if}\n
+  \markedindent \lstinline{\ 018137 Carry out attacking:}\n
+  \unmarkedindent \lstinline{\ 018144 \ \ \ \ if the player carries an arrow ( called the missile )}\lstinline{\ begin;}\n
+  \unmarkedindent \lstinline{\ 018147 \ \ \ \ \ \ \ \ hit the noun with the missile;}\n
+  \unmarkedindent \lstinline{\ 018150 \ \ \ \ end if}\n
   \n
   Debug command?\ \glkinput{break 18147}\n
   \n
@@ -1424,11 +1419,11 @@ rule or phrase.  For example, let's place one on the hit-the-noun line:
   Debug command?\ \cursor}
 
 \glkinput{List} is even more useful in combination with commands that navigate
-something called the call stack.  To explain it, we will first \glkinput{examine
-  the call stack} (a command available in a variety of variations, including
-\glkinput{x stack} and \glkinput{stack}, not to mention \glkinput{backtrace},
-\glkinput{bt}, and \glkinput{where} for authors accustomed to other debugging
-tools).
+the call stack.  To explain what that is, we will first \glkinput{examine the
+  annotated call stack} (a command available in an excess of variations,
+including \glkinput{x annotated stack} and \glkinput{annotated stack}, not to
+mention \glkinput{annotated backtrace}, \glkinput{abt}, and \glkinput{annotated
+  where} for authors accustomed to other debugging tools):
 
 \terp{\glkstatusline{Lists}{0/2}\n
   \glkheading{Tournament}\n
@@ -1445,63 +1440,105 @@ tools).
   \n
   \storyprompt\glkinput{force a breakpoint}\n
   \storyprompt\glkinput{shoot target}}{%
-  Debug command?\ \glkinput{examine the call stack}\n
+  Debug command?\ \glkinput{examine the annotated call stack}\n
   \n
-  Execution paused (at address 126184)\n
-  within carry out attacking (at address 126171) (call frame \#0, currently selected)\n
+  Execution paused\n
+  0.\ within carry out attacking (currently selected)\n
   \null\qquad (no original arguments)\n
   \null\qquad (the temporary named value is\n
-  \null\qquad \qquad t\_0 = arrow: nothing),\n
-  within the carry out stage rule (at address 100476) (call frame \#1)\n
+  \null\qquad \qquad t\_0 [the missile] = arrow: nothing),\n
+  1.\ within the carry out stage rule\n
   \null\qquad (no original arguments)\n
   \null\qquad (no temporary named values),\n
-  within the I6 routine AttackSub (at address 98067) (call frame \#2)\n
+  2.\ within the I6 routine AttackSub\n
   \null\qquad (no original arguments)\n
   \null\qquad (no temporary named values),\n
-  within the descend to specific action-processing rule (at address 9647) (call frame \#3)\n
+  3.\ within the descend to specific action-processing rule\n
   \null\qquad (no original arguments)\n
   \null\qquad (no temporary named values),\n
-  within the generate action rule (at address 71340) (call frame \#4)\n
+  4.\ within the generate action rule\n
   \null\qquad (no original arguments)\n
   \null\qquad (the temporary named values are\n
   \null\qquad \qquad i = \(<\)no kind\(>\): 0 / 0x0,\n
   \null\qquad \qquad j = \(<\)no kind\(>\): 0 / 0x0,\n
   \null\qquad \qquad k = \(<\)no kind\(>\): 0 / 0x0, and\n
   \null\qquad \qquad l = \(<\)no kind\(>\): 0 / 0x0,\n
-  within the main story routine (at address 70749) (call frame \#5)\n
+  5.\ within the main story routine\n
   \null\qquad (the original arguments are unknown)\n
   \null\qquad (no temporary named values).\n
   \n
   Debug command?\ \cursor}
 
 When a story is running, it typically has a number of tasks that it is working
-on at any one time.  Each of the blocks starting ``within\dots''\ in the output
-above is a summary of one task's state; the term for such a state is a ``call
-frame.''  For example, at the moment we can see that one of the story's tasks,
-\#4 to be precise, is running the generate action rule.  The original arguments
-of a call frame tell us what parameters the task had when it was started, and
-its temporary named values are its private variables.  In this case, task \#4
-has no arguments, but four temporary named values \lstinline{i} through
-\lstinline{l}, each of which is storing the number zero in a variable with no
-kind.  Task \#0 is perhaps more interesting to us.  That rule of course had no
-arguments, but we do see a cryptic temporary name for an arrow, \lstinline{t_0}.
-This, it turns out, is the I6 name for the variable.  It will have an I7 name,
-\lstinline{the missile}, as soon as execution reaches the next line.
+on at any one time.  Each of the numbered blocks starting with ``within\dots''\
+in the output above is a summary of one task's state; the term for such a state
+is a ``call frame.''  For example, at the moment we can see that one of the
+story's tasks, \#4 to be precise, is running the generate action rule.  The
+original arguments of a call frame tell us what parameters the task had when it
+was started, and its temporary named values are its private variables.  In this
+case, task \#4 has no arguments, but four temporary named values \lstinline{i}
+through \lstinline{l}, each of which is storing the number zero in a variable
+with no kind.  Task \#0 is perhaps more interesting to us.  That rule of course
+had no arguments, but we do see a cryptic temporary name for an arrow,
+\lstinline{t_0}.  This, it turns out, is the I6 name for the variable.  While it
+does not have an I7 name yet, it will as soon as execution reaches the next
+line.  Pending names are given in square brackets, so in this case we can
+recognize \lstinline{t_0} as \lstinline{the missile}.
 
-Call frames also have numbers, which are important in that they indicate the
-relationship between tasks.  For instance, the descend to specific
-action-processing rule (in task \#3) is running because the generate action rule
-(as task \#4) requested that it do so.  More generally, any task \#\(i\) is
-running because task \#\((i+1)\) asked it to.  (Except the last one; the main
-story routine is running simply because we loaded the story into an
-interpreter.)
+Call frames also have numbers that indicate the relationship between tasks.  For
+instance, the descend to specific action-processing rule (in task \#3) is
+running because the generate action rule (as task \#4) requested that it do so.
+More generally, any task \#\(i\) is running because task \#\((i+1)\) asked it
+to.  (Except the last one; the main story routine is running simply because we
+loaded the story.)
 
 A call stack, then, is the collection of all active call frames, ordered by who
-asked whom to run.  Within it there is always one call frame selected, and any
-of our inspection commands take the perspective of that call frame.  Looking
-back at this particular call stack, we see that call frame \#0 is selected,
-which is why our list command showed the code for the carry out attacking rule.
-We can change the selection (via \glkinput{select} or \glkinput{sel}) to get a
+asked whom to run.
+
+Often we only care about this ordering, and not the arguments or temporary named
+values.  In that case, we can leave off the word \glkinput{annotated} (or its
+abbreviation \glkinput{a}) when we give the command:
+
+\terp{\glkstatusline{Lists}{0/2}\n
+  \glkheading{Tournament}\n
+  An Interactive Fiction\n
+  Release 1 / Serial number 130204 / Inform~7 build 6G60 (I6/v6.32 lib 6/12N) SD\n
+  \n
+  \glkheading{Lists}\n
+  You can see a target and a willow wand here.\n
+  \n
+  \storyprompt\glkinput{take inventory}\n
+  You are carrying:\n
+  \null\ \ a longbow\n
+  \null\ \ three arrows\n
+  \n
+  \storyprompt\glkinput{force a breakpoint}\n
+  \storyprompt\glkinput{shoot target}}{%
+  \qquad \qquad i = \(<\)no kind\(>\): 0 / 0x0,\n
+  \null\qquad \qquad j = \(<\)no kind\(>\): 0 / 0x0,\n
+  \null\qquad \qquad k = \(<\)no kind\(>\): 0 / 0x0, and\n
+  \null\qquad \qquad l = \(<\)no kind\(>\): 0 / 0x0,\n
+  5.\ within the main story routine\n
+  \null\qquad (the original arguments are unknown)\n
+  \null\qquad (no temporary named values).\n
+  \n
+  Debug command?\ \glkinput{examine the call stack}\n
+  \n
+  Execution paused\n
+  0.\ within carry out attacking (currently selected),\n
+  1.\ within the carry out stage rule,\n
+  2.\ within the I6 routine AttackSub,\n
+  3.\hbox{\ }within the descend to specific action-processing rule,\n
+  4.\ within the generate action rule,\n
+  5.\ within the main story routine.\n
+  \n
+  Debug command?\ \cursor}
+
+Within a call stack there is always one call frame selected, and any of our
+inspection commands take the perspective of that call frame.  Looking back at
+this particular call stack, we see that call frame \#0 is selected, which is why
+our list command showed the code for the carry out attacking rule.  We can
+change the selection (via \glkinput{select} or \glkinput{sel}) to get a
 different source text listing:
 
 \terp{\glkstatusline{Lists}{0/2}\n
@@ -1519,20 +1556,20 @@ different source text listing:
   \n
   \storyprompt\glkinput{force a breakpoint}\n
   \storyprompt\glkinput{shoot target}}{%
-  \qquad \qquad l = \(<\)unknown kind\(>\): 0,\n
-  within the main story routine (at address 70749) (call frame \#5)\n
-  \null\qquad (the original arguments are unknown)\n
-  \null\qquad (no temporary named values).\n
-  \n
+  1.\ within the carry out stage rule,\n
+  2.\ within the I6 routine AttackSub,\n
+  3.\hbox{\ }within the descend to specific action-processing rule,\n
+  4.\ within the generate action rule,\n
+  5.\ within the main story routine.\n
   Debug command?\ \glkinput{select 1}\n
   \n
   The selected frame is now\n
-  \null\ \ within the carry out stage rule (at address 100476) (call frame \#1).\n
+  \null\ \ 1.\ within the carry out stage rule.\n
   \n
   Debug command?\ \glkinput{list}\n
   \n
-  \unmarkedindent \lstinline{012900 A specific action-processing rule ( this is the carry out stage rule ):}\n
-  \markedindent \lstinline{012903 \ \ \ \ consider the specific carry out rulebook.}\n
+  \unmarkedindent \lstinline{\ 012900 A specific action-processing rule ( this is the carry out stage rule ):}\n
+  \markedindent \lstinline{\ 012903 \ \ \ \ consider the specific carry out rulebook.}\n
   \n
   Debug command?\ \cursor}
 
@@ -1540,13 +1577,11 @@ The other call stack navigation commands are \glkinput{in} and \glkinput{out}.
 The former moves the selection a given number of call frames away from the main
 story routine, while the latter moves it in the opposite direction.  If we omit
 the distance, it's assumed to be one.  To demonstrate, \glkinput{out} followed
-by \glkinput{in 2} gets us back to call frame \#0, as pictured on the next page.
+by \glkinput{in 2} gets us back to call frame \#0, as pictured below.
 
 For the next few commands we need to get the story somewhere slightly more
 interesting.  Fortunately, we've set breakpoint 1 at a suitable location, so we
 can just enter \glkinput{go}.
-
-\pagebreak
 
 \terp{\glkstatusline{Lists}{0/2}\n
   \glkheading{Tournament}\n
@@ -1566,20 +1601,19 @@ can just enter \glkinput{go}.
   Debug command?\ \glkinput{out}\n
   \n
   The selected frame is now\n
-  \null\ \ within the I6 routine AttackSub (at address 98067) (call frame \#2).\n
+  \null\ \ 2.\ within the I6 routine AttackSub.\n
   \n
   Debug command?\ \glkinput{in 2}\n
   \n
   The selected frame is now\n
-  \null\ \ within carry out attacking (at address 126171) (call frame \#0).\n
+  \null\ \ 0.\ within carry out attacking.\n
   \n
   Debug command?\ \glkinput{go}\n
   \n
   \glkheading{Breakpoint 1:} Pause on I7 line 018147\n
   \n
-  Execution paused (at address 126221, code offset 0x1ECD1, I6 line 18148, and I7 line 18147)\n
-  \markedindent hit the noun with the missile;\n
-  within carry out attacking (at address 126171)\n
+  Execution paused within carry out attacking:\n
+  \markedindent \lstinline{\ 018148 \ \ \ \ hit the noun with the missile}\n
   \n
   Debug command?\ \cursor}
 
@@ -1603,15 +1637,15 @@ debuggers).
   \n
   \storyprompt\glkinput{force a breakpoint}\n
   \storyprompt\glkinput{shoot target}}{%
-  \ \ within carry out attacking (at address 126171) (call frame \#0).\n
+  The selected frame is now\n
+  \null\ \ 0.\ within carry out attacking.\n
   \n
   Debug command?\ \glkinput{go}\n
   \n
   \glkheading{Breakpoint 1:} Pause on I7 line 018147\n
   \n
-  Execution paused (at address 126221, code offset 0x1ECD1, I6 line 18148, and I7 line 18147)\n
-  \markedindent hit the noun with the missile;\n
-  within carry out attacking (at address 126171)\n
+  Execution paused within carry out attacking:\n
+  \markedindent \lstinline{\ 018148 \ \ \ \ hit the noun with the missile}\n
   \n
   Debug command?\ \glkinput{examine the noun}\n
   \n
@@ -1623,14 +1657,12 @@ debuggers).
   \n
   Debug command?\ \cursor}
 
-So the noun is the target and the missile is a generic arrow.  We knew both of
-these things, but the point is to illustrate that the debugger can report both
-non-temporary named values (like \lstinline{the noun}) and temporary named
-values (like \lstinline{the missile}), although we need to have the right call
-frame selected to refer to the latter.  It also defines some extra non-temporary
-named values to help us debug actions: \lstinline{the verb} and
-\lstinline{the requester}.  For example, the verb in our case is ``attacking,''
-an action name:
+Notice that the debugger can report both non-temporary named values (like
+\lstinline{the noun}) and temporary named values (like \lstinline{the missile}),
+although we need to have the right call frame selected to refer to the latter.
+It also defines some extra non-temporary named values to help us debug actions:
+\lstinline{the verb} and \lstinline{the requester}.  For example, the verb in
+our case is ``attacking,'' an action name:
 
 \terp{\glkstatusline{Lists}{0/2}\n
   \glkheading{Tournament}\n
@@ -1647,9 +1679,10 @@ an action name:
   \n
   \storyprompt\glkinput{force a breakpoint}\n
   \storyprompt\glkinput{shoot target}}{%
-  Execution paused (at address 126221, code offset 0x1ECD1, I6 line 18148, and I7 line 18147)\n
-  \markedindent hit the noun with the missile;\n
-  within carry out attacking (at address 126171)\n
+  \glkheading{Breakpoint 1:} Pause on I7 line 018147\n
+  \n
+  Execution paused within carry out attacking:\n
+  \markedindent \lstinline{\ 018148 \ \ \ \ hit the noun with the missile}\n
   \n
   Debug command?\ \glkinput{examine the noun}\n
   \n
@@ -1685,7 +1718,6 @@ line but no further.
   \n
   \storyprompt\glkinput{force a breakpoint}\n
   \storyprompt\glkinput{shoot target}}{%
-  the noun = object: target\n
   \n
   Debug command?\ \glkinput{examine the missile}\n
   \n
@@ -1697,95 +1729,16 @@ line but no further.
   \n
   Debug command?\ \glkinput{step}\n
   \n
-  Execution paused (at address 466101, code offset 0x71C79, and I6 line 89574)\n
-  \markedindent \lstinline@if ((t\_0 == I251\_willow\_wand)) { (PHR\_4198\_r13 (t\_0,t\_1)); rtrue; }@\n
-  within the I6 routine Resolver\_5 (at address 466096)\n
+  Debug command?\ (input interrupted)\n
+  \n
+  Execution paused within To hit ( T - a mark ) with ( A - an arrow ):\n
+  \markedindent \lstinline{\ 038111 \ \ \ \ if an arrow ( called the previous shot )}\ \lstinline{is part of t begin;}\n
   \n
   Debug command?\ \cursor}
 
-Here's a surprise---that doesn't look like a line from the source text.  But
-``within the I6 routine Resolver\_5'' provides a clue: we're looking at code
-that Inform wrote itself, code to decide which of the two to-hit implementations
-applies.  As the mention of ``\lstinline{I251_willow_wand}'' suggests, the story
-is about to check the willow wand case.  If we step once more, it will rule that
-out and move on to the second possibility:
-
-\terp{\glkstatusline{Lists}{0/2}\n
-  \glkheading{Tournament}\n
-  An Interactive Fiction\n
-  Release 1 / Serial number 130204 / Inform~7 build 6G60 (I6/v6.32 lib 6/12N) SD\n
-  \n
-  \glkheading{Lists}\n
-  You can see a target and a willow wand here.\n
-  \n
-  \storyprompt\glkinput{take inventory}\n
-  You are carrying:\n
-  \null\ \ a longbow\n
-  \null\ \ three arrows\n
-  \n
-  \storyprompt\glkinput{force a breakpoint}\n
-  \storyprompt\glkinput{shoot target}}{%
-  the verb = action name: attacking\n
-  \n
-  Debug command?\ \glkinput{step}\n
-  \n
-  Execution paused (at address 466101, code offset 0x71C79, and I6 line 89574)\n
-  \markedindent \lstinline@if ((t\_0 == I251\_willow\_wand)) { (PHR\_4198\_r13 (t\_0,t\_1)); rtrue; }@\n
-  within the I6 routine Resolver\_5 (at address 466096)\n
-  \n
-  Debug command?\ \glkinput{step}\n
-  \n
-  Execution paused (at address 458586, code offset 0x6FDF0, and I6 line 88011)\n
-  \markedindent \lstinline@if ((((t\_0 ofclass K16\_mark)))) { (PHR\_4197\_r14 (t\_0,t\_1)); rtrue; }@\n
-  within the I6 routine Resolver\_5 (at address 466096)\n
-  \n
-  Debug command?\ \cursor}
-
-And yet another step brings us into the phrase itself.  We'll take this
-opportunity to mention that \glkinput{again} (which can be abbreviated as
-\glkinput{g} or a blank input) repeats the previous command.
-
-\terp{\glkstatusline{Lists}{0/2}\n
-  \glkheading{Tournament}\n
-  An Interactive Fiction\n
-  Release 1 / Serial number 130204 / Inform~7 build 6G60 (I6/v6.32 lib 6/12N) SD\n
-  \n
-  \glkheading{Lists}\n
-  You can see a target and a willow wand here.\n
-  \n
-  \storyprompt\glkinput{take inventory}\n
-  You are carrying:\n
-  \null\ \ a longbow\n
-  \null\ \ three arrows\n
-  \n
-  \storyprompt\glkinput{force a breakpoint}\n
-  \storyprompt\glkinput{shoot target}}{%
-  458257)\n
-  \n
-  Debug command?\ \glkinput{step}\n
-  \n
-  Execution paused (at address 466123, code offset 0x71C8F, and I6 line 89575)\n
-  \markedindent \lstinline@if ((((t\_0 ofclass K16\_mark)))) { (PHR\_4197\_r14 (t\_0,t\_1)); rtrue; }@\n
-  within the I6 routine Resolver\_5 (at address 466096)\n
-  \n
-  Debug command?\ \glkinput{again}\n
-  \n
-  Execution paused (at address 250202, code offset 0x3D11E, I6 line 35504, and I7 line 35503)\n
-  \markedindent \lstinline{if an arrow ( called the previous shot )}\lstinline{\ is part of t begin}\n
-  within the I6 routine PHR\_4197\_r14 (at address 250197)\n
-  \n
-  Debug command?\ \cursor}
-
-Note that the synopsis of the story's location in the source text mentions ``the
-I6 routine PHR\_4197\_r14.''  The debugger knows that this phrase was originally
-written in Inform~7, but it doesn't know any I7 name for it, so it's showing the
-I6 name.  (It also understands the I6 name in our input, but that's only useful
-if \emph{we} happen to know it.)
-
-Were we to continue stepping, we would work our way through more code written by
-Inform, this time to decide whether an arrow is part of something.  Instead,
-we'll introduce another command, \glkinput{next} (which has the synonyms
-\glkinput{next line} and \glkinput{n}).
+Were we to continue stepping, we would enter the code that decides whether an
+arrow is part of something.  Instead, we'll introduce another command,
+\glkinput{next} (which has the synonyms \glkinput{next line} and \glkinput{n}).
 
 Much as \glkinput{step} waits until any task in the story has proceeded to
 another line, \glkinput{next} waits for a specific task to advance a
@@ -1811,27 +1764,62 @@ ignoring any rules or phrases the story uses to get there.
   \n
   \storyprompt\glkinput{force a breakpoint}\n
   \storyprompt\glkinput{shoot target}}{%
-  within the I6 routine Resolver\_5 (at address 466096)\n
   \n
-  Debug command?\ \glkinput{again}\n
+  Debug command?\ \glkinput{step}\n
   \n
-  Execution paused (at address 250202, code offset 0x3D11E, I6 line 35504, and I7 line 35503)\n
-  \markedindent \lstinline{if an arrow ( called the previous shot )}\lstinline{\ is part of t begin}\n
-  within the I6 routine PHR\_4197\_r14 (at address 250197)\n
+  Debug command?\ (input interrupted)\n
   \n
-  Debug command? \glkinput{next}\n
+  Execution paused within To hit ( T - a mark ) with ( A - an arrow ):\n
+  \markedindent \lstinline{\ 038111 \ \ \ \ if an arrow ( called the previous shot )}\ \lstinline{is part of t begin;}\n
   \n
-  Execution paused (at address 250235, code offset 0x3D13F, I6 line 35514, and I7 line 35513)\n
-  \markedindent \lstinline{now a is part of t;}\n
-  within the I6 routine PHR\_4197\_r14 (at address 250197)\n
+  Debug command?\ \glkinput{next}\n
+  \n
+  Debug command?\ (input interrupted)\n
+  \n
+  Execution paused within To hit ( T - a mark ) with ( A - an arrow ):\n
+  \markedindent \lstinline{\ 038121 \ \ \ \ now a is part of t;}\n
   \n
   Debug command?\ \cursor}
 
 One more useful command for running the story by increments: \glkinput{finish}
 (also \glkinput{finish this call}, \glkinput{fin}, or \glkinput{f}).  It
 continues until the end of a particular task, again whichever one matches the
-selected call frame.  With its help we return to \lstinline{Resolver_5} on the
-next page.
+selected call frame.  With its help we return to the carry out rule, whose
+preamble is indicated because there are no lines left to execute:
+
+\terp{\glkstatusline{Lists}{0/2}\n
+  \glkheading{Tournament}\n
+  An Interactive Fiction\n
+  Release 1 / Serial number 130204 / Inform~7 build 6G60 (I6/v6.32 lib 6/12N) SD\n
+  \n
+  \glkheading{Lists}\n
+  You can see a target and a willow wand here.\n
+  \n
+  \storyprompt\glkinput{take inventory}\n
+  You are carrying:\n
+  \null\ \ a longbow\n
+  \null\ \ three arrows\n
+  \n
+  \storyprompt\glkinput{force a breakpoint}\n
+  \storyprompt\glkinput{shoot target}}{%
+  with ( A - an arrow ):\n
+  \markedindent \lstinline{\ 38111 \ \ \ \ if an arrow ( called the previous shot )}\ \lstinline{is part of t begin;}\n
+  \n
+  Debug command?\ \glkinput{next}\n
+  \n
+  Debug command?\ (input interrupted)\n
+  \n
+  Execution paused within To hit ( T - a mark ) with ( A - an arrow ):\n
+  \markedindent \lstinline{\ 038121 \ \ \ \ now a is part of t;}\n
+  \n
+  Debug command?\ \glkinput{finish}\n
+  \n
+  Debug command?\ (input interrupted)\n
+  \n
+  Execution paused within carry out attacking:\n
+  \markedindent \lstinline{\ 018137 Carry out attacking:}\n
+  \n
+  Debug command?\ \cursor}
 
 To complete the tutorial, let's look at an actual, albeit simple bug.  First,
 we'll need a clean slate.  The command \glkinput{breakpoint information} (also
@@ -1854,19 +1842,21 @@ breakpoints.
   \n
   \storyprompt\glkinput{force a breakpoint}\n
   \storyprompt\glkinput{shoot target}}{%
-  0x3D13F, I6 line 35514, and I7 line 35513)\n
-  \markedindent \lstinline{now a is part of t;}\n
-  within the I6 routine PHR\_4197\_r14 (at address 250197)\n
+  Debug command?\ (input interrupted)\n
+  \n
+  Execution paused within To hit ( T - a mark ) with ( A - an arrow ):\n
+  \markedindent \lstinline{\ 038121 \ \ \ \ now a is part of t;}\n
   \n
   Debug command?\ \glkinput{finish}\n
   \n
-  Execution paused (at address 466149, code offset 0x71CA9, and I6 line 89575)\n
-  \markedindent \lstinline@if ((((t\_0 ofclass K16\_mark)))) { (PHR\_4197\_r14 (t\_0,t\_1)); rtrue; }@\n
-  within the I6 routine Resolver\_5 (at address 466096).\n
+  Debug command?\ (input interrupted)\n
+  \n
+  Execution paused within carry out attacking:\n
+  \markedindent \lstinline{\ 018137 Carry out attacking:}\n
   \n
   Debug command?\ \glkinput{breakpoint information}\n
   \n
-  Breakpoint 0 (enabled): Pause when carry out attacking (at address 126171) applies\n
+  Breakpoint 0 (enabled): Pause when carry out attacking applies\n
   Breakpoint 1 (enabled): Pause on I7 line 018147\n
   \n
   Debug command?\ \cursor}
@@ -1894,16 +1884,18 @@ Let's disable them for now.  We can enter the commands \glkinput{disable 0} and
   \n
   \storyprompt\glkinput{force a breakpoint}\n
   \storyprompt\glkinput{shoot target}}{%
+  \markedindent \lstinline{\ 038121 \ \ \ \ now a is part of t;}\n
   \n
   Debug command?\ \glkinput{finish}\n
   \n
-  Execution paused (at address 466149, code offset 0x71CA9, and I6 line 89575)\n
-  \markedindent \lstinline@if ((((t\_0 ofclass K16\_mark)))) { (PHR\_4197\_r14 (t\_0,t\_1)); rtrue; }@\n
-  within the I6 routine Resolver\_5 (at address 466096).\n
+  Debug command?\ (input interrupted)\n
+  \n
+  Execution paused within carry out attacking:\n
+  \markedindent \lstinline{\ 018137 Carry out attacking:}\n
   \n
   Debug command?\ \glkinput{breakpoint information}\n
   \n
-  Breakpoint 0 (enabled): Pause when carry out attacking (at address 126171) applies\n
+  Breakpoint 0 (enabled): Pause when carry out attacking applies\n
   Breakpoint 1 (enabled): Pause on I7 line 018147\n
   \n
   Debug command?\ \glkinput{disable all breakpoints}\n
@@ -1932,17 +1924,18 @@ Once the breakpoints are disabled, continue and shoot the willow wand.
   \storyprompt\glkinput{shoot wand}\n
   \n
   [** Programming error: tried to ``move'' arrow to nothing **]}{%
+  All breakpoints disabled.\n
+  \n
   Debug command?\ \glkinput{go}\n
   \n
   \glkheading{Breakpoint triggered by source text:} Programming error\n
   \n
-  Execution paused (at address 229637, code offset 0x380C9, and I6 line 33283)\n
-  \markedindent \lstinline@];@\n
-  within the I6 routine MoveObject (at address 229152).\n
+  Execution paused within the I6 routine MoveObject:\n
+  \markedindent \lstinline@\ 035670 ];@\n
   \n
-  Selecting the nearest location in the simplified call stack (at address 250171, code offset 0x3D0FF, I6 line 35492, and I7 line 35491)\n
-  \markedindent \lstinline {move a to the location of t.}\n
-  within the I6 routine PHR\_4198\_r13 (at address 250154).\n
+  Selecting the nearest location in the simplified call stack, which is within To hit ( T - the willow wand ) with ( A - an arrow ):\n
+  \markedindent \lstinline{\ 038099 \ \ \ \ move a to the location of t.}\n
+  \n
   (Use the command ``prefer no simplification'' to always select the point where execution is paused.)\n
   \n
   Debug command?\ \cursor}
@@ -1956,26 +1949,26 @@ such explanation.
 An extension that Interactive Debugger includes, Verbose Diagnostics, alters the
 code for reporting runtime problems, programming errors, and several other kinds
 of trouble.  Usually these alterations just print out a call stack, but inside
-the debugger they force a breakpoint.  Thus, we find the story paused in an I6
-routine named \lstinline{MoveObject}.
+the debugger they force a breakpoint.  Thus, we find the story paused at the
+very end of an I6 routine named \lstinline{MoveObject}.
 
-But then we get this bit:
+But then we get a bit:
 
 \begin{quote}
-  Selecting the nearest location in the simplified call stack (at address 250171, code offset 0x3D0FF, I6 line 35492, and I7 line 35491) ...
+  Selecting the nearest location in the simplified call stack\dots
 \end{quote}
 
 The debugger normally leaves out standard Inform internals so that we can focus
-on the code that we've written (or the code that is a consequence of what we've
-written, like \lstinline{Resolver_5}).  Here it's warning us that the
-programming error turned up inside of an internal routine, and that the nearest
-line of non-internal code it could find is the one that moves A to the location
-of T.  This suits us just fine; it's a pretty blatant hint of what's gone wrong.
+on the code that we've written.  Here it's warning us that the programming error
+turned up inside of an internal routine, and that the nearest line of
+non-internal code it could find is the one that moves A to the location of T.
+This suits us just fine; it's a pretty blatant clue to what's gone wrong.  The
+location of T must be nothing, which in turn means that T is off stage.
 
 For the demonstration's sake, however, let's confirm that T is indeed an
-off-stage object.  First we try the command \glkinput{examine T}, by which we
-find out what T is, but nothing more.  What we really want is \glkinput{showme},
-which replicates the behavior of Inform's testing command.
+off-stage object.  We could use the command \glkinput{examine the location of
+  T}, but we'll take this opportunity to introduce \glkinput{showme}, which
+replicates the behavior of Inform's testing command.
 
 \terp{\glkstatusline{Lists}{0/3}\n
   build 6G60 (I6/v6.32 lib 6/12N) SD\n
@@ -1995,27 +1988,22 @@ which replicates the behavior of Inform's testing command.
   \storyprompt\glkinput{shoot wand}\n
   \n
   [** Programming error: tried to ``move'' arrow to nothing **]}{%
-  250154).\n
+  \n
+  Selecting the nearest location in the simplified call stack, which is within To hit ( T - the willow wand ) with ( A - an arrow ):\n
+  \markedindent \lstinline{\ 038099 \ \ \ \ move a to the location of t.}\n
+  \n
   (Use the command ``prefer no simplification'' to always select the point where execution is paused.)\n
-  \n
-  Debug command?\ \glkinput{examine T}\n
-  \n
-  t = mark: willow wand\n
   \n
   Debug command?\ \glkinput{showme T}\n
   \n
-  The ``showme'' command works by running some story code, which is liable to crash the debugger if the story is in the middle of rearranging its data structures.  It could also disturb the state of the story, for instance if a printed name has a text substitution with side-effects.  (Use the command ``prefer no showme warnings'' to disable this message.)  Are you sure you want to continue?\ \cursor}
+  The ``showme'' command works by running some story code, which is liable to crash the debugger if applied to a non-object value or run when the story is in the middle of rearranging its data structures.  It could also disturb the state of the story, for instance if a printed name has a text substitution with side-effects.  Are you sure you want to continue (y, n, or Y)?\ \cursor}
 
-The admonition that pops up is relevant mainly in three cases.  One is when we
-are debugging Inform internals, which we're not.  Another is when printing the
-showme information might cause something to happen inside the story.  Looking at
-our source text, this case doesn't seem applicable either.  The third is when we
-try to use showme on a value that looks like it could be converted to an object
-but actually can't.  (\glkinput{Showme} automatically converts its argument to
-the object kind for convenience when dealing with low-level code.)  If our
-command were something like \glkinput{showme 12345}, we might get astoundingly
-unlucky, but as it is we've already determined that T is just an ordinary willow
-wand.  We can answer \glkinput{yes}.
+The first admonition that pops up would be applicable if we were uncertain about
+T being a valid object or had paused execution deep within the Inform internals,
+but neither is the case.  The second would apply if printing the showme
+information might cause something to happen inside the story.  But, looking at
+our source text, this doesn't seem to be a danger either.  So we can safely
+answer \glkinput{y}, or, if we don't want to be asked again, \glkinput{Y}.
 
 \terp{\glkstatusline{Lists}{0/3}\n
   build 6G60 (I6/v6.32 lib 6/12N) SD\n
@@ -2035,7 +2023,8 @@ wand.  We can answer \glkinput{yes}.
   \storyprompt\glkinput{shoot wand}\n
   \n
   [** Programming error: tried to ``move'' arrow to nothing **]}{%
-  The ``showme'' command works by running some story code, which is liable to crash the debugger if the story is in the middle of rearranging its data structures.  It could also disturb the state of the story, for instance if a printed name has a text substitution with side-effects.  (Use the command ``prefer no showme warnings'' to disable this message.)  Are you sure you want to continue?\ \hbox to 80pt{\glkinput{yes}\hfil}\n
+  \n
+  The ``showme'' command works by running some story code, which is liable to crash the debugger if applied to a non-object value or run when the story is in the middle of rearranging its data structures.  It could also disturb the state of the story, for instance if a printed name has a text substitution with side-effects.  Are you sure you want to continue (y, n, or Y)? \glkinput{y}\n
   \n
   willow wand - mark\n
   location: out of play\n
@@ -2081,9 +2070,9 @@ Our hunch is confirmed, and the cause is close at hand, the ordering of lines
   \n
   Debug command?\ \glkinput{list}\n
   \n
-  \unmarkedindent \lstinline{035482 To hit ( T - the willow wand )}\lstinline{\ with ( A - an arrow ):}\n
-  \unmarkedindent \lstinline{035488 \ \ \ \ remove the willow wand from play;}\n
-  \markedindent \lstinline{035491 \ \ \ \ move a to the location of t.}\n
+  \unmarkedindent \lstinline{\ 035482 To hit ( T - the willow wand )}\lstinline{\ with ( A - an arrow ):}\n
+  \unmarkedindent \lstinline{\ 035488 \ \ \ \ remove the willow wand from play;}\n
+  \markedindent \lstinline{\ 035491 \ \ \ \ move a to the location of t.}\n
   \n
   Debug command?\ \cursor}
 
@@ -2192,27 +2181,11 @@ we've seen, plus a handful of other common commands.
 
 \subsection{Inspecting Values}
 
-\command{examine [a variable name]\orcommand x [a variable name]\orcommand print
-  [a variable name]\orcommand p [a variable name]}{show the value of the named
-  variable.  If the variable is a temporary named value, give the value in the
-  selected call frame.}
-
-\command{examine [an object name]\orcommand x [an object name]\orcommand print
-  [an object name]\orcommand p [an object name]}{show the named object.}
-
-\command{examine [a function name]\orcommand x [a function name]\orcommand print
-  [a function name]\orcommand p [a function name]}{show the named rule, phrase,
-  or I6 routine.}
-
-\command{showme [a variable name]}{convert the value of the named variable to an
-  object and display it and all of its properties.  If the variable is a
-  temporary named value, use the value in the selected call frame.}
-
-\command{showme [an object name]}{display the named object and all of its
-  properties.}
-
-\command{showme [a number]}{convert the number to an object and display it and
-  all of its properties.  The number can be given in decimal or hexadecimal.}
+\command{examine [an expression]\orcommand x [an expression]\orcommand print [an
+  expression]\orcommand p [an expression]}{show the current value of the
+  expression, which is may mention numbers, variables, objects, and function
+  names.  Numbers can be given in decimal or hexadecimal.  If any variable is a
+  temporary named value, the command uses the value in the selected call frame.}
 
 \lastpagebreak
 
@@ -2246,7 +2219,7 @@ another question:
   \n
   Debug command?\ \glkinput{break carry out drawing}\n
   \n
-  Would you like to place the breakpoint after the rule's applicability check, so that it only pauses the story when the rule applies?\ \glkinput{no}\n
+  Would you like to place the breakpoint after the rule's applicability check, so that it only pauses the story when the rule applies (y or n)?\ \glkinput{n}\n
   \n
   Would you like to place the breakpoint on the routine kernel, so that you can skip over the block value management code?\ \cursor}
 
@@ -2266,7 +2239,7 @@ written.  Extending the analogy, we term the encased code ``routine kernels.''
 
 Normally we're not interested in block value management, so we want to focus on
 what we've written, the routine kernels.  But here our plan is to inspect
-Inform's addendum, so answer no and continue.
+Inform's addendum, so answer no and run the story.
 
 \terp{\glkstatusline{Drawing Room}{0/1}\n
   \glkheading{Monochrome}\n
@@ -2277,19 +2250,21 @@ Inform's addendum, so answer no and continue.
   You can see a table (on which is a bowl (in which is some fruit)) here.\n
   \n
   \storyprompt\cursor}{%
-  book is used, the first time a story command is parsed, or the first time the action machinery runs, for instance.\n
+  runs, for instance.\n
   \n
   Enter the command ``help'' at the debug prompt for help.\n
   \n
   Debug command?\ \glkinput{break carry out drawing}\n
   \n
-  Would you like to place the breakpoint after the rule's applicability check, so that it only pauses the story when the rule applies?\ \glkinput{no}\n
+  Would you like to place the breakpoint after the rule's applicability check, so that it only pauses the story when the rule applies (y or n)?\ \glkinput{n}\n
   \n
-  Would you like to place the breakpoint on the routine kernel, so that you can skip over the block value management code?\ \glkinput{no}\n
+  Would you like to place the breakpoint on the routine kernel, so that you can skip over the block value management code (y or n)?\ \glkinput{n}\n
   \n
-  Breakpoint 0 (enabled): Pause when entering carry out drawing (at address 164179)\n
+  Breakpoint 0 (enabled): Pause when entering carry out drawing\n
   \n
-  Debug command?\ \glkinput{go}}
+  Debug command?\ \glkinput{run}\n
+  \n
+  Debug command?\ \cursor}
 
 If we give the command \glkinput{draw fruit}, the breakpoint will trigger, and
 we can attempt to list the routine shell:
@@ -2304,20 +2279,19 @@ we can attempt to list the routine shell:
   \n
   \storyprompt\glkinput{draw fruit}}{%
   \n
-  Breakpoint 0 (enabled): Pause when entering carry out drawing (at address 164179)\n
+  Debug command?\ \glkinput{run}\n
   \n
-  Debug command?\ \glkinput{go}\n
+  Debug command?\ (input interrupted)\n
   \n
-  \glkheading{Breakpoint 0:} Pause when entering carry out drawing (at address 164179)\n
+  \glkheading{Breakpoint 0:} Pause when entering carry out drawing\n
   \n
-  Execution paused (at address 164182, code offset 0x2811A, I6 line 24480, and I7 line 24479)\n
-  \markedindent \lstinline{Carry out drawing:}\n
-  within carry out drawing (at address 164179).\n
+  Execution paused within carry out drawing:\n
+  \markedindent \lstinline{\ 024479 Carry out drawing:}\n
   \n
   Debug command?\ \glkinput{list}\n
   \n
-  \markedindent \lstinline{024479 Carry out drawing:}\n
-  \unmarkedindent \lstinline{\ \ \ \ \ \ \ \ \ \ \ \ (invoke the kernel of "carry out drawing", at address 164628)}\n
+  \markedindent \lstinline{\ 024479 Carry out drawing:}\n
+  \unmarkedindent \lstinline{\ \ \ \ \ \ \ \ \ \ \ \ \ (invoke the kernel of "carry out drawing")}\n
   \n
   Debug command?\ \cursor}
 
@@ -2385,16 +2359,16 @@ Listing again, we see much more detail:
   \storyprompt\glkinput{draw fruit}}{%
   Debug command?\ \glkinput{list}\n
   \n
-  \unmarkedindent \lstinline{024479 ! Carry out drawing:}\n
-  \markedindent \lstinline{024480 [ R\_4196 ;blockv\_stack-->(blockv\_sp+1) = BlkValueCreate(INDEXED\_TEXT\_TY,0,INDEXED\_TEXT\_TY);}\n
-  \unmarkedindent \lstinline{024481 \ \ \ \ blockv\_stack-->(blockv\_sp+0) = BlkValueCreate(INDEXED\_TEXT\_TY,0,INDEXED\_TEXT\_TY);}\n
-  \unmarkedindent \lstinline{024482 \ \ \ \ blockv\_sp = blockv\_sp + 2;}\n
-  \unmarkedindent \lstinline{024483 \ \ \ \ blockv\_stack-->(blockv\_sp++) = R\_SHELL\_0(blockv\_sp-2);}\n
-  \unmarkedindent \lstinline{024484 \ \ \ \ blockv\_sp = blockv\_sp - 3;}\n
-  \unmarkedindent \lstinline{024485 \ \ \ \ BlkFree(blockv\_stack-->(blockv\_sp+1));}\n
-  \unmarkedindent \lstinline{024486 \ \ \ \ BlkFree(blockv\_stack-->(blockv\_sp+0));}\n
-  \unmarkedindent \lstinline{024487 \ \ \ \ return blockv\_stack-->(blockv\_sp+2);}\n
-  \unmarkedindent \lstinline{024488 ];}\n
+  \unmarkedindent \lstinline{\ 024479 ! Carry out drawing:}\n
+  \markedindent \lstinline{\ 024480 [ R\_4196 ;blockv\_stack-->(blockv\_sp+1) = BlkValueCreate(INDEXED\_TEXT\_TY,0,INDEXED\_TEXT\_TY);}\n
+  \unmarkedindent \lstinline{\ 024481 \ \ \ \ blockv\_stack-->(blockv\_sp+0) = BlkValueCreate(INDEXED\_TEXT\_TY,0,INDEXED\_TEXT\_TY);}\n
+  \unmarkedindent \lstinline{\ 024482 \ \ \ \ blockv\_sp = blockv\_sp + 2;}\n
+  \unmarkedindent \lstinline{\ 024483 \ \ \ \ blockv\_stack-->(blockv\_sp++) = R\_SHELL\_0(blockv\_sp-2);}\n
+  \unmarkedindent \lstinline{\ 024484 \ \ \ \ blockv\_sp = blockv\_sp - 3;}\n
+  \unmarkedindent \lstinline{\ 024485 \ \ \ \ BlkFree(blockv\_stack-->(blockv\_sp+1));}\n
+  \unmarkedindent \lstinline{\ 024486 \ \ \ \ BlkFree(blockv\_stack-->(blockv\_sp+0));}\n
+  \unmarkedindent \lstinline{\ 024487 \ \ \ \ return blockv\_stack-->(blockv\_sp+2);}\n
+  \unmarkedindent \lstinline{\ 024488 ];}\n
   \n
   Debug command?\ \cursor}
 
@@ -2413,11 +2387,11 @@ recognizable name:
   \n
   \storyprompt\glkinput{draw fruit}}{%
   \unmarkedindentb \lstinline{024483 \ \ \ \ blockv\_stack-->(blockv\_sp++) = R\_SHELL\_0(blockv\_sp-2);}\n
-  \unmarkedindent \lstinline{024484 \ \ \ \ blockv\_sp = blockv\_sp - 3;}\n
-  \unmarkedindent \lstinline{024485 \ \ \ \ BlkFree(blockv\_stack-->(blockv\_sp+1));}\n
-  \unmarkedindent \lstinline{024486 \ \ \ \ BlkFree(blockv\_stack-->(blockv\_sp+0));}\n
-  \unmarkedindent \lstinline{024487 \ \ \ \ return blockv\_stack-->(blockv\_sp+2);}\n
-  \unmarkedindent \lstinline{024488 ];}\n
+  \unmarkedindent \lstinline{\ 024484 \ \ \ \ blockv\_sp = blockv\_sp - 3;}\n
+  \unmarkedindent \lstinline{\ 024485 \ \ \ \ BlkFree(blockv\_stack-->(blockv\_sp+1));}\n
+  \unmarkedindent \lstinline{\ 024486 \ \ \ \ BlkFree(blockv\_stack-->(blockv\_sp+0));}\n
+  \unmarkedindent \lstinline{\ 024487 \ \ \ \ return blockv\_stack-->(blockv\_sp+2);}\n
+  \unmarkedindent \lstinline{\ 024488 ];}\n
   \n
   Debug command?\ \glkinput{examine R\_SHELL\_0}\n
   \n
@@ -2441,7 +2415,7 @@ what we don't want it to do.  So type \glkinput{prefer no call stack
   \n
   \storyprompt\glkinput{draw fruit}}{%
   \unmarkedindentb \lstinline{024487 \ \ \ \ return blockv\_stack-->(blockv\_sp+2);}\n
-  \unmarkedindent \lstinline{024488 ];}\n
+  \unmarkedindent \lstinline{\ 024488 ];}\n
   \n
   Debug command?\ \glkinput{examine R\_SHELL\_0}\n
   \n
@@ -2491,25 +2465,25 @@ And examine the call stack:
   \storyprompt\glkinput{draw fruit}}{%
   Debug command?\ \glkinput{examine the call stack}\n
   \n
-  Execution paused (at address 164182)\n
-  within carry out drawing (at address 164179) (call frame \#0, currently selected),\n
-  within the I6 routine ProcessRulebook (at address 205660) (call frame \#1),\n
-  within the I6 routine ProcessRulebook (at address 205660) (call frame \#2),\n
-  within the carry out stage rule (at address 100362) (call frame \#3),\n
-  within the I6 routine ProcessRulebook (at address 205660) (call frame \#4),\n
-  within the I6 routine ProcessRulebook (at address 205660) (call frame \#5),\n
-  within the I6 routine GenericVerbSub (at address 176966) (call frame \#6),\n
-  within the I6 routine A81\_drawingSub (at address 98973) (call frame \#7),\n
-  within the descend to specific action-processing rule (at address 9647) (call frame \#8),\n
-  within the I6 routine ProcessRulebook (at address 205660) (call frame \#9),\n
-  within the I6 routine ProcessRulebook (at address 205660) (call frame \#10),\n
-  within the I6 routine ActionPrimitive (at address 174498) (call frame \#11),\n
-  within the I6 routine BeginAction (at address 174389) (call frame \#12),\n
-  within the generate action rule (at address 71340) (call frame \#13),\n
-  within the I6 routine ProcessRulebook (at address 205660) (call frame \#14),\n
-  within the I6 routine ProcessRulebook (at address 205660) (call frame \#15),\n
-  within the I6 routine FollowRulebook (at address 204885) (call frame \#16),\n
-  within the main story routine (at address 70749) (call frame \#17).\n
+  Execution paused\n
+  within carry out drawing (call frame \#0, currently selected),\n
+  within the I6 routine ProcessRulebook (call frame \#1),\n
+  within the I6 routine ProcessRulebook (call frame \#2),\n
+  within the carry out stage rule (call frame \#3),\n
+  within the I6 routine ProcessRulebook (call frame \#4),\n
+  within the I6 routine ProcessRulebook (call frame \#5),\n
+  within the I6 routine GenericVerbSub (call frame \#6),\n
+  within the I6 routine A81\_drawingSub (call frame \#7),\n
+  within the descend to specific action-processing rule (call frame \#8),\n
+  within the I6 routine ProcessRulebook (call frame \#9),\n
+  within the I6 routine ProcessRulebook (call frame \#10),\n
+  within the I6 routine ActionPrimitive (call frame \#11),\n
+  within the I6 routine BeginAction (call frame \#12),\n
+  within the generate action rule (call frame \#13),\n
+  within the I6 routine ProcessRulebook (call frame \#14),\n
+  within the I6 routine ProcessRulebook (call frame \#15),\n
+  within the I6 routine FollowRulebook (call frame \#16),\n
+  within the main story routine (call frame \#17).\n
   \n
   Debug command?\ \cursor}
 
@@ -2535,26 +2509,26 @@ reach the next interesting line, in \lstinline{KindAtomic}.
   Debug command?\ \glkinput{step}\n
   \n
   Execution paused (at address 482780, code offset 0x75DA0, and I6 line 93891)\n
-  \markedindent \lstinline{if (skov == 0 && (kov < 0 || kov >= BASE_KIND_HWM))}\lstinline{\ skov = kov;}\n
-  within the I6 routine BlkValueCreate (at address 482775).\n
+  \markedindent \lstinline{\ if (skov == 0 && (kov < 0 || kov >= BASE_KIND_HWM))}\lstinline{\ skov = kov;}\n
+  within the I6 routine BlkValueCreate.\n
   \n
   Debug command?\ \glkinput{again}\n
   \n
   Execution paused (at address 482799, code offset 0x75DB3, and I6 line 93893)\n
-  \markedindent \lstinline{sf = KOVSupportFunction(kov);}\n
-  within the I6 routine BlkValueCreate (at address 482775).\n
+  \markedindent \lstinline{\ sf = KOVSupportFunction(kov);}\n
+  within the I6 routine BlkValueCreate.\n
   \n
   Debug command?\ \glkinput{again}\n
   \n
   Execution paused (at address 93187, code offset 0x16BC7, and I6 line 10900)\n
-  \markedindent \lstinline{k = KindAtomic(k);}\n
-  within the I6 routine KOVSupportFunction (at address 93182).\n
+  \markedindent \lstinline{\ k = KindAtomic(k);}\n
+  within the I6 routine KOVSupportFunction.\n
   \n
   Debug command?\ \glkinput{again}\n
   \n
   Execution paused (at address 34789, code offset 0x87A9, and I6 line 5205)\n
-  \markedindent \lstinline{if ((kind >= 0)}\lstinline{\ &&}\lstinline{\ (kind < BASE_KIND_HWM))}\lstinline{\ return kind;}\n
-  within the I6 routine KindAtomic (at address 34784).\n
+  \markedindent \lstinline{\ if ((kind >= 0)}\lstinline{\ &&}\lstinline{\ (kind < BASE_KIND_HWM))}\lstinline{\ return kind;}\n
+  within the I6 routine KindAtomic.\n
   \n
   Debug command?\ \cursor}
 
@@ -2682,8 +2656,8 @@ line.  We will use \glkinput{next sequence point} and then \glkinput{list}.
   Debug command?\ \glkinput{next sequence point}\n
   \n
   Execution paused (at address 34800, code offset 0x87B4, and I6 line 5205)\n
-  \markedindent \lstinline{if ((kind >= 0)}\lstinline{\ &&}\lstinline{\ (kind < BASE_KIND_HWM))}\lstinline{\ return kind;}\n
-  within the I6 routine KindAtomic (at address 34784)\n
+  \markedindent \lstinline{\ if ((kind >= 0)}\lstinline{\ &&}\lstinline{\ (kind < BASE_KIND_HWM))}\lstinline{\ return kind;}\n
+  within the I6 routine KindAtomic\n
   \n
   Debug command?\ \glkinput{list}\n
   \n
@@ -2716,13 +2690,13 @@ its support function is.
   \n
   Execution paused (at address 93197, code offset 0x16BD1, and I6 line 10901)\n
   \markedindent \lstinline @switch(k) \{@\n
-  within the I6 routine KOVSupportFunction (at address 93182).\n
+  within the I6 routine KOVSupportFunction.\n
   \n
   Debug command?\ \glkinput{finish}\n
   \n
   Execution paused (at address 482809, code offset 0x75DBD, and I6 line 93894)\n
-  \markedindent \lstinline{if (sf)}\lstinline{\ block = sf(CREATE_KOVS, cast_from, skov);}\n
-  within the I6 routine BlkValueCreate (at address 482775).\n
+  \markedindent \lstinline{\ if (sf)}\lstinline{\ block = sf(CREATE_KOVS, cast_from, skov);}\n
+  within the I6 routine BlkValueCreate.\n
   \n
   Debug command?\ \cursor}
 
@@ -2745,8 +2719,8 @@ an Inform 6 variable and has no associated kind.  Instead, we turn to
   Debug command?\ \glkinput{finish}\n
   \n
   Execution paused (at address 482809, code offset 0x75DBD, and I6 line 93894)\n
-  \markedindent \lstinline{if (sf)}\lstinline{\ block = sf(CREATE_KOVS, cast_from, skov);}\n
-  within the I6 routine BlkValueCreate (at address 482775).\n
+  \markedindent \lstinline{\ if (sf)}\lstinline{\ block = sf(CREATE_KOVS, cast_from, skov);}\n
+  within the I6 routine BlkValueCreate.\n
   \n
   Debug command?\ \glkinput{examine sf}\n
   \n
@@ -2783,7 +2757,7 @@ And step, as expected, takes us into exactly that routine:
   \n
   Execution paused (at address 484303, code offset 0x76393, and I6 line 94247)\n
   \markedindent \lstinline @switch(task) \{@\n
-  within the I6 routine INDEXED\_TEXT\_TY\_Support (at address 484298).\n
+  within the I6 routine INDEXED\_TEXT\_TY\_Support.\n
   \n
   Debug command?\ \cursor}
 
@@ -2914,11 +2888,11 @@ when the story reports a runtime problem, it will also print a call stack like
 \begin{quote}
   \texttt{*** Run-time problem P10: Since yourself is not allowed the property "open",}\n
   \null\qquad\texttt{it is against the rules to try to use it.}\n
-  \texttt{within the I6 routine Adj\_43\_t2\_v9 (at address 140694),}\n
-  \texttt{within before singing (at address 95178),}\n
-  \texttt{within the before stage rule (at address 93834),}\n
-  \texttt{within the generate action rule (at address 71034),}\n
-  \texttt{within the main story routine (at address 70444).}
+  \texttt{within the I6 routine Adj\_43\_t2\_v9,}\n
+  \texttt{within before singing,}\n
+  \texttt{within the before stage rule,}\n
+  \texttt{within the generate action rule,}\n
+  \texttt{within the main story routine.}
 \end{quote}
 
 to tell us where in the story the failure was detected.  Reports for programming
