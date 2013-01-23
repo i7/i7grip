@@ -2406,7 +2406,7 @@ To list I7 for (R - a routine record) and the sequence point (S - a number) with
 	guess the routine kernel for the function address;
 	let the routine kernel address be the routine kernel address of the function at address the function address;
 	unless the routine kernel address is zero:
-		say "         [one tab](invoke [the human-friendly name for the function at address the routine kernel address], at address [the routine kernel address])[line break]";
+		say "         [one tab](invoke [the human-friendly name for the function at address the routine kernel address])[line break]";
 		stop;
 	repeat with the line number running over the half-open interval from the beginning line number to the end line number:
 		if the listing limit is at most zero:
