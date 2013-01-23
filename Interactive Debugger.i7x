@@ -3424,9 +3424,9 @@ the extension we can (1) pause execution when certain conditions hold, resuming
 it later, and (2) inspect the state of the story while it is paused.  Its
 interface should be familiar to authors who have experience using gdb.
 
-Details are in README.pdf, which accompanies the distribution of the extension,
-and is also available for download from
-https://sourceforge.net/projects/i7grip/.
+Details are in the README that accompanies the distribution of the extension
+(and is also available for download from
+https://sourceforge.net/projects/i7grip/).
 
 Chapter: Requirements, Limitations, and Bugs
 
@@ -3483,7 +3483,7 @@ the project, special thanks go to these people, in chronological order:
 
 Example: * Tournament - The First Tutorial Story
 
-README.pdf, which should have come with the extension, contains two debugger
+The README, which should have come with the extension, contains two debugger
 tutorials.  The following source text is the story used in the first one.
 
 	*: "Tournament" by Brady Garvin.
@@ -3537,7 +3537,7 @@ tutorials.  The following source text is the story used in the first one.
 
 Example: ** Monochrome - The Second Tutorial Story
 
-README.pdf, which should have come with the extension, contains two debugger
+The README, which should have come with the extension, contains two debugger
 tutorials.  The following source text is the story used in the second one.
 
 	*: "Monochrome" by Brady Garvin.

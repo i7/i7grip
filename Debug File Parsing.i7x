@@ -2477,9 +2477,9 @@ then write
 	The name of the symbolic link to the debug information file is "...".
 	The name of the symbolic link to the debugging log file is "...".
 
-so that the extension knows the names of these links.  README.pdf, which
-accompanies the distribution of the extension and is also available from
-https://sourceforge.net/projects/i7grip/, describes in detail how to do this.
+so that the extension knows the names of these links.  The README that
+accompanies the distribution of the extension (and is also available from
+https://sourceforge.net/projects/i7grip/) describes in detail how to do this.
 
 These files take a little bit of time to load, so that only happens when we
 invoke the phrase
