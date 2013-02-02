@@ -1414,11 +1414,13 @@ Chapter: Usage
 Section: Background
 
 This extension documentation assumes familiarity with the Glk specification,
-which can be found at http://eblong.com/zarf/glk/, and Glk Interception, an
-extension which it includes.  Most of the code in the Glk specification is given
-in C, but the syntax is nearly identical if we use Inform 6 inclusions.  There
-is, however, a smattering of I7 syntax available, which is easier to present
-here, at once, than in bits and pieces as it comes up.
+which can be found at http://eblong.com/zarf/glk/, and the extension Glk
+Interception.
+
+Most of the code in the Glk specification is given in C, but the syntax is
+nearly identical if we use Inform 6 inclusions.  There is, however, a smattering
+of I7 syntax available, which is easier to present here, at once, than in bits
+and pieces as it comes up.
 
 First off, Glk Window Wrappers imports some types from glk.h, though with more
 Inform-friendly names.  The type winid_t, for instance, is presented as the kind
