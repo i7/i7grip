@@ -664,6 +664,10 @@ To say original argument name (I - a number) of (A - a call frame):
 				unless the local name is the name for invalid local number I:
 					say "[the local name]";
 					stop;
+				now the local name is sample I7 local name number I of the routine record;
+				unless the local name is the name for invalid local number I:
+					say "[I6 local name number I of the routine record] [bracket][the local name][close bracket]";
+					stop;
 		say "[I6 local name number I of the routine record]".
 
 To decide what text is original argument kind name (I - a number) of (A - a call frame):
@@ -733,6 +737,10 @@ To say temporary name (I - a number) of (A - a call frame):
 				let the local name be I7 local name number I of the source line record;
 				unless the local name is the name for invalid local number I:
 					say "[the local name]";
+					stop;
+				now the local name is sample I7 local name number I of the routine record;
+				unless the local name is the name for invalid local number I:
+					say "[I6 local name number I of the routine record] [bracket][the local name][close bracket]";
 					stop;
 		say "[I6 local name number I of the routine record]".
 

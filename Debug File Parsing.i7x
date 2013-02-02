@@ -147,6 +147,7 @@ Section "The Routine Record Structure" - unindexed
 	4 bytes for the function address
 	4 bytes for the local count [-1 if the local count and names have not been loaded]
 	64 bytes for the I6 local names [null if the local count and names have not been loaded, "<invalid-local-#>" for nonexistent locals]
+	64 bytes for the sample I7 local names [null if the local count and names have not been loaded, "<invalid-local-#>" for nonexistent or non-I7 locals]
 	64 bytes for the I7 local kind names [null if the I7 locals have not been loaded, "<no kind>" for nonexistent locals and locals without kinds]
 	4 bytes for the source version [zero if the source language has not been determined, six for I6, seven for I7]
 	4 bytes for the beginning stream position
@@ -161,7 +162,7 @@ Section "The Routine Record Structure" - unindexed
 [All stream positions are in the debug information file, not the I6 source.]
 
 To decide what number is the assumed maximum local count: (- 16 -).
-To decide what number is the size of a routine record: (- 172 -).
+To decide what number is the size of a routine record: (- 236 -).
 
 Section "Routine Record Construction" - unindexed
 
@@ -186,41 +187,44 @@ To write the local count (X - a number) to (A - a routine record): (- llo_setFie
 To decide what text is the possibly invalid I6 local name number (I - a number) of (A - a routine record): (- llo_getField({A},2+{I}) -).
 To write (X - some text) to I6 local name number (I - a number) of (A - a routine record): (- llo_setField({A},2+{I},{X}); -).
 
-To decide what text is the possibly invalid I7 local kind name number (I - a number) of (A - a routine record): (- llo_getField({A},18+{I}) -).
-To write (X - some text) to I7 local kind name number (I - a number) of (A - a routine record): (- llo_setField({A},18+{I},{X}); -).
+To decide what text is the possibly invalid sample I7 local name number (I - a number) of (A - a routine record): (- llo_getField({A},18+{I}) -).
+To write (X - some text) to sample I7 local name number (I - a number) of (A - a routine record): (- llo_setField({A},18+{I},{X}); -).
 
-To decide what number is the possibly invalid source version of (A - a routine record): (- llo_getField({A},34) -).
-To write the source version (X - a number) to (A - a routine record): (- llo_setField({A},34,{X}); -).
+To decide what text is the possibly invalid I7 local kind name number (I - a number) of (A - a routine record): (- llo_getField({A},34+{I}) -).
+To write (X - some text) to I7 local kind name number (I - a number) of (A - a routine record): (- llo_setField({A},34+{I},{X}); -).
 
-To decide what number is the beginning stream position of (A - a routine record): (- llo_getField({A},35) -).
-To write the beginning stream position (X - a number) to (A - a routine record): (- llo_setField({A},35,{X}); -).
+To decide what number is the possibly invalid source version of (A - a routine record): (- llo_getField({A},50) -).
+To write the source version (X - a number) to (A - a routine record): (- llo_setField({A},50,{X}); -).
 
-To decide what number is the sequence point stream position of (A - a routine record): (- llo_getField({A},36) -).
-To write the sequence point stream position (X - a number) to (A - a routine record): (- llo_setField({A},36,{X}); -).
+To decide what number is the beginning stream position of (A - a routine record): (- llo_getField({A},51) -).
+To write the beginning stream position (X - a number) to (A - a routine record): (- llo_setField({A},51,{X}); -).
 
-To decide what number is the end stream position of (A - a routine record): (- llo_getField({A},37) -).
-To write the end stream position (X - a number) to (A - a routine record): (- llo_setField({A},37,{X}); -).
+To decide what number is the sequence point stream position of (A - a routine record): (- llo_getField({A},52) -).
+To write the sequence point stream position (X - a number) to (A - a routine record): (- llo_setField({A},52,{X}); -).
 
-To decide what number is the possibly invalid preamble line number of (A - a routine record): (- llo_getField({A},38) -).
-To write the preamble line number (X - a number) to (A - a routine record): (- llo_setField({A},38,{X}); -).
+To decide what number is the end stream position of (A - a routine record): (- llo_getField({A},53) -).
+To write the end stream position (X - a number) to (A - a routine record): (- llo_setField({A},53,{X}); -).
 
-To write the beginning line number (X - a number) to (A - a routine record): (- llo_setField({A},39,{X}); -).
+To decide what number is the possibly invalid preamble line number of (A - a routine record): (- llo_getField({A},54) -).
+To write the preamble line number (X - a number) to (A - a routine record): (- llo_setField({A},54,{X}); -).
 
-To write the end line number (X - a number) to (A - a routine record): (- llo_setField({A},40,{X}); -).
+To write the beginning line number (X - a number) to (A - a routine record): (- llo_setField({A},55,{X}); -).
 
-To decide what permanent linked list is the possibly invalid sequence point linked list of (A - a routine record): (- ({A}-->41) -).
-To write the sequence point linked list (X - a permanent linked list) to (A - a routine record): (- llo_setField({A},41,{X}); -).
+To write the end line number (X - a number) to (A - a routine record): (- llo_setField({A},56,{X}); -).
 
-To decide what permanent linked list tail is the possibly invalid sequence point linked list tail of (A - a routine record): (- ({A}-->42) -).
-To write the sequence point linked list tail (X - a permanent linked list tail) to (A - a routine record): (- llo_setField({A},42,{X}); -).
+To decide what permanent linked list is the possibly invalid sequence point linked list of (A - a routine record): (- ({A}-->57) -).
+To write the sequence point linked list (X - a permanent linked list) to (A - a routine record): (- llo_setField({A},57,{X}); -).
+
+To decide what permanent linked list tail is the possibly invalid sequence point linked list tail of (A - a routine record): (- ({A}-->58) -).
+To write the sequence point linked list tail (X - a permanent linked list tail) to (A - a routine record): (- llo_setField({A},58,{X}); -).
 
 Section "Direct Public Routine Record Accessors"
 
 To decide what number is the function address of (A - a routine record): (- llo_getInt({A}) -).
 
-To decide what number is the beginning line number of (A - a routine record): (- llo_getField({A},39) -).
+To decide what number is the beginning line number of (A - a routine record): (- llo_getField({A},55) -).
 
-To decide what number is the end line number of (A - a routine record): (- llo_getField({A},40) -).
+To decide what number is the end line number of (A - a routine record): (- llo_getField({A},56) -).
 
 Section "Lazy Public Routine Record Accessors"
 
@@ -237,6 +241,13 @@ To decide what text is I6 local name number (I - a number) of (A - a routine rec
 		decide on the result;
 	load I6 locals into A;
 	decide on the possibly invalid I6 local name number I of A.
+
+To decide what text is sample I7 local name number (I - a number) of (A - a routine record):
+	let the result be the possibly invalid sample I7 local name number I of A;
+	if the result is not zero converted to a text:
+		decide on the result;
+	load I7 locals into A;
+	decide on the possibly invalid sample I7 local name number I of A.
 
 To decide what text is I7 local kind name number (I - a number) of (A - a routine record):
 	let the result be the possibly invalid I7 local kind name number I of A;
@@ -1776,6 +1787,8 @@ To note the I7 local name (T - some text) for local number (I - a number) on lin
 	if the old name is not the name for invalid local number I:
 		stop; [This can happen in a legal source because some folks use ``let'' in place of ``now.'']
 	let the routine record be the sole routine record of the source line record;
+	let the canonicalized name be a new permanent canonicalization of the data identifier T;
+	write the canonicalized name to sample I7 local name number I of the routine record;
 	let the line number be N;
 	let outdented be false;
 	let the minimum indentation be the I7 indentation of the source line record;
@@ -1789,7 +1802,6 @@ To note the I7 local name (T - some text) for local number (I - a number) on lin
 		otherwise:
 			if the I7 indentation of the source line record is less than the minimum indentation:
 				stop;
-		let the canonicalized name be a new permanent canonicalization of the data identifier T;
 		write the canonicalized name to I7 local name number I of the source line record;
 		increment N;
 		now the source line record is the source line record for line number N.
@@ -1841,17 +1853,13 @@ To decide whether we successfully pair the pending I7 local names in (L - a link
 		now the infix index is the next infix index;
 	decide on whether or not the current linked list vertex is null.
 
-To load I7 locals into (A - a source line record):
-	let the routine record be the sole routine record of A;
-	if the routine record is an invalid routine record:
-		repeat with the index running over the half-open interval from zero to the assumed maximum local count:
-			write the name for invalid local number index to I7 local name number index of A;
-		stop;
+To load I7 locals into (A - a routine record):
 	repeat with the index running over the half-open interval from zero to the assumed maximum local count:
-		write "<no kind>" to I7 local kind name number index of the routine record;
-	let the preamble line number be the preamble line number of the routine record;
-	let the beginning line number be the beginning line number of the routine record;
-	let the end line number be the end line number of the routine record;
+		write "<no kind>" to I7 local kind name number index of A;
+		write the name for invalid local number index to sample I7 local name number index of A;
+	let the preamble line number be the preamble line number of A;
+	let the beginning line number be the beginning line number of A;
+	let the end line number be the end line number of A;
 	if the preamble line number is not zero:
 		let the preamble source line record be the source line record for line number preamble line number;
 		repeat with the index running over the half-open interval from zero to the assumed maximum local count:
@@ -1875,19 +1883,19 @@ To load I7 locals into (A - a source line record):
 			-- expecting a local prompt:
 				now the pending I7 local name is a new synthetic text extracted from the synthetic text I6 between the synthetic prefix call parameter comment prefix and the synthetic suffix local comment infix or the interned empty string if there is no match;
 				if the pending I7 local name is not empty:
-					let the local index be the index of the I6 local name from the routine record almost just before the synthetic suffix call parameter comment prefix in the synthetic text I6;
+					let the local index be the index of the I6 local name from A almost just before the synthetic suffix call parameter comment prefix in the synthetic text I6;
 					if the local index is at least zero:
 						note the I7 local name the pending I7 local name for local number local index on line number line number;
-						note the I7 kind name in the I6 for local number local index of the routine record;
+						note the I7 kind name in the I6 for local number local index of A;
 						delete the synthetic text the pending I7 local name;
 						now the pending I7 local name is "";
 				otherwise:
 					unless the index of the synthetic text the local variable comment prefix in the synthetic text the I6 is zero:
-						let the local index be the index of the I6 local name from the routine record almost just before the synthetic suffix local variable comment prefix in the synthetic text I6;
+						let the local index be the index of the I6 local name from A almost just before the synthetic suffix local variable comment prefix in the synthetic text I6;
 						if the local index is at least zero:
-							note the I7 kind name in the I6 for local number local index of the routine record;
+							note the I7 kind name in the I6 for local number local index of A;
 					otherwise if the I7 is empty:
-						if we successfully pair the pending I7 local names in the calling name linked list with the calling assignments in the I6 on line number line number to locals from the routine record:
+						if we successfully pair the pending I7 local names in the calling name linked list with the calling assignments in the I6 on line number line number to locals from A:
 							repeat with the moribund name running through the text keys of the calling name linked list:
 								delete the synthetic text the moribund name;
 							delete the calling name linked list;
@@ -1907,13 +1915,13 @@ To load I7 locals into (A - a source line record):
 			-- expecting a let translation:
 				let the solving comment index be the index of the synthetic text solving comment prefix in the synthetic text I6;
 				if the solving comment index is zero:
-					let the local index be the index of the I6 local name from the routine record almost just before the synthetic suffix let comment infix in the synthetic text I6;
+					let the local index be the index of the I6 local name from A almost just before the synthetic suffix let comment infix in the synthetic text I6;
 					if the local index is at least zero:
 						note the I7 local name the pending I7 local name for local number the local index on line number line number minus one;
 						delete the synthetic text the pending I7 local name;
 						now the pending I7 local name is "";
 					now the current state is expecting a local prompt;
-					if we successfully pair the pending I7 local names in the calling name linked list with the calling assignments in the I6 on line number line number to locals from the routine record:
+					if we successfully pair the pending I7 local names in the calling name linked list with the calling assignments in the I6 on line number line number to locals from A:
 						repeat with the moribund name running through the text keys of the calling name linked list:
 							delete the synthetic text the moribund name;
 						delete the calling name linked list;
@@ -1921,26 +1929,26 @@ To load I7 locals into (A - a source line record):
 				otherwise:
 					let the current state be expecting an equation-solving let translation;
 			-- expecting an equation-solving let translation:
-				let the local index be the index of the I6 local name from the routine record almost just before the synthetic suffix let comment infix in the synthetic text I6;
+				let the local index be the index of the I6 local name from A almost just before the synthetic suffix let comment infix in the synthetic text I6;
 				if the local index is at least zero:
 					note the I7 local name the pending I7 local name for local number the local index on line number line number minus two;
 					delete the synthetic text the pending I7 local name;
 					now the pending I7 local name is "";
-				if we successfully pair the pending I7 local names in the calling name linked list with the calling assignments in the I6 on line number line number to locals from the routine record:
+				if we successfully pair the pending I7 local names in the calling name linked list with the calling assignments in the I6 on line number line number to locals from A:
 					repeat with the moribund name running through the text keys of the calling name linked list:
 						delete the synthetic text the moribund name;
 					delete the calling name linked list;
 					now the calling name linked list is an empty linked list;
 				now the current state is expecting a local prompt;
 			-- expecting a repeat translation:
-				let the local index be the index of the I6 local name from the routine record almost just before the synthetic suffix list repeat comment infix in the synthetic text I6;
+				let the local index be the index of the I6 local name from A almost just before the synthetic suffix list repeat comment infix in the synthetic text I6;
 				if the local index is less than zero:
-					now the local index is the index of the I6 local name from the routine record almost just before the synthetic suffix non-list repeat comment infix in the synthetic text I6;
+					now the local index is the index of the I6 local name from A almost just before the synthetic suffix non-list repeat comment infix in the synthetic text I6;
 				if the local index is at least zero:
 					note the I7 local name the pending I7 local name for local number the local index on line number line number minus one, where the declaration is outdented;
 					delete the synthetic text the pending I7 local name;
 					now the pending I7 local name is "";
-				if we successfully pair the pending I7 local names in the calling name linked list with the calling assignments in the I6 on line number line number to locals from the routine record:
+				if we successfully pair the pending I7 local names in the calling name linked list with the calling assignments in the I6 on line number line number to locals from A:
 					repeat with the moribund name running through the text keys of the calling name linked list:
 						delete the synthetic text the moribund name;
 					delete the calling name linked list;
@@ -1949,6 +1957,14 @@ To load I7 locals into (A - a source line record):
 	repeat with the moribund name running through the text keys of the calling name linked list:
 		delete the synthetic text the moribund name;
 	delete the calling name linked list.
+
+To load I7 locals into (A - a source line record):
+	let the routine record be the sole routine record of A;
+	if the routine record is an invalid routine record:
+		repeat with the index running over the half-open interval from zero to the assumed maximum local count:
+			write the name for invalid local number index to I7 local name number index of A;
+	otherwise:
+		load I7 locals into the routine record.
 
 To load I7 kinds into (R - a routine record):
 	let the source line record be the source line record for line number the beginning line number of R;
