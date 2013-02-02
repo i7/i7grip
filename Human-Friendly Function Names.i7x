@@ -100,7 +100,7 @@ To give the rule at address (A - a number) the rule name (T - some text):
 
 Chapter "Phrase Hash Tables" - unindexed
 
-[Map a function address to a text extracted from the I6 Closure_* arrays.]
+[Map a function address to a text extracted from the I6 Closure_* arrays or else a phrase preamble.]
 The phrase name hash table is a permanent hash table that varies.
 [Map a canonical phrase name to a function address.]
 The phrase lookup hash table is a permanent hash table that varies.

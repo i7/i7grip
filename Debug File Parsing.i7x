@@ -2442,6 +2442,15 @@ All routine names initialized is a truth state that varies.  All routine names i
 
 Chapter "Backup Function Naming Phrase"
 
+Section "Identifying I6 Names for Phrases" - unindexed
+
+The phrase routine name prefix is a text that varies.
+
+A debug file setup rule (this is the allocate synthetic text for the substring used to identify routines that might be phrases rule):
+	now the phrase routine name prefix is a new permanent synthetic text copied from "PHR_".
+
+Section "Adding I6 Names and Preambles for Unnamed Phrases"
+
 To ensure that all routines have names:
 	if all routine names initialized is false:
 		now all routine names initialized is true;
@@ -2450,7 +2459,15 @@ To ensure that all routines have names:
 			let the routine record be the routine record value of the linked list vertex;
 			move the Infix debug stream to stream position nine plus the beginning stream position of the routine record expecting to read only 562 bytes;
 			let the I6 name be a new permanent synthetic text extracted from the Infix debug stream until a null terminator;
-			give the routine at address the function address the routine name the I6 name.
+			give the routine at address the function address the routine name the I6 name;
+			if the name for the phrase function at address the function address is empty and the synthetic text the I6 name begins with the synthetic text the phrase routine name prefix:
+				let the preamble line number be the preamble line number of the routine record;
+				if the preamble line number is not zero:
+					let the I6 be the I6 of the source line record for line number the preamble line number;
+					let the beginning address be the character array address of the synthetic text I6 plus two;
+					let the end address be the beginning address plus the length of the synthetic text I6 minus three; [two plus one to omit the colon]
+					let the I7 be the preamble I7 extracted from address beginning address to address end address;
+					give the phrase function at address the function address the phrase name the I7.
 
 Debug File Parsing ends here.
 
