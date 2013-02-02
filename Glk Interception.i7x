@@ -859,7 +859,7 @@ for the phrase's later use.  The phrase H is for layers that want to receive
 notifications about the story's activity.  In particular, layers that allocate
 windows or streams of their own need to recover them after an undo or restore,
 and layers introduced by debuggers want periodic chances to interrupt if the
-story enters an infinite loop.x  Layers without these interests should use the
+story enters an infinite loop.  Layers without these interests should use the
 default value of phrase Glk layer notification -> nothing.
 
 Section: Communication between layers
