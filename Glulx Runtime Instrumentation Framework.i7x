@@ -129,6 +129,12 @@ To fail at starting GRIF twice:
 To fail at guessing the routine kernel of (A - a number) mid-instrumentation:
 	say "[low-level runtime failure in]the [GRIF][with explanation]I was asked to ensure knowledge of any routine kernel of [the human-friendly name for the function at address A], but to do so I need access to the scratch space.  It's currently occupied.[terminating the story]".
 
+To fail at initializing the disassembly label hash table twice with no intervening teardown:
+	say "[low-level runtime failure in]the [GRIF][with explanation]I was asked to initialize the disassembly label hash table, but it was already initialized, and would need to be torn down before it could be initialized again.[terminating the story]".
+
+To fail at tearing down the uninitialized disassembly label hash table:
+	say "[low-level runtime failure in]the [GRIF][with explanation]I was asked to tear down the disassembly label hash table, but it wasn't initialized, and so could not be torn down.[terminating the story]".
+
 Book "Additional Low-Level Operations" - unindexed
 
 Chapter "Sign Extension" - unindexed
@@ -859,7 +865,68 @@ To repeat with (I - a nonexisting instruction vertex variable) running through o
 
 Chapter "Debugging"
 
-Section "Partial Say Phrases for Instructions" - unindexed
+Section "Data Structures for Say Phrases" - unindexed
+
+The disassembly label hash table is a hash table that varies.
+
+Section "Data Structure Management for Say Phrases"
+
+To initialize the disassembly label hash table:
+	unless the disassembly label hash table is an invalid hash table:
+		fail at initializing the disassembly label hash table twice with no intervening teardown;
+	let the label count be zero;
+	now the disassembly label hash table is a new hash table with the GRIF disassembly label hash table size buckets;
+	repeat with the instruction vertex running through the scratch space:
+		if the jump predecessor linked list of the instruction vertex is not empty:
+			increment the label count;
+			insert the key the instruction vertex and the value the label count into the disassembly label hash table.
+
+To tear down the disassembly label hash table:
+	if the disassembly label hash table is an invalid hash table:
+		fail at tearing down the uninitialized disassembly label hash table;
+	delete the disassembly label hash table;
+	now the disassembly label hash table is an invalid hash table.
+
+Section "Helper Functions for Partial Say Phrases" - unindexed
+
+To print the I6-like assembly of (A - an instruction vertex), using labels if possible:
+	say "[the I6 assembly name of A]";
+	let the parameter limit be the parameter limit of A;
+	repeat with the parameter index running from zero to the parameter limit:
+		if the addressing mode of parameter parameter index of A is:
+			-- the zero-or-discard addressing mode:
+				say " <zero>";
+			-- the constant addressing mode:
+				if using labels if possible and the disassembly label hash table is not an invalid hash table and the parameter index is the jump parameter index of A:
+					let the linked list vertex be the first match for the key the jump link of A in the disassembly label hash table;
+					if the linked list vertex is not null:
+						say " ?L[the number value of the linked list vertex]";
+						next;
+				say " [parameter parameter index of A in hexadecimal]";
+			-- the zero-based-dereference addressing mode:
+				say " *[parameter parameter index of A in hexadecimal]";
+			-- the stack addressing mode:
+				say " <stack>";
+			-- the call-frame-local addressing mode:
+				say " locals[bracket][parameter parameter index of A in hexadecimal][close bracket]";
+			-- the ram-based-dereference addressing mode:
+				say " *(RAM+[parameter parameter index of A in hexadecimal])";
+			-- the start-of-vertex addressing mode:
+				let the reference instruction vertex be parameter parameter index of A converted to an instruction vertex;
+				let the reference offset be the destination offset of the reference instruction vertex;
+				say " chunk+[the reference offset in hexadecimal](instruction [the source address of the reference instruction vertex in hexadecimal])";
+			-- the near-end-of-vertex addressing mode:
+				let the reference instruction vertex be parameter parameter index of A converted to an instruction vertex;
+				let the reference offset be the destination end offset of the reference instruction vertex;
+				say " chunk+[the reference offset minus two in hexadecimal](jump base after [the source address of the reference instruction vertex in hexadecimal])".
+
+Section "Partial Say Phrases for Instructions"
+
+To say the label of (A - an instruction vertex):
+	if the disassembly label hash table is not the invalid hash table:
+		let the linked list vertex be the first match for the key A in the disassembly label hash table;
+		if the linked list vertex is not null:
+			say ".L[the number value of the linked list vertex]:[line break]".
 
 To say the source range of (A - an instruction vertex):
 	let the source address be the source address of A;
@@ -886,71 +953,24 @@ To say the fallthrough and jump of (A - an instruction vertex):
 	otherwise:
 		say " [the source address of the jump link in hexadecimal])".
 
-To print the I6-like assembly of (A - an instruction vertex), using labels:
-	say "[the I6 assembly name of A]";
-	let the parameter limit be the parameter limit of A;
-	repeat with the parameter index running from zero to the parameter limit:
-		if the addressing mode of parameter parameter index of A is:
-			-- the zero-or-discard addressing mode:
-				say " <zero>";
-			-- the constant addressing mode:
-				if using labels and the parameter index is the jump parameter index of A:
-					let the linked list vertex be the first match for the key the jump link of A in the disassembly label hash table;
-					if the linked list vertex is not null:
-						say " ?L[the number value of the linked list vertex]";
-						next;
-				say " [parameter parameter index of A in hexadecimal]";
-			-- the zero-based-dereference addressing mode:
-				say " *[parameter parameter index of A in hexadecimal]";
-			-- the stack addressing mode:
-				say " <stack>";
-			-- the call-frame-local addressing mode:
-				say " locals[bracket][parameter parameter index of A in hexadecimal][close bracket]";
-			-- the ram-based-dereference addressing mode:
-				say " *(RAM+[parameter parameter index of A in hexadecimal])";
-			-- the start-of-vertex addressing mode:
-				let the reference instruction vertex be parameter parameter index of A converted to an instruction vertex;
-				let the reference offset be the destination offset of the reference instruction vertex;
-				say " chunk+[the reference offset in hexadecimal](instruction [the source address of the reference instruction vertex in hexadecimal])";
-			-- the near-end-of-vertex addressing mode:
-				let the reference instruction vertex be parameter parameter index of A converted to an instruction vertex;
-				let the reference offset be the destination end offset of the reference instruction vertex;
-				say " chunk+[the reference offset minus two in hexadecimal](jump base after [the source address of the reference instruction vertex in hexadecimal])".
-
 To say the I6-like assembly of (A - an instruction vertex):
 	print the I6-like assembly of A.
 
-To say the I6-like assembly of (A - an instruction vertex) using labels:
-	print the I6-like assembly of A, using labels.
-
-Section "Data Structures for the Human-Friendly Form of the Scratch Space" - unindexed
-
-The disassembly label hash table is a hash table that varies.
+To say the I6-like assembly of (A - an instruction vertex) using labels if possible:
+	print the I6-like assembly of A, using labels if possible.
 
 Section "The Human-Friendly Form of the Scratch Space"
 
 To say the human-friendly form of (A - an instruction vertex):
-	if the disassembly label hash table is not the invalid hash table:
-		let the linked list vertex be the first match for the key A in the disassembly label hash table;
-		if the linked list vertex is not null:
-			say ".L[the number value of the linked list vertex]:[line break]";
-		say "    [the source address of A in hexadecimal] [the I6-like assembly of A using labels][line break]";
-	otherwise:
-		say "    [the source address of A in hexadecimal] [the I6-like assembly of A][line break]".
+	say "[the label of A]    [the source address of A in hexadecimal] [the I6-like assembly of A using labels if possible][line break]".
 
 To say the human-friendly form of the scratch space:
-	let the label count be zero;
-	now the disassembly label hash table is a new hash table with the GRIF disassembly label hash table size buckets;
-	repeat with the instruction vertex running through the scratch space:
-		if the jump predecessor linked list of the instruction vertex is not empty:
-			increment the label count;
-			insert the key the instruction vertex and the value the label count into the disassembly label hash table;
+	initialize the disassembly label hash table;
 	say "[bracket]BEGINNING OF INSTRUCTIONS IN SCRATCH SPACE[close bracket][line break]";
 	repeat with the instruction vertex running through the scratch space:
 		say "[the human-friendly form of the instruction vertex]";
 	say "[bracket]END OF INSTRUCTIONS IN SCRATCH SPACE[close bracket][paragraph break]";
-	delete the disassembly label hash table;
-	now the disassembly label hash table is the invalid hash table.
+	tear down the disassembly label hash table.
 
 Section "The Detailed Human-Friendly Form of the Scratch Space"
 
@@ -2449,6 +2469,34 @@ can use the phrase
 or its relative
 
 	say the detailed human-friendly form of (V - an instruction vertex)
+
+The former will only print labels if they are available.  We can make them
+available with the phrase
+
+	initialize the disassembly label hash table
+
+and we should remember to use the phrase
+
+	tear down the disassembly label hash table
+
+when we no longer need them.
+
+We can also print parts of those phrases' output with
+
+	say the label of (A - an instruction vertex)
+
+	say the source range of (A - an instruction vertex)
+
+	say the destination range of (A - an instruction vertex)
+
+	say the I6-like assembly of (A - an instruction vertex)
+
+and
+
+	say the I6-like assembly of (A - an instruction vertex) using labels if possible
+
+Saying the label will print nothing if the labels have not been made available;
+similarly, the last say phrase will not use labels if it cannot find them.
 
 Section: Inspecting instruction vertices
 

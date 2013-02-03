@@ -2315,22 +2315,13 @@ To list Glulx assembly for (R - a routine record) and the sequence point (S - a 
 		stop;
 	let the function address be the function address of R;
 	parse the function at address the function address;
-	let the label count be zero;
-	now the disassembly label hash table is a new hash table with the GRIF disassembly label hash table size buckets;
-	repeat with the instruction vertex running through the scratch space:
-		if the jump predecessor linked list of the instruction vertex is not empty:
-			increment the label count;
-			insert the key the instruction vertex and the value the label count into the disassembly label hash table;
+	initialize the disassembly label hash table;
 	repeat with the instruction vertex running through the scratch space:
 		if the listing limit is at most zero:
 			break;
-		let the linked list vertex be the first match for the key the instruction vertex in the disassembly label hash table;
-		if the linked list vertex is not null:
-			say "  .L[the number value of the linked list vertex]:[line break]";
-		say "[if the source address of the instruction vertex is S]>[otherwise] [end if] [if the source address of the instruction vertex is a sequence point]<*>[otherwise]   [end if] [the source address of the instruction vertex in hexadecimal] [the I6-like assembly of the instruction vertex using labels][line break]";
+		say "[the label of the instruction vertex][if the source address of the instruction vertex is S]>[otherwise] [end if] [if the source address of the instruction vertex is a sequence point]<*>[otherwise]   [end if] [the source address of the instruction vertex in hexadecimal] [the I6-like assembly of the instruction vertex using labels if possible][line break]";
 		decrement the listing limit;
-	delete the disassembly label hash table;
-	now the disassembly label hash table is the invalid hash table.
+	tear down the disassembly label hash table.
 
 To say the Glulx for the sequence point (S - a number):
 	if S is not a sequence point:
@@ -2342,26 +2333,18 @@ To say the Glulx for the sequence point (S - a number):
 		stop;
 	let the function address be the function address of the routine record;
 	parse the function at address the function address;
-	let the label count be zero;
-	now the disassembly label hash table is a new hash table with the GRIF disassembly label hash table size buckets;
-	repeat with the instruction vertex running through the scratch space:
-		if the jump predecessor linked list of the instruction vertex is not empty:
-			increment the label count;
-			insert the key the instruction vertex and the value the label count into the disassembly label hash table;
+	initialize the disassembly label hash table;
 	let the instruction vertex be the instruction vertex corresponding to source address S;
 	if the instruction vertex is an invalid instruction vertex:
 		fail at iterating from a given sequence point;
+		tear down the disassembly label hash table;
 		stop;
 	while the instruction vertex is not null:
 		if the source address of the instruction vertex is not S and the source address of the instruction vertex is a sequence point:
 			break;
-		let the linked list vertex be the first match for the key the instruction vertex in the disassembly label hash table;
-		if the linked list vertex is not null:
-			say "  .L[the number value of the linked list vertex]:[line break]";
-		say "[if the source address of the instruction vertex is S]> <*>[otherwise]     [end if] [the source address of the instruction vertex in hexadecimal] [the I6-like assembly of the instruction vertex using labels][line break]";
+		say "[the label of the instruction vertex][if the source address of the instruction vertex is S]> <*>[otherwise]     [end if] [the source address of the instruction vertex in hexadecimal] [the I6-like assembly of the instruction vertex using labels if possible][line break]";
 		now the instruction vertex is the next link of the instruction vertex;
-	delete the disassembly label hash table;
-	now the disassembly label hash table is the invalid hash table.
+	tear down the disassembly label hash table.
 
 To list I6 for (R - a routine record) and the sequence point (S - a number) with the listing limit (L - a number):
 	now the listing limit is L;
@@ -2610,19 +2593,10 @@ To handle the debug command rooted at (V - a parse tree vertex that has the pars
 	let the uninstrumented function address be the uninstrumented function address of the debugger's current call frame;
 	let the function address be the address of the instrumented version of the function at address the uninstrumented function address;
 	parse the function at address the function address;
-	let the label count be zero;
-	now the disassembly label hash table is a new hash table with the GRIF disassembly label hash table size buckets;
+	initialize the disassembly label hash table;
 	repeat with the instruction vertex running through the scratch space:
-		if the jump predecessor linked list of the instruction vertex is not empty:
-			increment the label count;
-			insert the key the instruction vertex and the value the label count into the disassembly label hash table;
-	repeat with the instruction vertex running through the scratch space:
-		let the linked list vertex be the first match for the key the instruction vertex in the disassembly label hash table;
-		if the linked list vertex is not null:
-			say ".L[the number value of the linked list vertex]:[line break]";
-		say "    [the source address of the instruction vertex in hexadecimal] [the I6-like assembly of the instruction vertex using labels][line break]";
-	delete the disassembly label hash table;
-	now the disassembly label hash table is the invalid hash table;
+		say "[the label of the instruction vertex]    [the source address of the instruction vertex in hexadecimal] [the I6-like assembly of the instruction vertex using labels if possible][line break]";
+	tear down the disassembly label hash table;
 	say "[variable letter spacing][line break]".
 
 To say the location synopsis for the sequence point (S - a number) in the call frame (F - a call frame):
