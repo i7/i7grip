@@ -48,11 +48,13 @@ Use a debugger disambiguation hash table size of at least 11 translates as (- Co
 To decide what number is the user breakpoint hash table size: (- ID_USER_BREAKPOINT_HASH_SIZE -).
 To decide what number is the debugger disambiguation hash table size: (- ID_DISAMBIGUATION_HASH_SIZE -).
 
-Use a threshold for lengthy listings of at least 128 translates as (- Constant ID_LENGTHY_LISTING={N}; -).
 Use a disambiguation listing length of at least 4 translates as (- Constant ID_DISAMBIGUATION_LISTING_LENGTH={N}; -).
+Use a listing window of at least 10 translates as (- Constant ID_LISTING_WINDOW={N}; -).
+Use a threshold for lengthy listings of at least 32 translates as (- Constant ID_LENGTHY_LISTING={N}; -).
 
-To decide what number is the threshold for lengthy listings: (- ID_LENGTHY_LISTING -).
 To decide what number is the disambiguation listing length: (- ID_DISAMBIGUATION_LISTING_LENGTH -).
+To decide what number is the listing window radius: (- (ID_LISTING_WINDOW/2) -).
+To decide what number is the threshold for lengthy listings: (- ID_LENGTHY_LISTING -).
 
 Chapter "Forced Use Options"
 
@@ -92,6 +94,9 @@ To fail at matching a divider when finish is ignoring an interruption:
 To fail at finding a routine record for a kernel:
 	say "[low-level runtime failure in]Interactive Debugger[with explanation]I was able to find a routine kernel, but no routine record for that kernel, which is awfully strange.  Probably my bookkeeping has been corrupted.[terminating the story]".
 
+To fail at finding a preamble for a routine shell:
+	say "[runtime failure in]Interactive Debugger[with explanation]I was able to find a routine shell, but no I7 preamble for that shell.  Probably my bookkeeping has been corrupted.[continuing anyway]".
+
 To fail at forcing a breakpoint from the debugger in an unknown coexecution state:
 	say "[runtime failure in]Interactive Debugger[with explanation]I failed to consistently determine the execution state of the story, and am unable to report any caveats that might apply to this forced breakpoint, or even whether it will apply at all.[continuing anyway]".
 
@@ -103,6 +108,9 @@ To fail at recovering the debugger windows:
 
 To fail at iterating from a given sequence point:
 	say "[runtime failure in]Interactive Debugger[with explanation]I failed to find the assembly instruction at what I believed to be a sequence point; either the code has changed while the story was running or I have become confused.[continuing anyway]".
+
+To fail at understanding a debugging language:
+	say "[runtime failure in]Interactive Debugger[with explanation]I failed to understand the given debugging language.  Probably my grammar has been updated to include it, but the code for translating it to a debug mode has not.[continuing anyway]".
 
 Book "Simulated Parallelism"
 
@@ -354,7 +362,16 @@ Chapter "Debug Modes"
 A debug mode is a kind of value.  The debug modes are debugging at the I7 level, debugging at the I6 level, and debugging at the Glulx assembly level.
 The specification of a debug mode is "Debug modes represent a preferred language for debugging: I7, I6, or Glulx assembly."
 
+Section "Preferred Debug Modes" - unindexed
+
 The currently preferred debug mode is a debug mode that varies.  The currently preferred debug mode is debugging at the I7 level.
+
+To decide what debug mode is the preferred debug mode for (R - a routine record):
+	if R is an invalid routine record or the function at address the function address of R is a default veneer routine:
+		decide on debugging at the Glulx assembly level;
+	if the source version of R is less than seven:
+		decide on debugging at the I6 level;
+	decide on debugging at the I7 level.
 
 Chapter "Preferences"
 
@@ -383,13 +400,18 @@ A GRIF setup rule (this is the default debugger preferences rule):
 	now the call stack simplification flag is true;
 	now the call frame numbering flag is true;
 	now the showme warnings flag is true;
-	now the lengthly listing warnings flag is false;
+	now the lengthly listing warnings flag is true;
 	now the GRIF allows saves flag is false.
 
 Chapter "Current Call Frame" - unindexed
 
 The debugger's current call frame number is a number that varies.
 The debugger's current call frame is a call frame that varies.
+
+Section "Sequence Point to Highlight" - unindexed
+
+To decide what number is the sequence point to highlight:
+	decide on the last-seen sequence point of the debugger's current call frame or the last-seen sequence point before the last-seen breakpoint if it is innermost.
 
 Chapter "Control Flow Manipulation" - unindexed
 
@@ -1637,10 +1659,32 @@ To decide what number is the address of the function whose name is named by (V -
 	let the option counter be zero;
 	repeat with the function address running through the number keys of the function list:
 		increment the option counter;
-		say "[the option counter]. '[the function name]' as '[the human-friendly name for the function at address the function address], which begins like this:[line break]";
+		say "[the option counter]. '[the function name]' as '[the human-friendly name for the function at address the function address], which begins like this:[line break][fixed letter spacing]";
 		let the routine record be the routine record for the function address;
 		let the debug mode be the preferred debug mode for the routine record;
-		list the routine record with the debug mode the debug mode and the sequence point the sequence point and the listing limit the disambiguation listing length;
+		if the debug mode is:
+			-- debugging at the Glulx assembly level:
+				parse the function at address the function address;
+				let the end instruction vertex be the disambiguation listing length plus one instruction vertices after the scratch space beginning vertex or else the end of the function;
+				say "[the Glulx assembly from the scratch space beginning vertex to the end instruction vertex with the sequence point zero selected]";
+			-- debugging at the I6 level:
+				let the beginning line number be the beginning line number of the routine record;
+				let the end line number be the disambiguation listing length plus one lines after I6 line number the beginning line number or else the end of the function;
+				say "[the I6 from line number the beginning line number to the end line number with line number zero selected]";
+				unless the end line number is the end line number of the routine record:
+					say "  ...[line break]";
+			-- debugging at the I7 level:
+				guess the routine kernel for the function address;
+				let the routine kernel address be the routine kernel address of the function at address the function address;
+				unless the routine kernel address is zero:
+					now the routine record is the routine record for the routine kernel address;
+					always check that the routine record is not an invalid routine record or else fail at finding a routine record for a kernel;
+				let the beginning line number be the beginning line number of the routine record;
+				let the end line number be the disambiguation listing length plus one lines after I7 line number the beginning line number or else the end of the function;
+				say "[the I7 from line number the beginning line number to the end line number with line number zero selected]";
+				if there is an I7 line in the half-open interval from line number the end line number to the end line number of the routine record:
+					say "  ...[line break]";
+		say "[variable letter spacing]";
 	delete the synthetic text the function name;
 	let the choice be the disambiguation choice among the option counter options;
 	repeat with the function address running through the number keys of the function list:
@@ -2131,6 +2175,9 @@ To handle the debug command rooted at (V - a parse tree vertex that has the pars
 Chapter "Backtrace Commands" - unindexed
 
 To handle the debug command rooted at (V - a parse tree vertex that has the parseme the debugger's summary command):
+	if the debugger story-running flag is false:
+		say "The story is not running.  Use the command 'run' to run it.[paragraph break]";
+		stop;
 	now the currently preferred debug mode is debugging at the I7 level;
 	let the language vertex be the first match for a debugging language among the children of V;
 	unless the language vertex is an invalid parse tree vertex:
@@ -2258,6 +2305,146 @@ To handle the debug command rooted at (V - a parse tree vertex that has the pars
 
 Chapter "Listing Commands" - unindexed
 
+Section "Counting Lines" - unindexed
+
+To decide what number is the Glulx assembly count in the half-open interval from (B - an instruction vertex) to (E - an instruction vertex):
+	let the result be zero;
+	let the instruction vertex be B;
+	while the instruction vertex is not null and the instruction vertex is not E:
+		increment the result;
+		now the instruction vertex is the next link of the instruction vertex;
+	decide on the result.
+
+To decide what number is the I6 line count in the half-open interval from line number (B - a number) to (E - a number):
+	if E is less than B:
+		decide on zero;
+	decide on the E minus B.
+
+To decide what number is the I7 line count in the half-open interval from line number (B - a number) to (E - a number):
+	let the result be zero;
+	repeat with the line number running over the half-open interval from B to E:
+		let the source line record be the source line record for line number the line number;
+		if the source line record is an invalid source line record:
+			decide on the result;
+		if the I7 of the source line record is not empty:
+			increment the result;
+	decide on the result.
+
+To decide whether there is an I7 line in the half-open interval from line number (B - a number) to (E - a number):
+	repeat with the line number running over the half-open interval from B to E:
+		let the source line record be the source line record for line number the line number;
+		if the source line record is an invalid source line record:
+			decide no;
+		if the I7 of the source line record is not empty:
+			decide yes;
+	decide no.
+
+Section "Moving by Sequence Point Boundaries" - unindexed
+
+To decide what instruction vertex is the next sequence point instruction vertex after (V - an instruction vertex) or else a null instruction vertex:
+	let the result be the next link of V;
+	while the result is not null:
+		if the source address of the result is a sequence point:
+			decide on the result;
+		now the result is the next link of the result;
+	decide on the result.
+
+Section "Moving by Line Counts" - unindexed
+
+To decide what instruction vertex is (N - a number) instruction vertices before (V - an instruction vertex) or else the beginning of the function:
+	let the result be V;
+	repeat with a counter running from one to N:
+		let the previous link be the previous link of the result;
+		if the previous link is null:
+			decide on the result;
+		now the result is the previous link;
+	decide on the result.
+
+To decide what instruction vertex is (N - a number) instruction vertices after (V - an instruction vertex) or else the end of the function:
+	let the result be V;
+	repeat with a counter running from one to N:
+		let the next link be the next link of the result;
+		if the next link is null:
+			decide on the result;
+		now the result is the next link;
+	decide on the result.
+
+To decide what number is (N - a number) lines before I6 line number (L - a number) or else the beginning of the function:
+	if N is at most zero:
+		decide on L;
+	let the source line record be the source line record for line number L;
+	if the source line record is an invalid source line record:
+		decide on L;
+	let the routine record be the sole routine record of the source line record;
+	if the routine record is an invalid routine record:
+		decide on L minus N;
+	let the beginning line number be the beginning line number of the routine record;
+	if L minus N is greater than the beginning line number:
+		decide on L minus N;
+	decide on the beginning line number.
+
+To decide what number is (N - a number) lines after I6 line number (L - a number) or else the end of the function:
+	if N is at most zero:
+		decide on L;
+	let the source line record be the source line record for line number L;
+	if the source line record is an invalid source line record:
+		decide on L;
+	let the routine record be the sole routine record of the source line record;
+	if the routine record is an invalid routine record:
+		decide on L plus N;
+	let the end line number be the end line number of the routine record;
+	if L plus N is less than the end line number:
+		decide on L plus N;
+	decide on the end line number.
+
+To decide what number is (N - a number) lines before I7 line number (L - a number) or else the beginning of the function:
+	if N is at most zero:
+		decide on L;
+	let the source line record be the source line record for line number L;
+	if the source line record is an invalid source line record:
+		decide on L;
+	let the routine record be the sole routine record of the source line record;
+	if the routine record is an invalid routine record:
+		decide on L;
+	let the beginning line number be the beginning line number of the routine record;
+	let the line number be L;
+	let the remaining decrements be N;
+	while the line number minus the remaining decrements is at least the beginning line number:
+		decrement the line number;
+		now the source line record is the source line record for line number the line number;
+		if the I7 of the source line record is not empty:
+			decrement the remaining decrements;
+			if the remaining decrements are zero:
+				decide on the line number;
+	repeat with the earliest line number running from the beginning line number to L:
+		now the source line record is the source line record for line number the earliest line number;
+		if the I7 of the source line record is not empty:
+			decide on the earliest line number;
+	decide on L.
+
+To decide what number is (N - a number) lines after I7 line number (L - a number) or else the end of the function:
+	if N is at most zero:
+		decide on L;
+	let the source line record be the source line record for line number L;
+	if the source line record is an invalid source line record:
+		decide on L;
+	let the routine record be the sole routine record of the source line record;
+	if the routine record is an invalid routine record:
+		decide on L;
+	let the end line number be the end line number of the routine record;
+	let the line number be L;
+	let the remaining increments be N;
+	while the line number plus the remaining increments is at most the end line number:
+		increment the line number;
+		now the source line record is the source line record for line number the line number;
+		if the I7 of the source line record is not empty:
+			decrement the remaining increments;
+			if the remaining increments are zero:
+				decide on the line number;
+	decide on the end line number.
+
+Section "Lowest Level Listing Say Phrases" - unindexed
+
 To say the nonnegative number (N - a number) as at least six digits:
 	say "[if N is less than 100000]0[end if][if N is less than 10000]0[end if][if N is less than 1000]0[end if][if N is less than 100]0[end if][if N is less than 10]0[end if][N converted to a number]".
 
@@ -2274,14 +2461,20 @@ To say (T - some text) with tabs rendered as spaces:
 			say "[the character code converted to a Unicode character]";
 	delete the synthetic text the synthetic text.
 
-The listing limit is a number that varies.
+Section "Unnumbered Listing" - unindexed
+
+[These phrases do not change letter spacing.]
+[These phrases do not print trailing blank lines.]
+[These phrases do not print error messages in place of empty listings.]
+
+To say the unnumbered Glulx assembly for (V - an instruction vertex):
+	say "[the label of V]> [if the source address of V is a sequence point]<*>[otherwise]   [end if] [the I6-like assembly of V using labels if possible][line break]".
 
 To say the unnumbered I6 for line number (N - a number):
 	let the source line record be the source line record for line number N;
 	if the source line record is not an invalid source line record:
 		let the I6 be the I6 of the source line record;
-		say "> [the I6 with tabs rendered as spaces][line break]";
-		decrement the listing limit.
+		say "> [the I6 with tabs rendered as spaces][line break]".
 
 To say the unnumbered I7 for line number (N - a number):
 	let the source line record be the source line record for line number N;
@@ -2289,15 +2482,22 @@ To say the unnumbered I7 for line number (N - a number):
 		let the indentation be the I7 indentation of the source line record;
 		let the I7 be the I7 of the source line record;
 		unless the I7 is empty:
-			say "> [the indentation tabs][the I7 with tabs rendered as spaces][line break]";
-			decrement the listing limit.
+			say "> [the indentation tabs][the I7 with tabs rendered as spaces][line break]".
+
+Section "Numbered Single-Line Listing" - unindexed
+
+[These phrases do not change letter spacing.]
+[These phrases do not print trailing blank lines.]
+[These phrases do not print error messages in place of empty listings.]
+
+To say the Glulx assembly for (V - an instruction vertex) with the sequence point (S - a number) selected:
+	say "[the label of V][if the source address of V is S]>[otherwise] [end if] [if the source address of V is a sequence point]<*>[otherwise]   [end if] [the source address of V in hexadecimal] [the I6-like assembly of V using labels if possible][line break]".
 
 To say the I6 for line number (N - a number) with line number (S - a number) selected:
 	let the source line record be the source line record for line number N;
 	if the source line record is not an invalid source line record:
 		let the I6 be the I6 of the source line record;
-		say "[if N is S]>[otherwise] [end if] [the nonnegative number N as at least six digits] [the I6 with tabs rendered as spaces][line break]";
-		decrement the listing limit.
+		say "[if N is S]>[otherwise] [end if] [the nonnegative number N as at least six digits] [the I6 with tabs rendered as spaces][line break]".
 
 To say the I7 for line number (N - a number) with line number (S - a number) selected:
 	let the source line record be the source line record for line number N;
@@ -2305,23 +2505,85 @@ To say the I7 for line number (N - a number) with line number (S - a number) sel
 		let the indentation be the I7 indentation of the source line record;
 		let the I7 be the I7 of the source line record;
 		unless the I7 is empty:
-			say "[if N is S]>[otherwise] [end if] [the nonnegative number N as at least six digits] [the indentation tabs][the I7 with tabs rendered as spaces][line break]";
-			decrement the listing limit.
+			say "[if N is S]>[otherwise] [end if] [the nonnegative number N as at least six digits] [the indentation tabs][the I7 with tabs rendered as spaces][line break]".
 
-To list Glulx assembly for (R - a routine record) and the sequence point (S - a number) with the listing limit (L - a number):
-	now the listing limit is L;
-	if R is an invalid routine record:
-		say "No disassembly is available because the function has no debug information.[line break]";
-		stop;
-	let the function address be the function address of R;
-	parse the function at address the function address;
+Section "Numbered Single-Line Listing with Errors" - unindexed
+
+[These phrases do change letter spacing.]
+[These phrases do print trailing blank lines.]
+[These phrases do print error messages in place of empty listings.]
+
+To say only the I6 for line number (N - a number) with line number (S - a number) selected:
+	let the source line record be the source line record for line number N;
+	if the source line record is not an invalid source line record:
+		let the I6 be the I6 of the source line record;
+		say "[fixed letter spacing][if N is S]>[otherwise] [end if] [the nonnegative number N as at least six digits] [the I6 with tabs rendered as spaces][variable letter spacing][paragraph break]";
+	otherwise:
+		say "There is no line [N].[paragraph break]".
+
+To say only the I7 for line number (N - a number) with line number (S - a number) selected:
+	let the source line record be the source line record for line number N;
+	if the source line record is not an invalid source line record:
+		let the indentation be the I7 indentation of the source line record;
+		let the I7 be the I7 of the source line record;
+		if the I7 is empty:
+			say "There is no matching I7 line.[paragraph break]";
+		otherwise:
+			say "[fixed letter spacing][if N is S]>[otherwise] [end if] [the nonnegative number N as at least six digits] [the indentation tabs][the I7 with tabs rendered as spaces][variable letter spacing][paragraph break]";
+	otherwise:
+		say "There is no line [N].[paragraph break]".
+
+Section "Numbered Multiple-Line Listing" - unindexed
+
+[These phrases do not change letter spacing.]
+[These phrases do not print trailing blank lines.]
+[These phrases do not print error messages in place of empty listings.]
+
+To say the Glulx assembly from (B - an instruction vertex) to (E - an instruction vertex) with the sequence point (S - a number) selected:
 	initialize the disassembly label hash table;
-	repeat with the instruction vertex running through the scratch space:
-		if the listing limit is at most zero:
-			break;
-		say "[the label of the instruction vertex][if the source address of the instruction vertex is S]>[otherwise] [end if] [if the source address of the instruction vertex is a sequence point]<*>[otherwise]   [end if] [the source address of the instruction vertex in hexadecimal] [the I6-like assembly of the instruction vertex using labels if possible][line break]";
-		decrement the listing limit;
+	let the instruction vertex be B;
+	while the instruction vertex is not null and the instruction vertex is not E:
+		say "[the Glulx assembly for the instruction vertex with the sequence point S selected]";
+		now the instruction vertex is the next link of the instruction vertex;
 	tear down the disassembly label hash table.
+
+To say the I6 from line number (B - a number) to (E - a number) with line number (S - a number) selected:
+	repeat with the line number running over the half-open interval from B to E:
+		say "[the I6 for line number the line number with line number S selected]".
+
+To say the I7 from line number (B - a number) to (E - a number) with line number (S - a number) selected:
+	repeat with the line number running over the half-open interval from B to E:
+		say "[the I7 for line number the line number with line number S selected]".
+
+Section "Numbered Multiple-Line Listing with Errors" - unindexed
+
+[These phrases do change letter spacing.]
+[These phrases do print trailing blank lines.]
+[These phrases do print error messages in place of empty listings.]
+
+To say only the I6 from line number (B - a number) to (E - a number) with the sequence point (S - a number) selected:
+	let the line count be the I6 line count in the half-open interval from line number B to E;
+	if the line count is zero:
+		say "There are no matching I6 lines.[paragraph break]";
+		stop;
+	if the author consents to a listing as lengthy as the line count:
+		let the current line number be the I6 line number for the sequence point S;
+		say "[fixed letter spacing][the I6 from line number B to E with line number the current line number selected][variable letter spacing][line break]".
+
+To say only the I7 from line number (B - a number) to (E - a number) with the sequence point (S - a number) selected:
+	let the line count be the I7 line count in the half-open interval from line number B to E;
+	if the line count is zero:
+		say "There are no matching I7 lines.[paragraph break]";
+		stop;
+	if the author consents to a listing as lengthy as the line count:
+		let the current line number be the I7 line number for the sequence point S;
+		say "[fixed letter spacing][the I7 from line number B to E with line number the current line number selected][variable letter spacing][line break]".
+
+Section "Lising a Sequence Point" - unindexed
+
+[This phrase does not change letter spacing.]
+[This phrase does not print trailing blank lines.]
+[This phrase does print an error message in place of an empty listing.]
 
 To say the Glulx for the sequence point (S - a number):
 	if S is not a sequence point:
@@ -2333,151 +2595,204 @@ To say the Glulx for the sequence point (S - a number):
 		stop;
 	let the function address be the function address of the routine record;
 	parse the function at address the function address;
-	initialize the disassembly label hash table;
 	let the instruction vertex be the instruction vertex corresponding to source address S;
 	if the instruction vertex is an invalid instruction vertex:
 		fail at iterating from a given sequence point;
-		tear down the disassembly label hash table;
 		stop;
-	while the instruction vertex is not null:
-		if the source address of the instruction vertex is not S and the source address of the instruction vertex is a sequence point:
-			break;
-		say "[the label of the instruction vertex][if the source address of the instruction vertex is S]> <*>[otherwise]     [end if] [the source address of the instruction vertex in hexadecimal] [the I6-like assembly of the instruction vertex using labels if possible][line break]";
-		now the instruction vertex is the next link of the instruction vertex;
-	tear down the disassembly label hash table.
+	let the terminator be the next sequence point instruction vertex after the instruction vertex or else a null instruction vertex;
+	say "[the Glulx assembly from the instruction vertex to the terminator with the sequence point S selected]".
 
-To list I6 for (R - a routine record) and the sequence point (S - a number) with the listing limit (L - a number):
-	now the listing limit is L;
-	if R is an invalid routine record:
-		say "No I6 listing is available because the function has no debug information.[line break]";
+Section "Listing by Window" - unindexed
+
+[These phrases do change letter spacing.]
+[These phrases do print trailing blank lines.]
+[These phrases do print error messages in place of empty listings.]
+
+To say the nearby Glulx assembly with the sequence point (S - a number) selected:
+	let the routine record be the routine record owning the sequence point S;
+	if the routine record is an invalid routine record:
+		say "No disassembly is available because the function has no debug information.[paragraph break]";
 		stop;
-	let the preamble line number be the preamble line number of R;
-	let the beginning line number be the beginning line number of R;
-	let the end line number be the end line number of R;
-	if the beginning line number is zero:
-		say "No I6 listing is available.[line break]";
+	let the function address be the function address of the routine record;
+	parse the function at address the function address;
+	let the instruction vertex be the instruction vertex corresponding to source address S;
+	if the instruction vertex is an invalid instruction vertex:
+		fail at iterating from a given sequence point;
 		stop;
+	let the beginning instruction vertex be the listing window radius instruction vertices before the instruction vertex or else the beginning of the function;
+	let the end instruction vertex be the listing window radius instruction vertices after the instruction vertex or else the end of the function;
+	say "[fixed letter spacing]";
+	unless the beginning instruction vertex is the scratch space beginning vertex:
+		say "  ...[line break]";
+	say "[the Glulx assembly from the beginning instruction vertex to the end instruction vertex with the sequence point S selected]";
+	unless the beginning instruction vertex is the scratch space end vertex:
+		say "  ...[line break]";
+	say "[variable letter spacing][line break]".
+
+To say the nearby I6 with the sequence point (S - a number) selected:
 	let the current line number be the I6 line number for the sequence point S;
-	unless the preamble line number is zero:
-		say "[the I6 for line number the preamble line number with line number the current line number selected]";
-	repeat with the line number running over the half-open interval from the beginning line number to the end line number:
-		if the listing limit is at most zero:
-			break;
-		say "[the I6 for line number the line number with line number the current line number selected]";
-	if the listing limit is L:
-		say "There are no matching I6 lines.[line break]".
+	let the source line record be the source line record for line number the current line number;
+	if the source line record is an invalid source line record:
+		say "No I6 listing is available.[paragraph break]";
+		stop;
+	let the beginning line number be the listing window radius lines before I6 line number the current line number or else the beginning of the function;
+	let the end line number be the listing window radius lines after I6 line number the current line number or else the end of the function;
+	say "[fixed letter spacing]";
+	let the routine record be the routine record owning the sequence point S;
+	unless the routine record is an invalid routine record:
+		let the preamble line number be the preamble line number of the routine record;
+		unless the preamble line number is zero:
+			say "[the I6 for line number the preamble line number with line number the current line number selected]";
+		unless the beginning line number is the beginning line number of the routine record:
+			say "  ...[line break]";
+	say "[the I6 from line number the beginning line number to the end line number with line number the current line number selected]";
+	unless the routine record is an invalid routine record or the end line number is the end line number of the routine record:
+		say "  ...[line break]";
+	say "[variable letter spacing][line break]".
 
-To list I7 for (R - a routine record) and the sequence point (S - a number) with the listing limit (L - a number):
-	now the listing limit is L;
-	if R is an invalid routine record:
-		say "No I7 listing available because the function has no debug information.[line break]";
+To say the nearby I7 with the sequence point (S - a number) selected:
+	let the current line number be the I7 line number for the sequence point S;
+	let the source line record be the source line record for line number the current line number;
+	if the source line record is an invalid source line record:
+		say "No I7 listing is available.[paragraph break]";
 		stop;
-	let the preamble line number be the preamble line number of R;
-	let the beginning line number be the beginning line number of R;
-	let the end line number be the end line number of R;
-	if the beginning line number is zero:
-		say "No I7 listing is available.[line break]";
-		stop;
-	let the current line number be the I7 line number for the sequence point S in the routine record R;
-	unless the preamble line number is zero:
-		say "[the I7 for line number the preamble line number with line number the current line number selected]";
-	let the function address be the function address of R;
-	guess the routine kernel for the function address;
-	let the routine kernel address be the routine kernel address of the function at address the function address;
-	unless the routine kernel address is zero:
-		say "         [one tab](invoke [the human-friendly name for the function at address the routine kernel address])[line break]";
-		stop;
-	repeat with the line number running over the half-open interval from the beginning line number to the end line number:
-		if the listing limit is at most zero:
-			break;
-		say "[the I7 for line number the line number with line number the current line number selected]";
-	if the listing limit is L:
-		say "There are no matching I7 lines.[line break]".
+	say "[fixed letter spacing]";
+	let the beginning line number be zero;
+	let the end line number be zero;
+	let the routine record be the routine record owning the sequence point S;
+	unless the routine record is an invalid routine record:
+		let the preamble line number be the preamble line number of the routine record;
+		unless the preamble line number is zero:
+			let the function address be the function address of the routine record;
+			guess the routine kernel for the function address;
+			let the routine kernel address be the routine kernel address of the function at address the function address;
+			unless the routine kernel address is zero:
+				say "[the I7 for line number the preamble line number with line number the current line number selected]";
+				say "         [one tab](invoke [the human-friendly name for the function at address the routine kernel address])[variable letter spacing][paragraph break]";
+				stop;
+	now the beginning line number is the listing window radius lines before I7 line number the current line number or else the beginning of the function;
+	now the end line number is the listing window radius lines after I7 line number the current line number or else the end of the function;
+	unless the routine record is an invalid routine record:
+		if there is an I7 line in the half-open interval from line number the beginning line number of the routine record to the beginning line number:
+			say "  ...[line break]";
+	say "[the I7 from line number the beginning line number to the end line number with line number the current line number selected]";
+	unless the routine record is an invalid routine record:
+		if there is an I7 line in the half-open interval from line number the end line number to the end line number of the routine record:
+			say "  ...[line break]";
+	say "[variable letter spacing][line break]".
 
-To decide what debug mode is the preferred debug mode for (R - a routine record):
-	if R is an invalid routine record or the function at address the function address of R is a default veneer routine:
-		decide on debugging at the Glulx assembly level;
-	if the source version of R is less than seven:
-		decide on debugging at the I6 level;
-	decide on debugging at the I7 level.
+Section "Lengthy Listings" - unindexed
 
 To decide whether the author consents to a listing as lengthy as (N - a number):
-	if the lengthly listing warnings flag is false:
+	if the lengthly listing warnings flag is false or N is at most the threshold for lengthy listings:
 		decide yes;
 	say "This listing is [N] line[unless N is one]s[end if] long.  Are you sure you want to list [if N is one]it[otherwise]all of them[end if] (y, n, or Y)? ";
 	let the result be whether or not the author consents;
 	now the lengthly listing warnings flag is whether or not (whether or not the consent was permanent) is false;
+	say "[line break]";
 	decide on the result.
 
-To list (R - a routine record) with the debug mode (D - a debug mode) and the sequence point (S - a number) and the listing limit (L - a number):
-	if D is:
-		-- debugging at the Glulx assembly level:
+Section "Listing by Function" - unindexed
+
+[These phrases do change letter spacing.]
+[These phrases do print trailing blank lines.]
+[These phrases do print error messages in place of empty listings.]
+
+To say the Glulx assembly for (R - a routine record) and the sequence point (S - a number):
+	if R is an invalid routine record:
+		say "No disassembly is available because the function has no debug information.[line break]";
+		stop;
+	let the function address be the function address of R;
+	parse the function at address the function address;
+	if the author consents to a listing as lengthy as the Glulx assembly count in the half-open interval from the scratch space beginning vertex to a null instruction vertex:
+		say "[fixed letter spacing][the Glulx assembly from the scratch space beginning vertex to a null instruction vertex with the sequence point S selected][variable letter spacing][line break]".
+
+To say the I6 for (R - a routine record) and the sequence point (S - a number):
+	if R is an invalid routine record:
+		say "No I6 listing is available because the function has no debug information.[paragraph break]";
+		stop;
+	let the preamble line number be the preamble line number of R;
+	let the beginning line number be the beginning line number of R;
+	let the end line number be the end line number of R;
+	if the beginning line number is zero:
+		say "No I6 listing is available.[paragraph break]";
+		stop;
+	let the line count be the I6 line count in the half-open interval from line number the beginning line number to the end line number;
+	if the line count is zero:
+		say "No I6 listing is available.[paragraph break]";
+		stop;
+	if the author consents to a listing as lengthy as the line count:
+		let the current line number be the I6 line number for the sequence point S;
+		say "[fixed letter spacing]";
+		unless the preamble line number is zero:
+			say "[the I6 for line number the preamble line number with line number the current line number selected]";
+		say "[the I6 from line number the beginning line number to the end line number with line number the current line number selected][variable letter spacing][line break]".
+
+To say the I7 for (R - a routine record) and the sequence point (S - a number):
+	if R is an invalid routine record:
+		say "No I7 listing available because the function has no debug information.[paragraph break]";
+		stop;
+	let the function address be the function address of R;
+	let the preamble line number be the preamble line number of R;
+	guess the routine kernel for the function address;
+	let the routine kernel address be the routine kernel address of the function at address the function address;
+	unless the routine kernel address is zero:
+		let the current line number be the I7 line number for the sequence point S in the routine record R;
+		always check that the preamble line number is not zero or else fail at finding a preamble for a routine shell;
+		say "[fixed letter spacing][the I7 for line number the preamble line number with line number the current line number selected]";
+		say "         [one tab](invoke [the human-friendly name for the function at address the routine kernel address])[variable letter spacing][paragraph break](automatically listing the kernel)[paragraph break]";
+		say "[the I7 for the routine record for the routine kernel address and the sequence point S]";
+		stop;
+	let the beginning line number be the beginning line number of R;
+	let the end line number be the end line number of R;
+	if the beginning line number is zero:
+		say "No I7 listing is available.[paragraph break]";
+		stop;
+	let the line count be the I7 line count in the half-open interval from line number the beginning line number to the end line number;
+	if the author consents to a listing as lengthy as the line count:
+		let the current line number be the I7 line number for the sequence point S in the routine record R;
+		if the preamble line number is zero:
+			if the line count is zero:
+				say "There are no matching I7 lines.[paragraph break]";
+				stop;
 			say "[fixed letter spacing]";
-			list Glulx assembly for R and the sequence point S with the listing limit L;
-		-- debugging at the I6 level:
-			if R is not an invalid routine record:
-				let the line count be one plus the end line number of R minus the beginning line number of R;
-				if the line count is greater than the listing limit:
-					now the line count is the listing limit;
-				unless the line count is at most the threshold for lengthy listings:
-					unless the author consents to a listing as lengthy as the line count:
-						stop;
-					say "[line break]";
-			say "[fixed letter spacing]";
-			list I6 for R and the sequence point S with the listing limit L;
-		-- debugging at the I7 level:
-			if R is not an invalid routine record:
-				let the line count be the number of I7 lines from the beginning line number of R to the end line number of R;
-				if the line count is greater than the listing limit:
-					now the line count is the listing limit;
-				unless the line count is at most the threshold for lengthy listings:
-					unless the author consents to a listing as lengthy as the line count:
-						stop;
-					say "[line break]";
-			say "[fixed letter spacing]";
-			list I7 for R and the sequence point S with the listing limit L;
-	say "[variable letter spacing]".
+		otherwise:
+			say "[fixed letter spacing][the I7 for line number the preamble line number with line number the current line number selected]";
+		say "[the I7 from line number the beginning line number to the end line number with line number the current line number selected][variable letter spacing][line break]".
 
-To decide what number is the sequence point to highlight:
-	decide on the last-seen sequence point of the debugger's current call frame or the last-seen sequence point before the last-seen breakpoint if it is innermost.
+Section "Preferred Debug Mode or Override" - unindexed
 
-To list I6 lines (A - a number) through (B - a number) for the sequence point (S - a number):
-	if A is less than one:
-		now A is one;
-	if B is less than zero:
-		now B is zero;
-	now the listing limit is the effectively infinite listing limit;
-	let the current line number be the I6 line number for the sequence point S;
-	repeat with the line number running from A to B:
-		say "[the I6 for line number the line number with line number the current line number selected]";
-	if the listing limit is the effectively infinite listing limit:
-		say "There are no matching I6 lines.[line break]".
+To decide what debug mode is the preferred debug mode for the half-open interval from line number (B - a number) to (E - a number) or the override among the children of (V - a parse tree vertex):
+	let the language vertex be the first match for a debugging language among the children of V;
+	if the language vertex is an invalid parse tree vertex:
+		if there is an I7 line in the half-open interval from line number B to E:
+			decide on debugging at the I7 level;
+		decide on debugging at the I6 level;
+	if the Glulx language appears among the children of the language vertex:
+		decide on debugging at the Glulx assembly level;
+	if the I6 language appears among the children of the language vertex:
+		decide on debugging at the I6 level;
+	if the I7 language appears among the children of the language vertex:
+		decide on debugging at the I7 level;
+	fail at understanding a debugging language;
+	if there is an I7 line in the half-open interval from line number B to E:
+		decide on debugging at the I7 level;
+	decide on debugging at the I6 level.
 
-To decide what number is the number of I7 lines from (A - a number) to (B - a number):
-	if A is less than one:
-		now A is one;
-	if B is less than zero:
-		now B is zero;
-	let the result be zero;
-	repeat with the line number running from A to B:
-		let the source line record be the source line record for line number the line number;
-		unless the source line record is an invalid source line record:
-			let the I7 be the I7 of the source line record;
-			unless the I7 is empty:
-				increment the result;
-	decide on the result.
+To decide what debug mode is the preferred debug mode for (R - a routine record) or the override among the children of (V - a parse tree vertex):
+	let the language vertex be the first match for a debugging language among the children of V;
+	if the language vertex is an invalid parse tree vertex:
+		decide on the preferred debug mode for R;
+	if the Glulx language appears among the children of the language vertex:
+		decide on debugging at the Glulx assembly level;
+	if the I6 language appears among the children of the language vertex:
+		decide on debugging at the I6 level;
+	if the I7 language appears among the children of the language vertex:
+		decide on debugging at the I7 level;
+	fail at understanding a debugging language;
+	decide on the preferred debug mode for R.
 
-To list I7 lines (A - a number) through (B - a number) for the sequence point (S - a number):
-	if A is less than one:
-		now A is one;
-	if B is less than zero:
-		now B is zero;
-	now the listing limit is the effectively infinite listing limit;
-	let the current line number be the I7 line number for the sequence point S in the routine record the routine record owning the sequence point S;
-	repeat with the line number running from A to B:
-		say "[the I7 for line number the line number with line number the current line number selected]";
-	if the listing limit is the effectively infinite listing limit:
-		say "There are no matching I7 lines.  Use the 'list as I6' command to list I6.[line break]".
+Section "Listing by Inference" - unindexed
 
 To handle the debug command rooted at (V - a parse tree vertex that has the parseme the debugger's list-by-inference command):
 	if the debugger story-running flag is false:
@@ -2488,18 +2803,15 @@ To handle the debug command rooted at (V - a parse tree vertex that has the pars
 		say "No listing available.[paragraph break]";
 		stop;
 	let the routine record be the routine record owning the sequence point the sequence point;
-	let the debug mode be a debug mode;
-	let the language vertex be the first match for a debugging language among the children of V;
-	if the language vertex is an invalid parse tree vertex:
-		now the debug mode is the preferred debug mode for the routine record;
-	otherwise if the Glulx language appears among the children of the language vertex:
-		now the debug mode is debugging at the Glulx assembly level;
-	otherwise if the I6 language appears among the children of the language vertex:
-		now the debug mode is debugging at the I6 level;
-	otherwise if the I7 language appears among the children of the language vertex:
-		now the debug mode is debugging at the I7 level;
-	list the routine record with the debug mode debug mode and the sequence point the sequence point and the listing limit the effectively infinite listing limit;
-	say "[line break]".
+	if the preferred debug mode for the routine record or the override among the children of V is:
+		-- debugging at the Glulx assembly level:
+			say "[the nearby Glulx assembly with the sequence point the sequence point selected]";
+		-- debugging at the I6 level:
+			say "[the nearby I6 with the sequence point the sequence point selected]";
+		-- debugging at the I7 level:
+			say "[the nearby I7 with the sequence point the sequence point selected]".
+
+Section "Listing by Function or Address" - unindexed
 
 To handle the debug command rooted at (V - a parse tree vertex that has the parseme the debugger's list-by-function command):
 	let the sequence point be the sequence point to highlight;
@@ -2508,96 +2820,72 @@ To handle the debug command rooted at (V - a parse tree vertex that has the pars
 	if the function address is zero:
 		stop;
 	let the routine record be the routine record for the function address;
-	let the debug mode be a debug mode;
-	let the language vertex be the first match for a debugging language among the children of V;
-	if the language vertex is an invalid parse tree vertex:
-		now the debug mode is the preferred debug mode for the routine record;
-	otherwise if the Glulx language appears among the children of the language vertex:
-		now the debug mode is debugging at the Glulx assembly level;
-	otherwise if the I6 language appears among the children of the language vertex:
-		now the debug mode is debugging at the I6 level;
-	otherwise if the I7 language appears among the children of the language vertex:
-		now the debug mode is debugging at the I7 level;
-	list the routine record with the debug mode debug mode and the sequence point the sequence point and the listing limit the effectively infinite listing limit;
-	say "[line break]".
+	if the preferred debug mode for the routine record or the override among the children of V is:
+		-- debugging at the Glulx assembly level:
+			say "[the Glulx assembly for the routine record and the sequence point the sequence point]";
+		-- debugging at the I6 level:
+			say "[the I6 for the routine record and the sequence point the sequence point]";
+		-- debugging at the I7 level:
+			say "[the I7 for the routine record and the sequence point the sequence point]".
 
 To handle the debug command rooted at (V - a parse tree vertex that has the parseme the debugger's list-by-address command):
 	let the sequence point be the sequence point to highlight;
 	let the function address vertex be the first match for a function address for the debugger among the children of V;
 	let the function address be the function address named by the function address vertex;
 	let the routine record be the routine record for the function address;
-	let the debug mode be a debug mode;
-	let the language vertex be the first match for a debugging language among the children of V;
-	if the language vertex is an invalid parse tree vertex:
-		now the debug mode is the preferred debug mode for the routine record;
-	otherwise if the Glulx language appears among the children of the language vertex:
-		now the debug mode is debugging at the Glulx assembly level;
-	otherwise if the I6 language appears among the children of the language vertex:
-		now the debug mode is debugging at the I6 level;
-	otherwise if the I7 language appears among the children of the language vertex:
-		now the debug mode is debugging at the I7 level;
-	list the routine record with the debug mode debug mode and the sequence point the sequence point and the listing limit the effectively infinite listing limit;
-	say "[line break]".
+	if the preferred debug mode for the routine record or the override among the children of V is:
+		-- debugging at the Glulx assembly level:
+			say "[the Glulx assembly for the routine record and the sequence point the sequence point]";
+		-- debugging at the I6 level:
+			say "[the I6 for the routine record and the sequence point the sequence point]";
+		-- debugging at the I7 level:
+			say "[the I7 for the routine record and the sequence point the sequence point]".
+
+Section "Listing by Line Number" - unindexed
 
 To handle the debug command rooted at (V - a parse tree vertex that has the parseme the debugger's list-by-line-number command):
+	let the sequence point be the sequence point to highlight;
 	let the line number vertex be the first match for a line number among the children of V;
 	let the decimal vertex be the first match for a decimal number for the debugger among the children of the line number vertex;
 	let the line number be the decimal number named by the decimal vertex;
-	let the sequence point be the sequence point to highlight;
 	let the language vertex be the first match for a debugging language among the children of V;
-	if the language vertex is an invalid parse tree vertex or the I7 language appears among the children of the language vertex:
-		say "[fixed letter spacing]";
-		list I7 lines the line number through the line number for the sequence point the sequence point;
-		say "[variable letter spacing][line break]";
-	otherwise if the I6 language appears among the children of the language vertex:
-		say "[fixed letter spacing]";
-		list I6 lines the line number through the line number for the sequence point the sequence point;
-		say "[variable letter spacing][line break]";
-	otherwise:
-		say "I can only list a line in I6 or I7.[paragraph break]".
+	if the preferred debug mode for the half-open interval from line number the line number to the line number plus one or the override among the children of V is:
+		-- debugging at the I6 level:
+			let the current line number be the I6 line number for the sequence point the sequence point;
+			say "[only the I6 for line number the line number with line number the current line number selected]";
+		-- debugging at the I7 level:
+			let the current line number be the I7 line number for the sequence point the sequence point;
+			say "[only the I7 for line number the line number with line number the current line number selected]";
+		-- otherwise:
+			say "I can only list a line in I6 or I7.[paragraph break]".		
 
 To handle the debug command rooted at (V - a parse tree vertex that has the parseme the debugger's list-by-line-numbers command):
+	let the sequence point be the sequence point to highlight;
 	let the line number vertex be the first match for a line number among the children of V;
 	let the decimal vertex be the first match for a decimal number for the debugger among the children of the line number vertex;
 	let the beginning line number be the decimal number named by the decimal vertex;
 	now the line number vertex is the next match for a line number after the child the line number vertex;
 	now the decimal vertex is the first match for a decimal number for the debugger among the children of the line number vertex;
-	let the end line number be the decimal number named by the decimal vertex;
-	let the sequence point be the sequence point to highlight;
-	let the line count be one plus the end line number minus the beginning line number;
+	let the end line number be the decimal number named by the decimal vertex plus one;
 	let the language vertex be the first match for a debugging language among the children of V;
-	if the language vertex is an invalid parse tree vertex or the I7 language appears among the children of the language vertex:
-		now the line count is the number of I7 lines from the beginning line number to the end line number;
-		unless the line count is at most the threshold for lengthy listings:
-			if the author consents to a listing as lengthy as the line count:
-				say "[line break]";
-				stop;
-			say "[line break]";
-		say "[fixed letter spacing]";
-		list I7 lines the beginning line number through the end line number for the sequence point the sequence point;
-		say "[variable letter spacing][line break]";
-	otherwise if the I6 language appears among the children of the language vertex:
-		unless the line count is at most the threshold for lengthy listings:
-			if the author consents to a listing as lengthy as the line count:
-				say "[line break]";
-				stop;
-			say "[line break]";
-		say "[fixed letter spacing]";
-		list I6 lines the beginning line number through the end line number for the sequence point the sequence point;
-		say "[variable letter spacing][line break]";
-	otherwise:
-		say "I can only list a range of lines in I6 or I7.[paragraph break]".
+	if the preferred debug mode for the half-open interval from line number the beginning line number to the end line number or the override among the children of V is:
+		-- debugging at the I6 level:
+			say "[only the I6 from line number the beginning line number to the end line number with the sequence point the sequence point selected]";
+		-- debugging at the I7 level:
+			say "[only the I7 from line number the beginning line number to the end line number with the sequence point the sequence point selected]";
+		-- otherwise:
+			say "I can only list a range of lines in I6 or I7.[paragraph break]".		
+
+Section "Listing Instrumentation" - unindexed
 
 To handle the debug command rooted at (V - a parse tree vertex that has the parseme the debugger's list-instrumentation command):
-	say "[fixed letter spacing]";
 	let the uninstrumented function address be the uninstrumented function address of the debugger's current call frame;
 	let the function address be the address of the instrumented version of the function at address the uninstrumented function address;
 	parse the function at address the function address;
-	initialize the disassembly label hash table;
-	repeat with the instruction vertex running through the scratch space:
-		say "[the label of the instruction vertex]    [the source address of the instruction vertex in hexadecimal] [the I6-like assembly of the instruction vertex using labels if possible][line break]";
-	tear down the disassembly label hash table;
-	say "[variable letter spacing][line break]".
+	if the author consents to a listing as lengthy as the Glulx assembly count in the half-open interval from the scratch space beginning vertex to a null instruction vertex:
+		say "[fixed letter spacing][the glulx assembly from the scratch space beginning vertex to a null instruction vertex with the sequence point zero selected][variable letter spacing][line break]".
+
+Section "Location Synopses" - unindexed
 
 To say the location synopsis for the sequence point (S - a number) in the call frame (F - a call frame):
 	let the current line number be the I6 line number for the sequence point S;
