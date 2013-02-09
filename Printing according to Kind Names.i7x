@@ -8,6 +8,7 @@ Include Low-Level Operations by Brady Garvin.
 Include Low-Level Text by Brady Garvin.
 Include Low-Level Linked Lists by Brady Garvin.
 Include Low-Level Hash Tables by Brady Garvin.
+Include Glulx Text Decoding by Brady Garvin.
 Include Punctuated Word Parsing Engine by Brady Garvin.
 Include Disambiguation Framework by Brady Garvin.
 Include Human-Friendly Function Names by Brady Garvin.
@@ -746,169 +747,9 @@ Part "Paranoid Text Manipulation" - unindexed
 
 Chapter "Characters" - unindexed
 
-To decide whether (C - a Unicode character) is printable: (- (glk_gestalt_ext(gestalt_CharOutput,{C},0,1)~=gestalt_CharOutput_CannotPrint) -).
-To decide whether (C - a Unicode character) is unprintable: (- (glk_gestalt_ext(gestalt_CharOutput,{C},0,1)==gestalt_CharOutput_CannotPrint) -).
+[Almost completely covered by Glulx Text Decoding.]
 
-Chapter "Decoding Vertices" - unindexed
-
-Section "The Decoding Vertex Kind" - unindexed
-
-A decoding vertex is a kind of value.  The plural of decoding vertex is decoding vertices.
-A decoding vertex is an invalid decoding vertex.  [See the note in the book "Extension Information."]
-The specification of a decoding vertex is "Decoding vertices describe the meaning of compressed text's bits; they are defined by the Glulx specification for compressed text, which see."
-
-Section "The Decoding Vertex Structure" - unindexed
-
-[Layout:
-	1 byte for the vertex type
-	N bytes for the payload]
-
-Section "Decoding Vertex Accessors" - unindexed
-
-To decide what number is the decoding vertex type of (A - a decoding vertex): (- llo_getByte({A}) -).
 To decide whether (A - a decoding vertex) is of indirect or unknown type: (- llo_unsignedGreaterThan(llo_getByte({A}),5) -).
-To decide whether (A - a decoding vertex) is of unknown type: (- (llo_unsignedGreaterThan(llo_getByte({A}),11)||(llo_getByte({A})==6)||(llo_getByte({A})==7)) -).
-
-To decide what Unicode character is the Latin-1 character of (A - a decoding vertex): (- llo_getByte({A}+1) -).
-To decide what Unicode character is the Unicode character of (A - a decoding vertex): (- llo_getInt({A}+1) -).
-To decide what text is the text of (A - a decoding vertex): (- ({A}+1) -).
-
-Section "Decoding Vertex Say Phrases" - unindexed
-
-To say (A - a decoding vertex):
-	if the decoding vertex type of A is:
-		-- 2: [Latin-1 character]
-			say "[the Latin-1 character of A]";
-		-- 3: [null-terminated Latin-1]
-			repeat with the character running with paranoia through the Latin-1 the text of A:
-				say "[if the character is printable][the character][otherwise]?[end if]";
-		-- 4: [Unicode character]
-			say "[the Unicode character of A]";
-		-- 5: [null-terminated Unicode]
-			repeat with the character running with paranoia through the Unicode the text of A:
-				say "[if the character is printable][the character][otherwise]?[end if]";
-		-- 8: [indirect reference]
-			say "<I6 printing variable>";
-		-- 9: [double indirect reference]
-			say "<I6 printing variable>";
-		-- 10: [indirect reference with arguments]
-			say "<I6 printing variable>";
-		-- 11: [double indirect reference with arguments]
-			say "<I6 printing variable>".
-
-Chapter "Repetition through Text" - unindexed
-
-Section "Repetition through Latin-1" - unindexed
-
-Include (-
-	Global k_iterator;
-	Global k_branchBits;
-	Global k_branchOffset;
--) after "Definitions.i6t".
-
-To repeat with (I - a nonexisting Unicode character variable) running with paranoia through the Latin-1 (A - some text) begin -- end: (-
-	k_iterator={A};
-	jump LLO_LOOP_{-counter:LLO_LOOP}_ENTRY;
-	for(::)
-		if(llo_advance){
-			@pull k_iterator;
-			if(llo_broken){
-				break;
-			}
-		.LLO_LOOP_{-advance-counter:LLO_LOOP}_ENTRY;
-			k_iterator++;
-			if(~~llo_validByteAddress(k_iterator)){
-				llo_broken=true;
-				break;
-			}
-			@aloadb k_iterator 0 {I};
-			if(~~{I}){
-				llo_broken=true;
-				break;
-			}
-			@push k_iterator;
-			llo_advance=false;
-		}else for(llo_oneTime=true,llo_broken=true,llo_advance=true:llo_oneTime&&((llo_oneTime=false),true)||(llo_broken=false):)
--).
-
-Section "Repetition through Unicode" - unindexed
-
-To repeat with (I - a nonexisting Unicode character variable) running with paranoia through the Unicode (A - some text) begin -- end: (-
-	k_iterator={A};
-	jump LLO_LOOP_{-counter:LLO_LOOP}_ENTRY;
-	for(::)
-		if(llo_advance){
-			@pull k_iterator;
-			if(llo_broken){
-				break;
-			}
-		.LLO_LOOP_{-advance-counter:LLO_LOOP}_ENTRY;
-			k_iterator=k_iterator+4;
-			if(~~llo_validIntAddress(k_iterator)){
-				llo_broken=true;
-				break;
-			}
-			@aload k_iterator 0 {I};
-			if(~~{I}){
-				llo_broken=true;
-				break;
-			}
-			@push k_iterator;
-			llo_advance=false;
-		}else for(llo_oneTime=true,llo_broken=true,llo_advance=true:llo_oneTime&&((llo_oneTime=false),true)||(llo_broken=false):)
--).
-
-Section "Repetition through Compressed Text" - unindexed
-
-Include (-
-	[ k_getRootDecodingVertex result;
-		@getstringtbl result;
-		return llo_getInt(result+8);
-	];
--).
-
-To repeat with (I - a nonexisting decoding vertex variable) running with paranoia through the compressed (T - some text) begin -- end: (-
-	{I}=k_getRootDecodingVertex();
-	@push {I};
-	k_iterator={T}+1;
-	@aloadb k_iterator 0 k_branchBits;
-	k_branchBits=$10000+k_branchBits;
-	jump LLO_LOOP_{-counter:LLO_LOOP}_ENTRY;
-	for(::)
-		if(llo_advance){
-			@pull k_branchBits;
-			@pull k_iterator;
-			if(llo_broken){
-				@pull {I};
-				break;
-			}
-			if(llo_getByte({I})){
-				@stkpeek 0 {I};
-			}
-		.LLO_LOOP_{-advance-counter:LLO_LOOP}_ENTRY;
-			llo_broken=true;
-			if(k_branchBits&$100){
-				k_iterator++;
-				if(~~llo_validByteAddress(k_iterator)){
-					@pull {I};
-					break;
-				}
-				@aloadb k_iterator 0 k_branchBits;
-				k_branchBits=$10000+k_branchBits;	
-			}
-			{I}++;
-			k_branchOffset=k_branchBits&1;
-			@aload {I} k_branchOffset {I};
-			if(llo_getByte({I})==1){
-				@pull {I};
-				break;
-			}
-			@push k_iterator;
-			@ushiftr k_branchBits 1 sp;
-			llo_broken=false;
-			llo_advance=~~llo_getByte({I});
-		}else for(llo_oneTime=true,llo_broken=true,llo_advance=true:llo_oneTime&&((llo_oneTime=false),true)||(llo_broken=false):)
--).
 
 Chapter "Text" - unindexed
 
