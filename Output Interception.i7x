@@ -5,6 +5,8 @@ Version 1 of Output Interception (for Glulx only) by Brady Garvin begins here.
 Include Runtime Checks by Brady Garvin.
 Include Low-Level Operations by Brady Garvin.
 Include Low-Level Text by Brady Garvin.
+Include Low-Level Linked Lists by Brady Garvin.
+Include Low-Level Hash Tables by Brady Garvin.
 Include Glulx Text Decoding by Brady Garvin.
 Include Glulx Runtime Instrumentation Framework by Brady Garvin.
 Include Glk Interception by Brady Garvin.
@@ -13,7 +15,11 @@ Use authorial modesty.
 
 Book "Extension Information"
 
-[Nothing to mention here in the present version.]
+Chapter "Use Options" - unindexed
+
+Use a echo stream interception hash table size of at least 31 translates as (- Constant OI_ECHO_STREAM_HASH_SIZE={N}; -).
+
+To decide what number is the echo stream interception hash table size: (- OI_ECHO_STREAM_HASH_SIZE -).
 
 Chapter "Rulebooks"
 
@@ -25,7 +31,7 @@ Chapter "Handler Variables"
 
 Section "Output Interception Types"
 
-An output interception type is a kind of value.  The output interception types are invalid textual output, valid textual output, and save file output.  The specification of an output interception type is "The output interception types represent the various kinds of output that Output Interception can detect.  'Invalid textual output' signifies that the story is about to write an invalid string to a stream, 'valid textual output' that it is about to write a valid string (available at 'the address of the intercepted output', a Unicode array whose length is 'the length of the intercepted output'), and 'save file output' that it is about to write a save file."
+An output interception type is a kind of value.  The output interception types are invalid textual output, valid textual output, save file output, and endless output.  The specification of an output interception type is "The output interception types represent the various kinds of output that Output Interception can detect.  'Invalid textual output' signifies that the story is about to write an invalid string to a stream, 'valid textual output' that it is about to write a valid string (available at 'the address of the intercepted output', a Unicode array whose length is 'the length of the intercepted output'), 'save file output' that it is about to write a save file, and 'endless output' that it has created an echo cycle and is attempting to send an infinite amount of output."
 
 Section "Mutable Handler Variables" - unindexed
 
@@ -90,7 +96,17 @@ To decide what number is the address of a new Latin-1-to-Unicode expansion of th
 Chapter "Interception Dispatch" - unindexed
 
 To intercept the output (this is intercepting the output):
-	traverse the output interception rulebook.
+	traverse the output interception rulebook;
+	if the input-output system of the intercepted output is the Glk input-output system:
+		let the echo stream list be the a new list of streams echoing the stream of the intercepted output;
+		if the echo stream list is an invalid linked list:
+			now the variable holding the type of the intercepted output is endless output;
+			traverse the output interception rulebook;
+		otherwise:
+			repeat with the echo stream running through the number keys of the echo stream list:
+				now the variable holding the stream of the intercepted output is the echo stream;
+				traverse the output interception rulebook;
+			delete the echo stream list.
 
 A GRIF shielding rule (this is the shield intercepting the output against instrumentation rule):
 	shield intercepting the output against instrumentation.
@@ -258,6 +274,66 @@ A GRIF instrumentation rule (this is the intercept the output of save instructio
 
 Chapter "Direct Output" - unindexed
 
+Section "Echo Stream Tracing" - unindexed
+
+The output interception window stream hash table is a hash table that varies.
+
+The output interception echo stream hash table is a hash table that varies.
+
+[Decides on an invalid linked list if there is an echo cycle.]
+To decide what linked list is a new list of streams echoing (S - a number):
+	let the pending invocation be an invalid Glk invocation;
+	if the Glk layers are in the pre-call state:
+		now the pending invocation is a new copy of the current Glk invocation;
+	otherwise:
+		prepare a spontaneous Glk invocation;
+	let the result be an empty linked list;
+	let the window stream hash table be a new hash table with the echo stream interception hash table size buckets;
+	let the window be zero;
+	repeat until a break:
+		write the function selector 32 [glk_window_iterate] to the current Glk invocation;
+		write the argument count two to the current Glk invocation;
+		write the window to argument number zero of the current Glk invocation;
+		write zero to argument number one of the current Glk invocation;
+		delegate the current Glk invocation to the Glk layer after output interception;
+		now the window is the result of the Glk invocation just delegated;
+		if the window is zero:
+			break;
+		prepare a spontaneous Glk invocation;
+		write the function selector 44 [glk_window_get_stream] to the current Glk invocation;
+		write the argument count one to the current Glk invocation;
+		write the window to argument number zero of the current Glk invocation;
+		delegate the current Glk invocation to the Glk layer after output interception;
+		let the stream be the result of the Glk invocation just delegated;
+		prepare a spontaneous Glk invocation;
+		insert the key the stream and the value the window into the window stream hash table;
+	let the current stream be S;
+	repeat until a break:
+		now the window is the first number value matching the key the current stream in the window stream hash table or zero if there are no matches;
+		if the window is zero:
+			break;
+		prepare a spontaneous Glk invocation;
+		write the function selector 46 [glk_window_get_echo_stream] to the current Glk invocation;
+		write the argument count one to the current Glk invocation;
+		write the window to argument number zero of the current Glk invocation;
+		delegate the current Glk invocation to the Glk layer after output interception;
+		now the current stream is the result of the Glk invocation just delegated;
+		if the current stream is zero:
+			break;
+		if the result contains the key the current stream:
+			delete the result;
+			delete the window stream hash table;
+			unless the pending invocation is an invalid Glk invocation:
+				prepare another Glk invocation from the pending invocation;
+				delete the pending invocation;
+			decide on an invalid linked list;
+		push the key the current stream onto the result;
+	delete the window stream hash table;
+	unless the pending invocation is an invalid Glk invocation:
+		prepare another Glk invocation from the pending invocation;
+		delete the pending invocation;
+	decide on the result.
+
 Section "Convenience Phrases for Direct Output" - unindexed
 
 To set the type and input-output system of the intercepted output to textual output under Glk with validity determined by the output length:
@@ -395,7 +471,7 @@ first; this is a phrase deciding on a value of the kind
 
 	an output interception type
 
-At the moment there are three possibilities:
+At the moment there are four possibilities:
 
 	invalid textual output
 
@@ -404,8 +480,8 @@ particularly forgiving, the story will probably crash.
 
 	valid textual output
 
-on the other hand, means that the story is about the print valid text.  It's
-stored as a sequence of Unicode code points at
+on the other hand, means that the story is about the print valid text.  That
+text is stored as a sequence of Unicode code points at
 
 	the address of the intercepted output
 
@@ -423,6 +499,14 @@ The third possibility,
 means that the story is emitting a save file.  The contents of the save file are
 not available for inspection because the save hasn't occurred yet, and any
 actions taken by the interception rules will alter them.
+
+And the fourth and last possibility,
+
+	endless output
+
+means that the story has manipulated the I/O system in such a way that the
+upcoming output will be infinite (for instance, by building an echo stream cycle
+under Glk).  A story crash---or possibly an interpreter crash---is imminent.
 
 After determining the interception type, an output interception rule may also be
 interested in
@@ -460,6 +544,8 @@ guarantee.
 I/O is written as input-output in the code since Inform sometimes treats the
 slash as semantic.
 
+Prompts printed by the interpreter for saves and restores are not intercepted.
+
 The null I/O system, filter I/O, and Glk are the only I/O system currently
 recognized.  FyreVM support may be added in the future if there is enough
 interest.
@@ -470,8 +556,6 @@ of these calls will not checked, nor will their output be captured correctly.
 As best I can tell, this limitation only affects authors who store routine
 addresses in I6 printing variables, and code of this sort will break on the
 Z-machine, so it's not a good idea anyway.
-
-Output by way of echo streams is not detected. [////]
 
 Section: Regarding bugs
 
