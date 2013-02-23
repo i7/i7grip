@@ -31,7 +31,7 @@ Chapter "Handler Variables"
 
 Section "Output Interception Types"
 
-An output interception type is a kind of value.  The output interception types are invalid textual output, valid textual output, save file output, and endless output.  The specification of an output interception type is "The output interception types represent the various kinds of output that Output Interception can detect.  'Invalid textual output' signifies that the story is about to write an invalid string to a stream, 'valid textual output' that it is about to write a valid string (available at 'the address of the intercepted output', a Unicode array whose length is 'the length of the intercepted output'), 'save file output' that it is about to write a save file, and 'endless output' that it has created an echo cycle and is attempting to send an infinite amount of output."
+An output interception type is a kind of value.  The output interception types are invalid textual output, valid textual output, save file output, endless output, and cursor movement.  The specification of an output interception type is "The output interception types represent the various kinds of output that Output Interception can detect.  'Invalid textual output' signifies that the story is about to write an invalid string to a stream, 'valid textual output' that it is about to write a valid string (available at 'the address of the intercepted output', a Unicode array whose length in words is 'the length of the intercepted output'), 'save file output' that it is about to write a save file, 'endless output' that it has created an echo cycle and is attempting to send an infinite amount of output, and finally 'cursor movement', which signifies no printed output, but a change in where that output will appear."
 
 Section "Mutable Handler Variables" - unindexed
 
@@ -352,12 +352,30 @@ To set the stream of the intercepted output to the current stream during direct 
 	prepare another Glk invocation from the pending invocation;
 	delete the pending invocation.
 
+[//// Question: are cursor movements echoed?  Right now we assume not.]
+To set the stream of the intercepted output to the window stream of (W - a number) during direct output:
+	let the pending invocation be a new copy of the current Glk invocation;
+	write the function selector 44 [glk_window_get_stream] to the current Glk invocation;
+	write the argument count one to the current Glk invocation;
+	write W to argument number zero of the current Glk invocation;
+	delegate the current Glk invocation to the Glk layer after output interception;
+	now the variable holding the stream of the intercepted output is the result of the Glk invocation just delegated;
+	prepare another Glk invocation from the pending invocation;
+	delete the pending invocation.
+
 Section "Glk Interception Layer" - unindexed
 
 The Glk layer after output interception is a Glk layer that varies.
 
 To intercept output via direct Glk calls (this is intercepting output via direct Glk calls):
 	if the function selector of the current Glk invocation is:
+		-- 43: [glk_window_move_cursor]
+			ensure that the current Glk invocation has at least one argument;
+			let the window be argument number zero of the current Glk invocation;
+			set the stream of the intercepted output to the window stream of the window during direct output;
+			now the variable holding the input-output system of the intercepted output is the Glk input-output system;
+			now the variable holding the type of the intercepted output is cursor movement;
+			intercept the output;
 		-- 128: [glk_put_char]
 			ensure that the current Glk invocation has at least one argument;
 			set the stream of the intercepted output to the current stream during direct output;
@@ -443,6 +461,39 @@ Section "Glk Interception Layering Rule"
 A last Glk layering rule (this is the intercept output via direct Glk calls rule):
 	install intercepting output via direct Glk calls as a Glk layer whose notifications are handled by the default value of phrase Glk layer notification -> nothing and let the Glk layer after output interception be the layer it should delegate to.
 
+Chapter "Stream Classification"
+
+To decide whether (S - a number) is a window stream according to output interception:
+	let the pending invocation be an invalid Glk invocation;
+	if the Glk layers are in the pre-call state:
+		now the pending invocation is a new copy of the current Glk invocation;
+	otherwise:
+		prepare a spontaneous Glk invocation;
+	let the window be zero;
+	repeat until a break:
+		write the function selector 32 [glk_window_iterate] to the current Glk invocation;
+		write the argument count two to the current Glk invocation;
+		write the window to argument number zero of the current Glk invocation;
+		write zero to argument number one of the current Glk invocation;
+		delegate the current Glk invocation to the Glk layer after output interception;
+		now the window is the result of the Glk invocation just delegated;
+		if the window is zero:
+			unless the pending invocation is an invalid Glk invocation:
+				prepare another Glk invocation from the pending invocation;
+				delete the pending invocation;
+			decide no;
+		prepare a spontaneous Glk invocation;
+		write the function selector 44 [glk_window_get_stream] to the current Glk invocation;
+		write the argument count one to the current Glk invocation;
+		write the window to argument number zero of the current Glk invocation;
+		delegate the current Glk invocation to the Glk layer after output interception;
+		if S is the result of the Glk invocation just delegated:
+			unless the pending invocation is an invalid Glk invocation:
+				prepare another Glk invocation from the pending invocation;
+				delete the pending invocation;
+			decide yes;
+		prepare a spontaneous Glk invocation.
+
 Output Interception ends here.
 
 ---- DOCUMENTATION ----
@@ -471,7 +522,7 @@ first; this is a phrase deciding on a value of the kind
 
 	an output interception type
 
-At the moment there are four possibilities:
+At the moment there are five possibilities:
 
 	invalid textual output
 
@@ -500,13 +551,19 @@ means that the story is emitting a save file.  The contents of the save file are
 not available for inspection because the save hasn't occurred yet, and any
 actions taken by the interception rules will alter them.
 
-And the fourth and last possibility,
+The fourth,
 
 	endless output
 
 means that the story has manipulated the I/O system in such a way that the
 upcoming output will be infinite (for instance, by building an echo stream cycle
 under Glk).  A story crash---or possibly an interpreter crash---is imminent.
+
+And the fifth and last possibility,
+
+	cursor movement
+
+means that output on the given stream will now appear at a different location.
 
 After determining the interception type, an output interception rule may also be
 interested in
@@ -533,7 +590,12 @@ And finally, if output was written through the Glk I/O system,
 
 will be the opaque reference to the stream where the output was written.  We can
 compare these values between calls to determine whether two pieces of output
-were sent to the same place.
+were sent to the same place.  We can also ask
+
+	if (S - a number) is a window stream according to output interception:
+		....
+
+if we only want to deal with streams that print to windows.
 
 Chapter: Requirements, Limitations, and Bugs
 
