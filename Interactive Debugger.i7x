@@ -8,6 +8,7 @@ Include Low-Level Text by Brady Garvin.
 Include Low-Level Linked Lists by Brady Garvin.
 Include Low-Level Hash Tables by Brady Garvin.
 Include Glk Window Wrappers by Brady Garvin.
+Include Output Interception by Brady Garvin.
 Include Punctuated Word Parsing Engine by Brady Garvin.
 Include Human-Friendly Function Names by Brady Garvin.
 Include Glulx Runtime Instrumentation Framework by Brady Garvin.
@@ -31,6 +32,12 @@ You should have received a copy of the GNU General Public License along with thi
 
 Book "Extension Information"
 
+[For each of the kinds defined by Interactive Debugger you will see a sentence like
+
+	A stream log is an invalid stream log.
+
+This bewildering statement actually sets up stream logs as a qualitative value with default value the stream log at address one, which, as we say, is invalid.  (We could have gone with a quantitative kind for default zero, but then we would open up the possibility for arithmetic on the pointers.)  I wish it weren't necessary, but at least in this build Inform doesn't let us provide a default value any other way, and, moreover, we need a default value or else only I6 substitutions are allowed to decide on stream logs.]
+
 Chapter "Use Options"
 
 Use no more than one line input request at a time translates as (- Constant ID_SERIALIZE_LINE_REQUESTS; -).
@@ -42,10 +49,18 @@ Use the top of the window for the debugger translates as (- Constant ID_TOP; -).
 
 Use a debug command buffer size of at least 1024 translates as (- Constant ID_MAX_COMMAND_LENGTH={N}; -).
 
+Use a minimum stream log capacity of at least 1024 translates as (- Constant ID_MIN_STREAM_LOG_CAPACITY={N}; -).
+
+To decide what number is the minimum stream log capacity: (- ID_MIN_STREAM_LOG_CAPACITY -).
+
 Use a user breakpoint hash table size of at least 23 translates as (- Constant ID_USER_BREAKPOINT_HASH_SIZE={N}; -).
+Use a user breaktext hash table size of at least 23 translates as (- Constant ID_USER_BREAKTEXT_HASH_SIZE={N}; -).
+Use a stream log hash table size of at least 23 translates as (- Constant ID_STREAM_LOG_HASH_SIZE={N}; -).
 Use a debugger disambiguation hash table size of at least 11 translates as (- Constant ID_DISAMBIGUATION_HASH_SIZE={N}; -).
 
 To decide what number is the user breakpoint hash table size: (- ID_USER_BREAKPOINT_HASH_SIZE -).
+To decide what number is the user breaktext hash table size: (- ID_USER_BREAKTEXT_HASH_SIZE -).
+To decide what number is the stream log hash table size: (- ID_STREAM_LOG_HASH_SIZE -).
 To decide what number is the debugger disambiguation hash table size: (- ID_DISAMBIGUATION_HASH_SIZE -).
 
 Use a disambiguation listing length of at least 4 translates as (- Constant ID_DISAMBIGUATION_LISTING_LENGTH={N}; -).
@@ -111,6 +126,12 @@ To fail at iterating from a given sequence point:
 
 To fail at understanding a debugging language:
 	say "[runtime failure in]Interactive Debugger[with explanation]I failed to understand the given debugging language.  Probably my grammar has been updated to include it, but the code for translating it to a debug mode has not.[continuing anyway]".
+
+To fail at finding the text for a breaktext:
+	say "[runtime failure in]Interactive Debugger[with explanation]I failed to find (let alone understand) the given text when given a command to create a breaktext.  Probably my grammar and my text extraction code disagree on formatting details.[continuing anyway]".
+
+To fail at checking retired characters in a stream log:
+	say "[low-level runtime failure in]Interactive Debugger[with explanation]I attempted to check recent output for a breaktext, but the stream log was too short.  The code to rotate long output through short logs probably has a bug.[terminating the story]".
 
 Book "Simulated Parallelism"
 
@@ -442,6 +463,26 @@ Chapter "User Breakpoints" - unindexed
 [Maps breakpoint numbers to compound breakpoints]
 The user breakpoint hash table is a hash table that varies.
 
+Chapter "Active Stream Logs" - unindexed
+
+[Maps stream numbers to stream logs]
+The stream log hash table is a hash table that varies.
+
+Chapter "User Breaktexts" - unindexed
+
+The length of the longest breaktext is a number that varies.  The length of the longest breaktext is zero.
+
+To decide what number is the capacity corresponding to the longest breaktext:
+	let the result be four [overestimation to reduce churn] times four [conversion to bytes] times the length of the longest breaktext;
+	if the result is less than the minimum stream log capacity:
+		decide on the minimum stream log capacity;
+	decide on the result.
+
+[Maps breaktext numbers to breaktexts]
+The user breaktext hash table is a hash table that varies.
+
+The breaktext encountered flag is a truth state that varies.  The breaktext encountered flag is false.
+
 Chapter "Debugger Initialization" - unindexed
 
 A GRIF setup rule (this is the initialize the debugger state rule):
@@ -451,7 +492,9 @@ A GRIF setup rule (this is the initialize the debugger state rule):
 	now the last-seen call stack root is a null call frame;
 	now the last-seen call stack divider is a null call frame;
 	now the last-seen compound breakpoint list is an empty linked list;
-	now the user breakpoint hash table is a new hash table with the user breakpoint hash table size buckets.
+	now the user breakpoint hash table is a new hash table with the user breakpoint hash table size buckets;
+	now the stream log hash table is a new hash table with the stream log hash table size buckets;
+	now the user breaktext hash table is a new hash table with the user breaktext hash table size buckets.
 
 Book "Debugger Instrumentation" - unindexed
 
@@ -488,6 +531,204 @@ A GRIF instrumentation rule (this is the insert tripwires to detect follow-on ca
 			insert the post-call tripwire instruction vertex after the instruction vertex;
 			establish a jump link from the pre-call tripwire instruction vertex to the instruction vertex;
 			establish a jump link from the post-call tripwire instruction vertex to the next link of the post-call breakpoint-disabling instruction vertex.
+
+Book "Output Interception"
+
+Chapter "Stream Logs" - unindexed
+
+Section "The Stream Log Kind" - unindexed
+
+A stream log is a kind of value.
+A stream log is an invalid stream log.  [See the note in the book "Extension Information."]
+The specification of a stream log is "A stream log stores characters recently printed to a stream, which Interactive Debugger monitors for the appearance of breaktexts."
+
+Section "The Stream Log Structure" - unindexed
+
+[Layout:
+	4 bytes for the log capacity (in bytes, which we call N)
+	4 bytes for the log length in bytes
+	N bytes for the log]
+
+To decide what number is the size of a stream log with capacity (N - a number) bytes: (- (8+{N}) -).
+
+Section "Stream Log Construction and destruction" - unindexed
+
+To decide what stream log is a new stream log with capacity of at least (N - a number) bytes:
+	let the capacity be N;
+	if the capacity is less than the minimum stream log capacity:
+		now the capacity is the minimum stream log capacity;
+	let the size be the size of a stream log with capacity the capacity bytes;
+	let the result be a memory allocation of the size bytes converted to a stream log;
+	write the log capacity the capacity to the result;
+	write the log length zero to the result;
+	decide on the result.
+
+To delete (A - a stream log):
+	free the memory allocation at address A converted to a number.
+
+Section "Stream Log Accessors and Mutators" - unindexed
+
+To decide what number is the log capacity of (A - a stream log): (- llo_getInt({A}) -).
+To write the log capacity (X - a number) to (A - a stream log): (- llo_setInt({A},{X}); -).
+
+To decide what number is the log length of (A - a stream log): (- llo_getField({A},1) -).
+To write the log length (X - a number) to (A - a stream log): (- llo_setField({A},1,{X}); -).
+To clear (A - a stream log): (- llo_setField({A},1,0); -).
+
+To decide what number is the log address of (A - a stream log): (- ({A}+8) -).
+To decide what number is the log end address of (A - a stream log): (- ({A}+8+llo_getField({A},1)) -).
+
+Section "Stream Log Appending" - unindexed
+
+To decide what number is the written byte count after appending up to (N - a number) bytes from address (B - a number) to (A - a stream log):
+	let the length be the log length of A;
+	let the appendable byte count be the log capacity of A minus the length;
+	if N is less than the appendable byte count:
+		now the appendable byte count is N;
+	copy the appendable byte count bytes from address B to address the log end address of A;
+	increase the length by the appendable byte count;
+	write the log length the length to A;
+	decide on the appendable byte count.
+
+Section "Stream Log Scrolling" - unindexed
+
+To scroll (A - a stream log) as far as possible without losing the last (N - a number) byte/bytes:
+	let the scroll distance be the log length of A minus N;
+	if the scroll distance is at most zero:
+		stop;
+	let the destination address be the log address of A;
+	let the source address be the destination address plus the scroll distance;
+	copy the N bytes from address the source address to address the destination address;
+	write the log length N to A.
+
+Section "Stream Log Searching" - unindexed
+
+To decide whether (A - a stream log) contains the (N - a number) integer/integers at address (B - a number) overlapping with its last (M - a number) integer/integers:
+	always check that the log length of A is at least M or else fail at checking retired characters in a stream log;
+	let the relevant integer count be N plus M minus one;
+	if the log length of A is less than the relevant integer count:
+		now the relevant integer count is the log length of A;
+	let the relevant integers' address be the log end address of A minus four times the relevant integer count;
+	decide on whether or not the address of the N integers at address B in the relevant integer count integers at address the relevant integers' address is not zero.
+
+Section "Stream Log Expanding" - unindexed
+
+To decide what stream log is a new expansion of (A - a stream log) to have a capacity of at least (N - a number) byte/bytes:
+	let the old size be the size of a stream log with capacity the log capacity of A bytes;
+	let the capacity be N;
+	if the capacity is less than log capacity of A:
+		now the capacity is the log capacity of A;
+	if the capacity is less than the minimum stream log capacity:
+		now the capacity is the minimum stream log capacity;
+	let the size be the size of a stream log with capacity the capacity bytes;
+	let the result be a memory allocation of the size bytes converted to a stream log;
+	copy the old size bytes from address (A converted to a number) to address (the result converted to a number);
+	write the log capacity the capacity to the result;
+	decide on the result.	
+
+Chapter "Breaktexts" - unindexed
+
+Section "The Breaktext Kind" - unindexed
+
+A breaktext is a kind of value.
+A breaktext is an invalid breaktext.  [See the note in the book "Extension Information."]
+The specification of a breaktext is "A breaktext represents conditional interruption when a particular piece of text is printed by the story."
+
+Section "The Breaktext Structure" - unindexed
+
+[Layout:
+	4 bytes for the numeric identifier
+	4 bytes for the human-friendly name as synthetic text
+	4 bytes for the codepoint count
+	4 bytes for the address of the array of codepoints
+	4 bytes for the enabled flag
+	4 bytes for the triggered flag]
+[Compound breakpoints manage the lifetime of their human-friendly names; those names will be deleted when the breakpoint is.]
+[Similarly for their codepoint arrays.]
+
+To decide what number is the size of a breaktext: (- 24 -).
+
+Section "Breaktext Construction and destruction" - unindexed
+
+[T need not be synthetic; it will be copied.]
+[The array at address A, on the other hand, will not be copied, and becomes owned by the breaktext.]
+To decide what breaktext is a new breaktext for the (N - a number) codepoints at address (A - a number) named (T - some text):
+	let the result be a memory allocation of the size of a breaktext bytes converted to a breaktext;
+	write the numeric identifier the breakpoint counter to the result;
+	increment the breakpoint counter;
+	let the human-friendly name be a new synthetic text copied from T;
+	write the human-friendly name the human-friendly name to the result;
+	write the codepoint count N to the result;
+	write the codepoint array address A to the result;
+	disable the result;
+	untrigger the result;
+	decide on the result.
+
+To delete (A - a breaktext):
+	delete the synthetic text the human-friendly name of A;
+	free the memory allocation at address the codepoint array address of A;
+	free the memory allocation at address A converted to a number.
+
+Section "Private Breaktext Mutators" - unindexed
+
+To write the numeric identifier (X - a number) to (A - a breaktext): (- llo_setInt({A},{X}); -).
+
+To write the human-friendly name (X - some text) to (A - a breaktext): (- llo_setField({A},1,{X}); -).
+
+To write the codepoint count (X - a number) to (A - a breaktext): (- llo_setField({A},2,{X}); -).
+
+To write the codepoint array address (X - a number) to (A - a breaktext): (- llo_setField({A},3,{X}); -).
+
+Section "Public Breaktext Accessors" - unindexed
+
+To decide what number is the numeric identifier of (A - a breaktext): (- llo_getInt({A}) -).
+
+To decide what text is the human-friendly name of (A - a breaktext): (- llo_getField({A},1) -).
+
+To decide what number is the codepoint count of (A - a breaktext): (- llo_getField({A},2) -).
+To decide what number is the codepoint array address of (A - a breaktext): (- llo_getField({A},3) -).
+
+To decide whether (A - a breaktext) is disabled: (- (~~llo_getField({A},4)) -).
+To decide whether (A - a breaktext) is enabled: (- llo_getField({A},4) -).
+
+To disable (A - a breaktext): (- llo_setField({A},4,0); -).
+To enable (A - a breaktext): (- llo_setField({A},4,1); -).
+
+To decide whether (A - a breaktext) is triggered: (- llo_getField({A},5) -).
+
+To untrigger (A - a breaktext): (- llo_setField({A},5,0); -).
+To trigger (A - a breaktext): (- llo_setField({A},5,1); -).
+
+Chapter "Breaktext Detection Rule"
+
+An output interception rule (this is the breaktext detection rule):
+	if the input-output system of the intercepted output is the Glk input-output system and the stream of the intercepted output is a window stream according to output interception: [ignore cases that are irrelevant or errors]
+		unless we are within the debugger window:
+			let the stream log be the first stream log value matching the key the stream of the intercepted output in the stream log hash table or an invalid stream log if there are no matches;
+			if the stream log is an invalid stream log:
+				now the stream log is a new stream log with capacity of at least the capacity corresponding to the longest breaktext bytes;
+				insert the key the stream of the intercepted output and the value the stream log into the stream log hash table;
+			if the type of the intercepted output is:
+				-- valid textual output:
+					let the remaining byte count be the length of the intercepted output times four;
+					let the remaining output address be the address of the intercepted output;
+					repeat until a break:
+						let the written byte count be the written byte count after appending up to the remaining byte count bytes from address the remaining output address to the stream log;
+						let the written integer count be the written byte count divided by four;
+						repeat with the breaktext running through the breaktext values of the user breaktext hash table:
+							let the codepoint count be the codepoint count of the breaktext;
+							let the codepoint array address be the codepoint array address of the breaktext;
+							if the stream log contains the codepoint count integers at address the codepoint array address overlapping with its last written integer count integers:
+								trigger the breaktext;
+								enable the universal breakpoint;
+								now the breaktext encountered flag is true;
+						decrease the remaining byte count by the written byte count;
+						if the remaining byte count is zero:
+							break;
+						increase the remaining output address by the written byte count;
+						scroll the stream log as far as possible without losing the last two bytes;
+				-- cursor movement:
+					clear the stream log.
 
 Book "Main Debugger Routine" - unindexed
 
@@ -652,8 +893,8 @@ To begin advancing assuredly:
 
 To decide whether we should ignore the current interruption at (B - a simple breakpoint):
 	[Five cases to worry about:]
-	[I. a breakpoint was forced, meaning that we must stop]
-	if the breakpoint was forced:
+	[I. a breakpoint was forced or a breaktext was encountered, meaning that we must stop]
+	if the breakpoint was forced or the breaktext encountered flag is true:
 		now the currently preferred debug mode is debugging at the I7 level;
 		decide no;
 	[II. a new breakpoint was encountered, meaning that we must stop]
@@ -706,6 +947,10 @@ To announce breakpoints at (B - a simple breakpoint):
 			if the encountered compound breakpoint is enabled:
 				say "[if the breakpoints announced flag is false][line break][end if][bold type]Breakpoint [the numeric identifier of the encountered compound breakpoint]:[roman type] [the human-friendly name of the encountered compound breakpoint][line break]";
 				now the breakpoints announced flag is true;
+	repeat with the breaktext running through the breaktext values of the user breaktext hash table:
+		if the breaktext is triggered:
+			say "[if the breakpoints announced flag is false][line break][end if][bold type]Breaktext [the numeric identifier of the breaktext]:[roman type] [the human-friendly name of the breaktext][line break]";
+			now the breakpoints announced flag is true;
 	if the breakpoints announced flag is true:
 		say "[line break]".
 
@@ -753,6 +998,9 @@ Handling a breakpoint (this is the interactive debugger breakpoint response rule
 					if the encountered compound breakpoint is enabled:
 						push the key the encountered compound breakpoint onto the last-seen compound breakpoint list;
 						now the debugger's control flow attitude is responding after a cautious advance;
+			repeat with the breaktext running through the breaktext values of the user breaktext hash table:
+				untrigger the breaktext;
+			now the breaktext encountered flag is false;
 			if the debugger's control flow attitude is responding after a cautious advance:
 				enable frame-local breakpoints in the debugger's current call frame and outward;
 			now the last-seen call stack root is the root of the debugger's current call frame;
@@ -876,6 +1124,21 @@ To parse for (S - a parseme) beginning at lexeme index (I - a number) by parsing
 	let the word count be the word count of the array content;
 	repeat with the end lexeme index running from I plus one to the word count:
 		match S from lexeme index I to lexeme index the end lexeme index.
+
+Chapter "Arbitrary Words without Double Quotes" - unindexed
+
+The debug command string delimiter is some text that varies.
+
+A GRIF setup rule (this is the allocate synthetic text for the debug command string delimiter rule):
+	now the debug command string delimiter is a new permanent synthetic text copied from "'".
+
+To parse for (S - a parseme) beginning at lexeme index (I - a number) by parsing arbitrary words without double quotes (this is parsing arbitrary words without double quotes):
+	let the array content be the punctuated word array content of the owner of S;
+	let the word count be the word count of the array content;
+	repeat with the index running over the half-open interval from I to the word count:
+		if the synthetic text word index of the array content is identical to the synthetic text the debug command string delimiter:
+			break;
+		match S from lexeme index I to lexeme index the index plus one.
 
 Chapter "Function Names" - unindexed
 
@@ -1118,7 +1381,8 @@ A decimal number for the debugger and
 	a memory stack variable name for the debugger and
 	a local name for the debugger and
 	a kind name for the debugger and
-	an object name for the debugger are parsemes that vary.
+	an object name for the debugger and
+	a simple text for the debugger are parsemes that vary.
 
 A debug command and
 	--/a/an/the and
@@ -1147,6 +1411,7 @@ A debug command and
 	the debugger's break-by-function command and
 	the debugger's break-by-line-number command and
 	the debugger's break-by-inference command and
+	the debugger's break-by-text command and
 	the debugger's continue command and
 	the debugger's delete all command and
 	the debugger's delete command and
@@ -1159,6 +1424,8 @@ A debug command and
 	the debugger's finish command and
 	the debugger's force a breakpoint command and
 	the debugger's help command and
+	the debugger's breakpoint information command and
+	the debugger's breaktext information command and
 	the debugger's information command and
 	the debugger's inward command and
 	the debugger's inward-by-distance command and
@@ -1215,6 +1482,7 @@ A GRIF setup rule (this is the set up the debug command parser rule):
 	now a local name for the debugger is a new terminal in the debug command parser named "a temporary named value (which is a kind of variable name)" and parsed by parsing arbitrary words;
 	now a kind name for the debugger is a new terminal in the debug command parser named "a name of a kind" and parsed by parsing arbitrary words;
 	now an object name for the debugger is a new terminal in the debug command parser named "a name of an object" and parsed by parsing arbitrary words;
+	now a simple text for the debugger is a new terminal in the debug command parser named "a text with only simple substitutions" and parsed by parsing arbitrary words without double quotes;
 	now a debug command is a new nonterminal in the debug command parser named "a debug command";
 	now --/a/an/the is a new nonterminal in the debug command parser named "an optional occurrence of an article like 'a' or 'the'";
 	now --/at/on is a new nonterminal in the debug command parser named "an optional occurrence of the word 'at' or the word 'on'";
@@ -1242,6 +1510,7 @@ A GRIF setup rule (this is the set up the debug command parser rule):
 	now the debugger's break-by-function command is a new nonterminal in the debug command parser named "the 'break' command for a function";
 	now the debugger's break-by-line-number command is a new nonterminal in the debug command parser named "the 'break' command for a line number";
 	now the debugger's break-by-inference command is a new nonterminal in the debug command parser named "the 'break here' command";
+	now the debugger's break-by-text command is a new nonterminal in the debug command parser named "the 'break' command for a text";
 	now the debugger's continue command is a new nonterminal in the debug command parser named "the 'continue' command";
 	now the debugger's delete all command is a new nonterminal in the debug command parser named "the 'delete all breakpoints' command";
 	now the debugger's delete command is a new nonterminal in the debug command parser named "the 'delete a breakpoint' command";
@@ -1254,7 +1523,9 @@ A GRIF setup rule (this is the set up the debug command parser rule):
 	now the debugger's finish command is a new nonterminal in the debug command parser named "the 'finish' command";
 	now the debugger's force a breakpoint command is a new nonterminal in the debug command parser named "the 'force a breakpoint' command";
 	now the debugger's help command is a new nonterminal in the debug command parser named "the 'help' command";
-	now the debugger's information command is a new nonterminal in the debug command parser named "the 'breakpoint information' command";
+	now the debugger's breakpoint information command is a new nonterminal in the debug command parser named "the 'breakpoint information' command";
+	now the debugger's breaktext information command is a new nonterminal in the debug command parser named "the 'breaktext information' command";
+	now the debugger's information command is a new nonterminal in the debug command parser named "the 'information' command";
 	now the debugger's inward command is a new nonterminal in the debug command parser named "the 'move in one call frame' command";
 	now the debugger's inward-by-distance command is a new nonterminal in the debug command parser named "the 'move in several call frames' command";
 	now the debugger's license command is a new nonterminal in the debug command parser named "the 'license' command";
@@ -1304,6 +1575,7 @@ A GRIF setup rule (this is the set up the debug command parser rule):
 	understand "[the debugger's break-by-function command]" as a debug command;
 	understand "[the debugger's break-by-line-number command]" as a debug command;
 	understand "[the debugger's break-by-inference command]" as a debug command;
+	understand "[the debugger's break-by-text command]" as a debug command;
 	understand "[the debugger's continue command]" as a debug command;
 	understand "[the debugger's delete all command]" as a debug command;
 	understand "[the debugger's delete command]" as a debug command;
@@ -1316,6 +1588,8 @@ A GRIF setup rule (this is the set up the debug command parser rule):
 	understand "[the debugger's finish command]" as a debug command;
 	understand "[the debugger's force a breakpoint command]" as a debug command;
 	understand "[the debugger's help command]" as a debug command;
+	understand "[the debugger's breakpoint information command]" as a debug command;
+	understand "[the debugger's breaktext information command]" as a debug command;
 	understand "[the debugger's information command]" as a debug command;
 	understand "[the debugger's inward command]" as a debug command;
 	understand "[the debugger's inward-by-distance command]" as a debug command;
@@ -1374,12 +1648,14 @@ A GRIF setup rule (this is the set up the debug command parser rule):
 	understand "run" or "r" as the debugger's run command regardless of case;
 	understand "restart" as the debugger's restart command regardless of case;
 	[//]
-	understand "breakpoint information" or "breakpoints" or "information" as the debugger's information command regardless of case;
-	understand "info" or "i b" or "i" as the debugger's information command regardless of case;
+	understand "breakpoint information" or "breakpoint info" or "breakpoints" as the debugger's breakpoint information command regardless of case;
+	understand "breaktext information" or "breaktext info" or "breaktexts" as the debugger's breaktext information command regardless of case;
+	understand "information" or "info" or "i b" or "i" as the debugger's information command regardless of case;
 	understand "[b/bre/break/stop] [--/at/on] [a function name for the debugger]" as the debugger's break-by-function command regardless of case;
 	understand "[b/bre/break/stop] [--/at/on] [a function address for the debugger]" as the debugger's break-by-address command regardless of case;
 	understand "[b/bre/break/stop] [--/at/on] [a line number]" as the debugger's break-by-line-number command regardless of case;
 	understand "[b/bre/break/stop] here" or "[b/bre/break/stop]" as the debugger's break-by-inference command regardless of case;
+	understand "[b/bre/break/stop] [--/at/on] '[a simple text for the debugger]'" as the debugger's break-by-text command regardless of case;
 	understand "enable [a breakpoint number]" or "ena [a breakpoint number]" as the debugger's enable command regardless of case;
 	understand "disable [a breakpoint number]" or "dis [a breakpoint number]" as the debugger's disable command regardless of case;
 	understand "delete [a breakpoint number]" or "del [a breakpoint number]" or "d [a breakpoint number]" as the debugger's delete command regardless of case;
@@ -1596,6 +1872,8 @@ The last-seen debug command vertex is a parse tree vertex that varies.
 
 The debug command disambiguation attempted flag is a truth state that varies.
 
+The raw debug command is some text that varies.
+
 To dispatch the debug command (T - some text) (this is dispatching a debug command):
 	unless the current debugger coexecution state is story interrupted:
 		now the debugger's current call frame is the innermost call frame of a reconstructed call stack;
@@ -1610,6 +1888,7 @@ To dispatch the debug command (T - some text) (this is dispatching a debug comma
 				say "I didn't understand that command.  Check for misspellings or type 'help' to see the commands I do know.[paragraph break]";
 		otherwise:
 			let the command vertex be the first child of the root;
+			now the raw debug command is T;
 			handle the debug command rooted at the command vertex using a workaround for Inform bug 825;
 			if the command vertex has the parseme the debugger's again command:
 				delete the root and its descendants;
@@ -2919,7 +3198,7 @@ To say the debug location synopsis:
 
 Chapter "Breakpoint Commands" - unindexed
 
-To handle the debug command rooted at (V - a parse tree vertex that has the parseme the debugger's information command):
+To handle the debug command rooted at (V - a parse tree vertex that has the parseme the debugger's breakpoint information command):
 	let the informed flag be false;
 	repeat with the breakpoint index running over the half-open interval from zero to the breakpoint counter:
 		let the compound breakpoint be the first compound breakpoint value matching the key the breakpoint index in the user breakpoint hash table or an invalid compound breakpoint if there are no matches;
@@ -2928,6 +3207,32 @@ To handle the debug command rooted at (V - a parse tree vertex that has the pars
 			now the informed flag is true;
 	if the informed flag is false:
 		say "There are no breakpoints.[line break]";
+	say "[line break]".
+
+To handle the debug command rooted at (V - a parse tree vertex that has the parseme the debugger's breaktext information command):
+	let the informed flag be false;
+	repeat with the breakpoint index running over the half-open interval from zero to the breakpoint counter:
+		let the breaktext be the first breaktext value matching the key the breakpoint index in the user breaktext hash table or an invalid breaktext if there are no matches;
+		unless the breaktext is an invalid breaktext:
+			say "Breaktext [the numeric identifier of the breaktext] ([if the breaktext is enabled]enabled[otherwise]disabled[end if]): [the human-friendly name of the breaktext][line break]";
+			now the informed flag is true;
+	if the informed flag is false:
+		say "There are no breaktexts.[line break]";
+	say "[line break]".
+
+To handle the debug command rooted at (V - a parse tree vertex that has the parseme the debugger's information command):
+	let the informed flag be false;
+	repeat with the breakpoint index running over the half-open interval from zero to the breakpoint counter:
+		let the compound breakpoint be the first compound breakpoint value matching the key the breakpoint index in the user breakpoint hash table or an invalid compound breakpoint if there are no matches;
+		unless the compound breakpoint is an invalid compound breakpoint:
+			say "Breakpoint [the numeric identifier of the compound breakpoint] ([if the compound breakpoint is enabled]enabled[otherwise]disabled[end if]): [the human-friendly name of the compound breakpoint][line break]";
+			now the informed flag is true;
+		let the breaktext be the first breaktext value matching the key the breakpoint index in the user breaktext hash table or an invalid breaktext if there are no matches;
+		unless the breaktext is an invalid breaktext:
+			say "Breaktext [the numeric identifier of the breaktext] ([if the breaktext is enabled]enabled[otherwise]disabled[end if]): [the human-friendly name of the breaktext][line break]";
+			now the informed flag is true;
+	if the informed flag is false:
+		say "There are no breakpoints or breaktexts.[line break]";
 	say "[line break]".
 
 The function address for naming compound breakpoints is a number that varies.
@@ -3112,8 +3417,87 @@ To handle the debug command rooted at (V - a parse tree vertex that has the pars
 	unless the new compound breakpoint is an invalid compound breakpoint:
 		push the key the new compound breakpoint onto the last-seen compound breakpoint list.
 
+The simple text substitution for a line break is some text that varies.
+The simple text substitution for a single quote is some text that varies.
+The simple text substitution for a left square bracket is some text that varies.
+The simple text substitution for a right square bracket is some text that varies.
+A GRIF setup rule (this is the allocate permanent synthetic text for recognizing simple text substitutions rule):
+	now the simple text substitution for a line break is a new permanent synthetic text copied from "[bracket]line break[close bracket]";
+	now the simple text substitution for a single quote is a new permanent synthetic text copied from "[bracket]['][close bracket]";
+	now the simple text substitution for a left square bracket is a new permanent synthetic text copied from "[bracket]bracket[close bracket]";
+	now the simple text substitution for a right square bracket is a new permanent synthetic text copied from "[bracket]close bracket[close bracket]".
+
+The text for naming a breaktext is some text that varies.
+
+To enable and hash and announce (B - a breaktext):
+	enable B;
+	insert the key the numeric identifier of B and the value B into the user breaktext hash table;
+	say "Breaktext [the numeric identifier of B] (enabled): [the human-friendly name of B][paragraph break]".
+
+To handle the debug command rooted at (V - a parse tree vertex that has the parseme the debugger's break-by-text command):
+	let the text be a new synthetic text extracted from the synthetic text the raw debug command between the synthetic prefix the debug command string delimiter and the synthetic suffix the debug command string delimiter or the interned empty string if there is no match;
+	if the text is empty:
+		fail at finding the text for a breaktext;
+		stop;
+	let the remaining length be the length of the synthetic text the text;
+	let the source be the character array address of the synthetic text the text;
+	let the codepoint array address be a possibly zero-length memory allocation of the remaining length times four bytes;
+	let the target be the codepoint array address;
+	while the remaining length is greater than zero:
+		let the character code be the byte at address the source;
+		if the character code is:
+			-- 39: [single quote]
+				write the integer 34 [double quote] to address the target;
+				increment the source;
+				decrement the remaining length;
+			-- 91: [left square bracket]
+				let the substring be a new synthetic text extracted from the remaining length bytes at address the source;
+				if the synthetic text the substring begins with the synthetic text the simple text substitution for a line break:
+					write the integer 10 [newline] to address the target;
+					increase the source by the length of the synthetic text the simple text substitution for a line break;
+					decrease the remaining length by the length of the synthetic text the simple text substitution for a line break;
+				otherwise if the synthetic text the substring begins with the synthetic text the simple text substitution for a single quote:
+					write the integer 39 [single quote] to address the target;
+					increase the source by the length of the synthetic text the simple text substitution for a single quote;
+					decrease the remaining length by the length of the synthetic text the simple text substitution for a single quote;
+				otherwise if the synthetic text the substring begins with the synthetic text the simple text substitution for a left square bracket:
+					write the integer 91 [left square bracket] to address the target;
+					increase the source by the length of the synthetic text the simple text substitution for a left square bracket;
+					decrease the remaining length by the length of the synthetic text the simple text substitution for a left square bracket;
+				otherwise if the synthetic text the substring begins with the synthetic text the simple text substitution for a right square bracket:
+					write the integer 93 [right square bracket] to address the target;
+					increase the source by the length of the synthetic text the simple text substitution for a right square bracket;
+					decrease the remaining length by the length of the synthetic text the simple text substitution for a right square bracket;
+				otherwise:
+					say "Unrecognized or malformed text substitution: ...[the substring][paragraph break](Recognized substitutions are [the simple text substitution for a line break], [the simple text substitution for a single quote], [the simple text substitution for a left square bracket], and [the simple text substitution for a right square bracket], where spacing is important.)[paragraph break]";
+					delete the synthetic text the substring;
+					delete the synthetic text the text;
+					stop;
+				delete the synthetic text the substring;
+			-- otherwise:
+				write the integer the character code to address the target;
+				increment the source;
+				decrement the remaining length;
+		increase the target by four;
+	delete the synthetic text the text;
+	let the length be the target minus the codepoint array address;
+	now the length is the length divided by four;
+	if the length is greater than the length of the longest breaktext:
+		let the old capacity be the capacity corresponding to the longest breaktext;
+		now the length of the longest breaktext is the length;
+		let the new capacity be the capacity corresponding to the longest breaktext;
+		repeat with the linked list vertex running through the stream log hash table:
+			let the stream log be the stream log value of the linked list vertex;
+			let the expansion be a new expansion of the stream log to have a capacity of at least the new capacity bytes;
+			delete the stream log;
+			write the value the expansion to the linked list vertex;
+		if four times the length of the longest breaktext is greater than the old capacity:
+			say "Warning: Because this breaktext is longer than the amount of output history I've been keeping, I might not detect occurrences that have already been mostly printed.  The same caveat will apply if you add other long breaktexts before the output history fills the now expanded buffer.[paragraph break]";
+	now the text for naming a breaktext is the text;
+	enable and hash and announce a new breaktext for the length codepoints at address the codepoint array address named "break when '[the text for naming a breaktext]' is printed".
+
 To handle the debug command rooted at (V - a parse tree vertex that has the parseme the debugger's delete all command):
-	say "Really delete all breakpoints (y or n)? ";
+	say "Really delete all breakpoints and breaktexts (y or n)? ";
 	unless the author consents:
 		say "[line break]";
 		stop;
@@ -3121,51 +3505,74 @@ To handle the debug command rooted at (V - a parse tree vertex that has the pars
 	repeat with the compound breakpoint running through the compound breakpoint values of the user breakpoint hash table:
 		delete the compound breakpoint;
 	clear the user breakpoint hash table;
-	say "All breakpoints deleted.[paragraph break]".
+	repeat with the breaktext running through the breaktext values of the user breaktext hash table:
+		delete the breaktext;
+	clear the user breaktext hash table;
+	say "All breakpoints and breaktexts deleted.[paragraph break]".
 
 To handle the debug command rooted at (V - a parse tree vertex that has the parseme the debugger's disable all command):
 	repeat with the compound breakpoint running through the compound breakpoint values of the user breakpoint hash table:
 		disable the compound breakpoint;
-	say "All breakpoints disabled.[paragraph break]".
+	repeat with the breaktext running through the breaktext values of the user breaktext hash table:
+		disable the breaktext;
+	say "All breakpoints and breaktexts disabled.[paragraph break]".
 
 To handle the debug command rooted at (V - a parse tree vertex that has the parseme the debugger's enable all command):
 	repeat with the compound breakpoint running through the compound breakpoint values of the user breakpoint hash table:
 		enable the compound breakpoint;
-	say "All breakpoints enabled.[paragraph break]".
+	repeat with the breaktext running through the breaktext values of the user breaktext hash table:
+		enable the breaktext;
+	say "All breakpoints and breaktexts enabled.[paragraph break]".
 
 To handle the debug command rooted at (V - a parse tree vertex that has the parseme the debugger's delete command):
 	let the breakpoint number vertex be the first match for a breakpoint number among the children of V;
 	let the decimal vertex be the first match for a decimal number for the debugger among the children of the breakpoint number vertex;
 	let the breakpoint index be the decimal number named by the decimal vertex;
 	let the compound breakpoint be the first compound breakpoint value matching the key the breakpoint index in the user breakpoint hash table or an invalid compound breakpoint if there are no matches;
-	if the compound breakpoint is an invalid compound breakpoint:
-		say "No such breakpoint exists.[paragraph break]";
+	unless the compound breakpoint is an invalid compound breakpoint:
+		delete the compound breakpoint;
+		remove the first occurrence of the key the breakpoint index from the user breakpoint hash table;
+		say "Breakpoint deleted.[paragraph break]";
 		stop;
-	delete the compound breakpoint;
-	remove the first occurrence of the key the breakpoint index from the user breakpoint hash table;
-	say "Breakpoint deleted.[paragraph break]".
+	let the breaktext be the first breaktext value matching the key the breakpoint index in the user breaktext hash table or an invalid breaktext if there are no matches;
+	unless the breaktext is an invalid breaktext:
+		delete the breaktext;
+		remove the first occurrence of the key the breakpoint index from the user breaktext hash table;
+		say "Breaktext deleted.[paragraph break]";
+		stop;
+	say "No such breakpoint or breaktext exists.[paragraph break]".
 
 To handle the debug command rooted at (V - a parse tree vertex that has the parseme the debugger's disable command):
 	let the breakpoint number vertex be the first match for a breakpoint number among the children of V;
 	let the decimal vertex be the first match for a decimal number for the debugger among the children of the breakpoint number vertex;
 	let the breakpoint index be the decimal number named by the decimal vertex;
 	let the compound breakpoint be the first compound breakpoint value matching the key the breakpoint index in the user breakpoint hash table or an invalid compound breakpoint if there are no matches;
-	if the compound breakpoint is an invalid compound breakpoint:
-		say "No such breakpoint exists.[paragraph break]";
+	unless the compound breakpoint is an invalid compound breakpoint:
+		disable the compound breakpoint;
+		say "Breakpoint disabled.[paragraph break]";
 		stop;
-	disable the compound breakpoint;
-	say "Breakpoint disabled.[paragraph break]".
+	let the breaktext be the first breaktext value matching the key the breakpoint index in the user breaktext hash table or an invalid breaktext if there are no matches;
+	unless the breaktext is an invalid breaktext:
+		disable the breaktext;
+		say "Breaktext disabled.[paragraph break]";
+		stop;
+	say "No such breakpoint or breaktext exists.[paragraph break]".
 
 To handle the debug command rooted at (V - a parse tree vertex that has the parseme the debugger's enable command):
 	let the breakpoint number vertex be the first match for a breakpoint number among the children of V;
 	let the decimal vertex be the first match for a decimal number for the debugger among the children of the breakpoint number vertex;
 	let the breakpoint index be the decimal number named by the decimal vertex;
 	let the compound breakpoint be the first compound breakpoint value matching the key the breakpoint index in the user breakpoint hash table or an invalid compound breakpoint if there are no matches;
-	if the compound breakpoint is an invalid compound breakpoint:
-		say "No such breakpoint exists.[paragraph break]";
+	unless the compound breakpoint is an invalid compound breakpoint:
+		enable the compound breakpoint;
+		say "Breakpoint enabled.[paragraph break]";
 		stop;
-	enable the compound breakpoint;
-	say "Breakpoint enabled.[paragraph break]".
+	let the breaktext be the first breaktext value matching the key the breakpoint index in the user breaktext hash table or an invalid breaktext if there are no matches;
+	unless the breaktext is an invalid breaktext:
+		enable the breaktext;
+		say "Breaktext enabled.[paragraph break]";
+		stop;
+	say "No such breakpoint or breaktext exists.[paragraph break]".
 
 Chapter "Control Flow Commands" - unindexed
 
