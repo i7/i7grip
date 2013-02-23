@@ -723,6 +723,24 @@ Include (-
 		@linearsearch needle needleLength haystack 1 possibilities 0 5 result;
 		return result;
 	];
+	[ llo_shortSubsequenceIndex needle needleLength haystack haystackLength possibilities result;
+		if(needleLength>haystackLength){
+			return 0;
+		}
+		possibilities=1+haystackLength-needleLength;
+		needleLength=needleLength*2;
+		@linearsearch needle needleLength haystack 4 possibilities 0 5 result;
+		return result;
+	];
+	[ llo_intSubsequenceIndex needle needleLength haystack haystackLength possibilities result;
+		if(needleLength>haystackLength){
+			return 0;
+		}
+		possibilities=1+haystackLength-needleLength;
+		needleLength=needleLength*4;
+		@linearsearch needle needleLength haystack 4 possibilities 0 5 result;
+		return result;
+	];
 	[ llo_byteAddress needle haystack haystackLength result;
 		if(haystackLength<=0){
 			return 0;
@@ -754,17 +772,39 @@ Include (-
 		@linearsearch needle needleLength haystack 1 possibilities 0 1 result;
 		return result;
 	];
+	[ llo_shortSubsequenceAddress needle needleLength haystack haystackLength possibilities result;
+		if(needleLength>haystackLength){
+			return 0;
+		}
+		possibilities=1+haystackLength-needleLength;
+		needleLength=needleLength*2;
+		@linearsearch needle needleLength haystack 4 possibilities 0 1 result;
+		return result;
+	];
+	[ llo_intSubsequenceAddress needle needleLength haystack haystackLength possibilities result;
+		if(needleLength>haystackLength){
+			return 0;
+		}
+		possibilities=1+haystackLength-needleLength;
+		needleLength=needleLength*4;
+		@linearsearch needle needleLength haystack 4 possibilities 0 1 result;
+		return result;
+	];
 -).
 
 To decide what number is the index of the byte (B - a number) in the (N - a number) bytes at address (A - a number): (- llo_byteIndex({B},{A},{N}) -).
 To decide what number is the index of the short (S - a number) in the (N - a number) shorts at address (A - a number): (- llo_shortIndex({S},{A},{N}) -).
 To decide what number is the index of the integer (I - a number) in the (N - a number) integers at address (A - a number): (- llo_intIndex({I},{A},{N}) -).
 To decide what number is the index of the (N - a number) bytes at address (A - a number) in the (M - a number) bytes at address (B - a number): (- llo_byteSubsequenceIndex({A},{N},{B},{M}) -).
+To decide what number is the index of the (N - a number) shorts at address (A - a number) in the (M - a number) shorts at address (B - a number): (- llo_shortSubsequenceIndex({A},{N},{B},{M}) -).
+To decide what number is the index of the (N - a number) integers at address (A - a number) in the (M - a number) integers at address (B - a number): (- llo_intSubsequenceIndex({A},{N},{B},{M}) -).
 
 To decide what number is the address of the byte (B - a number) in the (N - a number) bytes at address (A - a number): (- llo_byteAddress({B},{A},{N}) -).
 To decide what number is the address of the short (S - a number) in the (N - a number) shorts at address (A - a number): (- llo_shortAddress({S},{A},{N}) -).
 To decide what number is the address of the integer (I - a number) in the (N - a number) integers at address (A - a number): (- llo_intAddress({I},{A},{N}) -).
 To decide what number is the address of the (N - a number) bytes at address (A - a number) in the (M - a number) bytes at address (B - a number): (- llo_byteSubsequenceAddress({A},{N},{B},{M}) -).
+To decide what number is the address of the (N - a number) shorts at address (A - a number) in the (M - a number) shorts at address (B - a number): (- llo_shortSubsequenceAddress({A},{N},{B},{M}) -).
+To decide what number is the address of the (N - a number) integers at address (A - a number) in the (M - a number) integers at address (B - a number): (- llo_intSubsequenceAddress({A},{N},{B},{M}) -).
 
 Chapter "Ingredients for Complicated Loops"
 
@@ -1447,13 +1487,17 @@ or sequence of bytes:
 
 If no match is found, these phrases decide on -1.
 
-A similar phrase is available for arrays of shorts:
+Similar phrases are available for arrays of shorts:
 
 	the index of the short (I - a number) in the (J - a number) shorts at address (K - a number)
+
+	the index of the (I - a number) shorts at address (J - a number) in the (K - a number) shorts at address (L - a number)
 
 and integers:
 
 	the index of the integer (I - a number) in the (J - a number) integers at address (K - a number)
+
+	the index of the (I - a number) integers at address (J - a number) in the (K - a number) integers at address (L - a number)
 
 For addresses instead of indices, we substitute the word "address" for "index".
 For example,
