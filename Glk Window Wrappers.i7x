@@ -1340,6 +1340,19 @@ To while within (W - a wrapped window) via (A - a wrapping layer) begin -- end: 
 		}else for(llo_oneTime=true,llo_broken=true,llo_advance=true:llo_oneTime&&((llo_oneTime=false),true):)
 -).
 
+Include (-
+	[ gww_within window;
+		return glk_stream_get_current()==glk_window_get_stream(window);
+	];
+-).
+
+To decide what number is testing whether we are within a window: (- gww_within -).
+
+To decide whether we are within (W - a wrapped window): (- gww_within({W}) -).
+
+A GRIF shielding rule (this is the shield testing whether we are within a window rule):
+	shield testing whether we are within a window against instrumentation.
+
 Chapter "Input in Wrapping Windows"
 
 Section "Waiting for Events"
@@ -1792,7 +1805,13 @@ the ellipsis directs output to W, while exiting it points output back to its
 former destination.  Therefore, unless we intervene, say phrases invoked from
 within the ellipsis, even indirectly, will print to W.  Importantly, this phrase
 only works in a wrapping layer phrase or an uninstrumented context (see the
-documentation for the Glulx Runtime Instrumentation Framework).
+documentation for the Glulx Runtime Instrumentation Framework).  The
+corresponding conditional
+
+	if we are within (W - a wrapped window):
+		....
+
+tests whether output is currently directed to W.
 
 For input, we make a Glk event request as usual.  But in place of glk_select, we
 write
