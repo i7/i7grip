@@ -1182,7 +1182,7 @@ Section "Managing Artificial Source Addresses"
 To start a new generation of artificial vertices:
 	now the first artificial source address in the current generation is the next available artificial source address.
 
-To decide whether (A - an instruction vertex) is artificial:
+Definition: an instruction vertex (called A) is artificial:
 	decide on whether or not the source address of A is at least the first artificial source address.
 
 To decide whether (A - an instruction vertex) is older than the current generation:
