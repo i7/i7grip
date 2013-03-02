@@ -92,12 +92,14 @@ To fail at reading up through character code (C - a number) when the available b
 Book "Early Adoption" - unindexed
 
 Include (-
+#ifndef glk_stream_open_resource;
 	[ glk_stream_open_resource _vararg_count ret;
 	! glk_stream_open_resource (filenum rock)
 	  ! And now the @glk call
 	  @glk $49 _vararg_count ret;
 	  return ret;
 	];
+#endif;
 -) after "Definitions.i6t".
 
 Book "Rocks"
