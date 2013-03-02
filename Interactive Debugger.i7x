@@ -3276,6 +3276,25 @@ To decide what compound breakpoint is a breakpoint placed on I7 line number (N -
 	enable and hash and announce the compound breakpoint;
 	decide on the compound breakpoint.
 
+To decide whether we warn that shielding or substitutions interfere with breakpoints in the function at address (A - a number):
+	let the instrumented address be the first number value matching the key A in the instrumented chunks hash table or zero if there are no matches;
+	if the instrumented address is A:
+		say "Warning: [the human-friendly name for the function at address A] has GRIF shielding, so, under normal circumstances, breakpoints placed inside will never trigger.  Place one anyway? ";
+		decide yes;
+	let the substituted address be the address of the function substituted for the function at address A;
+	if the substituted address is not A:
+		let the substitution name be the human-friendly name for the function at address the substituted address;
+		if the substitution name is "an unnamed rule or phrase":
+			say "Warning: [the human-friendly name for the function at address A] has an unnamed GRIF substitution, so, under normal circumstances, breakpoints placed inside will never trigger.  Place one anyway? ";
+		otherwise:
+			say "Warning: [the human-friendly name for the function at address A] has a GRIF substitution, [the substitution name], so, under normal circumstances, breakpoints placed inside will never trigger.  Place one anyway? ";
+		decide yes;
+	guess the routine shell for A;
+	let the routine shell address be the routine shell address of the function at address the function address of A;
+	unless the routine shell address is zero:
+		decide on whether or not we warn that shielding or substitutions interfere with breakpoints in the function at address the routine shell address;
+	decide no.
+
 The rule-announcing infix is some text that varies.
 A GRIF setup rule (this is the allocate permanent synthetic text for the rule-announcing infix rule):
 	now the rule-announcing infix is a new permanent synthetic text copied from "DB_Rule".
@@ -3315,6 +3334,10 @@ To break the function at address (A - a number):
 	if the sequence point linked list is empty:
 		say "There are no sequence points in [the human-friendly name for the function at address A].[paragraph break]";
 		stop;
+	if we warn that shielding or substitutions interfere with breakpoints in the function at address the function address of the routine record:
+		unless the author consents:
+			say "[line break]";
+			stop;
 	let the first I6 line number be the I6 line number after the applicability test in the routine record;
 	unless the first I6 line number is zero:
 		say "Would you like to place the breakpoint after the rule's applicability check, so that it only pauses the story when the rule applies (y or n)? ";
@@ -3383,6 +3406,10 @@ To handle the debug command rooted at (V - a parse tree vertex that has the pars
 		if the empty flag is true:
 			say "There are no sequence points on that line.[paragraph break]";
 			stop;
+		if we warn that shielding or substitutions interfere with breakpoints in the function at address the function address of the routine record:
+			unless the author consents:
+				say "[line break]";
+				stop;
 		now the line number for naming compound breakpoints is the line number;
 		let the discarded value be a breakpoint placed on I7 line number the line number in the routine record with the human-friendly name "Pause on I7 line [the nonnegative number the line number for naming compound breakpoints as at least six digits]";
 		stop;
