@@ -526,7 +526,7 @@ To elide calls to the routine at address (A - a number) with the routine name (T
 A GRIF setup rule (this is the elide standard template routines rule):
 	traverse the standard template routines with the visitor eliding calls to each standard template routine.
 
-Chapter "Simplification by Eliding Resolvers" - unindexed
+Chapter "Simplification by Eliding Resolvers" (for use with Debug File Parsing by Brady Garvin)
 
 The resolver index for capturing names of potentially elidable resolvers is a number that varies.
 
