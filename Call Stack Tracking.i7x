@@ -37,12 +37,14 @@ Chapter "Use Options" - unindexed
 Use a call substack hash table size of at least 2311 translates as (- Constant CST_CALL_SUBSTACK_HASH_SIZE={N}; -).
 Use a call stack reconstruction hash table size of at least 311 translates as (- Constant CST_RECONSTRUCTION_HASH_SIZE={N}; -).
 Use an elided function hash table size of at least 1123 translates as (- Constant CST_ELIDED_FUNCTION_HASH_SIZE={N}; -).
+Use a nonreturning jump hash table size of at least 311 translates as (- Constant CST_NONRETURNING_JUMP_HASH_SIZE={N}; -).
 
 Use a call stack vertex preallocation of at least 128 translates as (- Constant CST_CALL_STACK_VERTEX_PREALLOC={N}; -).
 
 To decide what number is the call substack hash table size: (- CST_CALL_SUBSTACK_HASH_SIZE -).
 To decide what number is the call stack reconstruction hash table size: (- CST_RECONSTRUCTION_HASH_SIZE -).
 To decide what number is the elided function hash table size: (- CST_ELIDED_FUNCTION_HASH_SIZE -).
+To decide what number is the nonreturning jump hash table size: (- CST_NONRETURNING_JUMP_HASH_SIZE -).
 
 To decide what number is the call stack vertex preallocation: (- CST_CALL_STACK_VERTEX_PREALLOC -).
 
@@ -975,6 +977,16 @@ To insert call stack tracking in (A - a call stack vertex) at the function entry
 
 Chapter "Exit Instrumentation" - unindexed
 
+Section "The Call Substack Hash Table" - unindexed
+
+The nonreturning jump hash table is a hash table that varies.
+
+A GRIF setup rule (this is the allocate a hash table for remembering nonreturning jumps rule):
+	now the nonreturning jump hash table is a new hash table with the nonreturning jump hash table size buckets.
+
+A GRIF capture rule (this is the clear the nonreturning jump hash table rule):
+	clear the nonreturning jump hash table.
+
 Section "Instrumentation to Eliminate Tailcalls" - unindexed
 
 [ @return <stack>; ]
@@ -1017,6 +1029,8 @@ To decide what instruction vertex is a new conditional return instruction vertex
 To convert the conditional return (V - an instruction vertex) into a conditional jump to a return:
 	unless V is older than the current generation and the jump link of V is null and the relative jump addressing flag is set in V:
 		stop;
+	if the nonreturning jump hash table contains the key V:
+		stop;
 	let the parameter index be the jump parameter index of V;
 	let the plain chunk mode be the addressing mode of parameter parameter index of V;
 	if the plain chunk mode is the zero-or-discard addressing mode or the plain chunk mode is the constant addressing mode:
@@ -1037,7 +1051,8 @@ To convert the conditional return (V - an instruction vertex) into a conditional
 	insert the conditional jump-to-return instruction vertex before V;
 	let the conditional return instruction vertex be a new conditional return instruction vertex for mode plain chunk mode and parameter plain chunk parameter;
 	insert the conditional return instruction vertex at the end of the arrangement;
-	establish a jump link from the conditional jump-to-return instruction vertex to the conditional return instruction vertex.
+	establish a jump link from the conditional jump-to-return instruction vertex to the conditional return instruction vertex;
+	insert the key V into the nonreturning jump hash table.
 
 To convert conditional returns into conditional jumps to returns:
 	repeat with the instruction vertex running through occurrences of jump without call in the scratch space:
