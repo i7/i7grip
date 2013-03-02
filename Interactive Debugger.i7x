@@ -1462,6 +1462,7 @@ A decimal number for the debugger and
 
 A debug command and
 	--/a/an/the and
+	--/any/every and
 	--/at/on and
 	--/my and
 	--/the and
@@ -1487,6 +1488,7 @@ A debug command and
 	the debugger's break-by-function command and
 	the debugger's break-by-line-number command and
 	the debugger's break-by-inference command and
+	the debugger's break-by-output command and
 	the debugger's break-by-text command and
 	the debugger's continue command and
 	the debugger's delete all command and
@@ -1561,6 +1563,7 @@ A GRIF setup rule (this is the set up the debug command parser rule):
 	now a simple text for the debugger is a new terminal in the debug command parser named "a text with only simple substitutions" and parsed by parsing arbitrary words without double quotes;
 	now a debug command is a new nonterminal in the debug command parser named "a debug command";
 	now --/a/an/the is a new nonterminal in the debug command parser named "an optional occurrence of an article like 'a' or 'the'";
+	now --/any/every is a new nonterminal in the debug command parser named "an optional occurrence of the word 'any' or the word 'every'";
 	now --/at/on is a new nonterminal in the debug command parser named "an optional occurrence of the word 'at' or the word 'on'";
 	now --/my is a new nonterminal in the debug command parser named "an optional occurrence of the word 'my'";
 	now --/the is a new nonterminal in the debug command parser named "an optional occurrence of the word 'the'";
@@ -1586,6 +1589,7 @@ A GRIF setup rule (this is the set up the debug command parser rule):
 	now the debugger's break-by-function command is a new nonterminal in the debug command parser named "the 'break' command for a function";
 	now the debugger's break-by-line-number command is a new nonterminal in the debug command parser named "the 'break' command for a line number";
 	now the debugger's break-by-inference command is a new nonterminal in the debug command parser named "the 'break here' command";
+	now the debugger's break-by-output command is a new nonterminal in the debug command parser named "the 'break on output' command";
 	now the debugger's break-by-text command is a new nonterminal in the debug command parser named "the 'break' command for a text";
 	now the debugger's continue command is a new nonterminal in the debug command parser named "the 'continue' command";
 	now the debugger's delete all command is a new nonterminal in the debug command parser named "the 'delete all breakpoints' command";
@@ -1651,6 +1655,7 @@ A GRIF setup rule (this is the set up the debug command parser rule):
 	understand "[the debugger's break-by-function command]" as a debug command;
 	understand "[the debugger's break-by-line-number command]" as a debug command;
 	understand "[the debugger's break-by-inference command]" as a debug command;
+	understand "[the debugger's break-by-output command]" as a debug command;
 	understand "[the debugger's break-by-text command]" as a debug command;
 	understand "[the debugger's continue command]" as a debug command;
 	understand "[the debugger's delete all command]" as a debug command;
@@ -1731,6 +1736,7 @@ A GRIF setup rule (this is the set up the debug command parser rule):
 	understand "[b/bre/break/stop] [--/at/on] [a function address for the debugger]" as the debugger's break-by-address command regardless of case;
 	understand "[b/bre/break/stop] [--/at/on] [a line number]" as the debugger's break-by-line-number command regardless of case;
 	understand "[b/bre/break/stop] here" or "[b/bre/break/stop]" as the debugger's break-by-inference command regardless of case;
+	understand "[b/bre/break/stop] [--/at/on] [--/any/every] output" as the debugger's break-by-output command regardless of case;
 	understand "[b/bre/break/stop] [--/at/on] '[a simple text for the debugger]'" as the debugger's break-by-text command regardless of case;
 	understand "enable [a breakpoint number]" or "ena [a breakpoint number]" as the debugger's enable command regardless of case;
 	understand "disable [a breakpoint number]" or "dis [a breakpoint number]" as the debugger's disable command regardless of case;
@@ -1824,6 +1830,7 @@ A GRIF setup rule (this is the set up the debug command parser rule):
 	understand "b" or "bre" or "break" or "stop" as b/bre/break/stop regardless of case;
 	[//]
 	understand "" or "a" or "an" or "the" as --/a/an/the regardless of case;
+	understand "" or "any" or "every" as --/any/every regardless of case;
 	understand "" or "at" or "on" as --/at/on regardless of case;
 	understand "" or "the" as --/the regardless of case;
 	understand "" or "my" as --/my regardless of case;
@@ -3536,6 +3543,9 @@ To enable and hash and announce (B - a breaktext):
 	enable B;
 	insert the key the numeric identifier of B and the value B into the user breaktext hash table;
 	say "Breaktext [the numeric identifier of B] (enabled): [the human-friendly name of B][paragraph break]".
+
+To handle the debug command rooted at (V - a parse tree vertex that has the parseme the debugger's break-by-output command):
+	enable and hash and announce a new breaktext for the zero codepoints at address the address for a zero-length allocation named "break when any text is printed".
 
 To handle the debug command rooted at (V - a parse tree vertex that has the parseme the debugger's break-by-text command):
 	let the text be a new synthetic text extracted from the synthetic text the raw debug command between the synthetic prefix the debug command string delimiter and the synthetic suffix the debug command string delimiter or the interned empty string if there is no match;
