@@ -1512,6 +1512,8 @@ A debug command and
 	the debugger's list-by-function command and
 	the debugger's list-by-line-number command and
 	the debugger's list-by-line-numbers command and
+	the debugger's list-by-instruction-address command and
+	the debugger's list-by-instruction-addresses command and
 	the debugger's list-by-inference command and
 	the debugger's list-instrumentation command and
 	the debugger's next command and
@@ -1613,6 +1615,8 @@ A GRIF setup rule (this is the set up the debug command parser rule):
 	now the debugger's list-by-function command is a new nonterminal in the debug command parser named "the 'list' command for a function";
 	now the debugger's list-by-line-number command is a new nonterminal in the debug command parser named "the 'list' command for a line number";
 	now the debugger's list-by-line-numbers command is a new nonterminal in the debug command parser named "the 'list' command for a range of line numbers";
+	now the debugger's list-by-instruction-address command is a new nonterminal in the debug command parser named "the 'list' command for an instruction given by its address";
+	now the debugger's list-by-instruction-addresses command is a new nonterminal in the debug command parser named "the 'list' command for instructions given by their addresses";
 	now the debugger's list-by-inference command is a new nonterminal in the debug command parser named "the 'list the current function' command";
 	now the debugger's list-instrumentation command is a new nonterminal in the debug command parser named "the 'list instrumentation' command";
 	now the debugger's next command is a new nonterminal in the debug command parser named "the 'next' command";
@@ -1679,6 +1683,8 @@ A GRIF setup rule (this is the set up the debug command parser rule):
 	understand "[the debugger's list-by-function command]" as a debug command;
 	understand "[the debugger's list-by-line-number command]" as a debug command;
 	understand "[the debugger's list-by-line-numbers command]" as a debug command;
+	understand "[the debugger's list-by-instruction-address command]" as a debug command;
+	understand "[the debugger's list-by-instruction-addresses command]" as a debug command;
 	understand "[the debugger's list-by-inference command]" as a debug command;
 	understand "[the debugger's list-instrumentation command]" as a debug command;
 	understand "[the debugger's next command]" as a debug command;
@@ -1760,6 +1766,8 @@ A GRIF setup rule (this is the set up the debug command parser rule):
 	understand "[l/list]" or "list [a debugging language]" or "list as [a debugging language]" as the debugger's list-by-inference command regardless of case;
 	understand "[l/list] [a line number]" or "[l/list] [a line number] as [a debugging language]" as the debugger's list-by-line-number command regardless of case;
 	understand "[l/list] [a line number] [through] [a line number]" or "[l/list] [a line number] [through] [a line number] as [a debugging language]" as the debugger's list-by-line-numbers command regardless of case;
+	understand "[l/list] [a hexadecimal number for the debugger]" as the debugger's list-by-instruction-address command regardless of case;
+	understand "[l/list] [a hexadecimal number for the debugger] [through] [a hexadecimal number for the debugger]" as the debugger's list-by-instruction-addresses command regardless of case;
 	understand "[l/list] [a function name for the debugger]" or "[l/list] [a function name for the debugger] as [a debugging language]" as the debugger's list-by-function command regardless of case;
 	understand "[l/list] [a function address for the debugger]" or "[l/list] [a function address for the debugger] as [a debugging language]" as the debugger's list-by-address command regardless of case;
 	understand "list instrumentation" or "li" as the debugger's list-instrumentation command regardless of case;
@@ -3237,6 +3245,66 @@ To handle the debug command rooted at (V - a parse tree vertex that has the pars
 			say "[only the I7 from line number the beginning line number to the end line number with the sequence point the sequence point selected]";
 		-- otherwise:
 			say "I can only list a range of lines in I6 or I7.[paragraph break]".		
+
+Section "Listing by Instruction Address"
+
+To decide what number is the function address for the instruction address (A - a number):
+	if A is unsigned at least the size of read-only memory:
+		decide on zero;
+	let the candidate be A;
+	while the candidate is not zero:
+		if the candidate is a sequence point:
+			decide on the function address of the routine record owning the sequence point the candidate;
+		let the routine record be the routine record for the candidate;
+		unless the routine record is an invalid routine record:
+			decide on the function address of the routine record;
+		decrement the candidate;
+	decide on zero.
+
+To handle the debug command rooted at (V - a parse tree vertex that has the parseme the debugger's list-by-instruction-address command):
+	let the sequence point be the sequence point to highlight;
+	let the hexadecimal vertex be the first match for a hexadecimal number for the debugger among the children of V;
+	let the instruction address be the hexadecimal number named by the hexadecimal vertex;
+	let the function address be the function address for the instruction address the instruction address;
+	if the function address is zero:
+		say "There is no such instruction (at least according to the debug information file).[paragraph break]";
+		stop;
+	parse the function at address the function address;
+	let the instruction vertex be the instruction vertex corresponding to source address the instruction address;
+	if the instruction vertex is an invalid instruction vertex:
+		say "There is no such instruction (at least according to the debug information file).[paragraph break]";
+		stop;
+	let the next instruction vertex be one instruction vertex after the instruction vertex or else the end of the function;
+	say "[fixed letter spacing][the Glulx assembly from the instruction vertex to the next instruction vertex with the sequence point the sequence point selected][variable letter spacing][line break]".
+
+To handle the debug command rooted at (V - a parse tree vertex that has the parseme the debugger's list-by-instruction-addresses command):
+	let the sequence point be the sequence point to highlight;
+	let the beginning hexadecimal vertex be the first match for a hexadecimal number for the debugger among the children of V;
+	let the beginning instruction address be the hexadecimal number named by the beginning hexadecimal vertex;
+	let the function address be the function address for the instruction address the beginning instruction address;
+	if the function address is zero:
+		say "There is no instruction at address [the beginning instruction address in hexadecimal] (at least according to the debug information file).[paragraph break]";
+		stop;
+	let the end hexadecimal vertex be the next match for a hexadecimal number for the debugger after the child the beginning hexadecimal vertex;
+	let the end instruction address be the hexadecimal number named by the end hexadecimal vertex;
+	let the corroborating function address be the function address for the instruction address the end instruction address;
+	if the corroborating function address is zero:
+		say "There is no instruction at address [the end instruction address in hexadecimal] (at least according to the debug information file).[paragraph break]";
+		stop;
+	if the function address is not the corroborating function address:
+		say "At present, I can only list instruction address ranges that do not cross function boundaries.[paragraph break]";
+		stop;
+	parse the function at address the function address;
+	let the beginning instruction vertex be the instruction vertex corresponding to source address the beginning instruction address;
+	if the beginning instruction vertex is an invalid instruction vertex:
+		say "There is no instruction at address [the beginning instruction address in hexadecimal] (at least according to the debug information file).[paragraph break]";
+		stop;
+	let the end instruction vertex be the instruction vertex corresponding to source address the end instruction address;
+	if the end instruction vertex is an invalid instruction vertex:
+		say "There is no instruction at address [the end instruction address in hexadecimal] (at least according to the debug information file).[paragraph break]";
+		stop;
+	let the next instruction vertex be one instruction vertex after the end instruction vertex or else the end of the function;
+	say "[fixed letter spacing][the Glulx assembly from the beginning instruction vertex to the next instruction vertex with the sequence point the sequence point selected][variable letter spacing][line break]".
 
 Section "Listing Instrumentation" - unindexed
 
