@@ -2656,8 +2656,8 @@ Once we have a valid routine record, many data are available.  First off,
 
 	the function address of (A - a routine record)
 
-locates the routine in memory.  With Human-Friendly Function Names included, the
-address can also be used to find a human-friendly name for the routine, via
+locates the routine in memory.  The address can also be used to find a
+human-friendly name for the routine, via
 
 	the human-friendly name for the function at address (A - a number)
 
