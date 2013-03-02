@@ -92,7 +92,7 @@ Chapter "The Linked List Vertex Structure" - unindexed
 [It might more organizational sense to put the key and underlying key together, but the key and value are better stored contiguously when we use @linkedsearch to look for a particular key/value pair.]
 [Linked list vertices do not ordinarily manage the lifetime of their links, but we can delete everything reachable from a beginning vertex if we so choose.]
 
-To decide what number is the size of a linked list vertex: (- 16 -).
+To decide what number is the size in memory of a linked list vertex: (- 16 -).
 
 Section "Linked List Vertex Construction and Destruction" - unindexed
 
@@ -274,34 +274,34 @@ Chapter "The Permanent Linked List Vertex Structure"
 Section "Permanent Linked List Vertex Construction" - unindexed
 
 To decide what permanent linked list vertex is a new permanent linked list vertex with the key (K - a value) and the link (L - a permanent linked list vertex):
-	let the result be a permanent memory allocation of the size of a linked list vertex bytes converted to a permanent linked list vertex;
+	let the result be a permanent memory allocation of the size in memory of a linked list vertex bytes converted to a permanent linked list vertex;
 	write the key K to the result;
 	write the link L to the result;
 	decide on the result.
 
 To decide what permanent linked list vertex is a new permanent linked list vertex with the key (K - a value) and the underlying key (U - a value) and the link (L - a permanent linked list vertex):
-	let the result be a permanent memory allocation of the size of a linked list vertex bytes converted to a permanent linked list vertex;
+	let the result be a permanent memory allocation of the size in memory of a linked list vertex bytes converted to a permanent linked list vertex;
 	write the key K to the result;
 	write the underlying key U to the result;
 	write the link L to the result;
 	decide on the result.
 
 To decide what permanent linked list vertex is a new permanent linked list vertex with the textual key (K - some text) and the link (L - a permanent linked list vertex):
-	let the result be a permanent memory allocation of the size of a linked list vertex bytes converted to a permanent linked list vertex;
+	let the result be a permanent memory allocation of the size in memory of a linked list vertex bytes converted to a permanent linked list vertex;
 	write the key the normal hash of K to the result;
 	write the underlying key K to the result;
 	write the link L to the result;
 	decide on the result.
 
 To decide what permanent linked list vertex is a new permanent linked list vertex with the key (K - a value) and the value (V - a value) and the link (L - a permanent linked list vertex):
-	let the result be a permanent memory allocation of the size of a linked list vertex bytes converted to a permanent linked list vertex;
+	let the result be a permanent memory allocation of the size in memory of a linked list vertex bytes converted to a permanent linked list vertex;
 	write the key K to the result;
 	write the value V to the result;
 	write the link L to the result;
 	decide on the result.
 
 To decide what permanent linked list vertex is a new permanent linked list vertex with the key (K - a value) and the underlying key (U - a value) and the value (V - a value) and the link (L - a permanent linked list vertex):
-	let the result be a permanent memory allocation of the size of a linked list vertex bytes converted to a permanent linked list vertex;
+	let the result be a permanent memory allocation of the size in memory of a linked list vertex bytes converted to a permanent linked list vertex;
 	write the key K to the result;
 	write the underlying key U to the result;
 	write the value V to the result;
@@ -309,7 +309,7 @@ To decide what permanent linked list vertex is a new permanent linked list verte
 	decide on the result.
 
 To decide what permanent linked list vertex is a new permanent linked list vertex with the textual key (K - some text) and the value (V - a value) and the link (L - a permanent linked list vertex):
-	let the result be a permanent memory allocation of the size of a linked list vertex bytes converted to a permanent linked list vertex;
+	let the result be a permanent memory allocation of the size in memory of a linked list vertex bytes converted to a permanent linked list vertex;
 	write the key the normal hash of K to the result;
 	write the underlying key K to the result;
 	write the value V to the result;

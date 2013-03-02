@@ -227,12 +227,12 @@ Chapter "The Binary Input File Stream Structure" - unindexed
 	BIF_BUFFER_LENGTH bytes for the buffer]
 [As it may not be obvious what code is affected by this layout, the affected lines are tagged [BIF LAYOUT SENSITIVE].]
 
-To decide what number is the size of a binary input file stream: (- (36+BIF_BUFFER_LENGTH) -). [BIF LAYOUT SENSITIVE]
+To decide what number is the size in memory of a binary input file stream: (- (36+BIF_BUFFER_LENGTH) -). [BIF LAYOUT SENSITIVE]
 
 Chapter "Binary Input File Stream Construction and Destruction"
 
 To decide what binary input file stream is a new binary input file stream (this is creating a new binary input file stream):
-	let the result be a memory allocation of the size of a binary input file stream bytes;
+	let the result be a memory allocation of the size in memory of a binary input file stream bytes;
 	zero 36 bytes at address result; [BIF LAYOUT SENSITIVE]
 	decide on the result converted to a binary input file stream.
 

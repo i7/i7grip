@@ -136,15 +136,15 @@ Section "The Wrapped Event Structure" - unindexed
 	4 bytes for the first associated value
 	4 bytes for the second associated value]
 
-To decide what number is the size of a wrapped event: (- 16 -).
+To decide what number is the size in memory of a wrapped event: (- 16 -).
 
 Section "Wrapped Event Construction"
 
 To decide what wrapped event is a new permanent wrapped event:
-	decide on a permanent memory allocation of the size of a wrapped event bytes converted to a wrapped event.
+	decide on a permanent memory allocation of the size in memory of a wrapped event bytes converted to a wrapped event.
 
 To decide what wrapped event is a new wrapped event:
-	decide on a memory allocation of the size of a wrapped event bytes converted to a wrapped event.
+	decide on a memory allocation of the size in memory of a wrapped event bytes converted to a wrapped event.
 
 To delete (A - a wrapped event):
 	free the memory allocation at address A converted to a number.
@@ -152,7 +152,7 @@ To delete (A - a wrapped event):
 Section "Copying Wrapped Events"
 
 To copy (A - a wrapped event) to (B - a wrapped event):
-	copy the size of a wrapped event bytes from address (A converted to a number) to address (B converted to a number).
+	copy the size in memory of a wrapped event bytes from address (A converted to a number) to address (B converted to a number).
 
 To copy (A - a wrapped event) to the four stack results beginning with stack result number (I - a number) of the Glk invocation just delegated:
 	write the event type of A to stack result number I of the Glk invocation just delegated;
@@ -207,18 +207,18 @@ Section "The Wrapped Window State Structure" - unindexed
 	4 bytes for the last-seen hyperlink input request (ditto)
 	4 bytes for the occupancy count]
 
-To decide what number is the size of a wrapped window state: (- 52 -).
+To decide what number is the size in memory of a wrapped window state: (- 52 -).
 
 Section "Wrapped Window State Construction and Destruction" - unindexed
 
 The wrapped window state object pool is an object pool that varies.
 
 A GRIF setup rule (this is the allocate an object pool for wrapped window states rule):
-	now the wrapped window state object pool is a new permanent object pool with the wrapped window state preallocation objects of size the size of a wrapped window state bytes.
+	now the wrapped window state object pool is a new permanent object pool with the wrapped window state preallocation objects of size the size in memory of a wrapped window state bytes.
 
 To decide what wrapped window state is a new wrapped window state for (W - a wrapped window):
 	let the result be a memory allocation from the wrapped window state object pool converted to a wrapped window state;
-	zero the size of a wrapped window state bytes at address result converted to a number;
+	zero the size in memory of a wrapped window state bytes at address result converted to a number;
 	write the window W to the result;
 	decide on the result.
 
@@ -286,18 +286,18 @@ Section "The Wrapped Stream State Structure" - unindexed
 	4 bytes for the last-seen style
 	4 bytes for the occupancy count]
 
-To decide what number is the size of a wrapped stream state: (- 16 -).
+To decide what number is the size in memory of a wrapped stream state: (- 16 -).
 
 Section "Wrapped Stream State Construction and Destruction" - unindexed
 
 The wrapped stream state object pool is an object pool that varies.
 
 A GRIF setup rule (this is the allocate an object pool for wrapped stream states rule):
-	now the wrapped stream state object pool is a new permanent object pool with the wrapped stream state preallocation objects of size the size of a wrapped stream state bytes.
+	now the wrapped stream state object pool is a new permanent object pool with the wrapped stream state preallocation objects of size the size in memory of a wrapped stream state bytes.
 
 To decide what wrapped stream state is a new wrapped stream state for (S - a wrapped stream):
 	let the result be a memory allocation from the wrapped stream state object pool converted to a wrapped stream state;
-	zero the size of a wrapped stream state bytes at address result converted to a number;
+	zero the size in memory of a wrapped stream state bytes at address result converted to a number;
 	write the stream S to the result;
 	decide on the result.
 
@@ -347,13 +347,13 @@ Section "The Wrapping Layer Structure" - unindexed
 	4 bytes for the foreign event handler
 	4 bytes for the multiple windows supported flag]
 
-To decide what number is the size of a wrapping layer: (- 32 -).
+To decide what number is the size in memory of a wrapping layer: (- 32 -).
 
 Section "Wrapping Layer Construction" - unindexed
 
 To decide what wrapping layer is a new permanent wrapping layer followed by (L - a Glk layer) with foreign events handled by (H - a phrase wrapped event -> event routing decision) (this is constructing a permanent wrapping layer):
-	let the result be a permanent memory allocation of the size of a wrapping layer bytes converted to a wrapping layer;
-	zero the size of a wrapping layer bytes at address result converted to a number;
+	let the result be a permanent memory allocation of the size in memory of a wrapping layer bytes converted to a wrapping layer;
+	zero the size in memory of a wrapping layer bytes at address result converted to a number;
 	write L as the Glk layer after the result;
 	let the window hash table be a new hash table with the resource hash table size buckets;
 	write the window hash table the window hash table to the result;

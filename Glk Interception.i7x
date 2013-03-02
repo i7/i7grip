@@ -116,14 +116,14 @@ Section "The Glk Invocation Structure" - unindexed
 	4 bytes for the argument count
 	4 bytes per argument for the arguments]
 
-To decide what number is the size of a Glk invocation with (N - a number) arguments: (- 8+(4*{N}) -).
+To decide what number is the size in memory of a Glk invocation with (N - a number) arguments: (- 8+(4*{N}) -).
 
 Section "Glk Invocation Construction and Destruction"
 
 To decide what Glk invocation is a new copy of the current Glk invocation:
 	check that the Glk layers are in the pre-call state or else fail at copying a Glk invocation after it has been delegated;
 	let the limit be the argument count of the current Glk invocation;
-	let the result be a memory allocation of the size of a Glk invocation with limit arguments bytes converted to a Glk invocation;
+	let the result be a memory allocation of the size in memory of a Glk invocation with limit arguments bytes converted to a Glk invocation;
 	write the function selector the function selector of the current Glk invocation to the result;
 	write the argument count limit to the result;
 	repeat with the index running over the half-open interval from zero to the limit:
@@ -207,14 +207,14 @@ Section "The Glk Outcome Structure" - unindexed
 	4 bytes for the stack result count
 	4 bytes per result for the stack result array]
 
-To decide what number is the size of a Glk outcome with (N - a number) stack results: (- 8+(4*{N}) -).
+To decide what number is the size in memory of a Glk outcome with (N - a number) stack results: (- 8+(4*{N}) -).
 
 Section "Glk Outcome Construction and Destruction"
 
 To decide what Glk outcome is a new copy of the current Glk outcome:
 	check that the Glk layers are in the post-call state or else fail at copying a Glk outcome before anything has been delegated;
 	let the limit be the number of stack results from the Glk invocation just delegated;
-	let the outcome be a memory allocation of the size of a Glk outcome with limit stack results bytes converted to a Glk outcome;
+	let the outcome be a memory allocation of the size in memory of a Glk outcome with limit stack results bytes converted to a Glk outcome;
 	write the result the result of the Glk invocation just delegated to the outcome;
 	write the stack result count limit to the outcome;
 	repeat with the index running over the half-open interval from zero to the limit:

@@ -162,13 +162,13 @@ Section "The Routine Record Structure" - unindexed
 [All stream positions are in the debug information file, not the I6 source.]
 
 To decide what number is the assumed maximum local count: (- 16 -).
-To decide what number is the size of a routine record: (- 236 -).
+To decide what number is the size in memory of a routine record: (- 236 -).
 
 Section "Routine Record Construction" - unindexed
 
 To decide what routine record is a new routine record with function address (A - a number) and beginning line number (N - a number) and beginning stream position (P - a number):
-	let the result be a permanent memory allocation of the size of a routine record bytes converted to a routine record;
-	zero the size of a routine record bytes at address result converted to a number;
+	let the result be a permanent memory allocation of the size in memory of a routine record bytes converted to a routine record;
+	zero the size in memory of a routine record bytes at address result converted to a number;
 	write the function address A to the result;
 	write the local count -1 to the result;
 	write the beginning stream position P to the result;
@@ -295,13 +295,13 @@ Section "The Source Line Record Structure" - unindexed
 	4 bytes for the sequence point linked list [an invalid permanent linked list if the sequence points have not yet been determined]
 	64 bytes for the I7 local names [null if the I7 has not yet been determined, "<invalid-local-#>" for nonexistent locals and locals out of scope]]
 
-To decide what number is the size of a source line record: (- 92 -).
+To decide what number is the size in memory of a source line record: (- 92 -).
 
 Section "Source Line Record Construction" - unindexed
 
 To decide what source line record is a new source line record for line number (N - a number) and the I6 (T - some text) and the routine record list (R - a permanent linked list):
-	let the result be a permanent memory allocation of the size of a source line record bytes converted to a source line record;
-	zero the size of a source line record bytes at address result converted to a number;
+	let the result be a permanent memory allocation of the size in memory of a source line record bytes converted to a source line record;
+	zero the size in memory of a source line record bytes at address result converted to a number;
 	write the line number N to the result;
 	write the I6 T to the result;
 	write the routine record list R to the result;
@@ -392,12 +392,12 @@ Section "The Global Record Structure" - unindexed
 	4 bytes for the human-friendly name
 	4 bytes for the kind name]
 
-To decide what number is the size of a global record: (- 16 -).
+To decide what number is the size in memory of a global record: (- 16 -).
 
 Section "Global Record Construction" - unindexed
 
 To decide what global record is a new I7 global record with index (I - a number) and human-friendly name (T - some text) and kind name (K - some text):
-	let the result be a permanent memory allocation of the size of a global record bytes converted to a global record;
+	let the result be a permanent memory allocation of the size in memory of a global record bytes converted to a global record;
 	write the global index I to the result;
 	write the address -1 to the result;
 	write the human-friendly name T to the result;
@@ -405,7 +405,7 @@ To decide what global record is a new I7 global record with index (I - a number)
 	decide on the result.
 
 To decide what global record is a new I6 global record with index (I - a number) and human-friendly name (T - some text):
-	let the result be a permanent memory allocation of the size of a global record bytes converted to a global record;
+	let the result be a permanent memory allocation of the size in memory of a global record bytes converted to a global record;
 	write the global index I to the result;
 	write the address -2 to the result;
 	write the human-friendly name T to the result;
@@ -484,12 +484,12 @@ Section "The Memory Stack Variable Record Structure" - unindexed
 	4 bytes for the human-friendly name
 	4 bytes for the kind name]
 
-To decide what number is the size of a memory stack variable record: (- 20 -).
+To decide what number is the size in memory of a memory stack variable record: (- 20 -).
 
 Section "Memory Stack Variable Record Construction" - unindexed
 
 To decide what memory stack variable record is a new rulebook variable record for variable (I - a number) owned by (O - some text) with human-friendly name (T - some text) and kind name (K - some text):
-	let the result be a permanent memory allocation of the size of a memory stack variable record bytes converted to a memory stack variable record;
+	let the result be a permanent memory allocation of the size in memory of a memory stack variable record bytes converted to a memory stack variable record;
 	write the memory stack identifier -1 to the result;
 	write the memory stack offset I to the result;
 	write the owner name O to the result;
@@ -498,7 +498,7 @@ To decide what memory stack variable record is a new rulebook variable record fo
 	decide on the result.
 
 To decide what memory stack variable record is a new activity variable record for variable (I - a number) owned by (O - some text) with human-friendly name (T - some text) and kind name (K - some text):
-	let the result be a permanent memory allocation of the size of a memory stack variable record bytes converted to a memory stack variable record;
+	let the result be a permanent memory allocation of the size in memory of a memory stack variable record bytes converted to a memory stack variable record;
 	write the memory stack identifier -10001 to the result;
 	write the memory stack offset I to the result;
 	write the owner name O to the result;
@@ -507,7 +507,7 @@ To decide what memory stack variable record is a new activity variable record fo
 	decide on the result.
 
 To decide what memory stack variable record is a new action variable record for variable (I - a number) owned by (O - some text) with human-friendly name (T - some text) and kind name (K - some text):
-	let the result be a permanent memory allocation of the size of a memory stack variable record bytes converted to a memory stack variable record;
+	let the result be a permanent memory allocation of the size in memory of a memory stack variable record bytes converted to a memory stack variable record;
 	write the memory stack identifier -20001 to the result;
 	write the memory stack offset I to the result;
 	write the owner name O to the result;

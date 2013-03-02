@@ -835,7 +835,7 @@ Section "The Memory Block Structure" - unindexed
 
 Section "Memory Block Accessors" - unindexed
 
-To decide what number is the size of (A - a memory block): (- llo_leftShift(1,llo_getByte({A}+BLK_HEADER_N)) -).
+To decide what number is the size in memory of (A - a memory block): (- llo_leftShift(1,llo_getByte({A}+BLK_HEADER_N)) -).
 To decide what number is the flags of (A - a memory block): (- llo_getByte({A}+BLK_HEADER_FLAGS) -).
 To decide whether (A - a memory block) is a multiblock: (- (llo_getByte({A}+BLK_HEADER_FLAGS)&BLK_FLAG_MULTIPLE) -).
 To decide what number is the base kind code of (A - a memory block): (- llo_getField({A},BLK_HEADER_KOV) -).
@@ -853,7 +853,7 @@ To decide whether (A - a memory block) is valid:
 	let the maximum possible size be the size of memory minus A converted to a number;
 	if the maximum possible size is less than 16:
 		decide no;
-	let the size be the size of A;
+	let the size be the size in memory of A;
 	if the size is less than 16 or the size is greater than the maximum possible size:
 		decide no;
 	decide yes.
@@ -1315,7 +1315,7 @@ The indexed text address for capturing stored action commands is a number that v
 
 To decide what text is the validation error for the stored action value (X - a number):
 	let the block be X converted to a memory block;
-	unless the block is valid and the size of the block is 32:
+	unless the block is valid and the size in memory of the block is 32:
 		decide on "<invalid stored action>";
 	let the action name be datum number zero of the block;
 	unless the validation error for the action name value the action name is empty:

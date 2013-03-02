@@ -134,13 +134,13 @@ Section "The Punctuated Word Array Structure" - unindexed
 	4 bytes for the number of words
 	4 bytes per punctuated word]
 
-To decide what number is the size of a punctuated word array for (N - a number) punctuated words: (- (4+4*{N}) -).
+To decide what number is the size in memory of a punctuated word array for (N - a number) punctuated words: (- (4+4*{N}) -).
 
 Section "Punctuated Word Array Construction and Destruction"
 
 To decide what punctuated word array is a new punctuated word array for the synthetic text (T - some text):
 	let the word count be the punctuated word count of the synthetic text T;
-	let the size be the size of a punctuated word array for the word count punctuated words;
+	let the size be the size in memory of a punctuated word array for the word count punctuated words;
 	let the result be a memory allocation of size bytes converted to a punctuated word array;
 	write the word count the word count to the result;
 	let the current address be the character array address of the synthetic text T;

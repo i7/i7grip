@@ -486,12 +486,12 @@ Section "The Operation Code Record Structure" - unindexed
 	4 bytes for the load parameter limit entry]
 [The first 28 bytes (up through the jump parameter index) must match the layout of instruction vertices.]
 
-To decide what number is the size of an operation code record: (- 36 -).
+To decide what number is the size in memory of an operation code record: (- 36 -).
 
 Section "Operation Code Record Construction and Destruction" - unindexed
 
 To decide what operation code record is a new operation code record:
-	decide on a permanent memory allocation of the size of an operation code record bytes converted to an operation code record.
+	decide on a permanent memory allocation of the size in memory of an operation code record bytes converted to an operation code record.
 
 [Operation code records are never deleted.]
 
@@ -662,7 +662,7 @@ Section "The Instruction Vertex Structure" - unindexed
 [Instruction vertices manage the lifetime of their jump predecessor linked lists; the linked list vertices are freed when the instruction vertex is deleted.]
 [Parameters are numbered from zero.]
 
-To decide what number is the size of an instruction vertex:
+To decide what number is the size in memory of an instruction vertex:
 	let the space for parameters be eight times the maximum number of parameters taken by any Glulx operation code;
 	decide on 68 plus the space for parameters.
 
@@ -671,7 +671,7 @@ Section "Instruction Vertex Construction" - unindexed
 The instruction vertex batch object pool is a batch object pool that varies.
 
 A GRIF setup rule (this is the allocate a batch object pool for instruction vertices rule):
-	now the instruction vertex batch object pool is a new permanent batch object pool with the GRIF instruction vertex preallocation objects of size the size of an instruction vertex bytes.
+	now the instruction vertex batch object pool is a new permanent batch object pool with the GRIF instruction vertex preallocation objects of size the size in memory of an instruction vertex bytes.
 
 [Reminder: we guarantee that the jump predecessor linked list address is null, and that the shielded flag is reset, but everything else could be gibberish.]
 To decide what instruction vertex is a new instruction vertex:
@@ -681,7 +681,7 @@ To decide what instruction vertex is a new instruction vertex:
 	decide on the result.
 
 To decide what instruction vertex is a new detached instruction vertex:
-	let the result be a memory allocation of the size of an instruction vertex bytes converted to an instruction vertex;
+	let the result be a memory allocation of the size in memory of an instruction vertex bytes converted to an instruction vertex;
 	write the jump predecessor linked list an empty linked list to the result;
 	reset the shielded flag in the result;
 	decide on the result.
@@ -1529,7 +1529,7 @@ Section "One-Time Call Translation" - unindexed
 [Some duplicated code here.  Someday it will be cleaned up.]
 To apply a one-time call translation of the function at address (A - a number) as requested by the instruction with jump base address (B - a number) (this is applying a one-time call translation):
 	let the next instruction address be B plus two;
-	zero the size of a one-time call translation requester bytes at address the next instruction address minus the size of a one-time call translation requester; [Zeros are @nops.]
+	zero the size in memory of a one-time call translation requester bytes at address the next instruction address minus the size in memory of a one-time call translation requester; [Zeros are @nops.]
 	let the function address's address be the next instruction address;
 	let the relevant operation code be the byte at address function address's address;
 	if the relevant operation code is less than 128:
@@ -1824,7 +1824,7 @@ To decide what instruction vertex is a new one-time call translation instruction
 	decide on the result.
 
 [Four bytes for the op-code, two for addressing modes, four for each load parameter, and zero for the store parameter gives us 18 total bytes.]
-To decide what number is the size of a one-time call translation requester: (- 18 -).
+To decide what number is the size in memory of a one-time call translation requester: (- 18 -).
 
 To convert (A - an instruction vertex) if it is a call:
 	if A is older than the current generation:

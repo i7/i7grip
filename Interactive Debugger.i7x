@@ -549,7 +549,7 @@ Section "The Stream Log Structure" - unindexed
 	4 bytes for the log length in bytes
 	N bytes for the log]
 
-To decide what number is the size of a stream log with capacity (N - a number) bytes: (- (8+{N}) -).
+To decide what number is the size in memory of a stream log with capacity (N - a number) bytes: (- (8+{N}) -).
 
 Section "Stream Log Construction and destruction" - unindexed
 
@@ -557,7 +557,7 @@ To decide what stream log is a new stream log with capacity of at least (N - a n
 	let the capacity be N;
 	if the capacity is less than the minimum stream log capacity:
 		now the capacity is the minimum stream log capacity;
-	let the size be the size of a stream log with capacity the capacity bytes;
+	let the size be the size in memory of a stream log with capacity the capacity bytes;
 	let the result be a memory allocation of the size bytes converted to a stream log;
 	write the log capacity the capacity to the result;
 	write the log length zero to the result;
@@ -614,13 +614,13 @@ To decide whether (A - a stream log) contains the (N - a number) integer/integer
 Section "Stream Log Expanding" - unindexed
 
 To decide what stream log is a new expansion of (A - a stream log) to have a capacity of at least (N - a number) byte/bytes:
-	let the old size be the size of a stream log with capacity the log capacity of A bytes;
+	let the old size be the size in memory of a stream log with capacity the log capacity of A bytes;
 	let the capacity be N;
 	if the capacity is less than log capacity of A:
 		now the capacity is the log capacity of A;
 	if the capacity is less than the minimum stream log capacity:
 		now the capacity is the minimum stream log capacity;
-	let the size be the size of a stream log with capacity the capacity bytes;
+	let the size be the size in memory of a stream log with capacity the capacity bytes;
 	let the result be a memory allocation of the size bytes converted to a stream log;
 	copy the old size bytes from address (A converted to a number) to address (the result converted to a number);
 	write the log capacity the capacity to the result;
@@ -646,14 +646,14 @@ Section "The Breaktext Structure" - unindexed
 [Compound breakpoints manage the lifetime of their human-friendly names; those names will be deleted when the breakpoint is.]
 [Similarly for their codepoint arrays.]
 
-To decide what number is the size of a breaktext: (- 24 -).
+To decide what number is the size in memory of a breaktext: (- 24 -).
 
 Section "Breaktext Construction and destruction" - unindexed
 
 [T need not be synthetic; it will be copied.]
 [The array at address A, on the other hand, will not be copied, and becomes owned by the breaktext.]
 To decide what breaktext is a new breaktext for the (N - a number) codepoints at address (A - a number) named (T - some text):
-	let the result be a memory allocation of the size of a breaktext bytes converted to a breaktext;
+	let the result be a memory allocation of the size in memory of a breaktext bytes converted to a breaktext;
 	write the numeric identifier the breakpoint counter to the result;
 	increment the breakpoint counter;
 	let the human-friendly name be a new synthetic text copied from T;

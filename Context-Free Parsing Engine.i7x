@@ -127,7 +127,7 @@ Section "The Parseme Structure" - unindexed
 [The parse attempt linked list contains every beginning index at which we have tried to match this parseme.]
 [The parse step linked list maps beginning indices to zero or more parse steps, each of which matches this parseme at that beginning index.]
 
-To decide what number is the size of a parseme: (- 28 -).
+To decide what number is the size in memory of a parseme: (- 28 -).
 
 Section "Private Parseme Construction and Destruction" - unindexed
 
@@ -139,8 +139,8 @@ To decide what text is the name for a rotation for (A - a parseme):
 	decide on the result.
 
 To decide what parseme is a new rotation parseme for (A - a parseme):
-	let the result be a permanent memory allocation of the size of a parseme bytes converted to a parseme;
-	zero the size of a parseme bytes at address result converted to a number;
+	let the result be a permanent memory allocation of the size in memory of a parseme bytes converted to a parseme;
+	zero the size in memory of a parseme bytes at address result converted to a number;
 	let the owner be the owner of A;
 	write the human-friendly name the name for a rotation for A to the result;
 	write the owner the owner to the result;
@@ -153,8 +153,8 @@ Section "Public Parseme Construction"
 
 To decide what parseme is a new terminal in (A - a context-free parser) named (T - some text) and parsed by (P - a phrase (parseme, number) -> nothing):
 	check that A is not in normal form or else fail at adding parsemes to a parser already in normal form;
-	let the result be a permanent memory allocation of the size of a parseme bytes converted to a parseme;
-	zero the size of a parseme bytes at address result converted to a number;
+	let the result be a permanent memory allocation of the size in memory of a parseme bytes converted to a parseme;
+	zero the size in memory of a parseme bytes at address result converted to a number;
 	write the human-friendly name T to the result;
 	write the owner A to the result;
 	write the parsing phrase P to the result;
@@ -235,7 +235,7 @@ Section "The Production Structure" - unindexed
 	4 bytes for the substitution size (zero if none, but possibility zero anyway)]
 [During grammar normalization, some extra productions are created by substituting one production (the inner production) in for the first right-hand parseme of another (the outer production).  We track both of the original productions and the number of parsemes substituted so that we can undo things in tree recovery.]
 
-To decide what number is the size of a production: (- 24 -).
+To decide what number is the size in memory of a production: (- 24 -).
 
 Section "Helper Functions for Production Construction and Destruction" - unindexed
 
@@ -249,8 +249,8 @@ Section "Private Production Construction and Destruction" - unindexed
 
 [With this constructor we are lazy and do *not* ascribe the new production to its left-hand parseme.  This construction is really only useful for normalization, which is going to redo the production linked list anyway.]
 To decide what production is a new production with (I - a production) substituted in for the first right-hand parseme of (O - a production):
-	let the result be a permanent memory allocation of the size of a production bytes converted to a production;
-	zero the size of a production bytes at address result converted to a number;
+	let the result be a permanent memory allocation of the size in memory of a production bytes converted to a production;
+	zero the size in memory of a production bytes at address result converted to a number;
 	write the left-hand parseme the left-hand parseme of O to the result;
 	write the inner production I to the result;
 	write the outer production O to the result;
@@ -271,8 +271,8 @@ Section "Public Production Construction and Destruction"
 
 To decide what production is a new production for (S - a parseme):
 	always check that the owner of S is not in normal form or else fail at adding productions to a parser already in normal form;
-	let the result be a permanent memory allocation of the size of a production bytes converted to a production;
-	zero the size of a production bytes at address result converted to a number;
+	let the result be a permanent memory allocation of the size in memory of a production bytes converted to a production;
+	zero the size in memory of a production bytes at address result converted to a number;
 	write the left-hand parseme S to the result;
 	push the key the result onto the production linked list of S;
 	decide on the result.
@@ -348,18 +348,18 @@ Section "The Parse Tree Rewrite Structure" - unindexed
 	4 bytes for the production]
 [The rewriting phrase should take a production, and returning nothing.  The standard phrases are defined later in this file.]
 
-To decide what number is the size of a parse tree rewrite: (- 8 -).
+To decide what number is the size in memory of a parse tree rewrite: (- 8 -).
 
 Section "Parse Tree Rewrite Construction and Destruction" - unindexed
 
 To decide what parse tree rewrite is a new tree unsubstitution rewrite for (P - a production):
-	let the result be a permanent memory allocation of the size of a parse tree rewrite bytes converted to a parse tree rewrite;
+	let the result be a permanent memory allocation of the size in memory of a parse tree rewrite bytes converted to a parse tree rewrite;
 	write the rewriting phrase unsubstituting a production to the result;
 	write the production P to the result;
 	decide on the result.
 
 To decide what parse tree rewrite is a new tree rotation rewrite for (P - a production):
-	let the result be a permanent memory allocation of the size of a parse tree rewrite bytes converted to a parse tree rewrite;
+	let the result be a permanent memory allocation of the size in memory of a parse tree rewrite bytes converted to a parse tree rewrite;
 	write the rewriting phrase rotating a production to the result;
 	write the production P to the result;
 	decide on the result.
@@ -392,7 +392,7 @@ Section "The Parse Step Structure" - unindexed
 	4 bytes for the end lexeme index]
 [Any code that looks up parse steps already knows the beginning index, so there's no point in storing it.]
 
-To decide what number is the size of a parse step: (- 12 -).
+To decide what number is the size in memory of a parse step: (- 12 -).
 
 Section "Helper Variables and Functions for Parse Step Construction and Destruction" - unindexed
 
@@ -400,13 +400,13 @@ The parse step object pool is an object pool that varies.
 
 To ensure that the parse step object pool is initialized:
 	if the parse step object pool is an invalid object pool:
-		now the parse step object pool is a new permanent object pool with the parse step preallocation objects of size the size of a parse step bytes.
+		now the parse step object pool is a new permanent object pool with the parse step preallocation objects of size the size in memory of a parse step bytes.
 
 Section "Parse Step Construction and Destruction" - unindexed
 
 To decide what parse step is a new parse step ending at lexeme index (I - a number):
 	let the result be a memory allocation from the parse step object pool converted to a parse step;
-	zero the size of a parse step bytes at address result converted to a number;
+	zero the size in memory of a parse step bytes at address result converted to a number;
 	write the end lexeme index I to the result;
 	decide on the result.
 
@@ -457,7 +457,7 @@ Section "The Parse Tree Vertex Structure" - unindexed
 	4 bytes for the beginning lexeme index
 	4 bytes for the end lexeme index]
 
-To decide what number is the size of a parse tree vertex: (- 36 -).
+To decide what number is the size in memory of a parse tree vertex: (- 36 -).
 
 Section "Helper Variables and Functions for Parse Tree Vertex Construction and Destruction" - unindexed
 
@@ -465,7 +465,7 @@ The parse tree vertex object pool is an object pool that varies.
 
 To ensure that the parse tree vertex object pool is initialized:
 	if the parse tree vertex object pool is an invalid object pool:
-		now the parse tree vertex object pool is a new permanent object pool with the parse tree vertex preallocation objects of size the size of a parse tree vertex bytes.
+		now the parse tree vertex object pool is a new permanent object pool with the parse tree vertex preallocation objects of size the size in memory of a parse tree vertex bytes.
 
 The doppelganger parse tree vertex is a parse tree vertex that varies.
 
@@ -473,7 +473,7 @@ To decide what parse tree vertex is a clone of (A - a parse tree vertex) with th
 	let the result be a memory allocation from the parse tree vertex object pool converted to a parse tree vertex;
 	if A is B:
 		now the doppelganger parse tree vertex is the result;
-	copy the size of a parse tree vertex bytes from address (A converted to a number) to address (the result converted to a number);
+	copy the size in memory of a parse tree vertex bytes from address (A converted to a number) to address (the result converted to a number);
 	let the first child be the first child of A;
 	unless the first child is null:
 		let the cloned child be a clone of the first child with the doppelganger noted for B;
@@ -492,13 +492,13 @@ Section "Private Parse Tree Vertex Construction and Destruction" - unindexed
 
 To decide what parse tree vertex is a new parse tree root for (S - a parseme):
 	let the result be a memory allocation from the parse tree vertex object pool converted to a parse tree vertex;
-	zero the size of a parse tree vertex bytes at address result converted to a number;
+	zero the size in memory of a parse tree vertex bytes at address result converted to a number;
 	write the parseme S to the result;
 	decide on the result.
 
 To decide what parse tree vertex is a new parse tree vertex for (S - a parseme) with the parent (A - a parse tree vertex), placed on the left:
 	let the result be a memory allocation from the parse tree vertex object pool converted to a parse tree vertex;
-	zero the size of a parse tree vertex bytes at address result converted to a number;
+	zero the size in memory of a parse tree vertex bytes at address result converted to a number;
 	write the parseme S to the result;
 	write the parent A to the result;
 	if placed on the left:
@@ -650,15 +650,15 @@ Section "The Context-Free Parser Structure" - unindexed
 	4 bytes for the content
 	4 bytes for the lexeme count]
 
-To decide what number is the size of a context-free parser: (- 20 -).
+To decide what number is the size in memory of a context-free parser: (- 20 -).
 
 Section "Context-Free Parser Construction and Destruction"
 
 To decide what context-free parser is a new context-free parser:
 	ensure that the parse step object pool is initialized;
 	ensure that the parse tree vertex object pool is initialized;
-	let the result be a permanent memory allocation of the size of a context-free parser bytes converted to a context-free parser;
-	zero the size of a context-free parser bytes at address result converted to a number;
+	let the result be a permanent memory allocation of the size in memory of a context-free parser bytes converted to a context-free parser;
+	zero the size in memory of a context-free parser bytes at address result converted to a number;
 	decide on the result.
 
 Section "Private Context-Free Parser Accessors and Mutators" - unindexed

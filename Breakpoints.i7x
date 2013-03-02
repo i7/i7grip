@@ -359,19 +359,19 @@ Section "The Simple Breakpoint Structure" - unindexed
 	4 bytes for the compound breakpoint list]
 [Simple breakpoints do not manage the lifetime of their linked lists; they should only be deleted when the list is empty.]
 
-To decide what number is the size of a simple breakpoint: (- 16 -).
+To decide what number is the size in memory of a simple breakpoint: (- 16 -).
 
 Section "Simple Breakpoint Construction and Destruction" - unindexed
 
 The simple breakpoint object pool is an object pool that varies.
 
 A GRIF setup rule (this is the allocate an object pool for simple breakpoints rule):
-	now the simple breakpoint object pool is a new permanent object pool with the simple breakpoint preallocation objects of size the size of a simple breakpoint bytes.
+	now the simple breakpoint object pool is a new permanent object pool with the simple breakpoint preallocation objects of size the size in memory of a simple breakpoint bytes.
 
 [This constructor is for internal use only.]
 To decide what simple breakpoint is a new unhashed simple breakpoint for the sequence point (A - a number):
 	let the result be a memory allocation from the simple breakpoint object pool converted to a simple breakpoint;
-	zero the size of a simple breakpoint bytes at address result converted to a number;
+	zero the size in memory of a simple breakpoint bytes at address result converted to a number;
 	write the sequence point A to the result;
 	let the index be the phrase that chooses the universal breakpoint flag index for a sequence point applied to A;
 	write the replaced breakpoint flag address universal breakpoint flag address index to the result;
@@ -486,7 +486,7 @@ Section "The Compound Breakpoint Structure" - unindexed
 [Compound breakpoints manage the lifetime of their human-friendly names; those names will be deleted when the breakpoint is.]
 [By virtue of phrases in earlier books, compound breakpoints manage the lifetime of their simple breakpoints.]
 
-To decide what number is the size of a compound breakpoint: (- 16 -).
+To decide what number is the size in memory of a compound breakpoint: (- 16 -).
 
 Section "Breakpoint Counter" - unindexed
 
@@ -496,8 +496,8 @@ Section "Compound Breakpoint Construction and Destruction"
 
 [T need not be synthetic; it will be copied.]
 To decide what compound breakpoint is a new compound breakpoint with human-friendly name (T - some text):
-	let the result be a memory allocation of the size of a compound breakpoint bytes converted to a compound breakpoint;
-	zero the size of a compound breakpoint bytes at address the result converted to a number;
+	let the result be a memory allocation of the size in memory of a compound breakpoint bytes converted to a compound breakpoint;
+	zero the size in memory of a compound breakpoint bytes at address the result converted to a number;
 	write the numeric identifier the breakpoint counter to the result;
 	increment the breakpoint counter;
 	let the human-friendly name be a new synthetic text copied from T;
@@ -505,8 +505,8 @@ To decide what compound breakpoint is a new compound breakpoint with human-frien
 	decide on the result.
 
 To decide what compound breakpoint is a new unnumbered compound breakpoint with human-friendly name (T - some text):
-	let the result be a memory allocation of the size of a compound breakpoint bytes converted to a compound breakpoint;
-	zero the size of a compound breakpoint bytes at address the result converted to a number;
+	let the result be a memory allocation of the size in memory of a compound breakpoint bytes converted to a compound breakpoint;
+	zero the size in memory of a compound breakpoint bytes at address the result converted to a number;
 	write the numeric identifier -1 to the result;
 	let the human-friendly name be a new synthetic text copied from T;
 	write the human-friendly name the human-friendly name to the result;

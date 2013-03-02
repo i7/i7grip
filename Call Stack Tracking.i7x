@@ -100,21 +100,21 @@ Section "The Call Stack Vertex Structure" - unindexed
 	64 bytes for the arguments passed (not valid for the out-of-bounds arguments or arguments that were passed directly from constants or locals)
 	4*? bytes for extras]
 
-To decide what number is the base size of a call stack vertex: (- 148 -).
-The mutable size of a call stack vertex is a number that varies.  The mutable size of a call stack vertex is 148.
-To decide what number is the size of a call stack vertex: (- (+ the mutable size of a call stack vertex +) -).	
+To decide what number is the base size in memory of a call stack vertex: (- 148 -).
+The mutable size in memory of a call stack vertex is a number that varies.  The mutable size in memory of a call stack vertex is 148.
+To decide what number is the size in memory of a call stack vertex: (- (+ the mutable size in memory of a call stack vertex +) -).	
 
 Section "Extra Fields in Call Stack Vertices"
 
 To decide what number is the index of a newly reserved call frame field:
-	let the result be the size of a call stack vertex divided by four;
-	increase the mutable size of a call stack vertex by four;
+	let the result be the size in memory of a call stack vertex divided by four;
+	increase the mutable size in memory of a call stack vertex by four;
 	decide on the result.
 
 Section "Call Stack Vertex Construction and Destruction" - unindexed
 
 To decide what call stack vertex is a new permanent call stack vertex:
-	let the result be a permanent memory allocation of the size of a call stack vertex bytes converted to a call stack vertex;
+	let the result be a permanent memory allocation of the size in memory of a call stack vertex bytes converted to a call stack vertex;
 	write the nearest same-function ancestor the invalid call stack vertex to the result;
 	write the catch token linked list an empty linked list to the result;
 	write the most recent call instruction address zero to the result;
@@ -124,7 +124,7 @@ The call stack vertex object pool is a object pool that varies.
 
 [Because GRIF setup rules determine the size of the call stack, we must not allocate the pool in the setup rulebook---we have to wait for the final size and do the allocation in the anticipation rulebook.]
 A GRIF anticipation rule (this is the allocate a object pool for call stack vertices rule):
-	now the call stack vertex object pool is a new permanent object pool with the call stack vertex preallocation objects of size the size of a call stack vertex bytes.
+	now the call stack vertex object pool is a new permanent object pool with the call stack vertex preallocation objects of size the size in memory of a call stack vertex bytes.
 
 To decide what call stack vertex is a new ancestor call stack vertex copied from (A - a call stack vertex):
 	let the result be a memory allocation from the call stack vertex object pool converted to a call stack vertex;
@@ -138,14 +138,14 @@ To delete (A - a call stack vertex):
 Section "Copying Call Stack Vertices" - unindexed
 
 To copy (A - a call stack vertex) to (B - a call stack vertex):
-	copy the size of a call stack vertex bytes from address (A converted to a number) to address (B converted to a number).
+	copy the size in memory of a call stack vertex bytes from address (A converted to a number) to address (B converted to a number).
 
 Section "Annexing and Ceding Call Stack Vertices" - unindexed
 
 To annex a call stack vertex to replace (A - a call stack vertex) (this is annexing a call stack vertex):
 	let the discarded value be a new ancestor call stack vertex copied from A;
 	write the most recent call instruction address zero to A;
-	zero the size of a call stack vertex minus the base size of a call stack vertex bytes at address A converted to a number plus the base size of a call stack vertex.
+	zero the size in memory of a call stack vertex minus the base size in memory of a call stack vertex bytes at address A converted to a number plus the base size in memory of a call stack vertex.
 
 To cede (A - a call stack vertex) (this is ceding a call stack vertex):
 	let the ancestor call stack vertex be the nearest same-function ancestor of A;
@@ -239,12 +239,12 @@ Section "The Call Frame Structure" - unindexed
 [Ordinarily we would have a linked list of structures rather than structures with links inside.  In this case, however, some of the data that we think of as being owned by a call frame are really owned by a neighboring call frame, so it's easier if frames know who they're next to.]
 [The most recent instruction address is kept here (rather than computed by referring to the linked vertex) only for the purposes of Interactive Debugger.]
 
-To decide what number is the size of a call frame: (- 20 -).
+To decide what number is the size in memory of a call frame: (- 20 -).
 
 Section "Call Frame Construction" - unindexed
 
 To decide what call frame is a new call frame for the uninstrumented function address (A - a number) and (V - a call stack vertex) and the parent (P - a call frame):
-	let the result be a memory allocation of the size of a call frame bytes converted to a call frame;
+	let the result be a memory allocation of the size in memory of a call frame bytes converted to a call frame;
 	write the uninstrumented function address A to the result;
 	write the call stack vertex V to the result;
 	write the most recent instruction address the most recent call instruction address of V to the result;
@@ -912,9 +912,9 @@ To decide what instruction vertex is a new vertex-extras-resetting instruction v
 	let the result be a new artificial instruction vertex;
 	write the operation code op-mzero to the result;
 	write the addressing mode constant addressing mode to parameter zero of the result;
-	write the size of a call stack vertex minus the base size of a call stack vertex to parameter zero of the result;
+	write the size in memory of a call stack vertex minus the base size in memory of a call stack vertex to parameter zero of the result;
 	write the addressing mode constant addressing mode to parameter one of the result;
-	write (A converted to a number) plus the base size of a call stack vertex to parameter one of the result;
+	write (A converted to a number) plus the base size in memory of a call stack vertex to parameter one of the result;
 	decide on the result.
 
 [ @jumpabs <constant>; ]
@@ -936,7 +936,7 @@ To occupy (A - a call stack vertex) at the function entry point:
 		insert the occupancy-checking instruction vertex before the vertex-annexing instruction vertex;
 		insert the vertex-occupying instruction vertex before the vertex-annexing instruction vertex;
 		insert the vertex-resetting instruction vertex before the vertex-annexing instruction vertex;
-		unless the size of a call stack vertex is the base size of a call stack vertex:
+		unless the size in memory of a call stack vertex is the base size in memory of a call stack vertex:
 			let the vertex-extras-resetting instruction vertex be a new vertex-extras-resetting instruction vertex for A;
 			insert the vertex-extras-resetting instruction vertex before the vertex-annexing instruction vertex;
 		insert the annex-skipping instruction vertex before the vertex-annexing instruction vertex;
