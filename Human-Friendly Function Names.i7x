@@ -702,7 +702,7 @@ or even
 
 	"  beFoRe gOInG   tHRoUGH    a   cLoSEd dOoR(   BlOCkInG dOOr )   "
 
-(In the HTML format that Inform generates the whitespace issues in the last
+(In the HTML format that Inform generates, the whitespace issues in the last
 example might not be visible.)
 
 Section: Routine shells and kernels
