@@ -2713,7 +2713,7 @@ To decide what instruction vertex is the next sequence point instruction vertex 
 
 Section "Moving by Line Counts" - unindexed
 
-To decide what instruction vertex is (N - a number) instruction vertices before (V - an instruction vertex) or else the beginning of the function:
+To decide what instruction vertex is (N - a number) instruction vertex/vertices before (V - an instruction vertex) or else the beginning of the function:
 	let the result be V;
 	repeat with a counter running from one to N:
 		let the previous link be the previous link of the result;
@@ -2722,7 +2722,7 @@ To decide what instruction vertex is (N - a number) instruction vertices before 
 		now the result is the previous link;
 	decide on the result.
 
-To decide what instruction vertex is (N - a number) instruction vertices after (V - an instruction vertex) or else the end of the function:
+To decide what instruction vertex is (N - a number) instruction vertex/vertices after (V - an instruction vertex) or else the end of the function:
 	let the result be V;
 	repeat with a counter running from one to N:
 		let the next link be the next link of the result;
@@ -2731,7 +2731,7 @@ To decide what instruction vertex is (N - a number) instruction vertices after (
 		now the result is the next link;
 	decide on the result.
 
-To decide what number is (N - a number) lines before I6 line number (L - a number) or else the beginning of the function:
+To decide what number is (N - a number) line/lines before I6 line number (L - a number) or else the beginning of the function:
 	if N is at most zero:
 		decide on L;
 	let the source line record be the source line record for line number L;
@@ -2745,7 +2745,7 @@ To decide what number is (N - a number) lines before I6 line number (L - a numbe
 		decide on L minus N;
 	decide on the beginning line number.
 
-To decide what number is (N - a number) lines after I6 line number (L - a number) or else the end of the function:
+To decide what number is (N - a number) line/lines after I6 line number (L - a number) or else the end of the function:
 	if N is at most zero:
 		decide on L;
 	let the source line record be the source line record for line number L;
@@ -2759,7 +2759,7 @@ To decide what number is (N - a number) lines after I6 line number (L - a number
 		decide on L plus N;
 	decide on the end line number.
 
-To decide what number is (N - a number) lines before I7 line number (L - a number) or else the beginning of the function:
+To decide what number is (N - a number) line/lines before I7 line number (L - a number) or else the beginning of the function:
 	if N is at most zero:
 		decide on L;
 	let the source line record be the source line record for line number L;
@@ -2784,7 +2784,7 @@ To decide what number is (N - a number) lines before I7 line number (L - a numbe
 			decide on the earliest line number;
 	decide on L.
 
-To decide what number is (N - a number) lines after I7 line number (L - a number) or else the end of the function:
+To decide what number is (N - a number) line/lines after I7 line number (L - a number) or else the end of the function:
 	if N is at most zero:
 		decide on L;
 	let the source line record be the source line record for line number L;
