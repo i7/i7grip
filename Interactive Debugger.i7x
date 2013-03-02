@@ -22,7 +22,7 @@ Use authorial modesty.
 
 Book "Copyright and License"
 
-[Copyright 2012 Brady J. Garvin]
+[Copyright 2013 Brady J. Garvin]
 
 [This extension is free software: you can redistribute it and/or modify it under the terms of the GNU General Public License as published by the Free Software Foundation, either version 3 of the License, or (at your option) any later version.
 
@@ -2113,9 +2113,9 @@ To handle the debug command rooted at (V - a parse tree vertex that has the pars
 Chapter "Extension Information Commands" - unindexed
 
 To say the debugger version:
-	say "Version 1 (4 February 2012)".
+	say "Version 2 (1 May 2013)".
 To say the debugger copyright:
-	say "Copyright 2012 Brady J. Garvin".
+	say "Copyright 2013 Brady J. Garvin".
 
 The banner printed flag is a truth state that varies.  The banner printed flag is false.
 To say the debugger banner text:

@@ -6,7 +6,7 @@ Use authorial modesty.
 
 Book "Copyright and License"
 
-[Copyright 2012 Brady J. Garvin]
+[Copyright 2013 Brady J. Garvin]
 
 [This extension is free software: you can redistribute it and/or modify it under the terms of the GNU General Public License as published by the Free Software Foundation, either version 3 of the License, or (at your option) any later version.
 
