@@ -559,6 +559,13 @@ Book "Inform Information" - unindexed
 
 Chapter "Routine Shell Identification" - unindexed
 
+Section "Routine Shell Guesses" - unindexed
+
+The kernel guess hash table is a permanent hash table that varies.
+
+A GRIF setup rule (this is the allocate a permanent hash table for tracking kernel guesses rule):
+	now the kernel guess hash table is a new permanent hash table with the GRIF chunk translation hash table size buckets;
+
 Section "Recognizing Routine Shell Components" - unindexed
 
 To decide what number is blockv_stack: (- blockv_stack -).
@@ -582,6 +589,9 @@ To decide whether (A - an instruction vertex) couldn't be a pre-return aload in 
 Section "The Emendation Rule for Routine Shell Identification"
 
 A GRIF emendation rule (this is the detect routine shells rule):
+	if the kernel guess hash table contains the key the address of the chunk being instrumented:
+		stop;
+	insert the key the address of the chunk being instrumented into the kernel guess hash table;
 	repeat with the instruction vertex running through occurrences of the operation code op-return in the scratch space:
 		if the addressing mode of parameter zero of the instruction vertex is not the stack addressing mode or the previous link of the instruction vertex couldn't be a pre-return aload in a routine shell:
 			stop;
@@ -601,7 +611,7 @@ Section "Forcing Routine Shell Identification"
 
 To guess the routine kernel for (A - a sayable value):
 	let the function address be the function address of A;
-	unless the instrumented chunks hash table contains the key the function address:
+	unless the kernel guess hash table contains the key the function address:
 		always check that the mutable address of the chunk being instrumented is zero or else fail at guessing the routine kernel of the function address mid-instrumentation;
 		parse the function at address the function address;
 		now the mutable address of the chunk being instrumented is the function address;
