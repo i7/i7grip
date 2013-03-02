@@ -42,6 +42,10 @@ Chapter "Use Options"
 
 Use no more than one line input request at a time translates as (- Constant ID_SERIALIZE_LINE_REQUESTS; -).
 
+Use an ideal emulated timer resolution of at least 50 translates as (- Constant ID_IDEAL_TIMER_RESOLUTION={N}; -).
+
+To decide what number is the ideal emulated timer resolution: (- ID_IDEAL_TIMER_RESOLUTION -).
+
 Use the right of the window for the debugger translates as (- Constant ID_RIGHT; -).
 Use the left of the window for the debugger translates as (- Constant ID_LEFT; -).
 Use the bottom of the window for the debugger translates as (- Constant ID_BOTTOM; -).
@@ -150,6 +154,8 @@ The debugger coexecution states are story interrupted, story waiting for input, 
 
 The current debugger coexecution state is a debugger coexecution state that varies.  The current debugger coexecution state is story unpaused.
 
+The debugger input event flushing flag is a truth state that varies.  The debugger input event flushing flag is false.
+
 The debugger prompting flag is a truth state that varies.  The debugger prompting flag is true.
 
 Part "Separation of the VM and Story Startup"
@@ -252,17 +258,24 @@ To decide what wrapped window is the debugger window:
 
 Section "Glk Layer" - unindexed
 
+The debugger's emulated timer resolution is a number that varies.  The debugger's emulated timer resolution is zero.
 The debugger's emulated timer interval is a number that varies.  The debugger's emulated timer interval is zero.
+The debugger's emulated timer interval remaining is a number that varies.  The debugger's emulated timer interval remaining is zero.
 
 To hide the debugger window wrapping (this is hiding the debugger window wrapping):
 	if the multiple windows supported flag is set in the debugger wrapping layer and the no more than one line input request at a time option is not active:
 		if the function selector of the current Glk invocation is:
 			-- 214: [glk_request_timer_events]
-				delegate the current Glk invocation to the Glk layer after the debugger wrapping layer;
-			-- otherwise:
-				hide window wrapping with the debugger wrapping layer;
-	otherwise:
-		hide window wrapping with the debugger wrapping layer.
+				now the debugger's emulated timer interval is argument number zero of the current Glk invocation;
+				now the debugger's emulated timer interval remaining is the debugger's emulated timer interval;
+				if the debugger's emulated timer interval is less than the ideal emulated timer resolution:
+					now the debugger's emulated timer resolution is the debugger's emulated timer interval;
+				otherwise:
+					now the debugger's emulated timer resolution is the ideal emulated timer resolution;
+				write the debugger's emulated timer resolution to argument number zero of the current Glk invocation;
+				if timestamps are supported:
+					let the discarded value be the number of milliseconds elapsed since the last timestamp;
+	hide window wrapping with the debugger wrapping layer.
 
 Section "Glk Layer Notification Handler for the Glk Layer" - unindexed
 
@@ -312,12 +325,14 @@ To handle the Glk layer notification (N - a Glk layer notification) for the debu
 				write one to argument number zero of the current Glk invocation;
 				delegate the current Glk invocation to the Glk layer after the debugger wrapping layer;
 				now the current debugger coexecution state is story unpaused;
+				now the debugger input event flushing flag is true;
 				wait for the next foreign event using the debugger wrapping layer;
 				now the current debugger coexecution state is story waiting for input;
+				now the debugger input event flushing flag is false;
 				prepare a spontaneous Glk invocation;
 				write the function selector 214 [glk_request_timer_events] to the current Glk invocation;
 				write the argument count one to the current Glk invocation;
-				write zero to argument number zero of the current Glk invocation;
+				write the debugger's emulated timer resolution to argument number zero of the current Glk invocation;
 				delegate the current Glk invocation to the Glk layer after the debugger wrapping layer.
 
 Section "Event Handler for the Glk Layer" - unindexed
@@ -331,8 +346,69 @@ To decide what number is the maximum length of the debug command buffer: (- ID_M
 
 The debugger's line input handler is a phrase text -> nothing that varies.
 
+Include (-
+#ifndef gestalt_DateTime;
+	Constant gestalt_DateTime 20;
+#endif;
+#ifndef glk_current_time;
+	[ glk_current_time _vararg_count ret;
+	! glk_current_time (time)
+	  ! And now the @glk call
+	  @glk $160 _vararg_count ret;
+	  return ret;
+	];
+#endif;
+-) after "Definitions.i6t".
+
+Include (-
+	Array id_previousTimestamp --> 3;
+	Array id_timestamp --> 3;
+	[ id_timestampSupport;
+		return glk_gestalt(gestalt_DateTime,0);
+	];
+	[ id_getMsTimestampDifference
+		highDifference lowDifference microDifference test;
+		llo_copy(12,id_timestamp,id_previousTimestamp);
+		glk_current_time(id_timestamp);
+		highDifference=(id_timestamp-->0)-(id_previousTimestamp-->0);
+		lowDifference=(id_timestamp-->1)-(id_previousTimestamp-->1);
+		microDifference=(id_timestamp-->2)-(id_previousTimestamp-->2);
+		if(microDifference<0){
+			microDifference=microDifference+1000000;
+			lowDifference=lowDifference-1;
+		}
+		@jgtu lowDifference 2147482 ?overflow;
+		if(((id_timestamp-->1)>0)&&((id_previousTimestamp-->1)<0)){
+			highDifference=highDifference-1;
+		}
+		if(highDifference){
+			.overflow;
+			return 2147483647;
+		}
+		return lowDifference*1000+microDifference/1000;
+	];
+-).
+
+To decide what number is the address of the timestamp-support-checking function: (- id_timestampSupport -).
+To decide what number is the address of the timestamp differencing function: (- id_getMsTimestampDifference -).
+
+A GRIF shielding rule (this is the shield timestamp functions for timer emulation rule):
+	shield the address of the timestamp-support-checking function against instrumentation;
+	shield the address of the timestamp differencing function against instrumentation.
+
+To decide whether timestamps are supported: (- id_timestampSupport() -).
+To decide what number is the number of milliseconds elapsed since the last timestamp: (- id_getMsTimestampDifference() -).
+
 To decide what event routing decision is the event routing decision after handling (E - a wrapped event) for the debugger wrapping layer (this is handling a wrapped event for the debugger wrapping layer):
-	if the event type of E is the timer event type and the current debugger coexecution state is story unpaused:
+	if the event type of E is the timer event type and the multiple windows supported flag is set in the debugger wrapping layer and the no more than one line input request at a time option is not active:
+		if the debugger input event flushing flag is false:
+			if timestamps are supported:
+				decrease the debugger's emulated timer interval remaining by the number of milliseconds elapsed since the last timestamp;
+			otherwise:
+				decrease the debugger's emulated timer interval remaining by the debugger's emulated timer resolution;
+			if the debugger's emulated timer interval remaining is at most zero:
+				now the debugger's emulated timer interval remaining is the debugger's emulated timer interval;
+				decide on routing the event normally;
 		decide on routing the event no further;
 	if the event type of E is the line input event type:
 		while within the debugger window via the debugger wrapping layer:
