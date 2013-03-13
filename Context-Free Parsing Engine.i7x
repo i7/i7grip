@@ -3,11 +3,11 @@ Version 1 of Context-Free Parsing Engine (for Glulx only) by Brady Garvin begins
 "A library for parsing a generic sequence according to a grammar in Backus-Naur form."
 
 Include Runtime Checks by Brady Garvin.
+Include Object Pools by Brady Garvin.
 Include Low-Level Operations by Brady Garvin.
 Include Low-Level Text by Brady Garvin.
 Include Low-Level Linked Lists by Brady Garvin.
 Include Low-Level Hash Tables by Brady Garvin.
-Include Object Pools by Brady Garvin.
 
 Use authorial modesty.
 
