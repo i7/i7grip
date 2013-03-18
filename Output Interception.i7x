@@ -37,7 +37,7 @@ Chapter "Handler Variables"
 
 Section "Output Interception Types"
 
-An output interception type is a kind of value.  The output interception types are invalid textual output, valid textual output, save file output, endless output, and cursor movement.  The specification of an output interception type is "The output interception types represent the various kinds of output that Output Interception can detect.  'Invalid textual output' signifies that the story is about to write an invalid string to a stream, 'valid textual output' that it is about to write a valid string (available at 'the address of the intercepted output', a Unicode array whose length in words is 'the length of the intercepted output'), 'save file output' that it is about to write a save file, 'endless output' that it has created an echo cycle and is attempting to send an infinite amount of output, and finally 'cursor movement', which signifies no printed output, but a change in where that output will appear."
+An output interception type is a kind of value.  The output interception types are invalid textual output, valid textual output, save file output, endless output, style change, endless style change, and cursor movement.  The specification of an output interception type is "The output interception types represent the various kinds of output that Output Interception can detect.  'Invalid textual output' signifies that the story is about to write an invalid string to a stream, 'valid textual output' that it is about to write a valid string (available at 'the address of the intercepted output', a Unicode array whose length in words is 'the length of the intercepted output'), 'save file output' that it is about to write a save file, 'endless output' that it has created an echo cycle and is attempting to send an infinite amount of output, 'style change' and 'endless style change' for changes to output style, perhaps in an echo cycle, and finally 'cursor movement', which signifies no printed output, but a change in where that output will appear."
 
 Section "Mutable Handler Variables" - unindexed
 
@@ -106,7 +106,10 @@ To intercept the output (this is intercepting the output):
 	if the input-output system of the intercepted output is the Glk input-output system:
 		let the echo stream list be the a new list of streams echoing the stream of the intercepted output;
 		if the echo stream list is an invalid linked list:
-			now the variable holding the type of the intercepted output is endless output;
+			if the type of the intercepted output is style change:
+				now the variable holding the type of the intercepted output is endless style change;
+			otherwise:
+				now the variable holding the type of the intercepted output is endless output;
 			traverse the output interception rulebook;
 		otherwise:
 			repeat with the echo stream running through the number keys of the echo stream list:
@@ -459,6 +462,18 @@ To intercept output via direct Glk calls (this is intercepting output via direct
 			now the variable holding the address of the intercepted output is argument number one of the current Glk invocation;
 			now the variable holding the length of the intercepted output is argument number two of the current Glk invocation;
 			set the type and input-output system of the intercepted output to textual output under Glk with validity determined by the output length;
+			intercept the output;
+		-- 134: [glk_set_style]
+			ensure that the current Glk invocation has at least one argument;
+			set the stream of the intercepted output to the current stream during direct output;
+			now the variable holding the input-output system of the intercepted output is the Glk input-output system;
+			now the variable holding the type of the intercepted output is style change;
+			intercept the output;
+		-- 135: [glk_set_style_stream]
+			ensure that the current Glk invocation has at least two arguments;
+			now the variable holding the stream of the intercepted output is argument number zero of the current Glk invocation;
+			now the variable holding the input-output system of the intercepted output is the Glk input-output system;
+			now the variable holding the type of the intercepted output is style change;
 			intercept the output;
 	delegate the current Glk invocation to the Glk layer after output interception.
 

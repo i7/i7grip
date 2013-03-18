@@ -33,6 +33,7 @@ Use a printing routine hash table size of at least 311 translates as (- Constant
 Use a miscellaneous routine hash table size of at least 311 translates as (- Constant VDL_MISC_ROUTINE_HASH_SIZE={N}; -).
 
 Use a extra Glk stream state hash table size of at least 311 translates as (- Constant VDL_EXTRA_STREAM_STATE_HASH_SIZE={N}; -).
+Use a extra Glk file reference state hash table size of at least 311 translates as (- Constant VDL_EXTRA_FREF_STATE_HASH_SIZE={N}; -).
 
 To decide what number is the block value routine hash table size: (- VDL_BLOCK_ROUTINE_HASH_SIZE -).
 To decide what number is the indexed text routine hash table size: (- VDL_IT_ROUTINE_HASH_SIZE -).
@@ -42,6 +43,7 @@ To decide what number is the printing routine hash table size: (- VDL_PRINT_ROUT
 To decide what number is the miscellaneous routine hash table size: (- VDL_MISC_ROUTINE_HASH_SIZE -).
 
 To decide what number is the extra Glk stream state hash table size: (- VDL_EXTRA_STREAM_STATE_HASH_SIZE -).
+To decide what number is the extra Glk file reference state hash table size: (- VDL_EXTRA_FREF_STATE_HASH_SIZE -).
 
 Book "Runtime Problems" - unindexed
 
@@ -993,6 +995,8 @@ To decide what number is the current Glk file encoding mask: (- (fileusage_TextM
 To decide what number is the current Glk file encoding minimum: (- fileusage_TextMode -).
 To decide what number is the current Glk file encoding maximum: (- fileusage_BinaryMode -).
 
+To decide what number is the text encoding: (- fileusage_TextMode -).
+
 To decide what number is the current Glk file purpose mask: (- (fileusage_Data|fileusage_SavedGame|fileusage_Transcript|fileusage_InputRecord) -).
 To decide what number is the current Glk file purpose minimum: (- fileusage_Data -).
 To decide what number is the current Glk file purpose maximum: (- fileusage_InputRecord -).
@@ -1681,14 +1685,6 @@ To check that (A - a number) has no line input pending:
 
 [Character input does not block output.]
 
-To check that the current stream is not blocked by line input:
-	if the Glk error state is not empty:
-		stop;
-	let the stream state be the first extra Glk stream state value matching the key the current stream for Glk error detection in the extra Glk stream state hash table or the all-flags extra Glk stream state if there are no matches;
-	unless the stream state describes line input pending:
-		stop;
-	signal the Glk error "The current stream is the output stream of a window with line input pending".
-
 To check that the stream given by (A - a number) is not blocked by line input:
 	if the Glk error state is not empty:
 		stop;
@@ -1758,36 +1754,55 @@ Chapter "Extra Glk State" - unindexed
 Section "Extra Glk Stream State" - unindexed
 
 [Layout:
-	27 bits padding (most significant)
+	26 bits padding (most significant)
 	1 bit for the margin-aligned image possible flag
 	1 bit for the line input pending flag
 	1 bit for the character input pending flag
+	1 bit for the text stream flag
 	1 bit for the output stream flag
 	1 bit for the input stream flag (least significant)]
 
-An extra Glk stream state is a kind of value.  Extra Glk stream state 31 specifies an extra Glk stream state.
-The specification of an extra Glk stream state is "Some parts of the Glk state, like whether a stream is for input, output, or both, are stored by the interpreter but inaccessible to the story, because Glk call can read them.  Therefore, Verbose Diagnostics and Verbose Diagnostics Lite have to remember this state themselves.  For streams, everything is represented in the bits of an arithmetic kind, which is called 'extra Glk stream state'."
+An extra Glk stream state is a kind of value.  Extra Glk stream state 63 specifies an extra Glk stream state.
+The specification of an extra Glk stream state is "Some parts of the Glk state, like whether a stream is for input, output, or both, are stored by the interpreter but inaccessible to the story, because no Glk call can read them.  Therefore, Verbose Diagnostics and Verbose Diagnostics Lite have to remember this state themselves.  For streams, everything is represented in the bits of an arithmetic kind, which is called 'extra Glk stream state'."
 
-To decide what extra Glk stream state is the extra Glk stream state for a new input stream: (- 1 -).
-To decide what extra Glk stream state is the extra Glk stream state for a new non-window output stream: (- 2 -).
-To decide what extra Glk stream state is the extra Glk stream state for a new window output stream: (- 18 -).
-To decide what extra Glk stream state is the extra Glk stream state for a new input-output stream: (- 3 -).
-To decide what extra Glk stream state is the all-flags extra Glk stream state: (- 31 -).
+To decide what extra Glk stream state is the extra Glk stream state for a new binary input stream: (- 1 -).
+To decide what extra Glk stream state is the extra Glk stream state for a new non-window binary output stream: (- 2 -).
+To decide what extra Glk stream state is the extra Glk stream state for a new window output stream: (- 38 -).
+To decide what extra Glk stream state is the extra Glk stream state for a new binary input-output stream: (- 3 -).
+To decide what extra Glk stream state is the all-flags extra Glk stream state: (- 63 -).
 
 To decide whether (E - an extra Glk stream state) describes an input stream: (- ({E}&1) -).
 To decide whether (E - an extra Glk stream state) describes an output stream: (- ({E}&2) -).
-To decide whether (E - an extra Glk stream state) describes character input pending: (- ({E}&4) -).
-To decide whether (E - an extra Glk stream state) describes line input pending: (- ({E}&8) -).
-To decide whether (E - an extra Glk stream state) describes the possibility of a margin-aligned image: (- ({E}&16) -).
+To decide whether (E - an extra Glk stream state) describes a text stream: (- ({E}&4) -).
+To decide whether (E - an extra Glk stream state) describes character input pending: (- ({E}&8) -).
+To decide whether (E - an extra Glk stream state) describes line input pending: (- ({E}&16) -).
+To decide whether (E - an extra Glk stream state) describes the possibility of a margin-aligned image: (- ({E}&32) -).
 
-To decide what extra Glk stream state is (E - an extra Glk stream state) with no character input pending: (- ({E}&~4) -).
-To decide what extra Glk stream state is (E - an extra Glk stream state) with character input pending: (- ({E}|4) -).
+To decide what extra Glk stream state is (E - an extra Glk stream state) with text usage: (- ({E}|4) -).
 
-To decide what extra Glk stream state is (E - an extra Glk stream state) with no line input pending: (- ({E}&~8) -).
-To decide what extra Glk stream state is (E - an extra Glk stream state) with line input pending: (- ({E}|8) -).
+To decide what extra Glk stream state is (E - an extra Glk stream state) with no character input pending: (- ({E}&~8) -).
+To decide what extra Glk stream state is (E - an extra Glk stream state) with character input pending: (- ({E}|8) -).
 
-To decide what extra Glk stream state is (E - an extra Glk stream state) with no margin-aligned image possible: (- ({E}&~16) -).
-To decide what extra Glk stream state is (E - an extra Glk stream state) with a margin-aligned image possible: (- ({E}|16) -).
+To decide what extra Glk stream state is (E - an extra Glk stream state) with no line input pending: (- ({E}&~16) -).
+To decide what extra Glk stream state is (E - an extra Glk stream state) with line input pending: (- ({E}|16) -).
+
+To decide what extra Glk stream state is (E - an extra Glk stream state) with no margin-aligned image possible: (- ({E}&~32) -).
+To decide what extra Glk stream state is (E - an extra Glk stream state) with a margin-aligned image possible: (- ({E}|32) -).
+
+Section "Extra Glk File Reference State" - unindexed
+
+[Layout:
+	31 bits padding (most significant)
+	1 bit for the text usage flag (least significant)]
+
+An extra Glk file reference state is a kind of value.  Extra Glk file reference state 1 specifies an extra Glk file reference state.
+The specification of an extra Glk file reference state is "Some parts of the Glk state, like whether a file reference is for binary data or text are stored by the interpreter but inaccessible to the story, because no Glk call can read them.  Therefore, Verbose Diagnostics and Verbose Diagnostics Lite have to remember this state themselves.  For file references, everything is represented in the bits of an arithmetic kind, which is called 'extra Glk file reference state'."
+
+To decide what extra Glk file reference state is the extra Glk file reference state for a new binary file reference: (- 0 -).
+To decide what extra Glk file reference state is the extra Glk file reference state for a new text file reference: (- 1 -).
+To decide what extra Glk file reference state is the all-flags extra Glk file reference state: (- 1 -).
+
+To decide whether (E - an extra Glk file reference state) describes a text file reference: (- ({E}&1) -).
 
 Section "Extra Glk State Hash Tables" - unindexed
 
@@ -1795,6 +1810,11 @@ The extra Glk stream state hash table is a hash table that varies.
 
 A GRIF setup rule (this is the allocate a hash table for extra Glk stream state rule):
 	now the extra Glk stream state hash table is a new hash table with the extra Glk stream state hash table size buckets.
+
+The extra Glk file reference state hash table is a hash table that varies.
+
+A GRIF setup rule (this is the allocate a hash table for extra Glk file reference state rule):
+	now the extra Glk file reference state hash table is a new hash table with the extra Glk file reference state hash table size buckets.
 
 Section "Extra Glk State Hash Table Mutators" - unindexed
 
@@ -1833,13 +1853,30 @@ To note the new window stream created:
 	let the stream be the stream of the window the window for Glk error detection after dispatch;
 	insert the key the stream and the value the extra Glk stream state for a new window output stream into the extra Glk stream state hash table.
 
-To note the new stream created with filemode (M - a number):
-	let the value be the extra Glk stream state for a new non-window output stream;
-	if the M is the read operation:
-		now the value is the extra Glk stream state for a new input stream;
-	otherwise if the M is the read-write operation:
-		now the value is the extra Glk stream state for a new input-output stream;
+To note the new stream created with no file reference and filemode (M - a number):
+	let the value be the extra Glk stream state for a new non-window binary output stream;
+	if M is the read operation:
+		now the value is the extra Glk stream state for a new binary input stream;
+	otherwise if M is the read-write operation:
+		now the value is the extra Glk stream state for a new binary input-output stream;
 	insert the key the result of the Glk invocation just delegated and the value the value into the extra Glk stream state hash table.
+
+To note the new stream created with file reference (R - a number) and filemode (M - a number):
+	let the value be the extra Glk stream state for a new non-window binary output stream;
+	if M is the read operation:
+		now the value is the extra Glk stream state for a new binary input stream;
+	otherwise if M is the read-write operation:
+		now the value is the extra Glk stream state for a new binary input-output stream;
+	let the file reference state be the first extra Glk file reference state value matching the key R in the extra Glk file reference state hash table or the all-flags extra Glk file reference state if there are no matches;
+	if the file reference state describes a text file reference:
+		now the value is the value with text usage;
+	insert the key the result of the Glk invocation just delegated and the value the value into the extra Glk stream state hash table.
+
+To note the new file reference created with usage (U - a number):
+	let the value be the extra Glk file reference state for a new binary file reference;
+	if the bitwise and of U and the current Glk file encoding mask is text encoding:
+		now the value is the extra Glk file reference state for a new text file reference;
+	insert the key the result of the Glk invocation just delegated and the value the value into the extra Glk file reference state hash table.
 
 Section "Filename for Extra Glk State" - unindexed
 
@@ -1882,12 +1919,23 @@ Include (-
 To save the (N - a number) byte/bytes at address (A - a number) as Glk state: (- vdl_saveGlkState({A},{N}); -).
 
 To save Glk state (this is saving Glk state):
-	let the byte counter be zero;
+	let the byte counter be eight;
 	repeat with the linked list vertex running through the extra Glk stream state hash table:
+		increase the byte counter by eight;
+	repeat with the linked list vertex running through the extra Glk file reference state hash table:
 		increase the byte counter by eight;
 	let the encoded state address be a possibly zero-length memory allocation of the byte counter bytes;
 	let the address be the encoded state address;
 	repeat with the linked list vertex running through the extra Glk stream state hash table:
+		write the integer the number key of the linked list vertex to address the address;
+		increase the address by four;
+		write the integer the number value of the linked list vertex to address the address;
+		increase the address by four;
+	write the integer zero to address the address;
+	increase the address by four;
+	write the integer zero to address the address;
+	increase the address by four;
+	repeat with the linked list vertex running through the extra Glk file reference state hash table:
 		write the integer the number key of the linked list vertex to address the address;
 		increase the address by four;
 		write the integer the number value of the linked list vertex to address the address;
@@ -1943,14 +1991,23 @@ To decide what number is the length of the newly loaded Glk state: (- (vdl_glkSt
 To load Glk state (this is loading Glk state):
 	let the encoded state address be the address of a newly loaded Glk state;
 	clear the extra Glk stream state hash table;
+	clear the extra Glk file reference state hash table;
 	let the address be the encoded state address;
 	let the entry count be the length of the newly loaded Glk state divided by eight;
+	let the class index be zero;
 	repeat with a counter running over the half-open interval from zero to the entry count:
 		let the key be the integer at address the address;
 		increase the address by four;
 		let the value be the integer at address the address;
 		increase the address by four;
-		insert the key the key and the value the value into the extra Glk stream state hash table;
+		if the key is zero:
+			increment the class index;
+		otherwise:
+			if the class index is:
+				-- zero:
+					insert the key the key and the value the value into the extra Glk stream state hash table;
+				-- one:
+					insert the key the key and the value the value into the extra Glk file reference state hash table;
 	free the possibly zero-length memory allocation at address the encoded state address.
 
 A GRIF shielding rule (this is the shield loading Glk state against instrumentation rule):
@@ -2036,6 +2093,7 @@ The Glk layer after Glk error detection is a Glk layer that varies.
 To detect Glk errors (this is Glk error detection):
 	now the Glk error function selector is the function selector of the current Glk invocation;
 	[Variables in which to remember arguments:]
+	let the file reference be a number;
 	let the filemode be a number;
 	let the event structure address be a number;
 	[Switch, dispatch, and switch again.]
@@ -2155,6 +2213,7 @@ To detect Glk errors (this is Glk error detection):
 			check that argument number zero of the current Glk invocation is not null;
 			check that argument number zero of the current Glk invocation is a valid Glk file reference;
 			check that argument number one of the current Glk invocation is a valid Glk file mode;
+			now the file reference is argument number zero of the current Glk invocation;
 			now the filemode is argument number one of the current Glk invocation;
 		-- 67: [glk_stream_open_memory]
 			check that the current Glk invocation has four arguments;
@@ -2170,6 +2229,7 @@ To detect Glk errors (this is Glk error detection):
 			check that argument number zero of the current Glk invocation is not a window stream;
 			check that argument number one of the current Glk invocation is either null or a valid structure address for two fields;
 			check that argument number one of the current Glk invocation is either null or a writeable address;
+			remove the first occurrence of the key argument number zero of the current Glk invocation from the extra Glk stream state hash table;
 		-- 69: [glk_stream_set_position]
 			check that the current Glk invocation has three arguments;
 			check that argument number zero of the current Glk invocation is not null;
@@ -2188,18 +2248,22 @@ To detect Glk errors (this is Glk error detection):
 		-- 96: [glk_fileref_create_temp]
 			check that the current Glk invocation has two arguments;
 			check that argument number zero of the current Glk invocation is a valid Glk file usage;
+			note the new file reference created with usage argument number zero of the current Glk invocation;
 		-- 97: [glk_fileref_create_by_name]
 			check that the current Glk invocation has three arguments;
 			check that argument number zero of the current Glk invocation is a valid Glk file usage;
 			check that argument number one of the current Glk invocation is a valid Glk file mode;
+			note the new file reference created with usage argument number zero of the current Glk invocation;
 		-- 98: [glk_fileref_create_by_prompt]
 			check that the current Glk invocation has three arguments;
 			check that argument number zero of the current Glk invocation is a valid Glk file usage;
 			check that argument number one of the current Glk invocation is a valid Glk file mode;
+			note the new file reference created with usage argument number zero of the current Glk invocation;
 		-- 99: [glk_fileref_destroy]
 			check that the current Glk invocation has one argument;
 			check that argument number zero of the current Glk invocation is not null;
 			check that argument number zero of the current Glk invocation is a valid Glk file reference;
+			remove the first occurrence of the key argument number zero of the current Glk invocation from the extra Glk file reference state hash table;
 		-- 100: [glk_fileref_iterate]
 			check that the current Glk invocation has two arguments;
 			check that argument number zero of the current Glk invocation is a valid Glk file reference;
@@ -2222,30 +2286,26 @@ To detect Glk errors (this is Glk error detection):
 			check that argument number zero of the current Glk invocation is a valid Glk file usage;
 			check that argument number one of the current Glk invocation is not null;
 			check that argument number one of the current Glk invocation is a valid Glk file reference;
+			note the new file reference created with usage argument number zero of the current Glk invocation;
 		-- 128: [glk_put_char]
 			check that the current Glk invocation has one argument;
 			check that the current stream is not null;
-			check that the current stream is not blocked by line input;
 		-- 129: [glk_put_char_stream]
 			check that the current Glk invocation has two arguments;
 			check that argument number zero of the current Glk invocation is not null;
 			check that argument number zero of the current Glk invocation is a valid Glk stream;
 			check that argument number zero of the current Glk invocation is a valid output stream;
-			check that the stream given by argument number zero of the current Glk invocation is not blocked by line input;
 		-- 130: [glk_put_string]
 			check that the current Glk invocation has one argument;
 			check that the current stream is not null;
-			check that the current stream is not blocked by line input;
 		-- 131: [glk_put_string_stream]
 			check that the current Glk invocation has two arguments;
 			check that argument number zero of the current Glk invocation is not null;
 			check that argument number zero of the current Glk invocation is a valid Glk stream;
 			check that argument number zero of the current Glk invocation is a valid output stream;
-			check that the stream given by argument number zero of the current Glk invocation is not blocked by line input;
 		-- 132: [glk_put_buffer]
 			check that the current Glk invocation has two arguments;
 			check that the current stream is not null;
-			check that the current stream is not blocked by line input;
 			check that either argument number zero of the current Glk invocation is null or its argument number one of the current Glk invocation byte elements are at valid addresses;
 			check that argument number zero of the current Glk invocation is not null;
 		-- 133: [glk_put_buffer_stream]
@@ -2253,7 +2313,6 @@ To detect Glk errors (this is Glk error detection):
 			check that argument number zero of the current Glk invocation is not null;
 			check that argument number zero of the current Glk invocation is a valid Glk stream;
 			check that argument number zero of the current Glk invocation is a valid output stream;
-			check that the stream given by argument number zero of the current Glk invocation is not blocked by line input;
 			check that either argument number one of the current Glk invocation is null or its argument number two of the current Glk invocation byte elements are at valid addresses;
 			check that argument number one of the current Glk invocation is not null;
 		-- 134: [glk_set_style]
@@ -2509,17 +2568,14 @@ To detect Glk errors (this is Glk error detection):
 			check that the current Glk invocation has one argument;
 			check that Unicode is supported;
 			check that the current stream is not null;
-			check that the current stream is not blocked by line input;
 		-- 297: [glk_put_string_uni]
 			check that the current Glk invocation has one argument;
 			check that Unicode is supported;
 			check that the current stream is not null;
-			check that the current stream is not blocked by line input;
 		-- 298: [glk_put_buffer_uni]
 			check that the current Glk invocation has two arguments;
 			check that Unicode is supported;
 			check that the current stream is not null;
-			check that the current stream is not blocked by line input;
 			check that either argument number zero of the current Glk invocation is null or its argument number one of the current Glk invocation elements are at valid addresses;
 			check that argument number zero of the current Glk invocation is not null;
 		-- 299: [glk_put_char_stream_uni]
@@ -2528,21 +2584,18 @@ To detect Glk errors (this is Glk error detection):
 			check that argument number zero of the current Glk invocation is not null;
 			check that argument number zero of the current Glk invocation is a valid Glk stream;
 			check that argument number zero of the current Glk invocation is a valid output stream;
-			check that the stream given by argument number zero of the current Glk invocation is not blocked by line input;
 		-- 300: [glk_put_string_stream_uni]
 			check that the current Glk invocation has two arguments;
 			check that Unicode is supported;
 			check that argument number zero of the current Glk invocation is not null;
 			check that argument number zero of the current Glk invocation is a valid Glk stream;
 			check that argument number zero of the current Glk invocation is a valid output stream;
-			check that the stream given by argument number zero of the current Glk invocation is not blocked by line input;
 		-- 301: [glk_put_buffer_stream_uni]
 			check that the current Glk invocation has three arguments;
 			check that Unicode is supported;
 			check that argument number zero of the current Glk invocation is not null;
 			check that argument number zero of the current Glk invocation is a valid Glk stream;
 			check that argument number zero of the current Glk invocation is a valid output stream;
-			check that the stream given by argument number zero of the current Glk invocation is not blocked by line input;
 			check that either argument number one of the current Glk invocation is null or its argument number two of the current Glk invocation elements are at valid addresses;
 			check that argument number one of the current Glk invocation is not null;
 		-- 304: [glk_get_char_stream_uni]
@@ -2575,6 +2628,7 @@ To detect Glk errors (this is Glk error detection):
 			check that argument number zero of the current Glk invocation is not null;
 			check that argument number zero of the current Glk invocation is a valid Glk file reference;
 			check that argument number one of the current Glk invocation is a valid Glk file mode;
+			now the file reference is argument number zero of the current Glk invocation;
 			now the filemode is argument number one of the current Glk invocation;
 		-- 313: [glk_stream_open_memory_uni]
 			check that the current Glk invocation has four arguments;
@@ -2714,20 +2768,69 @@ To detect Glk errors (this is Glk error detection):
 		-- 35: [glk_window_open]
 			note the new window stream created;
 		-- 66: [glk_stream_open_file]
-			note the new stream created with filemode the filemode;
+			note the new stream created with file reference the file reference and filemode the filemode;
 		-- 312: [glk_stream_open_file_uni]
-			note the new stream created with filemode the filemode;
+			note the new stream created with file reference the file reference and filemode the filemode;
 		-- 67: [glk_stream_open_memory]
-			note the new stream created with filemode the filemode;
+			note the new stream created with no file reference and filemode the filemode;
 		-- 313: [glk_stream_open_memory_uni]
-			note the new stream created with filemode the filemode;
+			note the new stream created with no file reference and filemode the filemode;
 		-- 73: [glk_stream_open_resource]
-			note the new stream created with filemode the read operation;
+			note the new stream created with no file reference and filemode the read operation;
 		-- 314: [glk_stream_open_resource_uni]
-			note the new stream created with filemode the read operation.
+			note the new stream created with no file reference and filemode the read operation.
 
 A Glk layering rule (this is the detect Glk errors rule):
 		install Glk error detection as a Glk layer whose notifications are handled by the default value of phrase Glk layer notification -> nothing and let the Glk layer after Glk error detection be the layer it should delegate to.
+
+Chapter "Output Interception for Glk Error Detection" - unindexed
+
+To decide whether (C - a number) is a forbidden control character:
+	if C is at least 0 [null] and C is at most 9 [tab]:
+		decide yes;
+	if C is at least 11 [vertical tab] and C is at most 31 [unit separator]:
+		decide yes;
+	if C is at least 127 [delete; beginning of additionally reserved control characters] and C is at most 159 [end of additionally reserved control characters]:
+		decide yes;
+	decide no.
+
+An output interception rule (this is the intercept output for Glk error detection rule):
+	if the input-output system of the intercepted output is the Glk input-output system:
+		now the Glk error function selector is zero;
+		if the type of the intercepted output is:
+			-- invalid textual output:
+				signal the Glk error "Attempt to print invalid text";
+			-- valid textual output:
+				check that the stream given by the stream of the intercepted output is not blocked by line input;
+				let the stream state be the first extra Glk stream state value matching the key the stream of the intercepted output in the extra Glk stream state hash table or the all-flags extra Glk stream state if there are no matches;
+				if the stream state describes a text stream:
+					let the address be the address of the intercepted output;
+					repeat with a counter running over the half-open interval from zero to the length of the intercepted output:
+						if the integer at address the address is a forbidden control character:
+							signal the Glk error "Attempt to print control characters to a text stream";
+							stop;
+						increase the address by four;
+				if the length of the intercepted output is greater than zero:
+					let the linked list vertex be the first match for the key the stream of the intercepted output in the extra Glk stream state hash table;
+					unless the linked list vertex is null:
+						let the address of the last character be the address of the intercepted output plus (four times the length of the intercepted output) minus four;
+						if the integer at address the address of the last character is 10: [newline]
+							write the value the extra Glk stream state value of the linked list vertex with a margin-aligned image possible to the linked list vertex;
+						otherwise:
+							write the value the extra Glk stream state value of the linked list vertex with no margin-aligned image possible to the linked list vertex;
+			-- save file output:
+				let the stream state be the first extra Glk stream state value matching the key the stream of the intercepted output in the extra Glk stream state hash table or the all-flags extra Glk stream state if there are no matches;
+				if the stream state describes a text stream:
+					signal the Glk error "Attempt to print control characters to a text stream";
+					stop;
+			-- endless output:
+				signal the Glk error "Attempt to print to an echo stream cycle";
+			-- style change:
+				do nothing;
+			-- endless style change:
+				signal the Glk error "Attempt to set the style of an echo stream cycle";
+			-- cursor movement:
+				check that the stream given by the stream of the intercepted output is not blocked by line input.
 
 Book "Miscellaneous Errors" - unindexed
 
