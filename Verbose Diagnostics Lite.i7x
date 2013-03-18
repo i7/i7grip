@@ -41,11 +41,6 @@ To decide what number is the memory stack routine hash table size: (- VRPM_MST_R
 To decide what number is the printing routine hash table size: (- VRPM_PRINT_ROUTINE_HASH_SIZE -).
 To decide what number is the miscellaneous routine hash table size: (- VRPM_MISC_ROUTINE_HASH_SIZE -).
 
-Book "The Call Stack Format"
-
-To say the call stack for a verbose runtime problem message:
-	say "[the call stack]".
-
 Book "Runtime Problems" - unindexed
 
 Responding to a runtime problem is a phrase nothing -> nothing that varies.
@@ -54,7 +49,7 @@ Chapter "Responding to a Runtime Problem" - unindexed (for use without Interacti
 
 [We use the word ``print'' to avoid an Inform bug in 6G60.]
 To print the call stack for a runtime problem (this is saying the call stack for a runtime problem):
-	say "[the call stack for a verbose runtime problem message]".
+	say "[the call stack]".
 
 Responding to a runtime problem is saying the call stack for a runtime problem.
 
@@ -93,7 +88,7 @@ Chapter "Responding to a Programming Error" - unindexed (for use without Interac
 
 [We use the word ``print'' to avoid an Inform bug in 6G60.]
 To print the call stack for a programming error (this is saying the call stack for a programming error):
-	say "[line break][the call stack for a verbose runtime problem message]".
+	say "[line break][the call stack]".
 
 Responding to a programming error is saying the call stack for a programming error.
 
@@ -133,7 +128,7 @@ Chapter "Responding to a Block Value Error" - unindexed (for use without Interac
 
 [We use the word ``print'' to avoid an Inform bug in 6G60.]
 To print the call stack for a block value error (this is saying the call stack for a block value error):
-	say "[the call stack for a verbose runtime problem message]".
+	say "[the call stack]".
 
 Responding to a block value error is saying the call stack for a block value error.
 
@@ -237,7 +232,7 @@ Chapter "Responding to a Indexed Text Error" - unindexed (for use without Intera
 
 [We use the word ``print'' to avoid an Inform bug in 6G60.]
 To print the call stack for a indexed text error (this is saying the call stack for a indexed text error):
-	say "[the call stack for a verbose runtime problem message]".
+	say "[the call stack]".
 
 Responding to a indexed text error is saying the call stack for a indexed text error.
 
@@ -356,7 +351,7 @@ Chapter "Responding to a Relation Error" - unindexed (for use without Interactiv
 
 [We use the word ``print'' to avoid an Inform bug in 6G60.]
 To print the call stack for a relation error (this is saying the call stack for a relation error):
-	say "[the call stack for a verbose runtime problem message]".
+	say "[the call stack]".
 
 Responding to a relation error is saying the call stack for a relation error.
 
@@ -513,7 +508,7 @@ Chapter "Responding to a Memory Stack Error" - unindexed (for use without Intera
 
 [We use the word ``print'' to avoid an Inform bug in 6G60.]
 To print the call stack for a memory stack error (this is saying the call stack for a memory stack error):
-	say "[the call stack for a verbose runtime problem message]".
+	say "[the call stack]".
 
 Responding to a memory stack error is saying the call stack for a memory stack error.
 
@@ -589,7 +584,7 @@ Chapter "Responding to a Printing Error" - unindexed (for use without Interactiv
 
 [We use the word ``print'' to avoid an Inform bug in 6G60.]
 To print the call stack for a printing error (this is saying the call stack for a printing error):
-	say "[the call stack for a verbose runtime problem message]".
+	say "[the call stack]".
 
 Responding to a printing error is saying the call stack for a printing error.
 
@@ -666,7 +661,7 @@ Chapter "Responding to a Miscellaneous Error" - unindexed (for use without Inter
 
 [We use the word ``print'' to avoid an Inform bug in 6G60.]
 To print the call stack for a miscellaneous error (this is saying the call stack for a miscellaneous error):
-	say "[the call stack for a verbose runtime problem message]".
+	say "[the call stack]".
 
 Responding to a miscellaneous error is saying the call stack for a miscellaneous error.
 
@@ -748,7 +743,7 @@ Book "Nonfunction Calls"
 Chapter "Responding to a Nonfunction Call" - unindexed (for use without Interactive Debugger by Brady Garvin)
 
 This is the print the call stack on nonfunctions rule:
-	say "[low-level runtime failure in][the story title][with explanation]The story called a nonfunction as if it were a function.[line break][the call stack for a verbose runtime problem message][terminating the story]".
+	say "[low-level runtime failure in][the story title][with explanation]The story called a nonfunction as if it were a function.[line break][the call stack][terminating the story]".
 
 The nonfunction substitution rule is the print the call stack on nonfunctions rule.
 
