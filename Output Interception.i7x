@@ -13,6 +13,12 @@ Include Glk Interception by Brady Garvin.
 
 Use authorial modesty.
 
+Book "Copyright and License"
+
+[Copyright 2013 Brady J. Garvin]
+
+[This extension is released under the Creative Commons Attribution 3.0 Unported License (CC BY 3.0) so that it can qualify as a public Inform extension.  See the LICENSE file included in the release for further details.]
+
 Book "Extension Information"
 
 Chapter "Use Options" - unindexed
@@ -622,10 +628,10 @@ Z-machine, so it's not a good idea anyway.
 Section: Regarding bugs
 
 If you encounter a bug, check first on the project website
-(https://sourceforge.net/projects/i7grip/) to see whether a newer version of
-this extension is available.  If, even using the latest version, the fault
-remains, please file a bug report: On the website, choose "Support" from the
-toolbar and follow the link in the box titled "Best Way to Get Help".
+(https://github.com/i7/i7grip) to see whether a newer version of this extension
+is available.  If, even using the latest version, the fault remains, please file
+a bug report: On the website, choose "Issues" from the toolbar and click on "New
+Issue".
 
 I will try to respond quickly, at least with an estimate of when the bug might
 be fixed, though sometimes I am away from the internet for a week or two at a
@@ -634,8 +640,8 @@ time.
 Chapter: Acknowledgements
 
 Output Interception was prepared as part of the Glulx Runtime Instrumentation
-Project (https://sourceforge.net/projects/i7grip/).  For this first edition of
-the project, special thanks go to these people, in chronological order:
+Project (https://github.com/i7/i7grip).  For this first edition of the project,
+special thanks go to these people, in chronological order:
 
 - Graham Nelson, Emily Short, and others, not only for Inform, but also for the
   countless hours the high-quality technical documentation saved me and for the

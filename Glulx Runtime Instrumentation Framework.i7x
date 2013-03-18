@@ -18,11 +18,7 @@ Book "Copyright and License"
 
 [Copyright 2013 Brady J. Garvin]
 
-[This extension is free software: you can redistribute it and/or modify it under the terms of the GNU General Public License as published by the Free Software Foundation, either version 3 of the License, or (at your option) any later version.
-
-This extension is distributed in the hope that it will be useful, but WITHOUT ANY WARRANTY; without even the implied warranty of MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the GNU General Public License for more details.
-
-You should have received a copy of the GNU General Public License along with this extension.  If not, see <http://www.gnu.org/licenses/>.]
+[This extension is released under the Creative Commons Attribution 3.0 Unported License (CC BY 3.0) so that it can qualify as a public Inform extension.  See the LICENSE file included in the release for further details.]
 
 Book "Extension Information"
 
@@ -2947,10 +2943,10 @@ changes a function (see the documentation of the custom git operation codes).
 Section: Regarding bugs
 
 If you encounter a bug, check first on the project website
-(https://sourceforge.net/projects/i7grip/) to see whether a newer version of
-this extension is available.  If, even using the latest version, the fault
-remains, please file a bug report: On the website, choose "Support" from the
-toolbar and follow the link in the box titled "Best Way to Get Help".
+(https://github.com/i7/i7grip) to see whether a newer version of this extension
+is available.  If, even using the latest version, the fault remains, please file
+a bug report: On the website, choose "Issues" from the toolbar and click on "New
+Issue".
 
 I will try to respond quickly, at least with an estimate of when the bug might
 be fixed, though sometimes I am away from the internet for a week or two at a
@@ -2959,9 +2955,9 @@ time.
 Chapter: Acknowledgements
 
 Glulx Runtime Instrumentation Framework was prepared as the nucleus of the Glulx
-Runtime Instrumentation Project (https://sourceforge.net/projects/i7grip/).  For
-this first edition of the project, special thanks go to these people, in
-chronological order:
+Runtime Instrumentation Project (https://github.com/i7/i7grip).  For this first
+edition of the project, special thanks go to these people, in chronological
+order:
 
 - Graham Nelson, Emily Short, and others, not only for Inform, but also for the
   countless hours the high-quality technical documentation saved me and for the
