@@ -623,7 +623,7 @@ Section "The Stream Log Structure" - unindexed
 
 To decide what number is the size in memory of a stream log with capacity (N - a number) bytes: (- (8+{N}) -).
 
-Section "Stream Log Construction and destruction" - unindexed
+Section "Stream Log Construction and Destruction" - unindexed
 
 To decide what stream log is a new stream log with capacity of at least (N - a number) bytes:
 	let the capacity be N;

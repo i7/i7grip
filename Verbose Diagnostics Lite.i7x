@@ -1128,7 +1128,7 @@ To move the stream (S - a number) to its end for Glk error detection:
 	prepare another Glk invocation from the pending invocation;
 	delete the pending invocation.
 
-Section "Extra Stream State Lookups (and related lookups)" - unindexed
+Section "Extra Stream State Lookups (and Related Lookups)" - unindexed
 
 To decide what number is the stream of the window (W - a number) for Glk error detection after dispatch:
 	let the pending outcome be a new copy of the current Glk outcome;
