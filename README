@@ -1,5 +1,5 @@
 The Glulx Runtime Instrumentation Project (GRIP) provides debugging tools for authors of interactive fiction (IF) by building on the capabilities of the Glulx virtual machine.
 
-GRIP is hosted on SourceForge at https://sourceforge.net/projects/i7grip/.
+GRIP is hosted on GitHub at https://github.com/i7/i7grip.
 
-This is a mid-delevopment snapshot.
+This is a mid-delevopment snapshot.  The target release date for Version 2 is 1 May 2013.
