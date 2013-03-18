@@ -45,10 +45,11 @@ Details are in the following chapters.
 Chapter: Usage
 
 When Verbose Diagnostics is included, all of the known problem messages for
-runtime trouble, both at the I7 and the I6 level, are accompanied by a call
-stack.  These call stacks are printed using phrases from the extension Call
-Stack Tracking (which see), and we can customize them by changing the truth
-states from Call Stack Tracking in a GRIF setup rule.  For example,
+runtime trouble, at the I7 level, at the I6 level, and at the Glk level, are
+accompanied by a call stack.  These call stacks are printed using phrases from
+the extension Call Stack Tracking (which see), and we can customize them by
+changing the truth states from Call Stack Tracking in a GRIF setup rule.  For
+example,
 
 	*: A GRIF setup rule:
 		now the call stack simplification flag is false.
@@ -78,6 +79,9 @@ guarantee.
 Verbose Diagnostics is subject to the caveats for the Glulx Runtime
 Instrumentation Framework; see the requirements chapter in its documentation for
 the technical details.
+
+Verbose Diagnostics is likewise subject to the caveats for Verbose Diagnostics
+Lite; see its documentation's requirements chapter for those technical details.
 
 Section: Regarding bugs
 
