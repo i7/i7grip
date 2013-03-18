@@ -27,19 +27,19 @@ Book "Extension Information"
 
 Chapter "Use Options" - unindexed
 
-Use a block value routine hash table size of at least 311 translates as (- Constant VRPM_BLOCK_ROUTINE_HASH_SIZE={N}; -).
-Use a indexed text routine hash table size of at least 311 translates as (- Constant VRPM_IT_ROUTINE_HASH_SIZE={N}; -).
-Use a relation routine hash table size of at least 311 translates as (- Constant VRPM_REL_ROUTINE_HASH_SIZE={N}; -).
-Use a memory stack routine hash table size of at least 311 translates as (- Constant VRPM_MST_ROUTINE_HASH_SIZE={N}; -).
-Use a printing routine hash table size of at least 311 translates as (- Constant VRPM_PRINT_ROUTINE_HASH_SIZE={N}; -).
-Use a miscellaneous routine hash table size of at least 311 translates as (- Constant VRPM_MISC_ROUTINE_HASH_SIZE={N}; -).
+Use a block value routine hash table size of at least 311 translates as (- Constant VDL_BLOCK_ROUTINE_HASH_SIZE={N}; -).
+Use a indexed text routine hash table size of at least 311 translates as (- Constant VDL_IT_ROUTINE_HASH_SIZE={N}; -).
+Use a relation routine hash table size of at least 311 translates as (- Constant VDL_REL_ROUTINE_HASH_SIZE={N}; -).
+Use a memory stack routine hash table size of at least 311 translates as (- Constant VDL_MST_ROUTINE_HASH_SIZE={N}; -).
+Use a printing routine hash table size of at least 311 translates as (- Constant VDL_PRINT_ROUTINE_HASH_SIZE={N}; -).
+Use a miscellaneous routine hash table size of at least 311 translates as (- Constant VDL_MISC_ROUTINE_HASH_SIZE={N}; -).
 
-To decide what number is the block value routine hash table size: (- VRPM_BLOCK_ROUTINE_HASH_SIZE -).
-To decide what number is the indexed text routine hash table size: (- VRPM_IT_ROUTINE_HASH_SIZE -).
-To decide what number is the relation routine hash table size: (- VRPM_REL_ROUTINE_HASH_SIZE -).
-To decide what number is the memory stack routine hash table size: (- VRPM_MST_ROUTINE_HASH_SIZE -).
-To decide what number is the printing routine hash table size: (- VRPM_PRINT_ROUTINE_HASH_SIZE -).
-To decide what number is the miscellaneous routine hash table size: (- VRPM_MISC_ROUTINE_HASH_SIZE -).
+To decide what number is the block value routine hash table size: (- VDL_BLOCK_ROUTINE_HASH_SIZE -).
+To decide what number is the indexed text routine hash table size: (- VDL_IT_ROUTINE_HASH_SIZE -).
+To decide what number is the relation routine hash table size: (- VDL_REL_ROUTINE_HASH_SIZE -).
+To decide what number is the memory stack routine hash table size: (- VDL_MST_ROUTINE_HASH_SIZE -).
+To decide what number is the printing routine hash table size: (- VDL_PRINT_ROUTINE_HASH_SIZE -).
+To decide what number is the miscellaneous routine hash table size: (- VDL_MISC_ROUTINE_HASH_SIZE -).
 
 Book "Runtime Problems" - unindexed
 
@@ -63,7 +63,7 @@ Responding to a runtime problem is forcing a breakpoint for a runtime problem.
 Chapter "The Custom Runtime Problem Handler" - unindexed
 
 Include (-
-	[ vrpm_RTPHandler n par1 par2 par3 In i c;
+	[ vdl_RTPHandler n par1 par2 par3 In i c;
 		enable_rte=true;
 		RunTimeProblem(n,par1,par2,par3,In,i,c);
 		(llo_getField((+ responding to a runtime problem +),1))();
@@ -73,7 +73,7 @@ Include (-
 Chapter "Runtime Problem Handler Addresses" - unindexed
 
 To decide what rule is the default runtime problem handler: (- RunTimeProblem -).
-To decide what rule is the custom runtime problem handler: (- vrpm_RTPHandler -).
+To decide what rule is the custom runtime problem handler: (- vdl_RTPHandler -).
 
 Chapter "Shielding the Custom Runtime Problem Handler" - unindexed
 
@@ -102,7 +102,7 @@ Responding to a programming error is forcing a breakpoint for a programming erro
 Chapter "The Custom Programming Error Handler" - unindexed
 
 Include (-
-	[ vrpm_PEHandler crime obj id size p q;
+	[ vdl_PEHandler crime obj id size p q;
 		RT__Err(crime,obj,id,size,p,q);
 		(llo_getField((+ responding to a programming error +),1))();
 	];
@@ -111,7 +111,7 @@ Include (-
 Chapter "Programming Error Handler Addresses" - unindexed
 
 To decide what rule is the default programming error handler: (- RT__Err -).
-To decide what rule is the custom programming error handler: (- vrpm_PEHandler -).
+To decide what rule is the custom programming error handler: (- vdl_PEHandler -).
 
 Chapter "Shielding the Custom Programming Error Handler" - unindexed
 
@@ -142,7 +142,7 @@ Responding to a block value error is forcing a breakpoint for a block value erro
 Chapter "The Custom Block Value Error Handler" - unindexed
 
 Include (-
-	[ vrpm_BVEHandler message;
+	[ vdl_BVEHandler message;
 		print (string)message,"^";
 		(llo_getField((+ responding to a block value error +),1))();
 	];
@@ -150,7 +150,7 @@ Include (-
 
 Chapter "Block Value Error Handler Addresses" - unindexed
 
-To decide what number is the address of the custom block value error handler: (- vrpm_BVEHandler -).
+To decide what number is the address of the custom block value error handler: (- vdl_BVEHandler -).
 
 Chapter "Block Value Routines of Interest" - unindexed
 
@@ -200,7 +200,7 @@ A GRIF setup rule (this is the allocate the synthetic text for the block value e
 Section "Block Value Routine Instrumentation Proper" - unindexed
 
 [ !From @streamstr <parameter-zero>; ]
-[ @callfi vrpm_BVEHandler <moved-from-parameter-zero> 0; ]
+[ @callfi vdl_BVEHandler <moved-from-parameter-zero> 0; ]
 To replace (A - an instruction vertex) with a block value error handler invocation if it is printing a block value error:
 	if the addressing mode of parameter zero of A is the constant addressing mode:
 		let the message be parameter zero of A converted to some text;
@@ -246,7 +246,7 @@ Responding to a indexed text error is forcing a breakpoint for a indexed text er
 Chapter "The Custom Indexed Text Error Handler" - unindexed
 
 Include (-
-	[ vrpm_IndexedTextHandler message;
+	[ vdl_IndexedTextHandler message;
 		print (string)message,"^";
 		(llo_getField((+ responding to a indexed text error +),1))();
 	];
@@ -254,7 +254,7 @@ Include (-
 
 Chapter "Indexed Text Error Handler Addresses" - unindexed
 
-To decide what number is the address of the custom indexed text error handler: (- vrpm_IndexedTextHandler -).
+To decide what number is the address of the custom indexed text error handler: (- vdl_IndexedTextHandler -).
 
 Chapter "Indexed Text Routines of Interest" - unindexed
 
@@ -319,7 +319,7 @@ A GRIF setup rule (this is the allocate the synthetic text for the indexed text 
 Section "Indexed Text Routine Instrumentation Proper" - unindexed
 
 [ !From @streamstr <parameter-zero>; ]
-[ @callfi vrpm_IndexedTextHandler <moved-from-parameter-zero> 0; ]
+[ @callfi vdl_IndexedTextHandler <moved-from-parameter-zero> 0; ]
 To replace (A - an instruction vertex) with an indexed text error handler invocation if it is printing an indexed text error:
 	if the addressing mode of parameter zero of A is the constant addressing mode:
 		let the message be parameter zero of A converted to some text;
@@ -365,7 +365,7 @@ Responding to a relation error is forcing a breakpoint for a relation error.
 Chapter "The Custom Relation Error Handler" - unindexed
 
 Include (-
-	[ vrpm_RelationHandler message;
+	[ vdl_RelationHandler message;
 		print (string)message,"^";
 		(llo_getField((+ responding to a relation error +),1))();
 	];
@@ -373,7 +373,7 @@ Include (-
 
 Chapter "Relation Error Handler Addresses" - unindexed
 
-To decide what number is the address of the custom relation error handler: (- vrpm_RelationHandler -).
+To decide what number is the address of the custom relation error handler: (- vdl_RelationHandler -).
 
 Chapter "Relation Routines of Interest" - unindexed
 
@@ -476,7 +476,7 @@ A GRIF setup rule (this is the allocate the synthetic text for the relation erro
 Section "Relation Routine Instrumentation Proper" - unindexed
 
 [ !From @streamstr <parameter-zero>; ]
-[ @callfi vrpm_RelationHandler <moved-from-parameter-zero> 0; ]
+[ @callfi vdl_RelationHandler <moved-from-parameter-zero> 0; ]
 To replace (A - an instruction vertex) with a relation error handler invocation if it is printing a relation error:
 	if the addressing mode of parameter zero of A is the constant addressing mode:
 		let the message be parameter zero of A converted to some text;
@@ -522,7 +522,7 @@ Responding to a memory stack error is forcing a breakpoint for a memory stack er
 Chapter "The Custom Memory Stack Error Handler" - unindexed
 
 Include (-
-	[ vrpm_MemoryStackHandler;
+	[ vdl_MemoryStackHandler;
 		print "^^";
 		(llo_getField((+ responding to a memory stack error +),1))();
 	];
@@ -530,7 +530,7 @@ Include (-
 
 Chapter "Memory Stack Error Handler Addresses" - unindexed
 
-To decide what number is the address of the custom memory stack error handler: (- vrpm_MemoryStackHandler -).
+To decide what number is the address of the custom memory stack error handler: (- vdl_MemoryStackHandler -).
 
 Chapter "Memory Stack Routines of Interest" - unindexed
 
@@ -554,7 +554,7 @@ A GRIF setup rule (this is the allocate the synthetic text for the memory stack 
 Section "Memory Stack Routine Instrumentation Proper" - unindexed
 
 [ !From @streamstr <parameter-zero>; ]
-[ @callf vrpm_MemoryStackHandler 0; ]
+[ @callf vdl_MemoryStackHandler 0; ]
 To replace (A - an instruction vertex) with a memory stack error handler invocation if it is printing a memory stack error:
 	if the addressing mode of parameter zero of A is the constant addressing mode:
 		let the message be parameter zero of A converted to some text;
@@ -598,7 +598,7 @@ Responding to a printing error is forcing a breakpoint for a printing error.
 Chapter "The Custom Printing Error Handler" - unindexed
 
 Include (-
-	[ vrpm_PrintingErrorHandler message;
+	[ vdl_PrintingErrorHandler message;
 		print (string)message,"^";
 		(llo_getField((+ responding to a printing error +),1))();
 	];
@@ -606,7 +606,7 @@ Include (-
 
 Chapter "Printing Error Handler Addresses" - unindexed
 
-To decide what number is the address of the custom printing error handler: (- vrpm_PrintingErrorHandler -).
+To decide what number is the address of the custom printing error handler: (- vdl_PrintingErrorHandler -).
 
 Chapter "Printing Routines of Interest" - unindexed
 
@@ -629,7 +629,7 @@ A GRIF setup rule (this is the allocate the synthetic text for the printing erro
 Section "Printing Routine Instrumentation Proper" - unindexed
 
 [ !From @streamstr <parameter-zero>; ]
-[ @callfi vrpm_PrintingErrorHandler <moved-from-parameter-zero> 0; ]
+[ @callfi vdl_PrintingErrorHandler <moved-from-parameter-zero> 0; ]
 To replace (A - an instruction vertex) with a printing error handler invocation if it is printing a printing error:
 	if the addressing mode of parameter zero of A is the constant addressing mode:
 		let the message be parameter zero of A converted to some text;
@@ -675,7 +675,7 @@ Responding to a miscellaneous error is forcing a breakpoint for a miscellaneous 
 Chapter "The Custom Miscellaneous Error Handler" - unindexed
 
 Include (-
-	[ vrpm_MiscellaneousErrorHandler message;
+	[ vdl_MiscellaneousErrorHandler message;
 		print (string)message,"^";
 		(llo_getField((+ responding to a miscellaneous error +),1))();
 	];
@@ -683,7 +683,7 @@ Include (-
 
 Chapter "Miscellaneous Error Handler Addresses" - unindexed
 
-To decide what number is the address of the custom miscellaneous error handler: (- vrpm_MiscellaneousErrorHandler -).
+To decide what number is the address of the custom miscellaneous error handler: (- vdl_MiscellaneousErrorHandler -).
 
 Chapter "Miscellaneous Routines of Interest" - unindexed
 
@@ -714,7 +714,7 @@ A GRIF setup rule (this is the allocate the synthetic text for the miscellaneous
 Section "Miscellaneous Routine Instrumentation Proper" - unindexed
 
 [ !From @streamstr <parameter-zero>; ]
-[ @callfi vrpm_MiscellaneousErrorHandler <moved-from-parameter-zero> 0; ]
+[ @callfi vdl_MiscellaneousErrorHandler <moved-from-parameter-zero> 0; ]
 To replace (A - an instruction vertex) with a miscellaneous error handler invocation if it is printing a miscellaneous error:
 	if the addressing mode of parameter zero of A is the constant addressing mode:
 		let the message be parameter zero of A converted to some text;
