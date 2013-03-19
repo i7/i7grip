@@ -1534,6 +1534,25 @@ To check that (A - a number) is a valid Glk file usage:
 				stop;
 	signal the Glk error "Argument is an invalid file usage".
 
+To decide whether (C - a number) is a unprintable control character:
+	if C is at least 0 [null] and C is at most 9 [tab]:
+		decide yes;
+	if C is at least 11 [vertical tab] and C is at most 31 [unit separator]:
+		decide yes;
+	if C is at least 127 [delete; beginning of additionally reserved control characters] and C is at most 159 [end of additionally reserved control characters]:
+		decide yes;
+	decide no.
+
+To check that the (N - a number) elements of the keycode array at address (A - a number) are valid optional line terminators:
+	let the address be A;
+	repeat with a counter running over the half-open interval from zero to N:
+		let the keycode be the integer at address the address;
+		if the keycode is at least zero and the keycode is less than 256:
+			unless the keycode is a unprintable control character:
+				signal the Glk error "Array argument contains an invalid optional line terminator";
+				stop;
+		increase the address by four.
+
 Section "Glk Window Type Violations" - unindexed
 
 To check that (A - a number) is a valid Glk window:
@@ -2682,6 +2701,7 @@ To detect Glk errors (this is Glk error detection):
 			check that argument number zero of the current Glk invocation is not null;
 			check that argument number zero of the current Glk invocation is a valid Glk window;
 			check that either argument number one of the current Glk invocation is null or its argument number two of the current Glk invocation elements are at valid addresses;
+			check that the argument number two of the current Glk invocation elements of the keycode array at address argument number one of the current Glk invocation are valid optional line terminators;
 		-- 352: [glk_current_time]
 			check that the current Glk invocation has one argument;
 			check that timekeeping is supported;
@@ -2785,15 +2805,6 @@ A Glk layering rule (this is the detect Glk errors rule):
 
 Chapter "Output Interception for Glk Error Detection" - unindexed
 
-To decide whether (C - a number) is a forbidden control character:
-	if C is at least 0 [null] and C is at most 9 [tab]:
-		decide yes;
-	if C is at least 11 [vertical tab] and C is at most 31 [unit separator]:
-		decide yes;
-	if C is at least 127 [delete; beginning of additionally reserved control characters] and C is at most 159 [end of additionally reserved control characters]:
-		decide yes;
-	decide no.
-
 An output interception rule (this is the intercept output for Glk error detection rule):
 	if the input-output system of the intercepted output is the Glk input-output system:
 		now the Glk error function selector is zero;
@@ -2806,7 +2817,7 @@ An output interception rule (this is the intercept output for Glk error detectio
 				if the stream state describes a text stream:
 					let the address be the address of the intercepted output;
 					repeat with a counter running over the half-open interval from zero to the length of the intercepted output:
-						if the integer at address the address is a forbidden control character:
+						if the integer at address the address is a unprintable control character:
 							signal the Glk error "Attempt to print control characters to a text stream";
 							stop;
 						increase the address by four;
