@@ -96,7 +96,7 @@ To write the argument count (N - a number) to the current Glk invocation:
 		let the old argument array address be the argument array address of the current Glk invocation;
 		let the new argument array address be a memory allocation of N times four bytes;
 		copy the old byte count bytes from address old argument array address to address new argument array address;
-		zero the N minus the old byte count bytes at address new argument array address plus the old byte count;
+		zero the (four times N) minus the old byte count bytes at address new argument array address plus the old byte count;
 		free the possibly zero-length memory allocation at address old argument array address;
 		write the argument array address new argument array address to the current Glk invocation;
 	write the argument count N to the current Glk invocation without reallocation.
