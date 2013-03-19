@@ -180,13 +180,62 @@ To decide what number is the address of the idle-on-quit routine: (- id_idleOnQu
 
 Chapter "Limiting Story Quits"
 
+Section "Temporary Space for Limiting Story Quits" - unindexed
+
+Include (-
+	Array id_glkPops --> 8;
+-).
+
+To decide what number is where stack pops from Glk invocations are temporarily saved for limiting story quits: (- id_glkPops -).
+
+Section "Instruction Vertices for Limiting Story Quits"
+
+[ @callf <idle-on-quit-function> 0; ]
+To decide what instruction vertex is a new idle-on-quit instruction vertex:
+	let the result be a new artificial instruction vertex;
+	write the operation code op-callf to the result;
+	write the addressing mode constant addressing mode to parameter zero of the result;
+	write the address of the idle-on-quit routine to parameter zero of the result;
+	write the addressing mode zero-or-discard addressing mode to parameter one of the result;
+	decide on the result.
+
+[ @jeq <P-in-mode-M> 1 <constant>; ]
+To decide what instruction vertex is a new conditional jump-to-idle-on-quit instruction vertex for mode (M - an addressing mode) and parameter (P - a number):
+	let the result be a new artificial instruction vertex;
+	write the operation code op-jeq to the result;
+	write the addressing mode M to parameter zero of the result;
+	write P to parameter zero of the result;
+	write the addressing mode constant addressing mode to parameter one of the result;
+	write one to parameter one of the result;
+	write the addressing mode constant addressing mode to parameter two of the result;
+	decide on the result.
+
+Section "Instrumentation Rule for Limiting Story Quits"
+
 A GRIF instrumentation rule (this is the limit effects of story quits to the story rule):
 	if the no more than one line input request at a time option is not active:
 		repeat with the instruction vertex running through occurrences of the operation code op-quit in the scratch space:
 			write the operation code op-callf to the instruction vertex;
 			write the addressing mode constant addressing mode to parameter zero of the instruction vertex;
 			write the address of the idle-on-quit routine to parameter zero of the instruction vertex;
-			write the addressing mode zero-or-discard addressing mode to parameter one of the instruction vertex.
+			write the addressing mode zero-or-discard addressing mode to parameter one of the instruction vertex;
+		repeat with the instruction vertex running through occurrences of the operation code op-glk in the scratch space:
+			let the addressing mode be the addressing mode of parameter zero of the instruction vertex;
+			if the addressing mode is the constant addressing mode:
+				if parameter zero of the instruction vertex is one:
+					write the operation code op-callf to the instruction vertex;
+					write the addressing mode constant addressing mode to parameter zero of the instruction vertex;
+					write the address of the idle-on-quit routine to parameter zero of the instruction vertex;
+					write the addressing mode zero-or-discard addressing mode to parameter one of the instruction vertex;
+ 			otherwise if the addressing mode is not the zero-or-discard addressing mode:
+				cleanse the instruction vertex of stack pops using the array at address where stack pops from Glk invocations are temporarily saved for limiting story quits;
+				now the addressing mode is the addressing mode of parameter zero of the instruction vertex;
+				let the parameter be parameter zero of the instruction vertex;
+				let the jump-to-idle-on-quit instruction vertex be a new conditional jump-to-idle-on-quit instruction vertex for mode the addressing mode and parameter the parameter;
+				let the idle-on-quit instruction vertex be a new idle-on-quit instruction vertex;
+				insert the jump-to-idle-on-quit instruction vertex before the instruction vertex;
+				insert the idle-on-quit instruction vertex at the end of the arrangement;
+				establish a jump link from the jump-to-idle-on-quit instruction vertex to the idle-on-quit instruction vertex.
 
 Part "Transfer of Control"
 
