@@ -2813,8 +2813,8 @@ An output interception rule (this is the intercept output for Glk error detectio
 				if the length of the intercepted output is greater than zero:
 					let the linked list vertex be the first match for the key the stream of the intercepted output in the extra Glk stream state hash table;
 					unless the linked list vertex is null:
-						let the address of the last character be the address of the intercepted output plus (four times the length of the intercepted output) minus four;
-						if the integer at address the address of the last character is 10: [newline]
+						let the last character address be the address of the intercepted output plus (four times the length of the intercepted output) minus four;
+						if the integer at address the last character address is 10: [newline]
 							write the value the extra Glk stream state value of the linked list vertex with a margin-aligned image possible to the linked list vertex;
 						otherwise:
 							write the value the extra Glk stream state value of the linked list vertex with no margin-aligned image possible to the linked list vertex;
