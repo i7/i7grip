@@ -1843,6 +1843,11 @@ To note a character input request for the window (W - a number):
 		write the value the extra Glk stream state value of the linked list vertex with character input pending to the linked list vertex.
 
 To note a finished character input request for the window (W - a number):
+	let the linked list vertex be the extra stream state vertex of the window W for Glk error detection;
+	unless the linked list vertex is null:
+		write the value the extra Glk stream state value of the linked list vertex with no character input pending to the linked list vertex.
+
+To note a finished character input request for the window (W - a number) after dispatch:
 	let the linked list vertex be the extra stream state vertex of the window W for Glk error detection after dispatch;
 	unless the linked list vertex is null:
 		write the value the extra Glk stream state value of the linked list vertex with no character input pending to the linked list vertex.
@@ -1853,6 +1858,11 @@ To note a line input request for the window (W - a number):
 		write the value the extra Glk stream state value of the linked list vertex with line input pending to the linked list vertex.
 
 To note a finished line input request for the window (W - a number):
+	let the linked list vertex be the extra stream state vertex of the window W for Glk error detection;
+	unless the linked list vertex is null:
+		write the value the extra Glk stream state value of the linked list vertex with no line input pending to the linked list vertex.
+
+To note a finished line input request for the window (W - a number) after dispatch:
 	let the linked list vertex be the extra stream state vertex of the window W for Glk error detection after dispatch;
 	unless the linked list vertex is null:
 		write the value the extra Glk stream state value of the linked list vertex with no line input pending to the linked list vertex.
@@ -2782,9 +2792,9 @@ To detect Glk errors (this is Glk error detection):
 			let the event be the integer at address the event structure address;
 			let the window be the integer at address (the event structure address plus four);
 			if the event is the character input event type:
-				note a finished character input request for the window the window;
+				note a finished character input request for the window the window after dispatch;
 			otherwise if the event is the line input event type:
-				note a finished line input request for the window the window;
+				note a finished line input request for the window the window after dispatch;
 		-- 35: [glk_window_open]
 			note the new window stream created;
 		-- 66: [glk_stream_open_file]
