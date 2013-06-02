@@ -2194,7 +2194,7 @@ before starting GRIF and
 afterwards.  If we need to simulate the hijacking process, we may want to do the
 same.  For completeness, the instrumented post-hijacking stage rule traverses
 
-	the GRIF post-hijacking rulebook
+	the GRIF instrumented post-hijacking rulebook
 
 but it does so in instrumented code, which would correspond to the beginning of
 the interesting rule in this example.
