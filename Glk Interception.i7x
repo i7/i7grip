@@ -546,7 +546,7 @@ Include (-
 
 To decide what number is where the remaining number of intercepted Glk stack results is temporarily saved: (- gi_glkStackResultIndex -).
 To decide what number is where the stack depth added by Glk results is temporarily saved: (- gi_glkRollSize -).
-To decide what number is where the result of a restore-like operation is temporarily saved: (- gi_restoreResult -).
+To decide what number is where the result of a restore-like operation is temporarily saved for Glk interception: (- gi_restoreResult -).
 
 Chapter "Instruction Vertices" - unindexed
 
@@ -617,11 +617,11 @@ To decide what instruction vertex is a new Glk stack result rolling instruction 
 	decide on the result.
 
 [ @jne gi_restoreResult-->0 -1 <constant>; ]
-To decide what instruction vertex is a new restore-result-testing instruction vertex:
+To decide what instruction vertex is a new restore-result-testing instruction vertex for Glk interception:
 	let the result be a new artificial instruction vertex;
 	write the operation code op-jne to the result;
 	write the addressing mode zero-based-dereference addressing mode to parameter zero of the result;
-	write where the result of a restore-like operation is temporarily saved to parameter zero of the result;
+	write where the result of a restore-like operation is temporarily saved for Glk interception to parameter zero of the result;
 	write the addressing mode constant addressing mode to parameter one of the result;
 	write -1 to parameter one of the result;
 	write the addressing mode constant addressing mode to parameter two of the result;
@@ -632,8 +632,8 @@ To decide what instruction vertex is a new Glk object recovery instruction verte
 	decide on a new artificial instruction vertex for a zero-argument call to the function at address the function address of recovering Glk interception with return mode the zero-or-discard addressing mode.
 
 [ @copy gi_restoreResult-->0 <P-in-mode-M>; ]
-To decide what instruction vertex is a new restore-result-restoring instruction vertex for mode (M - an addressing mode) and parameter (P - a number):
-	decide on a new artificial instruction vertex for a copy with source mode the zero-based-dereference addressing mode and source parameter where the result of a restore-like operation is temporarily saved and destination mode M and destination parameter P.
+To decide what instruction vertex is a new restore-result-restoring instruction vertex for mode (M - an addressing mode) and parameter (P - a number) for Glk interception:
+	decide on a new artificial instruction vertex for a copy with source mode the zero-based-dereference addressing mode and source parameter where the result of a restore-like operation is temporarily saved for Glk interception and destination mode M and destination parameter P.
 
 [ @sub gi_yieldCountdown-->0 1 gi_yieldCountdown-->0; ]
 To decide what instruction vertex is a new yield-countdown-decrementing instruction vertex:
@@ -741,10 +741,10 @@ To note restores to (V - an instruction vertex) for Glk interception:
 	let the result mode be the addressing mode of parameter the store index of V;
 	let the result parameter be parameter the store index of V;
 	write the addressing mode zero-based-dereference addressing mode to parameter the store index of V;
-	write where the result of a restore-like operation is temporarily saved to parameter the store index of V;
-	let the restore-result-restoring instruction vertex be a new restore-result-restoring instruction vertex for mode the result mode and parameter the result parameter;
+	write where the result of a restore-like operation is temporarily saved for Glk interception to parameter the store index of V;
+	let the restore-result-restoring instruction vertex be a new restore-result-restoring instruction vertex for mode the result mode and parameter the result parameter for Glk interception;
 	insert the restore-result-restoring instruction vertex after V;
-	let the restore-result-testing instruction vertex be a new restore-result-testing instruction vertex;
+	let the restore-result-testing instruction vertex be a new restore-result-testing instruction vertex for Glk interception;
 	let the Glk object recovery instruction vertex be a new Glk object recovery instruction vertex;
 	insert the restore-result-testing instruction vertex before the restore-result-restoring instruction vertex;
 	insert the Glk object recovery instruction vertex before the restore-result-restoring instruction vertex;
