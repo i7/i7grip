@@ -114,6 +114,14 @@ Definition: a hash table (called A) is empty:
 			decide no;
 	decide yes.
 
+Section "Hash Table Properties"
+
+To decide what number is the number of entries in (A - a hash table):
+	let the result be zero;
+	repeat with a linked list vertex running through A:
+		increment the result;
+	decide on the result.
+
 Chapter "The Permanent Hash Table Kind"
 
 A permanent hash table is a kind of value.
@@ -153,6 +161,14 @@ Definition: a permanent hash table (called A) is empty:
 		unless bucket number index of A is empty:
 			decide no;
 	decide yes.
+
+Section "Permanent Hash Table Properties"
+
+To decide what number is the number of entries in (A - a permanent hash table):
+	let the result be zero;
+	repeat with a linked list vertex running through A:
+		increment the result;
+	decide on the result.
 
 Book "Hash Table Interfaces"
 
@@ -1105,7 +1121,7 @@ removed, nor can a permanent hash table be deleted.  But there is also a
 significant speed-up under some interpreters if we use permanent hash tables in
 place of their ordinary counterparts.
 
-Section: Manipulating Hash Tables
+Section: Manipulating hash tables
 
 Every phrase in the sections titled "The search and lookup interface" and
 "Loops" in the Low-Level Linked Lists documentation also applies to hash tables
@@ -1134,6 +1150,18 @@ and
 	insert the textual key (K - some text) into (H - a hash table)
 
 The insertion phrases for permanent hash tables are the same.
+
+Section: Counting entries
+
+The phrase
+
+	the number of entries in (H - a hash table)
+
+counts the number of entries in a hash table.  Similarly,
+
+	the number of entries in (H - a permanent hash table)
+
+counts entries in a permanent hash table.
 
 Chapter: Requirements, Limitations, and Bugs
 
