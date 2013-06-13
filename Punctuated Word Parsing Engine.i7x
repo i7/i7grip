@@ -211,7 +211,7 @@ To repeat with (I - a nonexisting text variable) running through (A - a punctuat
 			}
 			@push pwpe_iterator;
 			llo_advance=false;
-			@aload {A} pwpe_iterator {I};
+			{I}=llo_getField({A},pwpe_iterator);
 		}else for(llo_oneTime=true,llo_broken=true,llo_advance=true:llo_oneTime&&((llo_oneTime=false),true)||(llo_broken=false):)
 -).
 
