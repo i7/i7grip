@@ -601,6 +601,12 @@ To enable the universal breakpoint (this is enabling the universal breakpoint):
 	repeat with the simple breakpoint running through the simple breakpoint values of the simple breakpoint hash table:
 		set the breakpoint flag in the simple breakpoint.
 
+A GRIF shielding rule (this is the shield breakpoint toggles rule):
+	shield disabling the universal breakpoint in one flag against instrumentation;
+	shield enabling the universal breakpoint in one flag against instrumentation;
+	shield disabling the universal breakpoint against instrumentation;
+	shield enabling the universal breakpoint against instrumentation.
+
 Section "Forcing a Breakpoint"
 
 Include (-
