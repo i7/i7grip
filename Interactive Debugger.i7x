@@ -1058,7 +1058,7 @@ To decide what breaktext is a new breaktext for the (N - a number) codepoints at
 
 To delete (A - a breaktext):
 	delete the synthetic text the human-friendly name of A;
-	free the memory allocation at address the codepoint array address of A;
+	free the possibly zero-length memory allocation at address the codepoint array address of A;
 	free the memory allocation at address A converted to a number.
 
 Section "Private Breaktext Mutators" - unindexed
