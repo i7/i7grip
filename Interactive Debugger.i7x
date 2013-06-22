@@ -1108,12 +1108,13 @@ An output interception rule (this is the breaktext detection rule):
 						let the written byte count be the written byte count after appending up to the remaining byte count bytes from address the remaining output address to the stream log;
 						let the written integer count be the written byte count divided by four;
 						repeat with the breaktext running through the breaktext values of the user breaktext hash table:
-							let the codepoint count be the codepoint count of the breaktext;
-							let the codepoint array address be the codepoint array address of the breaktext;
-							if the stream log contains the codepoint count integers at address the codepoint array address overlapping with its last written integer count integers:
-								trigger the breaktext;
-								enable the universal breakpoint;
-								now the breaktext encountered flag is true;
+							if the breaktext is enabled:
+								let the codepoint count be the codepoint count of the breaktext;
+								let the codepoint array address be the codepoint array address of the breaktext;
+								if the stream log contains the codepoint count integers at address the codepoint array address overlapping with its last written integer count integers:
+									trigger the breaktext;
+									enable the universal breakpoint;
+									now the breaktext encountered flag is true;
 						decrease the remaining byte count by the written byte count;
 						if the remaining byte count is zero:
 							break;
