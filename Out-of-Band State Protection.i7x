@@ -99,7 +99,9 @@ Include (-
 	[ obsp_beginDeserialization
 		fileReference stream;
 		fileReference = glk_fileref_create_by_name(fileusage_Data | fileusage_BinaryMode, (+ the protected state filename +), 0);
-		stream = glk_stream_open_file(fileReference, filemode_Read, 0);
+		if (glk_fileref_does_file_exist(fileReference)) {
+			stream = glk_stream_open_file(fileReference, filemode_Read, 0);
+		}
 		if (~~stream) {
 			glk_fileref_destroy(fileReference);
 			obsp_deserializationAddress = llo_zeroLengthAllocationAddress;
