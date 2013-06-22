@@ -259,10 +259,26 @@ Include (-
 	[ id_restart window;
 		(llo_getField((+ canceling any request for a debug input line +),1))();
 		for(window=0:window=glk_window_iterate(window,0):){
-			glk_cancel_char_event(window);
-			glk_cancel_line_event(window,0);
-			glk_cancel_mouse_event(window);
-			glk_cancel_hyperlink_event(window);
+			switch (glk_window_get_type(window)) {
+				wintype_Pair:
+				wintype_Blank:
+				wintype_TextBuffer:
+					glk_cancel_char_event(window);
+					glk_cancel_line_event(window,0);
+					glk_cancel_hyperlink_event(window);
+				wintype_TextGrid:
+					glk_cancel_char_event(window);
+					glk_cancel_line_event(window,0);
+					glk_cancel_mouse_event(window);
+					glk_cancel_hyperlink_event(window);
+				wintype_Graphics:
+					glk_cancel_mouse_event(window);
+				default:
+					glk_cancel_char_event(window);
+					glk_cancel_line_event(window,0);
+					glk_cancel_mouse_event(window);
+					glk_cancel_hyperlink_event(window);
+			}
 		}
 		(llo_getField((+ clearing pending requests from the extra Glk state +),1))();
 		(llo_getField((+ serializing protected state +),1))();
