@@ -1319,13 +1319,13 @@ To while within (W - a wrapped window) via (A - a wrapping layer) begin -- end: 
 	@push gww_streamTransfer;
 	@push gww_windowStateTransfer;
 	@push gww_streamStateTransfer;
-	@push say__p;
-	@push say__pc;
+	@push say__p; say__p=0;
+	@push say__pc; say__pc=0;
 	@push say__n;
-	say__p=0;
-	say__pc=0;
+	@push debug_rules; debug_rules=0;
 	for(llo_advance=false::)
 		if(llo_advance){
+			@pull debug_rules;
 			@pull say__n;
 			@pull say__pc;
 			@pull say__p;
