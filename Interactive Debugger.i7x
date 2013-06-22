@@ -1820,6 +1820,7 @@ A debug command and
 	the debugger's break-by-inference command and
 	the debugger's break-by-output command and
 	the debugger's break-by-text command and
+	the debugger's clear command and
 	the debugger's continue command and
 	the debugger's delete all command and
 	the debugger's delete command and
@@ -1921,6 +1922,7 @@ A GRIF setup rule (this is the set up the debug command parser rule):
 	now the debugger's break-by-inference command is a new nonterminal in the debug command parser named "the 'break here' command";
 	now the debugger's break-by-output command is a new nonterminal in the debug command parser named "the 'break on output' command";
 	now the debugger's break-by-text command is a new nonterminal in the debug command parser named "the 'break' command for a text";
+	now the debugger's clear command is a new nonterminal in the debug command parser named "the 'clear' command";
 	now the debugger's continue command is a new nonterminal in the debug command parser named "the 'continue' command";
 	now the debugger's delete all command is a new nonterminal in the debug command parser named "the 'delete all breakpoints' command";
 	now the debugger's delete command is a new nonterminal in the debug command parser named "the 'delete a breakpoint' command";
@@ -1987,6 +1989,7 @@ A GRIF setup rule (this is the set up the debug command parser rule):
 	understand "[the debugger's break-by-inference command]" as a debug command;
 	understand "[the debugger's break-by-output command]" as a debug command;
 	understand "[the debugger's break-by-text command]" as a debug command;
+	understand "[the debugger's clear command]" as a debug command;
 	understand "[the debugger's continue command]" as a debug command;
 	understand "[the debugger's delete all command]" as a debug command;
 	understand "[the debugger's delete command]" as a debug command;
@@ -2029,6 +2032,8 @@ A GRIF setup rule (this is the set up the debug command parser rule):
 	understand "[the debugger's version command]" as a debug command;
 	understand "[the debugger's xyzzy command]" as a debug command;
 	understand "[the debugger's plugh command]" as a debug command;
+	[//]
+	understand "clear" as the debugger's clear command regardless of case;
 	[//]
 	understand "about" as the debugger's about command regardless of case;
 	understand "again" and "g" and "" as the debugger's again command regardless of case;
@@ -2504,6 +2509,23 @@ Chapter "Default Handler for Unimplemented Commands" - unindexed
 
 To handle the debug command rooted at (V - a parse tree vertex):
 	say "[runtime failure in]Interactive Debugger[with explanation]That command, [the human-friendly name of the parseme of V], is not yet implemented.[continuing anyway][line break]".
+
+Chapter "The Clear Command" - unindexed
+
+Include (-
+	[ id_windowClear;
+		glk_window_clear((+ the debugger window +));
+	];
+-).
+
+To decide what number is clearing the debugger window: (- id_windowClear -).
+To clear the debugger window: (- id_windowClear(); -).
+
+A GRIF shielding rule (this is the shield clearing the debugger window rule):
+	shield clearing the debugger window against instrumentation.
+
+To handle the debug command rooted at (V - a parse tree vertex that has the parseme the debugger's clear command):
+	clear the debugger window.
 
 Chapter "The Quit Command" - unindexed
 
