@@ -836,12 +836,15 @@ To decide what stream log is a deserialized stream log:
 	deserialize the length bytes to address the log address of the result;
 	decide on the result.
 
-Chapter "Serialization/Deserialization Rule"
+Chapter "Debugger State Serialization and Deserialization"
 
-[////]
+Section "Magic Numbers" - unindexed
+
 To decide what number is the debugger state magic number: (- 1765239140 -). [ASCII for "i7id"]
 
 To decide what number is the debugger state file format version number: (- 0 -).
+
+Section "Serialization/Deserialization Rule"
 
 A protected state serialization/deserialization rule (this is the serializing and deserializing the debugger state rule):
 	if serializing rather than deserializing:
