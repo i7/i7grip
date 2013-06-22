@@ -2363,7 +2363,7 @@ To decide what number is the address of the function whose name is named by (V -
 		if the debug mode is:
 			-- debugging at the Glulx assembly level:
 				parse the function at address the function address;
-				let the end instruction vertex be the disambiguation listing length plus one instruction vertices after the scratch space beginning vertex or else the end of the function;
+				let the end instruction vertex be the disambiguation listing length plus one instruction vertices after the scratch space beginning vertex or else a null instruction vertex;
 				say "[the Glulx assembly from the scratch space beginning vertex to the end instruction vertex with the sequence point zero selected]";
 			-- debugging at the I6 level:
 				let the beginning line number be the beginning line number of the routine record;
@@ -2945,12 +2945,12 @@ To decide what instruction vertex is (N - a number) instruction vertex/vertices 
 		now the result is the previous link;
 	decide on the result.
 
-To decide what instruction vertex is (N - a number) instruction vertex/vertices after (V - an instruction vertex) or else the end of the function:
+To decide what instruction vertex is (N - a number) instruction vertex/vertices after (V - an instruction vertex) or else a null instruction vertex:
 	let the result be V;
 	repeat with a counter running from one to N:
 		let the next link be the next link of the result;
 		if the next link is null:
-			decide on the result;
+			decide on a null instruction vertex;
 		now the result is the next link;
 	decide on the result.
 
@@ -3205,12 +3205,12 @@ To say the nearby Glulx assembly with the sequence point (S - a number) selected
 		fail at iterating from a given sequence point;
 		stop;
 	let the beginning instruction vertex be the listing window radius instruction vertices before the instruction vertex or else the beginning of the function;
-	let the end instruction vertex be the listing window radius instruction vertices after the instruction vertex or else the end of the function;
+	let the end instruction vertex be the listing window radius instruction vertices after the instruction vertex or else a null instruction vertex;
 	say "[fixed letter spacing]";
 	unless the beginning instruction vertex is the scratch space beginning vertex:
 		say "  ...[line break]";
 	say "[the Glulx assembly from the beginning instruction vertex to the end instruction vertex with the sequence point S selected]";
-	unless the beginning instruction vertex is the scratch space end vertex:
+	unless the end instruction vertex is null:
 		say "  ...[line break]";
 	say "[variable letter spacing][line break]".
 
@@ -3489,7 +3489,7 @@ To handle the debug command rooted at (V - a parse tree vertex that has the pars
 	if the instruction vertex is an invalid instruction vertex:
 		say "There is no such instruction (at least according to the debug information file).[paragraph break]";
 		stop;
-	let the next instruction vertex be one instruction vertex after the instruction vertex or else the end of the function;
+	let the next instruction vertex be one instruction vertex after the instruction vertex or else a null instruction vertex;
 	say "[fixed letter spacing][the Glulx assembly from the instruction vertex to the next instruction vertex with the sequence point the sequence point selected][variable letter spacing][line break]".
 
 To handle the debug command rooted at (V - a parse tree vertex that has the parseme the debugger's list-by-instruction-addresses command):
@@ -3518,7 +3518,7 @@ To handle the debug command rooted at (V - a parse tree vertex that has the pars
 	if the end instruction vertex is an invalid instruction vertex:
 		say "There is no instruction at address [the end instruction address in hexadecimal] (at least according to the debug information file).[paragraph break]";
 		stop;
-	let the next instruction vertex be one instruction vertex after the end instruction vertex or else the end of the function;
+	let the next instruction vertex be one instruction vertex after the end instruction vertex or else a null instruction vertex;
 	say "[fixed letter spacing][the Glulx assembly from the beginning instruction vertex to the next instruction vertex with the sequence point the sequence point selected][variable letter spacing][line break]".
 
 Section "Listing Instrumentation" - unindexed
