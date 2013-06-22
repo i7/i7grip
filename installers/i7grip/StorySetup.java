@@ -43,6 +43,7 @@ public class StorySetup extends InstallerBase {
 	    output.write(holding.toString());
 	    output.close();
 	} catch (IOException exception) {
+	    exception.printStackTrace();
 	    fatalError("Encountered error when adding inclusions to ``" + sourceCode + "'': " + exception);
 	}
     }
@@ -69,6 +70,7 @@ public class StorySetup extends InstallerBase {
 	    output.write(holding.toString());
 	    output.close();
 	} catch (IOException exception) {
+	    exception.printStackTrace();
 	    fatalError("Encountered error when changing to Glulx in ``" + propertyList + "'': " + exception);
 	}
     }

@@ -72,6 +72,7 @@ public final class InstallerEscalation {
 	    output.close();
 	    execute(new String[] { outerScript.getPath() }, "Privilege-escalating");
 	} catch (Exception exception) {
+	    exception.printStackTrace();
 	    fatalError("Encountered error when escalating privileges: " + exception);
 	} finally {
 	    innerScript.delete();

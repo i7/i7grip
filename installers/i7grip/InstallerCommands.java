@@ -42,6 +42,7 @@ public class InstallerCommands {
 	    execute(command, "Link-creating");
 	} catch (Exception exception) {
 	    if (escalationArgument == null) {
+		exception.printStackTrace();
 		fatalError("Encountered error when making ``" + destination + "'' a symbolic link to ``" + source + "'': " + exception);
 	    }
 	    if (theAuthorConsents("Unable to create symbolic link.  Escalate privileges and try again?", true)) {
@@ -76,6 +77,7 @@ public class InstallerCommands {
 	    }
 	    execute(command, "Project-opening");
 	} catch (IOException exception) {
+	    exception.printStackTrace();
 	    fatalError("Encountered error when opening ``" + project + "'': " + exception);
 	}
     }
