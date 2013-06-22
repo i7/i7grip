@@ -3147,6 +3147,9 @@ Section "Numbered Multiple-Line Listing with Errors" - unindexed
 [These phrases do print error messages in place of empty listings.]
 
 To say only the I6 from line number (B - a number) to (E - a number) with the sequence point (S - a number) selected:
+	if E is less than B:
+		say "There are no lines in that range.  The end line number precedings the beginning line number.[paragraph break]";
+		stop;
 	let the line count be the I6 line count in the half-open interval from line number B to E;
 	if the line count is zero:
 		say "There are no matching I6 lines.[paragraph break]";
@@ -3156,6 +3159,9 @@ To say only the I6 from line number (B - a number) to (E - a number) with the se
 		say "[fixed letter spacing][the I6 from line number B to E with line number the current line number selected][variable letter spacing][line break]".
 
 To say only the I7 from line number (B - a number) to (E - a number) with the sequence point (S - a number) selected:
+	if E is less than B:
+		say "There are no lines in that range.  The end line number precedings the beginning line number.[paragraph break]";
+		stop;
 	let the line count be the I7 line count in the half-open interval from line number B to E;
 	if the line count is zero:
 		say "There are no matching I7 lines.[paragraph break]";
@@ -3502,6 +3508,9 @@ To handle the debug command rooted at (V - a parse tree vertex that has the pars
 		stop;
 	let the end hexadecimal vertex be the next match for a hexadecimal number for the debugger after the child the beginning hexadecimal vertex;
 	let the end instruction address be the hexadecimal number named by the end hexadecimal vertex;
+	if the end instruction address is less than the beginning instruction address:
+		say "There are no instructions in that range.  The end address precedings the beginning address.[paragraph break]";
+		stop;
 	let the corroborating function address be the function address for the instruction address the end instruction address;
 	if the corroborating function address is zero:
 		say "There is no instruction at address [the end instruction address in hexadecimal] (at least according to the debug information file).[paragraph break]";
