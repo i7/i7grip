@@ -4329,6 +4329,12 @@ Include (-
 
 To invoke the showme subroutine on (V - a number): (- @push noun;noun={V};CreatePropertyOffsets();ShowMeSub();@pull noun; -).
 
+To invoke the showme subroutine on (V - a number) with a special case for nothing:
+	if V is zero:
+		say "nothing - object[line break]";
+	otherwise:
+		invoke the showme subroutine on V.
+
 To apply the debugger's showme to (V - a number):
 	if the showme warnings flag is true:
 		say "The 'showme' command works by running some story code, which is liable to crash the debugger if the story is in the middle of rearranging its data structures.  It could also disturb the state of the story, for instance if a printed name has a text substitution with side-effects.  Are you sure you want to continue (y, n, or Y)? ";
@@ -4336,9 +4342,9 @@ To apply the debugger's showme to (V - a number):
 			if the consent was permanent:
 				now the showme warnings flag is false;
 			say "[line break]";
-			invoke the showme subroutine on the V;
+			invoke the showme subroutine on the V with a special case for nothing;
 	otherwise:
-		invoke the showme subroutine on the V;
+		invoke the showme subroutine on the V with a special case for nothing;
 	say "[line break]".
 
 To handle the debug command rooted at (V - a parse tree vertex that has the parseme the debugger's showme command):
