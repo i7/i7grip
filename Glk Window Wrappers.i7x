@@ -1321,10 +1321,12 @@ To while within (W - a wrapped window) via (A - a wrapping layer) begin -- end: 
 	@push gww_streamStateTransfer;
 	@push say__p;
 	@push say__pc;
+	@push say__n;
 	say__p=0;
 	say__pc=0;
 	for(llo_advance=false::)
 		if(llo_advance){
+			@pull say__n;
 			@pull say__pc;
 			@pull say__p;
 			@pull gww_streamStateTransfer;

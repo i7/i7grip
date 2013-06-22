@@ -420,6 +420,7 @@ Include (-
 		}
 		@push say__p;
 		@push say__pc;
+		@push say__n;
 		glk_stream_set_current(stream);
 		if(llo_getByte(text)==224 or 225 or 226){
 			print (string)text;
@@ -428,6 +429,7 @@ Include (-
 		}
 		glk_stream_set_current(oldStream);
 		glk_stream_close(stream,metrics);
+		@pull say__n;
 		@pull say__pc;
 		@pull say__p;
 	];
@@ -449,6 +451,7 @@ Include (-
 	#endif;
 		@push say__p;
 		@push say__pc;
+		@push say__n;
 		@getiosys sp sp;
 		@setiosys 1 llo_cocoaPrint;
 		@push llo_cocoaTargetAddress;
@@ -467,6 +470,7 @@ Include (-
 		@pull llo_cocoaTargetAddress;
 		@stkswap;
 		@setiosys sp sp;
+		@pull say__n;
 		@pull say__pc;
 		@pull say__p;
 	#ifndef COCOA_QUIET;
@@ -568,6 +572,7 @@ Include (-
 To record the number of characters printed when we (P - a phrase): (-
 	@push say__p;
 	@push say__pc;
+	@push say__n;
 	llo_oldStream=glk_stream_get_current();
 	! To workaround a bug in some Glk implementations, use 1, not 0, as the array argument
 	llo_stream=glk_stream_open_memory(1,0,filemode_Write,llo_streamToStringMetrics);
@@ -577,6 +582,7 @@ To record the number of characters printed when we (P - a phrase): (-
 		glk_stream_set_current(llo_oldStream);
 		glk_stream_close(llo_stream,llo_streamToStringMetrics);
 	}
+	@pull say__n;
 	@pull say__pc;
 	@pull say__p;
 -).

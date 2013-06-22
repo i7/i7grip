@@ -197,6 +197,7 @@ Include (-
 To overwrite the synthetic text (T - some text) with the text printed when we (P - a phrase): (-
 	@push say__p;
 	@push say__pc;
+	@push say__n;
 	@push llt_oldStream;
 	@push llt_stream;
 	@push llt_oldLength;
@@ -222,6 +223,7 @@ To overwrite the synthetic text (T - some text) with the text printed when we (P
 	@pull llt_oldLength;
 	@pull llt_stream;
 	@pull llt_oldStream;
+	@pull say__n;
 	@pull say__pc;
 	@pull say__p;
 -).
