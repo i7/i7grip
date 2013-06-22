@@ -4,6 +4,7 @@ Version 1 of Verbose Diagnostics Lite (for Glulx only) by Brady Garvin begins he
 
 "with the support for block value errors courtesy of Esteban Montecristo"
 
+Include Runtime Checks by Brady Garvin.
 Include Low-Level Operations by Brady Garvin.
 Include Low-Level Text by Brady Garvin.
 Include Low-Level Linked Lists by Brady Garvin.
@@ -12,6 +13,7 @@ Include Glulx Runtime Instrumentation Framework by Brady Garvin.
 Include Call Stack Tracking by Brady Garvin.
 Include Glk Interception by Brady Garvin.
 Include Output Interception by Brady Garvin.
+Include Out-of-Band State Protection by Brady Garvin.
 
 Use authorial modesty.
 
@@ -44,6 +46,13 @@ To decide what number is the miscellaneous routine hash table size: (- VDL_MISC_
 
 To decide what number is the extra Glk stream state hash table size: (- VDL_EXTRA_STREAM_STATE_HASH_SIZE -).
 To decide what number is the extra Glk file reference state hash table size: (- VDL_EXTRA_FREF_STATE_HASH_SIZE -).
+
+Book "Runtime Checks"
+
+Chapter "Messages" - unindexed
+
+To fail at recognizing an extra Glk state serialization format:
+	say "[low-level runtime failure in]Verbose Diagnostics/Verbose Diagnostics Lite[with explanation]I attempted to deserialize my own copy of some Glk state from a temporary file, but found that the file doesn't adhere to a format I recognize.[terminating the story]".
 
 Book "Runtime Problems" - unindexed
 
@@ -1907,212 +1916,43 @@ To note the new file reference created with usage (U - a number):
 		now the value is the extra Glk file reference state for a new text file reference;
 	insert the key the result of the Glk invocation just delegated and the value the value into the extra Glk file reference state hash table.
 
-Section "Filename for Extra Glk State" - unindexed
+Chapter "Extra Glk State Serialization and Deserialization"
 
-The Glk state filename is some text that varies.
+Section "Magic Numbers" - unindexed
 
-A GRIF setup rule (this is the choose a filename for the extra Glk state rule):
-	[The integer at address 32 is the story checksum.]
-	now the Glk state filename is a new permanent synthetic text copied from "vdl_[the integer at address 32]_[the story title]".
+To decide what number is the extra Glk state magic number: (- 1986292831 -). [ASCII for "vdl_"]
 
-Section "Magic Number and Length Field for Extra Glk State" - unindexed
+To decide what number is the extra Glk state file format version number: (- 0 -).
 
-Include (-
-	Constant VDL_ = 1986292831;
-	Array vdl_glkStatePrefix --> VDL_ 0;
--) after "Definitions.i6t".
+Section "Serialization/Deserialization Rule"
 
-Section "Saving Extra Glk State" - unindexed
-
-Include (-
-	[ vdl_saveGlkState contents length
-		reference stream;
-		reference=glk_fileref_create_by_name(fileusage_Data|fileusage_BinaryMode,(+ the Glk state filename +),0);
-		if(~~reference){
-			rfalse;
-		}
-		stream=glk_stream_open_file(reference,filemode_Write,0);
-		glk_fileref_destroy(reference);
-		if(~~stream){
-			rfalse;
-		}
-		vdl_glkStatePrefix-->0=VDL_;
-		vdl_glkStatePrefix-->1=length;
-		glk_put_buffer_stream(stream,vdl_glkStatePrefix,8);
-		glk_put_buffer_stream(stream,contents,length);
-		glk_stream_close(stream,0);
-		rtrue;
-	];
--).
-
-To save the (N - a number) byte/bytes at address (A - a number) as Glk state: (- vdl_saveGlkState({A},{N}); -).
-
-To save Glk state (this is saving Glk state):
-	let the byte counter be eight;
-	repeat with the linked list vertex running through the extra Glk stream state hash table:
-		increase the byte counter by eight;
-	repeat with the linked list vertex running through the extra Glk file reference state hash table:
-		increase the byte counter by eight;
-	let the encoded state address be a possibly zero-length memory allocation of the byte counter bytes;
-	let the address be the encoded state address;
-	repeat with the linked list vertex running through the extra Glk stream state hash table:
-		write the integer the number key of the linked list vertex to address the address;
-		increase the address by four;
-		write the integer the number value of the linked list vertex to address the address;
-		increase the address by four;
-	write the integer zero to address the address;
-	increase the address by four;
-	write the integer zero to address the address;
-	increase the address by four;
-	repeat with the linked list vertex running through the extra Glk file reference state hash table:
-		write the integer the number key of the linked list vertex to address the address;
-		increase the address by four;
-		write the integer the number value of the linked list vertex to address the address;
-		increase the address by four;
-	save the byte counter bytes at address the encoded state address as Glk state;
-	free the possibly zero-length memory allocation at address the encoded state address.
-
-A GRIF shielding rule (this is the shield saving Glk state against instrumentation rule):
-	shield saving Glk state against instrumentation.
-
-Section "Loading Extra Glk State" - unindexed
-
-Include (-
-	[ vdl_loadGlkState
-		reference stream length result;
-		vdl_glkStatePrefix-->1=0;
-		reference=glk_fileref_create_by_name(fileusage_Data|fileusage_BinaryMode,(+ the Glk state filename +),0);
-		if(~~reference){
-			return llo_zeroLengthAllocationAddress;
-		}
-		stream=glk_stream_open_file(reference,filemode_Read,0);
-		if(~~stream){
-			glk_fileref_destroy(reference);
-			return llo_zeroLengthAllocationAddress;
-		}
-		if((glk_get_buffer_stream(stream,vdl_glkStatePrefix,8)~=8)||
-		   (vdl_glkStatePrefix-->0~=VDL_)||
-		   (~~(vdl_glkStatePrefix-->1))){
-			vdl_glkStatePrefix-->1=0;
-			glk_stream_close(stream,0);
-			glk_fileref_destroy(reference);
-			return llo_zeroLengthAllocationAddress;
-		}
-		length=vdl_glkStatePrefix-->1;
-		@malloc length result;
-		if(glk_get_buffer_stream(stream,result,length)~=length){
-			@mfree result;
-			vdl_glkStatePrefix-->1=0;
-			glk_stream_close(stream,0);
-			glk_fileref_destroy(reference);
-			return llo_zeroLengthAllocationAddress;
-		}
-		glk_stream_close(stream,0);
-		glk_fileref_delete_file(reference);
-		glk_fileref_destroy(reference);
-		return result;
-	];
--).
-
-To decide what number is the address of a newly loaded Glk state: (- vdl_loadGlkState(); -).
-To decide what number is the length of the newly loaded Glk state: (- (vdl_glkStatePrefix-->1) -).
-
-To load Glk state (this is loading Glk state):
-	let the encoded state address be the address of a newly loaded Glk state;
-	clear the extra Glk stream state hash table;
-	clear the extra Glk file reference state hash table;
-	let the address be the encoded state address;
-	let the entry count be the length of the newly loaded Glk state divided by eight;
-	let the class index be zero;
-	repeat with a counter running over the half-open interval from zero to the entry count:
-		let the key be the integer at address the address;
-		increase the address by four;
-		let the value be the integer at address the address;
-		increase the address by four;
-		if the key is zero:
-			increment the class index;
-		otherwise:
-			if the class index is:
-				-- zero:
-					insert the key the key and the value the value into the extra Glk stream state hash table;
-				-- one:
-					insert the key the key and the value the value into the extra Glk file reference state hash table;
-	free the possibly zero-length memory allocation at address the encoded state address.
-
-A GRIF shielding rule (this is the shield loading Glk state against instrumentation rule):
-	shield loading Glk state against instrumentation.
-
-A GRIF setup rule (this is the load Glk state on startup rule):
-	load Glk state.
-
-Section "Temporary Space for Extra Glk State" - unindexed
-
-Include (-
-	Array vdl_restoreResult --> 1;
--) after "Definitions.i6t".
-
-To decide what number is where the result of a restore-like operation is temporarily saved for Glk state loading: (- vdl_restoreResult -).
-
-Section "Instruction Vertices for Extra Glk State" - unindexed
-
-[ @callf <invocation-phrase> 0; ]
-To decide what instruction vertex is a new Glk state-saving instruction vertex:
-	decide on a new artificial instruction vertex for a zero-argument call to the function at address the function address of saving Glk state with return mode the zero-or-discard addressing mode.
-
-[ @copy vdl_restoreResult-->0 <P-in-mode-M>; ]
-To decide what instruction vertex is a new restore-result-restoring instruction vertex for mode (M - an addressing mode) and parameter (P - a number) for Glk state loading:
-	decide on a new artificial instruction vertex for a copy with source mode the zero-based-dereference addressing mode and source parameter where the result of a restore-like operation is temporarily saved for Glk state loading and destination mode M and destination parameter P.
-
-[ @jne vdl_restoreResult-->0 -1 <constant>; ]
-To decide what instruction vertex is a new restore-result-testing instruction vertex for Glk state loading:
-	let the result be a new artificial instruction vertex;
-	write the operation code op-jne to the result;
-	write the addressing mode zero-based-dereference addressing mode to parameter zero of the result;
-	write where the result of a restore-like operation is temporarily saved for Glk state loading to parameter zero of the result;
-	write the addressing mode constant addressing mode to parameter one of the result;
-	write -1 to parameter one of the result;
-	write the addressing mode constant addressing mode to parameter two of the result;
-	decide on the result.
-
-[ @callf <invocation-phrase> 0; ]
-To decide what instruction vertex is a new Glk state-loading instruction vertex:
-	decide on a new artificial instruction vertex for a zero-argument call to the function at address the function address of loading Glk state with return mode the zero-or-discard addressing mode.
-
-Section "Instrumentation for Extra Glk State" - unindexed
-
-To note restores by (V - an instruction vertex) for Glk state saving:
-	let the Glk state-saving instruction vertex be a new Glk state-saving instruction vertex;
-	insert the Glk state-saving instruction vertex before V.
-
-A GRIF instrumentation rule (this is the note restores for Glk state saving rule):
-	start a new generation of artificial vertices;
-	repeat with the instruction vertex running through occurrences of the operation code op-restart in the scratch space:
-		note restores by the instruction vertex for Glk state saving;
-	repeat with the instruction vertex running through occurrences of the operation code op-restore in the scratch space:
-		note restores by the instruction vertex for Glk state saving;
-	repeat with the instruction vertex running through occurrences of the operation code op-restoreundo in the scratch space:
-		note restores by the instruction vertex for Glk state saving.
-
-To note restores to (V - an instruction vertex) for Glk state loading:
-	let the store index be the parameter limit of V;
-	let the result mode be the addressing mode of parameter the store index of V;
-	let the result parameter be parameter the store index of V;
-	write the addressing mode zero-based-dereference addressing mode to parameter the store index of V;
-	write where the result of a restore-like operation is temporarily saved for Glk state loading to parameter the store index of V;
-	let the restore-result-restoring instruction vertex be a new restore-result-restoring instruction vertex for mode the result mode and parameter the result parameter for Glk state loading;
-	insert the restore-result-restoring instruction vertex after V;
-	let the restore-result-testing instruction vertex be a new restore-result-testing instruction vertex for Glk state loading;
-	let the Glk state-loading instruction vertex be a new Glk state-loading instruction vertex;
-	insert the restore-result-testing instruction vertex before the restore-result-restoring instruction vertex;
-	insert the Glk state-loading instruction vertex before the restore-result-restoring instruction vertex;
-	establish a jump link from the restore-result-testing instruction vertex to the restore-result-restoring instruction vertex.
-
-A GRIF instrumentation rule (this is the note restores for Glk state loading rule):
-	start a new generation of artificial vertices;
-	repeat with the instruction vertex running through occurrences of the operation code op-save in the scratch space:
-		note restores to the instruction vertex for Glk state loading;
-	repeat with the instruction vertex running through occurrences of the operation code op-saveundo in the scratch space:
-		note restores to the instruction vertex for Glk state loading.
+A protected state serialization/deserialization rule (this is the serializing and deserializing the extra Glk state rule):
+	if serializing rather than deserializing:
+		serialize the extra Glk state magic number;
+		serialize the extra Glk state file format version number;
+		serialize the number of entries in the extra Glk stream state hash table;
+		repeat with the linked list vertex running through the extra Glk stream state hash table:
+			serialize the number key of the linked list vertex;
+			serialize the number value of the linked list vertex;
+		serialize the number of entries in the extra Glk file reference state hash table;
+		repeat with the linked list vertex running through the extra Glk file reference state hash table:
+			serialize the number key of the linked list vertex;
+			serialize the number value of the linked list vertex;
+	otherwise if there is data to deserialize:
+		always check that a deserialized number is the extra Glk state magic number or else fail at recognizing an extra Glk state serialization format;
+		always check that a deserialized number is the extra Glk state file format version number or else fail at recognizing an extra Glk state serialization format;
+		clear the extra Glk stream state hash table;
+		let the entry count be a deserialized number;
+		repeat with a counter running over the half-open interval from zero to the entry count:
+			let the key be a deserialized number;
+			let the value be a deserialized number;
+			insert the key the key and the value the value into the extra Glk stream state hash table;
+		clear the extra Glk file reference state hash table;
+		now the entry count is a deserialized number;
+		repeat with a counter running over the half-open interval from zero to the entry count:
+			let the key be a deserialized number;
+			let the value be a deserialized number;
+			insert the key the key and the value the value into the extra Glk file reference state hash table.
 
 Chapter "Glk Error Detection Layer" - unindexed
 

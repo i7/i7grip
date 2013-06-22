@@ -8,6 +8,7 @@ Include Low-Level Text by Brady Garvin.
 Include Low-Level Linked Lists by Brady Garvin.
 Include Low-Level Hash Tables by Brady Garvin.
 Include Glk Window Wrappers by Brady Garvin.
+Include Out-of-Band State Protection by Brady Garvin.
 Include Output Interception by Brady Garvin.
 Include Punctuated Word Parsing Engine by Brady Garvin.
 Include Human-Friendly Function Names by Brady Garvin.
@@ -57,11 +58,15 @@ Use a user breakpoint hash table size of at least 23 translates as (- Constant I
 Use a user breaktext hash table size of at least 23 translates as (- Constant ID_USER_BREAKTEXT_HASH_SIZE={N}; -).
 Use a stream log hash table size of at least 23 translates as (- Constant ID_STREAM_LOG_HASH_SIZE={N}; -).
 Use a debugger disambiguation hash table size of at least 11 translates as (- Constant ID_DISAMBIGUATION_HASH_SIZE={N}; -).
+Use of debug command parse tree vertex hash table size of at least 23 translates as (- Constant ID_COMMAND_VERTEX_HASH_SIZE={N}; -).
+Use of debug command parseme hash table size of at least 311 translates as (- Constant ID_COMMAND_PARSEME_HASH_SIZE={N}; -).
 
 To decide what number is the user breakpoint hash table size: (- ID_USER_BREAKPOINT_HASH_SIZE -).
 To decide what number is the user breaktext hash table size: (- ID_USER_BREAKTEXT_HASH_SIZE -).
 To decide what number is the stream log hash table size: (- ID_STREAM_LOG_HASH_SIZE -).
 To decide what number is the debugger disambiguation hash table size: (- ID_DISAMBIGUATION_HASH_SIZE -).
+To decide what number is the debug command parse tree vertex hash table size: (- ID_COMMAND_VERTEX_HASH_SIZE -).
+To decide what number is the debug command parseme hash table size: (- ID_COMMAND_PARSEME_HASH_SIZE -).
 
 Use a disambiguation listing length of at least 4 translates as (- Constant ID_DISAMBIGUATION_LISTING_LENGTH={N}; -).
 Use a listing window of at least 10 translates as (- Constant ID_LISTING_WINDOW={N}; -).
@@ -133,15 +138,25 @@ To fail at finding the text for a breaktext:
 To fail at checking retired characters in a stream log:
 	say "[low-level runtime failure in]Interactive Debugger[with explanation]I attempted to check recent output for a breaktext, but the stream log was too short.  The code to rotate long output through short logs probably has a bug.[terminating the story]".
 
+To fail at recognizing a debugger serialization format:
+	say "[low-level runtime failure in]Interactive Debugger[with explanation]I attempted to deserialize the debugger state from a temporary file, but found that the file doesn't adhere to a format I recognize.[terminating the story]".
+
+To fail at serializing the debugger's parse of a command:
+	say "[low-level runtime failure in]Interactive Debugger[with explanation]I attempted to serialize a parse tree of one of your commands, but discovered in it unencodable inconsistencies.[terminating the story]".
+
+To fail at deserializing the debugger's parse of a command:
+	say "[low-level runtime failure in]Interactive Debugger[with explanation]I attempted to deserialize a parse tree of one of your commands, but found it undecodable.[terminating the story]".
+
 Book "Simulated Parallelism"
 
 Part "Parallelism State" - unindexed
 
 Chapter "Running and Continuing Flags" - unindexed
 
+The debugger's story-restarted flag is a truth state that varies.  The debugger's story-restarted flag is false.
 The debugger's story-has-run flag is a truth state that varies.  The debugger's story-has-run flag is false.
-The debugger story-running flag is a truth state that varies.  The debugger story-running flag is false.
-The debugger story-continuing flag is a truth state that varies.  The debugger story-continuing flag is false.
+The debugger's story-running flag is a truth state that varies.  The debugger's story-running flag is false.
+The debugger's story-continuing flag is a truth state that varies.  The debugger's story-continuing flag is false.
 
 Chapter "Coexecution State" - unindexed
 
@@ -160,7 +175,7 @@ Chapter "Initial Breakpoint"
 
 A last GRIF instrumented post-hijacking rule (this is the initial breakpoint rule):
 	force a breakpoint named "The initial breakpoint";
-	now the debugger story-running flag is true.
+	now the debugger's story-running flag is true.
 
 Part "Separation of the VM and Story Shutdown"
 
@@ -169,7 +184,7 @@ Chapter "Idle on Quit" - unindexed
 Include (-
 	Array id_ignoredEvent --> 4;
 	[ id_idleOnQuit;
-		(+ the debugger story-running flag +)=false;
+		(+ the debugger's story-running flag +)=false;
 		for(::){
 			glk_select(id_ignoredEvent);
 		}
@@ -188,16 +203,11 @@ Include (-
 
 To decide what number is where stack pops from Glk invocations are temporarily saved for limiting story quits: (- id_glkPops -).
 
-Section "Instruction Vertices for Limiting Story Quits"
+Section "Instruction Vertices for Limiting Story Quits" - unindexed
 
 [ @callf <idle-on-quit-function> 0; ]
 To decide what instruction vertex is a new idle-on-quit instruction vertex:
-	let the result be a new artificial instruction vertex;
-	write the operation code op-callf to the result;
-	write the addressing mode constant addressing mode to parameter zero of the result;
-	write the address of the idle-on-quit routine to parameter zero of the result;
-	write the addressing mode zero-or-discard addressing mode to parameter one of the result;
-	decide on the result.
+	decide on a new artificial instruction vertex for a zero-argument call to the function at address the address of the idle-on-quit routine with return mode the zero-or-discard addressing mode.
 
 [ @jeq <P-in-mode-M> 1 <constant>; ]
 To decide what instruction vertex is a new conditional jump-to-idle-on-quit instruction vertex for mode (M - an addressing mode) and parameter (P - a number):
@@ -236,6 +246,46 @@ A GRIF instrumentation rule (this is the limit effects of story quits to the sto
 				insert the jump-to-idle-on-quit instruction vertex before the instruction vertex;
 				insert the idle-on-quit instruction vertex at the end of the arrangement;
 				establish a jump link from the jump-to-idle-on-quit instruction vertex to the idle-on-quit instruction vertex.
+
+Chapter "Limiting Story Restarts"
+
+Section "Restart from Debugger" - unindexed
+
+To clear pending requests from the extra Glk state (this is clearing pending requests from the extra Glk state):
+	repeat with the linked list vertex running through the extra Glk stream state hash table:
+		write the value the extra Glk stream state value of the linked list vertex with no character input pending with no line input pending to the linked list vertex.
+
+Include (-
+	[ id_restart window;
+		(llo_getField((+ canceling any request for a debug input line +),1))();
+		for(window=0:window=glk_window_iterate(window,0):){
+			glk_cancel_char_event(window);
+			glk_cancel_line_event(window,0);
+			glk_cancel_mouse_event(window);
+			glk_cancel_hyperlink_event(window);
+		}
+		(llo_getField((+ clearing pending requests from the extra Glk state +),1))();
+		(llo_getField((+ serializing protected state +),1))();
+		@restart;
+	];
+-).
+
+To decide what number is restarting the story from the debugger: (- id_restart -).
+To restart the story from the debugger: (- id_restart(); -).
+
+Section "Shielding for Limiting Story Restarts"
+
+A GRIF shielding rule (this is the shield restarting the story from the debugger rule):
+	shield restarting the story from the debugger against instrumentation.
+
+Section "Instrumentation Rule for Limiting Story Restarts"
+
+A last GRIF instrumentation rule (this is the limit effects of story restarts to the story rule):
+	repeat with the instruction vertex running through occurrences of the operation code op-restart in the scratch space:
+		write the operation code op-callf to the instruction vertex;
+		write the addressing mode constant addressing mode to parameter zero of the instruction vertex;
+		write restarting the story from the debugger to parameter zero of the instruction vertex;
+		write the addressing mode zero-or-discard addressing mode to parameter one of the instruction vertex.
 
 Part "Transfer of Control"
 
@@ -467,7 +517,7 @@ To decide what event routing decision is the event routing decision after handli
 
 Section "Input Requests" - unindexed
 
-To cancel any request for a debug input line:
+To cancel any request for a debug input line (this is canceling any request for a debug input line):
 	if the debugger's line input handler is the default value of phrase text -> nothing:
 		stop;
 	prepare a spontaneous Glk invocation;
@@ -617,6 +667,211 @@ A GRIF setup rule (this is the initialize the debugger state rule):
 	now the stream log hash table is a new hash table with the stream log hash table size buckets;
 	now the user breaktext hash table is a new hash table with the user breaktext hash table size buckets.
 
+Chapter "Debugger State Serialization" - unindexed
+
+To serialize (A - a punctuated word array):
+	let the length be the word count of A;
+	serialize the length;
+	repeat with the index running over the half-open interval from zero to the length:
+		serialize the synthetic text word index of A.
+
+To serialize (V - parse tree vertex):
+	let the vertex index hash table be a new hash table with the debug command parse tree vertex hash table size buckets;
+	let the index be zero;
+	let the vertex be V;
+	while the vertex is not null:
+		insert the key the vertex and the value the index into the vertex index hash table;
+		increment the index;
+		now the vertex is the parse tree vertex to visit after the vertex;
+	serialize the index;
+	let the parser be the owner of the parseme of V;
+	let the parseme index hash table be a new hash table with the debug command parseme hash table size buckets;
+	now the index is zero;
+	repeat with the parseme running through the parseme keys of the parseme linked list of the parser:
+		insert the key the parseme and the value the index into the parseme index hash table;
+		increment the index;
+	now the vertex is V;
+	while the vertex is not null:
+		let the parseme be the parseme of the vertex;
+		serialize the first number value matching the key the parseme in the parseme index hash table or -1 if there are no matches;
+		if the parseme is a nonterminal:
+			let production serialized be false;
+			let the vertex's production be the production of the vertex;
+			now the index is zero;
+			repeat with the indexed production running through the production keys of the production linked list of the parseme:
+				if the vertex's production is the indexed production:
+					serialize the index;
+					now production serialized is true;
+					break;
+				increment the index;
+			always check that production serialized is true or else fail at serializing the debugger's parse of a command;
+		serialize the first number value matching the key the first child of the vertex in the vertex index hash table or -1 if there are no matches;
+		serialize the first number value matching the key the last child of the vertex in the vertex index hash table or -1 if there are no matches;
+		serialize the first number value matching the key the left sibling of the vertex in the vertex index hash table or -1 if there are no matches;
+		serialize the first number value matching the key the right sibling of the vertex in the vertex index hash table or -1 if there are no matches;
+		serialize the beginning lexeme index of the vertex;
+		serialize the end lexeme index of the vertex;
+		now the vertex is the parse tree vertex to visit after the vertex;
+	delete the vertex index hash table;
+	delete the parseme index hash table.
+
+To serialize (C - a compound breakpoint):
+	serialize the numeric identifier of C;
+	serialize the synthetic text the human-friendly name of C; [////]
+	let the simple breakpoint list be the simple breakpoint list of C;
+	serialize the length of the simple breakpoint list;
+	repeat with the simple breakpoint running through the simple breakpoint keys of the simple breakpoint list:
+		serialize the sequence point of the simple breakpoint;
+	serialize whether or not C is enabled.
+
+To serialize (B - a breaktext):
+	serialize the numeric identifier of B;
+	serialize the synthetic text the human-friendly name of B; [////]
+	let the codepoint count be the codepoint count of B;
+	serialize the codepoint count;
+	serialize the codepoint count times four bytes at address the codepoint array address of B;
+	serialize whether or not B is enabled;
+	serialize whether or not B is triggered.
+
+To serialize (L - a stream log):
+	serialize the log capacity of L;
+	serialize the log length of L;
+	serialize the log length of L times four bytes at address the log address of L.
+
+Chapter "Debugger Deserialization" - unindexed
+
+To decide what punctuated word array is a deserialized punctuated word array:
+	let the word count be a deserialized number;
+	let the size be the size in memory of a punctuated word array for the word count punctuated words;
+	let the result be a memory allocation of size bytes converted to a punctuated word array;
+	write the word count the word count to the result;
+	repeat with the index running over the half-open interval from zero to the word count:
+		write a deserialized synthetic text to word index of the result;
+	decide on the result.
+
+To decide what parse tree vertex is a deserialized parse tree vertex for (A - a context-free parser):
+	let the parseme hash table be a new hash table with the debug command parseme hash table size buckets;
+	let the index be zero;
+	repeat with the parseme running through the parseme keys of the parseme linked list of A:
+		insert the key the index and the value the parseme into the parseme hash table;
+		increment the index;
+	let the vertex count be a deserialized number;
+	let the vertex hash table be a new hash table with the debug command parse tree vertex hash table size buckets;
+	repeat with the second index running over the half-open interval from zero to the vertex count:
+		let the vertex be a new parse tree root for an invalid parseme;
+		insert the key the second index and the value the vertex into the vertex hash table;
+	repeat with the second index running over the half-open interval from zero to the vertex count:
+		let the vertex be the first parse tree vertex value matching the key the second index in the vertex hash table or an invalid parse tree vertex if there are no matches;
+		always check that the vertex is not an invalid parse tree vertex or else fail at deserializing the debugger's parse of a command;
+		let the parseme be the first parseme value matching the key a deserialized number in the parseme hash table or an invalid parseme if there are no matches;
+		write the parseme the parseme to the vertex;
+		if the parseme is a nonterminal:
+			let the production index be a deserialized number;
+			if the production index is at least zero:
+				repeat with the production running through the production keys of the production linked list of the parseme:
+					decrement the production index;
+					if the production index is zero:
+						write the production the production to the vertex;
+		write the first child the first parse tree vertex value matching the key a deserialized number in the vertex hash table or a null parse tree vertex if there are no matches to the vertex;
+		write the last child the first parse tree vertex value matching the key a deserialized number in the vertex hash table or a null parse tree vertex if there are no matches to the vertex;
+		write the left sibling the first parse tree vertex value matching the key a deserialized number in the vertex hash table or a null parse tree vertex if there are no matches to the vertex;
+		write the right sibling the first parse tree vertex value matching the key a deserialized number in the vertex hash table or a null parse tree vertex if there are no matches to the vertex;
+		write the beginning lexeme index a deserialized number to the vertex;
+		write the end lexeme index a deserialized number to the vertex;
+	let the result be the first parse tree vertex value matching the key zero in the vertex hash table or an invalid parse tree vertex if there are no matches;
+	always check that the result is not an invalid parse tree vertex or else fail at deserializing the debugger's parse of a command;
+	decide on the result.
+
+To decide what compound breakpoint is a deserialized compound breakpoint:
+	let the saved breakpoint counter be the breakpoint counter;
+	now the breakpoint counter is a deserialized number;
+	let the human-friendly name be a deserialized synthetic text;
+	let the result be a new compound breakpoint with human-friendly name the human-friendly name;
+	now the breakpoint counter is the saved breakpoint counter;
+	delete the synthetic text the human-friendly name;
+	let the sequence point count be a deserialized number;
+	repeat with a counter running from one to the sequence point count:
+		let the sequence point be a deserialized number;
+		attach the sequence point the sequence point to the result;
+	if a deserialized truth state is true:
+		enable the result;
+	decide on the result.
+
+To decide what breaktext is a deserialized breaktext:
+	let the saved breakpoint counter be the breakpoint counter;
+	now the breakpoint counter is a deserialized number;
+	let the human-friendly name be a deserialized synthetic text;
+	let the codepoint count be a deserialized number;
+	let the codepoint array address be a possibly zero-length memory allocation of the codepoint count times four bytes;
+	deserialize the codepoint count times four bytes to address the codepoint array address;
+	let the result be a new breaktext for the codepoint count codepoints at address the codepoint array address named the human-friendly name;
+	now the breakpoint counter is the saved breakpoint counter;
+	delete the synthetic text the human-friendly name;
+	if a deserialized truth state is true:
+		enable the result;
+	if a deserialized truth state is true:
+		trigger the result;
+	decide on the result.
+
+To decide what stream log is a deserialized stream log:
+	let the result be a new stream log with capacity of at least a deserialized number bytes;
+	let the length be a deserialized number;
+	write the log length the length to the result;
+	deserialize the length bytes to address the log address of the result;
+	decide on the result.
+
+Chapter "Serialization/Deserialization Rule"
+
+[////]
+To decide what number is the debugger state magic number: (- 1765239140 -). [ASCII for "i7id"]
+
+To decide what number is the debugger state file format version number: (- 0 -).
+
+A protected state serialization/deserialization rule (this is the serializing and deserializing the debugger state rule):
+	if serializing rather than deserializing:
+		serialize the debugger state magic number;
+		serialize the debugger state file format version number;
+		serialize the call stack simplification flag;
+		serialize the showme warnings flag;
+		serialize the lengthly listing warnings flag;
+		serialize the last-seen debug command punctuated words;
+		serialize the last-seen debug command vertex;
+		serialize the breakpoint counter;
+		serialize the number of entries in the user breakpoint hash table;
+		repeat with the compound breakpoint running through the compound breakpoint values of the user breakpoint hash table:
+			serialize the compound breakpoint;
+		serialize the number of entries in the user breaktext hash table;
+		repeat with the breaktext running through the breaktext values of the user breaktext hash table:
+			serialize the breaktext;
+		serialize the number of entries in the stream log hash table;
+		repeat with linked list vertex running through the stream log hash table:
+			serialize the number key of the linked list vertex;
+			serialize the stream log value of the linked list vertex;
+	otherwise if there is data to deserialize:
+		always check that a deserialized number is the debugger state magic number or else fail at recognizing a debugger serialization format;
+		always check that a deserialized number is the debugger state file format version number or else fail at recognizing a debugger serialization format;
+		now the call stack simplification flag is whether or not a deserialized truth state is true;
+		now the showme warnings flag is whether or not a deserialized truth state is true;
+		now the lengthly listing warnings flag is whether or not a deserialized truth state is true;
+		now the last-seen debug command punctuated words are a deserialized punctuated word array;
+		now the last-seen debug command vertex is a deserialized parse tree vertex for the debug command parser;
+		now the breakpoint counter is a deserialized number;
+		let the user breakpoint count be a deserialized number;
+		repeat with a counter running from one to the user breakpoint count:
+			let the compound breakpoint be a deserialized compound breakpoint;
+			insert the key the numeric identifier of the compound breakpoint and the value the compound breakpoint into the user breakpoint hash table;
+		let the user breaktext count be a deserialized number;
+		repeat with a counter running from one to the user breaktext count:
+			let the breaktext be a deserialized breaktext;
+			insert the key the numeric identifier of the breaktext and the value the breaktext into the user breaktext hash table;
+		let the stream log count be a deserialized number;
+		repeat with a counter running from one to the stream log count:
+			let the stream be a deserialized number;
+			let the stream log be a deserialized stream log;
+			insert the key the stream and the value the stream log into the stream log hash table;
+		now the debugger's story-restarted flag is true;
+		now the banner printed flag is true.
+
 Book "Debugger Instrumentation" - unindexed
 
 Chapter "Finish Detection in Follow-on Calls" - unindexed
@@ -667,7 +922,7 @@ Section "The Stream Log Structure" - unindexed
 
 [Layout:
 	4 bytes for the log capacity (in bytes, which we call N)
-	4 bytes for the log length in bytes
+	4 bytes for the log length (in bytes)
 	N bytes for the log]
 
 To decide what number is the size in memory of a stream log with capacity (N - a number) bytes: (- (8+{N}) -).
@@ -1060,7 +1315,7 @@ Chapter "Responding to a Break" - unindexed
 
 To announce breakpoints at (B - a simple breakpoint):
 	let the breakpoints announced flag be false;
-	if the breakpoint was forced and the debugger story-running flag is true:
+	if the breakpoint was forced and the debugger's story-running flag is true:
 		say "[line break][bold type]Breakpoint triggered by source text:[roman type] [the name of the forced breakpoint][line break]";
 		now the breakpoints announced flag is true;
 	unless B is an invalid simple breakpoint:
@@ -1088,6 +1343,16 @@ To adjust the debugger's current call frame:
 	now the debugger's current call frame number is zero.
 
 Handling a breakpoint (this is the interactive debugger breakpoint response rule):
+	[The initial breakpoint doesn't count when we restart, except as a hook for bringing up the debug command prompt.]
+	if the debugger's story-running flag is false and the debugger's story-restarted flag is true:
+		now the debugger's control flow state is responding after a continue;
+		now the debugger's story-has-run flag is true;
+		handle a debug command for continuing execution;
+		now the debugger's control flow attitude is responding after an assured advance;
+		now the current debugger coexecution state is story unpaused;
+		now the debugger prompting flag is true;
+		request a debug command;
+		stop;
 	now the debugger's current call frame is the innermost call frame of a reconstructed call stack;
 	let the encountered simple breakpoint be the simple breakpoint representing the sequence point the last-seen sequence point before the last-seen breakpoint;
 	unless we should ignore the current interruption at the encountered simple breakpoint:
@@ -1099,7 +1364,7 @@ Handling a breakpoint (this is the interactive debugger breakpoint response rule
 			disable all frame-local breakpoints;
 			disable all frame-local tripwires;
 			announce breakpoints at the encountered simple breakpoint;
-			now the debugger story-continuing flag is false;
+			now the debugger's story-continuing flag is false;
 			adjust the debugger's current call frame;
 			unless the last-seen call stack root is null:
 				let the moribund call frame be the leaf of the last-seen call stack root;
@@ -1108,10 +1373,10 @@ Handling a breakpoint (this is the interactive debugger breakpoint response rule
 			now the last-seen call stack divider is a null call frame;
 			delete the last-seen compound breakpoint list;
 			now the last-seen compound breakpoint list is an empty linked list;
-			if the debugger story-running flag is true:
+			if the debugger's story-running flag is true:
 				say "[the debug location synopsis]";
 			request a debug command;
-			while the debugger story-continuing flag is false:
+			while the debugger's story-continuing flag is false:
 				wait for the next foreign event using the debugger wrapping layer;
 			now the debugger's control flow attitude is responding after an assured advance;
 			if the encountered simple breakpoint is not an invalid simple breakpoint:
@@ -2017,8 +2282,8 @@ To dispatch the debug command (T - some text) (this is dispatching a debug comma
 		otherwise:
 			let the command vertex be the first child of the root;
 			now the raw debug command is T;
-			handle the debug command rooted at the command vertex using a workaround for Inform bug 825;
 			if the command vertex has the parseme the debugger's again command:
+				handle the debug command rooted at the command vertex using a workaround for Inform bug 825;
 				delete the root and its descendants;
 			otherwise:
 				unless the last-seen debug command vertex is an invalid parse tree vertex:
@@ -2026,6 +2291,7 @@ To dispatch the debug command (T - some text) (this is dispatching a debug comma
 					delete the last-seen debug command vertex and its descendants;
 				now the last-seen debug command punctuated words are the punctuated word array content of the debug command parser;
 				now the last-seen debug command vertex is the command vertex;
+				handle the debug command rooted at the command vertex using a workaround for Inform bug 825;
 	unless the current debugger coexecution state is story interrupted:
 		let the moribund call frame be the leaf of the debugger's current call frame;
 		delete the moribund call frame and its ancestors;
@@ -2452,7 +2718,7 @@ To handle the debug command rooted at (V - a parse tree vertex that has the pars
 Chapter "Backtrace Commands" - unindexed
 
 To handle the debug command rooted at (V - a parse tree vertex that has the parseme the debugger's summary command):
-	if the debugger story-running flag is false:
+	if the debugger's story-running flag is false:
 		say "The story is not running.  Use the command 'run' to run it.[paragraph break]";
 		stop;
 	now the currently preferred debug mode is debugging at the I7 level;
@@ -2471,7 +2737,7 @@ To say custom annotations for (A - a call frame) with frame number (I - a select
 	say " (currently selected)".
 
 To handle the debug command rooted at (V - a parse tree vertex that has the parseme the debugger's backtrace command):
-	if the debugger story-running flag is false:
+	if the debugger's story-running flag is false:
 		say "The story is not running.  Use the command 'run' to run it.[paragraph break]";
 		stop;
 	say "[if the current debugger coexecution state is story interrupted]Execution paused[otherwise]Executing [bold type](not paused)[roman type][end if][line break]";
@@ -2523,7 +2789,7 @@ To move out (N - a number) call frame/frames:
 		say "There is no call frame [N in words] layer[unless N is one]s[end if] outward from the current selection.  You can see the placement of the current selection with the command 'backtrace'.[paragraph break]".
 
 To handle the debug command rooted at (V - a parse tree vertex that has the parseme the debugger's select command):
-	if the debugger story-running flag is false:
+	if the debugger's story-running flag is false:
 		say "The story is not running.  Use the command 'run' to run it.[paragraph break]";
 		stop;
 	if the current debugger coexecution state is not story interrupted:
@@ -2541,7 +2807,7 @@ To handle the debug command rooted at (V - a parse tree vertex that has the pars
 		say "The selected frame is unchanged,[line break]  [the location of the debugger's current call frame with frame number the debugger's current call frame number].[paragraph break]".
 
 To handle the debug command rooted at (V - a parse tree vertex that has the parseme the debugger's inward command):
-	if the debugger story-running flag is false:
+	if the debugger's story-running flag is false:
 		say "The story is not running.  Use the command 'run' to run it.[paragraph break]";
 		stop;
 	if the current debugger coexecution state is not story interrupted:
@@ -2550,7 +2816,7 @@ To handle the debug command rooted at (V - a parse tree vertex that has the pars
 	move in one call frame.
 
 To handle the debug command rooted at (V - a parse tree vertex that has the parseme the debugger's inward-by-distance command):
-	if the debugger story-running flag is false:
+	if the debugger's story-running flag is false:
 		say "The story is not running.  Use the command 'run' to run it.[paragraph break]";
 		stop;
 	if the current debugger coexecution state is not story interrupted:
@@ -2561,7 +2827,7 @@ To handle the debug command rooted at (V - a parse tree vertex that has the pars
 	move in count call frames.
 
 To handle the debug command rooted at (V - a parse tree vertex that has the parseme the debugger's outward command):
-	if the debugger story-running flag is false:
+	if the debugger's story-running flag is false:
 		say "The story is not running.  Use the command 'run' to run it.[paragraph break]";
 		stop;
 	if the current debugger coexecution state is not story interrupted:
@@ -2570,7 +2836,7 @@ To handle the debug command rooted at (V - a parse tree vertex that has the pars
 	move out one call frame.
 
 To handle the debug command rooted at (V - a parse tree vertex that has the parseme the debugger's outward-by-distance command):
-	if the debugger story-running flag is false:
+	if the debugger's story-running flag is false:
 		say "The story is not running.  Use the command 'run' to run it.[paragraph break]";
 		stop;
 	if the current debugger coexecution state is not story interrupted:
@@ -3072,7 +3338,7 @@ To decide what debug mode is the preferred debug mode for (R - a routine record)
 Section "Listing by Inference" - unindexed
 
 To handle the debug command rooted at (V - a parse tree vertex that has the parseme the debugger's list-by-inference command):
-	if the debugger story-running flag is false:
+	if the debugger's story-running flag is false:
 		say "The story is not running.  Use the command 'run' to run it.[paragraph break]";
 		stop;
 	let the sequence point be the sequence point to highlight;
@@ -3479,7 +3745,7 @@ To handle the debug command rooted at (V - a parse tree vertex that has the pars
 	let the discarded value be a breakpoint placed on I6 line number the line number with the human-friendly name "Pause on I6 line [the nonnegative number the line number for naming compound breakpoints as at least six digits]".
 
 To handle the debug command rooted at (V - a parse tree vertex that has the parseme the debugger's break-by-inference command):
-	if the debugger story-running flag is false:
+	if the debugger's story-running flag is false:
 		say "The story is not running.  Use the command 'run' to run it.[paragraph break]";
 		stop;
 	if the current debugger coexecution state is not story interrupted:
@@ -3724,7 +3990,7 @@ To handle a debug command for continuing execution:
 			unless the debugger's current call frame is null:
 				enable frame-local breakpoints in the outward link of the debugger's current call frame and outward, considering only visible frames;
 				enable frame-local tripwires in the outward link of the debugger's current call frame and outward;
-	now the debugger story-continuing flag is true;
+	now the debugger's story-continuing flag is true;
 	unless the multiple windows supported flag is set in the debugger wrapping layer and the no more than one line input request at a time option is not active:
 		now the debugger prompting flag is false.
 
@@ -3752,36 +4018,16 @@ To force a breakpoint from the debugger after checking the coexecution state:
 			force a breakpoint from the debugger.
 
 To handle the debug command rooted at (V - a parse tree vertex that has the parseme the debugger's force a breakpoint command):
-	if the debugger story-running flag is false:
+	if the debugger's story-running flag is false:
 		say "The story is not running.  Use the command 'run' to run it.[paragraph break]";
 		stop;
 	force a breakpoint from the debugger after checking the coexecution state.
 
-Include (-
-	[ id_restart window;
-		for(window=0:window=glk_window_iterate(window,0):){
-			glk_cancel_char_event(window);
-			glk_cancel_line_event(window,0);
-			glk_cancel_mouse_event(window);
-			glk_cancel_hyperlink_event(window);
-		}
-		@restart;
-	];
--).
-
-To decide what number is restarting the story from the debugger: (- id_restart -).
-To restart the story from the debugger: (- id_restart(); -).
-
-A GRIF shielding rule (this is the shield restarting the story from the debugger rule):
-	shield restarting the story from the debugger against instrumentation.
-
 To handle the debug command rooted at (V - a parse tree vertex that has the parseme the debugger's restart command):
 	if the debugger's story-has-run flag is false:
-		say "The story hasn't been run yet.  Restart anyway (y or n)? ";
-		unless the author consents:
-			say "[line break]";
-			stop;
-	otherwise if the debugger story-running flag is true:
+		say "The story hasn't been run yet.[paragraph break]";
+		stop;
+	if the debugger's story-running flag is true:
 		say "Really restart the story (y or n)? ";
 		unless the author consents:
 			say "[line break]";
@@ -3789,20 +4035,21 @@ To handle the debug command rooted at (V - a parse tree vertex that has the pars
 	restart the story from the debugger.
 
 To handle the debug command rooted at (V - a parse tree vertex that has the parseme the debugger's run command):
-	if the debugger story-running flag is true:
+	if the debugger's story-running flag is true:
 		say "The story is currently running.  Restart it (y or n)? ";
 		unless the author consents:
 			say "[line break]";
 			stop;
-	if the debugger story-running flag is true or the debugger's story-has-run flag is true:
+	if the debugger's story-running flag is true or the debugger's story-has-run flag is true:
 		restart the story from the debugger;
 	always check that the current debugger coexecution state is story interrupted or else fail at being the first to run the story;
 	now the debugger's control flow state is responding after a continue;
 	now the currently preferred debug mode is debugging at the I7 level;
+	now the debugger's story-has-run flag is true;
 	handle a debug command for continuing execution.
 
 To handle the debug command rooted at (V - a parse tree vertex that has the parseme the debugger's continue command):
-	if the debugger story-running flag is false:
+	if the debugger's story-running flag is false:
 		say "The story is not running.  Use the command 'run' to run it.[paragraph break]";
 		stop;
 	if the current debugger coexecution state is not story interrupted:
@@ -3813,7 +4060,7 @@ To handle the debug command rooted at (V - a parse tree vertex that has the pars
 	handle a debug command for continuing execution.
 
 To handle the debug command rooted at (V - a parse tree vertex that has the parseme the debugger's step sequence point command):
-	if the debugger story-running flag is false:
+	if the debugger's story-running flag is false:
 		say "The story is not running.  Use the command 'run' to run it.[paragraph break]";
 		stop;
 	if the current debugger coexecution state is not story interrupted:
@@ -3824,7 +4071,7 @@ To handle the debug command rooted at (V - a parse tree vertex that has the pars
 	handle a debug command for continuing execution.
 
 To handle the debug command rooted at (V - a parse tree vertex that has the parseme the debugger's next sequence point command):
-	if the debugger story-running flag is false:
+	if the debugger's story-running flag is false:
 		say "The story is not running.  Use the command 'run' to run it.[paragraph break]";
 		stop;
 	if the current debugger coexecution state is not story interrupted:
@@ -3835,7 +4082,7 @@ To handle the debug command rooted at (V - a parse tree vertex that has the pars
 	handle a debug command for continuing execution.
 
 To handle the debug command rooted at (V - a parse tree vertex that has the parseme the debugger's step command):
-	if the debugger story-running flag is false:
+	if the debugger's story-running flag is false:
 		say "The story is not running.  Use the command 'run' to run it.[paragraph break]";
 		stop;
 	if the current debugger coexecution state is not story interrupted:
@@ -3846,7 +4093,7 @@ To handle the debug command rooted at (V - a parse tree vertex that has the pars
 	handle a debug command for continuing execution.
 
 To handle the debug command rooted at (V - a parse tree vertex that has the parseme the debugger's next command):
-	if the debugger story-running flag is false:
+	if the debugger's story-running flag is false:
 		say "The story is not running.  Use the command 'run' to run it.[paragraph break]";
 		stop;
 	if the current debugger coexecution state is not story interrupted:
@@ -3867,7 +4114,7 @@ To handle the debug command rooted at (V - a parse tree vertex that has the pars
 	handle a debug command for continuing execution.
 
 To handle the debug command rooted at (V - a parse tree vertex that has the parseme the debugger's finish command):
-	if the debugger story-running flag is false:
+	if the debugger's story-running flag is false:
 		say "The story is not running.  Use the command 'run' to run it.[paragraph break]";
 		stop;
 	if the current debugger coexecution state is not story interrupted:
@@ -4078,7 +4325,7 @@ To apply the debugger's showme to (V - a number):
 	say "[line break]".
 
 To handle the debug command rooted at (V - a parse tree vertex that has the parseme the debugger's showme command):
-	if the debugger story-running flag is false:
+	if the debugger's story-running flag is false:
 		say "The story is not running.  Use the command 'run' to run it.[paragraph break]";
 		stop;
 	let the object vertex be the first match for a object name for the debugger among the children of V;
