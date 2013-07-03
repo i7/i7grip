@@ -1,4 +1,4 @@
-Version 1 of Object Pools (for Glulx only) by Brady Garvin begins here.
+Version 2 of Object Pools (for Glulx only) by Brady Garvin begins here.
 
 "A caching system for speeding up memory allocations when the number of simultaneous allocations can be reasonably bounded."
 
@@ -20,7 +20,7 @@ Book "Extension Information"
 	A object pool is an invalid object pool.
 
 This bewildering statement actually sets up object pools as a qualitative value with default value the object pool at address one, which, as we say, is invalid.  (We could have gone with a quantitative kind for default zero, but then we would open up the possibility for arithmetic on the pointers.)  I wish it weren't necessary, but at least in this build Inform doesn't let us provide a default value any other way, and, moreover, we need a default value or else only I6 substitutions are allowed to decide on object pools.]
-    
+
 Book "Runtime Checks"
 
 Chapter "Environment Checks"
@@ -50,33 +50,33 @@ Section "The Object Pool Structure" - unindexed
 	4 bytes for the object size (in bytes, which we call M [it must be at least four; see the layout below]) (at offset -8 bytes)
 	4 bytes for the pool size (the total in bytes, which, letting N be the number of available objects, is N times M) (at offset -4 bytes)
 	4 bytes for the next available object address
-	M*N_0 bytes for the reserved memory (N_0 means the initial value of N, which must be nonnegative)]
+	(M * N_0) bytes for the reserved memory (N_0 means the initial value of N, which must be nonnegative)]
 [Layout of an unallocated object:
 	4 bytes for the pointer to the next unallocated object
-	M-4 bytes left over]
+	(M - 4) bytes left over]
 
 Section "Object Pool Construction"
 
 Include (-
 	[ op_newPool count objectSize
 		poolSize result objectAddress otherObjectAddress limit;
-		poolSize=12+count*objectSize;
-		result=llo_permanentMalloc(poolSize);
-		poolSize=poolSize-12;
-		result=result+12;
+		poolSize = 12 + count * objectSize;
+		result = llo_permanentMalloc(poolSize);
+		poolSize = poolSize - 12;
+		result = result + 12;
 		@astore result (-3) objectSize;
 		@astore result (-2) poolSize;
 		@astore result (-1) result;
-		limit=result+poolSize;
-		for(objectAddress=result: :){
-			otherObjectAddress=objectAddress+objectSize;
-			if(otherObjectAddress==limit){
+		limit = result + poolSize;
+		for (objectAddress = result::) {
+			otherObjectAddress = objectAddress + objectSize;
+			if (otherObjectAddress == limit) {
 				@astore objectAddress 0 0;
-				return result-4;
+				return result - 4;
 			}
 			@astore objectAddress 0 otherObjectAddress;
-			objectAddress=otherObjectAddress+objectSize;
-			if(objectAddress==limit){
+			objectAddress = otherObjectAddress + objectSize;
+			if (objectAddress == limit) {
 				@astore otherObjectAddress 0 0;
 				return result-4;
 			}
@@ -85,7 +85,7 @@ Include (-
 	];
 -).
 
-To decide what object pool is a new permanent object pool with (N - a number) objects of size (M - a number) bytes: (- op_newPool({N},{M}) -).
+To decide what object pool is a new permanent object pool with (N - a number) objects of size (M - a number) bytes: (- op_newPool({N}, {M}) -).
 
 Section "Object Pool Allocators"
 
@@ -93,28 +93,28 @@ Include (-
 	[ op_poolAllocate pool
 		result objectSize poolSize objectAddress otherObjectAddress limit;
 		@aload pool 0 result;
-		if(result){
+		if (result) {
 			@mcopy 4 result pool;
 			return result;
 		}
 		@aload pool (-2) objectSize;
 		@aload pool (-1) poolSize;
-		result=llo_permanentMalloc(poolSize);
-		objectAddress=result+objectSize;
-		limit=result+poolSize;
-		poolSize=poolSize+poolSize;
+		result = llo_permanentMalloc(poolSize);
+		objectAddress = result + objectSize;
+		limit = result + poolSize;
+		poolSize = poolSize + poolSize;
 		@astore pool (-1) poolSize;
 		@astore pool 0 objectAddress;
-		if(objectAddress~=limit){
-			for(::){
-				otherObjectAddress=objectAddress+objectSize;
-				if(otherObjectAddress==limit){
+		if (objectAddress ~= limit) {
+			for (::) {
+				otherObjectAddress = objectAddress + objectSize;
+				if (otherObjectAddress == limit) {
 					@astore objectAddress 0 0;
 					return result;
 				}
 				@astore objectAddress 0 otherObjectAddress;
-				objectAddress=otherObjectAddress+objectSize;
-				if(objectAddress==limit){
+				objectAddress = otherObjectAddress + objectSize;
+				if (objectAddress == limit) {
 					@astore otherObjectAddress 0 0;
 					return result;
 				}
@@ -131,7 +131,7 @@ Include (-
 
 To decide what number is a memory allocation from (A - an object pool): (- op_poolAllocate({A}) -).
 
-To free the memory allocation at address (X - a number) to (A - an object pool): (- op_poolFree({A},{X}); -).
+To free the memory allocation at address (X - a number) to (A - an object pool): (- op_poolFree({A}, {X}); -).
 
 Chapter "Batch Object Pools"
 
@@ -147,15 +147,16 @@ Section "The Batch Object Pool Structure" - unindexed
 	4 bytes for the previous address (the initial number of addresses we call N)
 	4 bytes for the object size (in bytes, which we call M)
 	4 bytes for the pool size (the total, in bytes)
-	MN bytes for the reserved memory]
+	(M * N) bytes for the reserved memory]
 
 Section "Batch Object Pool Construction"
 
 Include (-
-	[ op_newBatchPool count objectSize poolSize result end;
-		poolSize=12+count*objectSize;
-		result=llo_permanentMalloc(poolSize);
-		end=result+poolSize;
+	[ op_newBatchPool count objectSize
+		poolSize result end;
+		poolSize = 12 + count * objectSize;
+		result = llo_permanentMalloc(poolSize);
+		end = result + poolSize;
 		@astore result 0 end;
 		@astore result 1 objectSize;
 		@astore result 2 poolSize;
@@ -163,32 +164,35 @@ Include (-
 	];
 -).
 
-To decide what batch object pool is a new permanent batch object pool with (N - a number) objects of size (M - a number) bytes: (- op_newBatchPool({N},{M}) -).
+To decide what batch object pool is a new permanent batch object pool with (N - a number) objects of size (M - a number) bytes: (- op_newBatchPool({N}, {M}) -).
 
 Section "Batch Object Pool Allocators"
 
 Include (-
-	[ op_batchPoolAllocate pool objectSize result offset;
+	[ op_batchPoolAllocate pool objectSize
+		result offset;
 		@aload pool 1 objectSize;
 		@aload pool 0 result;
-		result=result-objectSize;
+		result = result - objectSize;
 		@astore pool 0 result;
-		offset=result-pool;
-		if(offset>=12){
+		offset = result - pool;
+		if (offset >= 12) {
 			return result;
 		}
 		return llo_malloc(objectSize);
 	];
-	[ op_batchPoolFreeInternals pool result poolSize end;
+	[ op_batchPoolFreeInternals pool
+		result poolSize end;
 		@aload pool 0 result;
-		result=((result-pool)>=12);
+		result = ((result - pool) >= 12);
 		@aload pool 2 poolSize;
-		end=pool+poolSize;
+		end = pool + poolSize;
 		@astore pool 0 end;
 		return result;
 	];
-	[ op_batchPoolFree pool address offset poolSize index;
-		offset=address-pool;
+	[ op_batchPoolFree pool address
+		offset poolSize index;
+		offset = address - pool;
 		@aload pool 2 poolSize;
 		@"3:42" offset poolSize 0; !jltu
 		llo_free(address);
@@ -199,7 +203,7 @@ To decide what number is a memory allocation from (A - a batch object pool): (- 
 
 To free internal memory allocations to (A - a batch object pool): (- op_batchPoolFreeInternals({A}); -).
 To decide whether all relevant allocations are accounted for after freeing internal memory allocations to (A - a batch object pool): (- op_batchPoolFreeInternals({A}) -).
-To free the memory allocation at address (X - a number) to (A - a batch object pool) if it is external: (- op_batchPoolFree({A},{X}); -).
+To free the memory allocation at address (X - a number) to (A - a batch object pool) if it is external: (- op_batchPoolFree({A}, {X}); -).
 
 Object Pools ends here.
 
@@ -228,7 +232,7 @@ of, and only then can it add the appropriate offset.  The speed of this lookup
 depends mostly on how many separate allocations the story has outstanding---more
 allocations means more possibilities to consider.
 
-Therefore, considering that memory accesses are quite common, it's to our
+Therefore, considering that memory accesses are quite frequent, it's to our
 advantage to limit our allocation count.  For the fairly common case where we
 can identify a family of like-sized allocations, there's a standard technique we
 can use---an object pool.
@@ -297,17 +301,29 @@ and for obtaining a memory allocation from it:
 
 	a memory allocation from (A - a batch object pool)
 
-The only difference is in how allocations are freed.  We use the phrase
+The only difference is in how allocations are freed.  We use first the phrase
 
-	free the memory allocations made from (A - a batch object pool)
+	unless all relevant allocations are accounted for after freeing internal memory allocations to (A - a batch object pool):
+		....
 
-which frees every outstanding allocation at once.
+which will free all allocations that were in fact made from the pool and not
+dynamic memory.  If some allocations were missed out, the ellipses execute,
+wherein we typically want to loop over the objects' addresses applying the
+phrase
+
+	free the memory allocation at address (X - a number) to (A - a batch object pool) if it is external
+
+which will clean up the extra objects while ignoring those that have already
+been put back in the pool.
+
+If we know that the pool has not been exceeded, there is the option to just write
+
+	free internal memory allocations to (A - a batch object pool)
 
 Chapter: Requirements, Limitations, and Bugs
 
-This version was tested with Inform 6G60.  It will probably function on newer
-versions, and it may function under slightly older versions, though there is no
-guarantee.
+This version was tested with Inform 6G60.  It may not function under other
+versions.
 
 Section: Regarding bugs
 
@@ -324,30 +340,52 @@ time.
 Chapter: Acknowledgements
 
 Object Pools was prepared as part of the Glulx Runtime Instrumentation Project
-(https://github.com/i7/i7grip).  For this first edition of the project, special
-thanks go to these people, in chronological order:
+(https://github.com/i7/i7grip).
 
-- Graham Nelson, Emily Short, and others, not only for Inform, but also for the
-  countless hours the high-quality technical documentation saved me and for the
-  work that made the Glulx VM possible,
+GRIP owes a great deal to everyone who made Inform possible and everyone who
+continues to contribute.  I'd like to give especial thanks to Graham Nelson and
+Emily Short, not only for their design and coding work, but also for all of the
+documentation, both of the language and its internals---it proved indispensable.
 
-- Andrew Plotkin for the Glulx VM and the Glk library, as well as their clear,
-  always up-to-date specifications,
+I am likewise indebted to everybody who worked to make Glulx and Glk a reality.
+Without them, there simply wouldn't have been any hope for this kind of project.
+My special thanks to Andrew Plotkin, with further kudos for his work maintaining
+the specifications.  They proved as essential as Inform's documentation.
 
-- Jacqueline Lott, David Welbourn, and all of the other attendees for Club
-  Floyd, my first connection to the interactive fiction community,
+The project itself was inspired by suggestions from Ron Newcomb and Esteban
+Montecristo on Inform's feature request page.  It's only because of their posts
+that I ever started.  (And here's hoping that late is better than never.)
 
-- Jesse McGrew and Emily Short for getting me involved with Inform 7,
+Esteban Montecristo also made invaluable contributions as an alpha tester.  I
+cannot thank him enough: he signed on as a beta tester but then quickly
+uncovered a slew of problems that forced me to reconsider both the term ``beta''
+and my timeline.  The impetus for the new, cleaner design and several clues that
+led to huge performance improvements are all due to him.  Moreover, he
+contributed code, since modified to fit the revised framework, for the extension
+Verbose Diagnostics.
 
-- all of the Inform 7 developers for their hard work, the ceaseless flow of
-  improvements, and their willingness to take me on as a collaborator,
+As for Ron Newcomb, I can credit him for nearly half of the bugs unearthed in
+the beta proper, not to mention sound advice on the organization of the
+documentation and the extensions.  GRIP is much sturdier as a result.
 
-- Ron Newcomb and Esteban Montecristo for the idea to write Call Stack Tracking
-  and Verbose Diagnostics,
+Roger Carbol, Jesse McGrew, Michael Martin, Dan Shiovitz, Johnny Rivera, and
+probably several others deserve similar thanks for answering questions on
+ifMUD's I6 and I7 channels.  I am grateful to Andrew Plotkin, David Kinder, and
+others for the same sort of help on intfiction.org.
 
-- Roger Carbol, Jesse McGrew, Michael Martin, Dan Shiovitz, Johnny Rivera, and
-  everyone else for their helpful comments on ifMUD's I6 and I7 channels,
+On top of that, David Kinder was kind enough to accommodate Debug File Parsing
+in the Windows IDE; consequently, authors who have a sufficiently recent version
+of Windows no longer need to write batch scripts.  His help is much appreciated,
+particularly because the majority of downloaders are running Windows.
 
-- Esteban Montecristo, for invaluable alpha testing,
+Even with the IDEs creating debug files, setting up symbolic links to those
+files can be a chore.  Jim Aiken suggested an automated solution, which now
+ships with the project.
 
-- and all of the beta testers who are reading this.
+And preliminary support for authors who want to debug inside a browser stems
+from discussion with Erik Temple and Andrew Plotkin; my thanks for their ideas.
+
+Finally, I should take this opportunity to express my gratitude to everyone who
+helped me get involved in the IF community.  Notable among these people are
+Jesse McGrew and Emily Short, not to mention Jacqueline Lott, David Welbourn,
+and all of the other Club Floyd attendees.
