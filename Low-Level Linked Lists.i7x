@@ -1,4 +1,4 @@
-Version 1 of Low-Level Linked Lists (for Glulx only) by Brady Garvin begins here.
+Version 2 of Low-Level Linked Lists (for Glulx only) by Brady Garvin begins here.
 
 "Linked lists for situations where Inform's lists aren't an option."
 
@@ -17,6 +17,7 @@ Book "Copyright and License"
 
 Book "Extension Information"
 
+[@]
 [Inform already has lists in the form of, well, lists.  But for the Glulx Runtime Instrumentation Framework we need to worry about:
 
 1. Reentrancy---if we inject a call into the middle of a block value management routine (which we will), the callee can't be sure that the block value record keeping is in a consistent state.
@@ -35,11 +36,12 @@ So we use our own implementation.  However, the adjective ``low-level'' is impor
 
 This bewildering statement actually sets up linked lists as a qualitative value with default value the linked list at address one, which, as we say, is invalid.  (We could have gone with a quantitative kind for default zero, but then we would open up the possibility for arithmetic on the pointers.)  I wish it weren't necessary, but at least in this build Inform doesn't let us provide a default value any other way, and, moreover, we need a default value or else only I6 substitutions are allowed to decide on linked lists.]
 
-[We use comparators to check equality of underlying keys (see below).  Properly speaking a comparator is a (phrase (value of kind K,K) -> truth state), but because of an Inform bug we have to write (phrase (value of kind K,K) -> nothing) instead.  The first argument is the key being searched for and the second is the key being checked (comparators need not be symmetric).  The result is true for equality, false otherwise.]
+[@]
+[We use comparators to check equality of underlying keys (see below).  Properly speaking a comparator is a (phrase (value of kind K, K) -> truth state), but because of Inform bug 473 we have to write (phrase (value of kind K, K) -> nothing) instead.  The first argument is the key being searched for and the second is the key being checked (comparators need not be symmetric).  The result is true for equality, false otherwise.]
 
 Chapter "Use Options"
 
-Use a linked list vertex preallocation of at least 65536 translates as (- Constant LLLL_VERTEX_PREALLOC={N}; -).
+Use a linked list vertex preallocation of at least 65536 translates as (- Constant LLLL_VERTEX_PREALLOC = {N}; -).
 
 Book "Runtime Checks"
 
@@ -50,7 +52,7 @@ An environment check rule (this is the check for dynamic memory allocation to su
 
 Book "Transfer Registers" - unindexed
 
-[We have some non-void phrases that need to (1) take l-values and (2) cause side-effects between the time that they compute their result and return it.  (1) means that we use I6 inlining, in which (2) gets expressed with the comma operator, as in (computeResult(),sideEffects(),result).  For this to work, however, we need a place to store the result between computeResult() and the final operand's evaluation.  We call such a place a transfer register; one is defined below.]
+[We have some non-void phrases that need to (1) take l-values and (2) cause side-effects between the time that they compute their result and return it.  (1) means that we use I6 inlining, in which (2) gets expressed with the comma operator, as in (computeResult(), sideEffects(), result).  For this to work, however, we need a place to store the result between computeResult() and the final operand's evaluation.  We call such a place a transfer register; one is defined below.]
 
 Include (-
 	Global llll_transfer;
@@ -84,7 +86,7 @@ Chapter "The Linked List Vertex Structure" - unindexed
 	4 bytes for the underlying key
 	4 bytes for the link to the next entry]
 [We call the two payloads ``key'' and ``value'' since that nomenclature works nicely with Low-Level Hash Tables.  By convention, if only one payload is in use, it should be the ``key.'']
-[The field called ``underlying key'' is for block-value cases: often we use the hash of the block-value as the key proper, but we need someway to recover what we think of as the key.  So we store the hash as the ``key'' and the pointer as the ``underlying key.'']
+[The field called ``underlying key'' is for block-value cases: often we use the hash of the block-value as the key proper, but we need some way to recover what we think of as the key.  So we store the hash as the ``key'' and the pointer as the ``underlying key.'']
 [It might more organizational sense to put the key and underlying key together, but the key and value are better stored contiguously when we use @linkedsearch to look for a particular key/value pair.]
 [Linked list vertices do not ordinarily manage the lifetime of their links, but we can delete everything reachable from a beginning vertex if we so choose.]
 
@@ -96,12 +98,13 @@ The linked list vertex object pool is an object pool that varies.
 
 [Bind to the real implementation only after allocating the pool.]
 Include (-
-	Global llll_new=llll_newResolve;
+	Global llll_new = llll_newResolve;
 -) after "Definitions.i6t".
 
 Include (-
-	[ llll_newByPool key value underlyingKey link result;
-		result=op_poolAllocate((+ the linked list vertex object pool +));
+	[ llll_newByPool key value underlyingKey link
+		result;
+		result = op_poolAllocate((+ the linked list vertex object pool +));
 		@astore result 0 key;
 		@astore result 1 value;
 		@astore result 2 underlyingKey;
@@ -109,12 +112,13 @@ Include (-
 		return result;
 	];
 	[ llll_newResolve key value underlyingKey link;
-		(+ the linked list vertex object pool +)=op_newPool(LLLL_VERTEX_PREALLOC,16);
-		llll_new=llll_newByPool;
-		return llll_newByPool(key,value,underlyingKey,link);
+		(+ the linked list vertex object pool +) = op_newPool(LLLL_VERTEX_PREALLOC, 16); ! depends on layout
+		llll_new = llll_newByPool;
+		return llll_newByPool(key, value, underlyingKey, link);
 	];
 -).
-To decide what linked list vertex is a new linked list vertex with the key (K - a value) and the underlying key (U - a value) and the value (V - a value) and the link (L - a linked list vertex): (- llll_new({K},{V},{U},{L}) -).
+
+To decide what linked list vertex is a new linked list vertex with the key (K - a value) and the underlying key (U - a value) and the value (V - a value) and the link (L - a linked list vertex): (- llll_new({K}, {V}, {U}, {L}) -).
 
 To decide what linked list vertex is a new linked list vertex with the key (K - a value) and the link (L - a linked list vertex):
 	decide on a new linked list vertex with the key K and the underlying key zero and the value zero and the link L.
@@ -122,7 +126,7 @@ To decide what linked list vertex is a new linked list vertex with the key (K - 
 To decide what linked list vertex is a new linked list vertex with the key (K - a value) and the underlying key (U - a value) and the link (L - a linked list vertex):
 	decide on a new linked list vertex with the key K and the underlying key U and the value zero and the link L.
 
-To decide what linked list vertex is a new linked list vertex with the textual key (K - some text) and the link (L - a linked list vertex):
+To decide what linked list vertex is a new linked list vertex with the textual key (K - some text) and the link (L - a linked list vertex) (this is creating a linked list vertex by textual key and link):
 	decide on a new linked list vertex with the key the normal hash of K and the underlying key K and the value zero and the link L.
 
 To decide what linked list vertex is a new linked list vertex with the key (K - a value) and the value (V - a value) and the link (L - a linked list vertex):
@@ -131,10 +135,10 @@ To decide what linked list vertex is a new linked list vertex with the key (K - 
 To decide what linked list vertex is a new linked list vertex with the textual key (K - some text) and the value (V - a value) and the link (L - a linked list vertex):
 	decide on a new linked list vertex with the key the normal hash of K and the underlying key K and the value V and the link L.
 
-To delete (A - a linked list vertex):
+To delete (A - a linked list vertex) (this is deleting a linked list vertex):
 	free the memory allocation at address (A converted to a number) to the linked list vertex object pool.
 
-To delete (A - a linked list vertex) and its successors:
+To delete (A - a linked list vertex) and its successors (this is deleting a linked list vertex and its successors):
 	let the link be the link of A;
 	free the memory allocation at address (A converted to a number) to the linked list vertex object pool;
 	while the link is not null:
@@ -144,23 +148,24 @@ To delete (A - a linked list vertex) and its successors:
 
 Section "Private Linked List Vertex Accessors and Mutators" - unindexed
 
-To write the link (L - a linked list vertex) to (A - a linked list vertex): (- llo_setField({A},3,{L}); -).
+To write the link (L - a linked list vertex) to (A - a linked list vertex): (- llo_setField({A}, 3, {L}); -).
 
 Section "Public Linked List Vertex Accessors and Mutators"
 
 To decide what K is the (D - a description of values of kind K) key of (A - a linked list vertex): (- llo_getInt({A}) -).
-To write the key (K - a value) to (A - a linked list vertex): (- llo_setInt({A},{K}); -).
+To write the key (K - a value) to (A - a linked list vertex): (- llo_setInt({A}, {K}); -).
 
-To decide what K is the (D - a description of values of kind K) value of (A - a linked list vertex): (- llo_getField({A},1) -).
-To write the value (V - a value) to (A - a linked list vertex): (- llo_setField({A},1,{V}); -).
+To decide what K is the (D - a description of values of kind K) value of (A - a linked list vertex): (- llo_getField({A}, 1) -).
+To write the value (V - a value) to (A - a linked list vertex): (- llo_setField({A}, 1, {V}); -).
 
-To decide what K is the underlying (D - a description of values of kind K) key of (A - a linked list vertex): (- llo_getField({A},2) -).
-To write the underlying key (U - a value) to (A - a linked list vertex): (- llo_setField({A},2,{U}); -).
+To decide what K is the underlying (D - a description of values of kind K) key of (A - a linked list vertex): (- llo_getField({A}, 2) -).
+To write the underlying key (U - a value) to (A - a linked list vertex): (- llo_setField({A}, 2, {U}); -).
 
-To decide what linked list vertex is the link of (A - a linked list vertex): (- llo_getField({A},3) -).
+To decide what linked list vertex is the link of (A - a linked list vertex): (- llo_getField({A}, 3) -).
 
 Book "Linked Lists"
 
+[@]
 [Many of the public phrases expect their linked list arguments to be l-values.  Unfortunately, there's no good way to tell the I7 compiler that, so passing an r-value is likely to get us an I6 error.]
 
 Chapter "The Linked List Kind"
@@ -175,18 +180,19 @@ To decide what linked list is an empty linked list: (- 0 -).
 
 Section "Assignment"
 
-To write (S - a linked list) to (D - a linked list): (- {D}={S}; -).
+[@]
+To write (S - a linked list) to (D - a linked list): (- {D} = {S}; -).
 
 Section "Deep Copying"
 
-To decide what linked list is a new copy of (L - a linked list):
+To decide what linked list is a new copy of (L - a linked list) (this is creating a linked list from a linked list):
 	let the result be an empty linked list;
 	let the result's tail be an empty linked list's tail;
 	repeat with the linked list vertex running through L:
 		enqueue the key the number key of the linked list vertex and the underlying key the underlying number key of the linked list vertex and the value the number value of the linked list vertex in the result through the result's tail;
 	decide on the result.
 
-To decide what linked list is a new copy of (L - a permanent linked list):
+To decide what linked list is a new copy of (L - a permanent linked list) (this is creating a linked list from a permanent linked list):
 	let the result be an empty linked list;
 	let the result's tail be an empty linked list's tail;
 	repeat with the linked list vertex running through L:
@@ -197,11 +203,11 @@ Section "Linked List Adjectives"
 
 [Performance note: If warranted, these definitions could be inlined.]
 Definition: a linked list is empty if it is zero converted to a linked list.
-Definition: a linked list is unit if the link of it converted to a linked list vertex is null.
+Definition: a linked list is unit if the link of it converted to a linked list vertex is null.  [The seemingly missing extra condition, "it is not empty", can safely be omitted because the "link" of a null vertex will be a value from the Glulx header, and the header cannot contain a zero word until offset 32.]
 
 Section "Linked List Length"
 
-To decide what number is the length of (L - a linked list):
+To decide what number is the length of (L - a linked list) (this is measuring a linked list):
 	let the result be zero;
 	repeat with a linked list vertex running through L:
 		increment the result;
@@ -209,12 +215,13 @@ To decide what number is the length of (L - a linked list):
 
 Section "Linked List Destruction"
 
-To delete (A - a linked list):
+To delete (A - a linked list) (this is deleting a linked list):
 	unless A is empty:
 		delete A converted to a linked list vertex and its successors.
 
 Book "Linked List Tails"
 
+[@]
 [Many of the public phrases expect their linked list tail arguments to be l-values.  Unfortunately, there's no good way to tell the I7 compiler that, so passing an r-value is likely to get us an I6 error.]
 
 Chapter "The Linked List Tail Kind"
@@ -230,23 +237,24 @@ To decide what linked list tail is an empty linked list's tail: (- 0 -).
 Section "Linked List Tail Extraction"
 
 Include (-
-	[ llll_justBefore address link result;
-		if(~~address||address==link){
+	[ llll_justBefore address link
+		result;
+		if (~~address || address == link) {
 			return 0;
 		}
 		@linkedsearch
-			link ! the ``key'' to search for
-			4 ! the size of the ``key'' in bytes
+			link    ! the ``key'' to search for
+			4       ! the size of the ``key'' in bytes
 			address ! the address of the first structure to search
-			12 ! the offset to the ``key''
-			12 ! the offset to the link
-			0 ! the options (no need for special options)
+			12      ! the offset to the ``key''
+			12      ! the offset to the link
+			0       ! the options (no need for special options)
 			result;
 		return result;
 	];
 -).
 
-To decide what linked list tail is the tail of (A - a linked list): (- llll_justBefore({A},0) -).
+To decide what linked list tail is the tail of (A - a linked list): (- llll_justBefore({A}, 0) -).
 
 Book "Permanent Linked List Vertices"
 
@@ -282,7 +290,7 @@ To decide what permanent linked list vertex is a new permanent linked list verte
 	write the link L to the result;
 	decide on the result.
 
-To decide what permanent linked list vertex is a new permanent linked list vertex with the textual key (K - some text) and the link (L - a permanent linked list vertex):
+To decide what permanent linked list vertex is a new permanent linked list vertex with the textual key (K - some text) and the link (L - a permanent linked list vertex) (this is creating a permanent linked list vertex by textual key and link):
 	let the result be a permanent memory allocation of the size in memory of a linked list vertex bytes converted to a permanent linked list vertex;
 	write the key the normal hash of K to the result;
 	write the underlying key K to the result;
@@ -314,23 +322,24 @@ To decide what permanent linked list vertex is a new permanent linked list verte
 
 Section "Private Permanent Linked List Vertex Accessors and Mutators" - unindexed
 
-To write the link (L - a permanent linked list vertex) to (A - a permanent linked list vertex): (- llo_setField({A},3,{L}); -).
+To write the link (L - a permanent linked list vertex) to (A - a permanent linked list vertex): (- llo_setField({A}, 3, {L}); -).
 
 Section "Public Permanent Linked List Vertex Accessors and Mutators"
 
 To decide what K is the (D - a description of values of kind K) key of (A - a permanent linked list vertex): (- llo_getInt({A}) -).
-To write the key (K - a value) to (A - a permanent linked list vertex): (- llo_setInt({A},{K}); -).
+To write the key (K - a value) to (A - a permanent linked list vertex): (- llo_setInt({A}, {K}); -).
 
-To decide what K is the (D - a description of values of kind K) value of (A - a permanent linked list vertex): (- llo_getField({A},1) -).
-To write the value (V - a value) to (A - a permanent linked list vertex): (- llo_setField({A},1,{V}); -).
+To decide what K is the (D - a description of values of kind K) value of (A - a permanent linked list vertex): (- llo_getField({A}, 1) -).
+To write the value (V - a value) to (A - a permanent linked list vertex): (- llo_setField({A}, 1, {V}); -).
 
-To decide what K is the underlying (D - a description of values of kind K) key of (A - a permanent linked list vertex): (- llo_getField({A},2) -).
-To write the underlying key (U - a value) to (A - a permanent linked list vertex): (- llo_setField({A},2,{U}); -).
+To decide what K is the underlying (D - a description of values of kind K) key of (A - a permanent linked list vertex): (- llo_getField({A}, 2) -).
+To write the underlying key (U - a value) to (A - a permanent linked list vertex): (- llo_setField({A}, 2, {U}); -).
 
-To decide what permanent linked list vertex is the link of (A - a permanent linked list vertex): (- llo_getField({A},3) -).
+To decide what permanent linked list vertex is the link of (A - a permanent linked list vertex): (- llo_getField({A}, 3) -).
 
 Book "Permanent Linked Lists"
 
+[@]
 [Many of the public phrases expect their permanent linked list arguments to be l-values.  Unfortunately, there's no good way to tell the I7 compiler that, so passing an r-value is likely to get us an I6 error.]
 
 Chapter "The Permanent Linked List Kind"
@@ -345,18 +354,19 @@ To decide what permanent linked list is an empty permanent linked list: (- 0 -).
 
 Section "Assignment"
 
-To write (S - a permanent linked list) to (D - a permanent linked list): (- {D}={S}; -).
+[@]
+To write (S - a permanent linked list) to (D - a permanent linked list): (- {D} = {S}; -).
 
 Section "Deep Copying"
 
-To decide what permanent linked list is a new permanent copy of (L - a linked list):
+To decide what permanent linked list is a new permanent copy of (L - a linked list) (this is creating a permanent linked list from a linked list):
 	let the result be an empty permanent linked list;
 	let the result's tail be an empty permanent linked list's tail;
 	repeat with the linked list vertex running through L:
 		enqueue the key the number key of the linked list vertex and the underlying key the underlying number key of the linked list vertex and the value the number value of the linked list vertex in the result through the result's tail;
 	decide on the result.
 
-To decide what permanent linked list is a new permanent copy of (L - a permanent linked list):
+To decide what permanent linked list is a new permanent copy of (L - a permanent linked list) (this is creating a permanent linked list from a permanent linked list):
 	let the result be an empty permanent linked list;
 	let the result's tail be an empty permanent linked list's tail;
 	repeat with the linked list vertex running through L:
@@ -371,7 +381,7 @@ Definition: a permanent linked list is unit if the link of it converted to a per
 
 Section "Permanent Linked List Length"
 
-To decide what number is the length of (L - a permanent linked list):
+To decide what number is the length of (L - a permanent linked list) (this is measuring a permanent linked list):
 	let the result be zero;
 	repeat with a permanent linked list vertex running through L:
 		increment the result;
@@ -379,6 +389,7 @@ To decide what number is the length of (L - a permanent linked list):
 
 Book "Permanent Linked List Tails"
 
+[@]
 [Many of the public phrases expect their permanent linked list tail arguments to be l-values.  Unfortunately, there's no good way to tell the I7 compiler that, so passing an r-value is likely to get us an I6 error.]
 
 Chapter "The Permanent Linked List Tail Kind"
@@ -393,7 +404,7 @@ To decide what permanent linked list tail is an empty permanent linked list's ta
 
 Section "Permanent Linked List Tail Extraction"
 
-To decide what permanent linked list tail is the tail of (A - a permanent linked list): (- llll_justBefore({A},0) -).
+To decide what permanent linked list tail is the tail of (A - a permanent linked list): (- llll_justBefore({A}, 0) -).
 
 Book "Linked List Interfaces"
 
@@ -496,39 +507,43 @@ To decide what permanent linked list is (A - a permanent linked list) after push
 
 Section "Pushing"
 
-To push the key (K - a value) onto (A - a linked list): (- {A}=(llo_getField((+ pushing a key onto a linked list +),1))({A},{K}); -).
+[@]
 
-To push the key (K - a value) and the underlying key (U - a value) onto (A - a linked list): (- {A}=(llo_getField((+ pushing a key and underlying key onto a linked list +),1))({A},{K},{U}); -).
+To push the key (K - a value) onto (A - a linked list): (- {A} = (llo_getField((+ pushing a key onto a linked list +), 1))({A}, {K}); -).
 
-To push the textual key (K - some text) onto (A - a linked list): (- {A}=(llo_getField((+ pushing a key and underlying key onto a linked list +),1))({A},llo_stringHash32({K}),{K}); -).
+To push the key (K - a value) and the underlying key (U - a value) onto (A - a linked list): (- {A} = (llo_getField((+ pushing a key and underlying key onto a linked list +), 1))({A}, {K}, {U}); -).
 
-To push the key (K - a value) and the value (V - a value) onto (A - a linked list): (- {A}=(llo_getField((+ pushing a key and value onto a linked list +),1))({A},{K},{V}); -).
+To push the textual key (K - some text) onto (A - a linked list): (- {A} = (llo_getField((+ pushing a key and underlying key onto a linked list +), 1))({A}, llo_stringHash32({K}), {K}); -).
 
-To push the key (K - a value) and the underlying key (U - a value) and the value (V - a value) onto (A - a linked list): (- {A}=(llo_getField((+ pushing a key and underlying key and value onto a linked list +),1))({A},{K},{U},{V}); -).
+To push the key (K - a value) and the value (V - a value) onto (A - a linked list): (- {A} = (llo_getField((+ pushing a key and value onto a linked list +), 1))({A}, {K}, {V}); -).
 
-To push the textual key (K - some text) and the value (V - a value) onto (A - a linked list): (- {A}=(llo_getField((+ pushing a key and underlying key and value onto a linked list +),1))({A},llo_stringHash32({K}),{K},{V}); -).
+To push the key (K - a value) and the underlying key (U - a value) and the value (V - a value) onto (A - a linked list): (- {A} = (llo_getField((+ pushing a key and underlying key and value onto a linked list +), 1))({A}, {K}, {U}, {V}); -).
 
-To push the key (K - a value) onto (A - a permanent linked list): (- {A}=(llo_getField((+ pushing a key onto a permanent linked list +),1))({A},{K}); -).
+To push the textual key (K - some text) and the value (V - a value) onto (A - a linked list): (- {A} = (llo_getField((+ pushing a key and underlying key and value onto a linked list +), 1))({A}, llo_stringHash32({K}), {K}, {V}); -).
 
-To push the key (K - a value) and the underlying key (U - a value) onto (A - a permanent linked list): (- {A}=(llo_getField((+ pushing a key and underlying key onto a permanent linked list +),1))({A},{K},{U}); -).
+To push the key (K - a value) onto (A - a permanent linked list): (- {A} = (llo_getField((+ pushing a key onto a permanent linked list +), 1))({A}, {K}); -).
 
-To push the textual key (K - some text) onto (A - a permanent linked list): (- {A}=(llo_getField((+ pushing a key and underlying key onto a permanent linked list +),1))({A},llo_stringHash32({K}),{K}); -).
+To push the key (K - a value) and the underlying key (U - a value) onto (A - a permanent linked list): (- {A} = (llo_getField((+ pushing a key and underlying key onto a permanent linked list +), 1))({A}, {K}, {U}); -).
 
-To push the key (K - a value) and the value (V - a value) onto (A - a permanent linked list): (- {A}=(llo_getField((+ pushing a key and value onto a permanent linked list +),1))({A},{K},{V}); -).
+To push the textual key (K - some text) onto (A - a permanent linked list): (- {A} = (llo_getField((+ pushing a key and underlying key onto a permanent linked list +), 1))({A}, llo_stringHash32({K}), {K}); -).
 
-To push the key (K - a value) and the underlying key (U - a value) and the value (V - a value) onto (A - a permanent linked list): (- {A}=(llo_getField((+ pushing a key and underlying key and value onto a permanent linked list +),1))({A},{K},{U},{V}); -).
+To push the key (K - a value) and the value (V - a value) onto (A - a permanent linked list): (- {A} = (llo_getField((+ pushing a key and value onto a permanent linked list +), 1))({A}, {K}, {V}); -).
 
-To push the textual key (K - some text) and the value (V - a value) onto (A - a permanent linked list): (- {A}=(llo_getField((+ pushing a key and underlying key and value onto a permanent linked list +),1))({A},llo_stringHash32({K}),{K},{V}); -).
+To push the key (K - a value) and the underlying key (U - a value) and the value (V - a value) onto (A - a permanent linked list): (- {A} = (llo_getField((+ pushing a key and underlying key and value onto a permanent linked list +), 1))({A}, {K}, {U}, {V}); -).
+
+To push the textual key (K - some text) and the value (V - a value) onto (A - a permanent linked list): (- {A} = (llo_getField((+ pushing a key and underlying key and value onto a permanent linked list +), 1))({A}, llo_stringHash32({K}), {K}, {V}); -).
 
 Section "Popping"
 
-To decide what linked list vertex is a linked list vertex popped off of (A - a linked list): (- ({A}=(llo_getField((+ popping a linked list vertex off of a linked list +),1))({A}),llll_transfer) -).
+[@]
 
-To decide what K is a/an (D - a description of values of kind K) key popped off of (A - a linked list): (- ({A}=(llo_getField((+ popping a key off of a linked list +),1))({A}),llll_transfer) -).
+To decide what linked list vertex is a linked list vertex popped off of (A - a linked list): (- ({A} = (llo_getField((+ popping a linked list vertex off of a linked list +), 1))({A}), llll_transfer) -).
 
-To decide what K is an underlying (D - a description of values of kind K) key popped off of (A - a linked list): (- ({A}=(llo_getField((+ popping an underlying key off of a linked list +),1))({A}),llll_transfer) -).
+To decide what K is a/an (D - a description of values of kind K) key popped off of (A - a linked list): (- ({A} = (llo_getField((+ popping a key off of a linked list +), 1))({A}), llll_transfer) -).
 
-To decide what K is a/an (D - a description of values of kind K) value popped off of (A - a linked list): (- ({A}=(llo_getField((+ popping a value off of a linked list +),1))({A}),llll_transfer) -).
+To decide what K is an underlying (D - a description of values of kind K) key popped off of (A - a linked list): (- ({A} = (llo_getField((+ popping an underlying key off of a linked list +), 1))({A}), llll_transfer) -).
+
+To decide what K is a/an (D - a description of values of kind K) value popped off of (A - a linked list): (- ({A} = (llo_getField((+ popping a value off of a linked list +), 1))({A}), llll_transfer) -).
 
 Chapter "Queue Interface"
 
@@ -640,98 +655,103 @@ To decide what permanent linked list tail is (B - a permanent linked list tail) 
 
 Section "Enqueuing"
 
-To enqueue the key (K - a value) in (A - a linked list) through (B - a linked list tail): (- {B}=(llo_getField((+ enqueuing a key in a linked list +),1))({B},{K});if(~~{A}) {A}={B}; -).
+To enqueue the key (K - a value) in (A - a linked list) through (B - a linked list tail): (- {B} = (llo_getField((+ enqueuing a key in a linked list +), 1))({B}, {K}); if (~~{A}) {A} = {B}; -).
 
-To enqueue the key (K - a value) and the underlying key (U - a value) in (A - a linked list) through (B - a linked list tail): (- {B}=(llo_getField((+ enqueuing a key and underlying key in a linked list +),1))({B},{K},{U});if(~~{A}) {A}={B}; -).
+To enqueue the key (K - a value) and the underlying key (U - a value) in (A - a linked list) through (B - a linked list tail): (- {B} = (llo_getField((+ enqueuing a key and underlying key in a linked list +), 1))({B}, {K}, {U}); if (~~{A}) {A} = {B}; -).
 
-To enqueue the textual key (K - some text) in (A - a linked list) through (B - a linked list tail): (- {B}=(llo_getField((+ enqueuing a key and underlying key in a linked list +),1))({B},llo_stringHash32({K}),{K});if(~~{A}) {A}={B}; -).
+To enqueue the textual key (K - some text) in (A - a linked list) through (B - a linked list tail): (- {B} = (llo_getField((+ enqueuing a key and underlying key in a linked list +), 1))({B}, llo_stringHash32({K}), {K}); if (~~{A}) {A} = {B}; -).
 
-To enqueue the key (K - a value) and the value (V - a value) in (A - a linked list) through (B - a linked list tail): (- {B}=(llo_getField((+ enqueuing a key and value in a linked list +),1))({B},{K},{V});if(~~{A}) {A}={B}; -).
+To enqueue the key (K - a value) and the value (V - a value) in (A - a linked list) through (B - a linked list tail): (- {B} = (llo_getField((+ enqueuing a key and value in a linked list +), 1))({B}, {K}, {V}); if (~~{A}) {A} = {B}; -).
 
-To enqueue the key (K - a value) and the underlying key (U - a value) and the value (V - a value) in (A - a linked list) through (B - a linked list tail): (- {B}=(llo_getField((+ enqueuing a key and underlying key and value in a linked list +),1))({B},{K},{U},{V});if(~~{A}) {A}={B}; -).
+To enqueue the key (K - a value) and the underlying key (U - a value) and the value (V - a value) in (A - a linked list) through (B - a linked list tail): (- {B} = (llo_getField((+ enqueuing a key and underlying key and value in a linked list +), 1))({B}, {K}, {U}, {V}); if (~~{A}) {A} = {B}; -).
 
-To enqueue the textual key (K - some text) and the value (V - a value) in (A - a linked list) through (B - a linked list tail): (- {B}=(llo_getField((+ enqueuing a key and underlying key and value in a linked list +),1))({B},llo_stringHash32({K}),{K},{V});if(~~{A}) {A}={B}; -).
+To enqueue the textual key (K - some text) and the value (V - a value) in (A - a linked list) through (B - a linked list tail): (- {B} = (llo_getField((+ enqueuing a key and underlying key and value in a linked list +), 1))({B}, llo_stringHash32({K}), {K}, {V}); if (~~{A}) {A} = {B}; -).
 
-To enqueue the key (K - a value) in (A - a permanent linked list) through (B - a permanent linked list tail): (- {B}=(llo_getField((+ enqueuing a key in a permanent linked list +),1))({B},{K});if(~~{A}) {A}={B}; -).
+To enqueue the key (K - a value) in (A - a permanent linked list) through (B - a permanent linked list tail): (- {B} = (llo_getField((+ enqueuing a key in a permanent linked list +), 1))({B}, {K}); if (~~{A}) {A} = {B}; -).
 
-To enqueue the key (K - a value) and the underlying key (U - a value) in (A - a permanent linked list) through (B - a permanent linked list tail): (- {B}=(llo_getField((+ enqueuing a key and underlying key in a permanent linked list +),1))({B},{K},{U});if(~~{A}) {A}={B}; -).
+To enqueue the key (K - a value) and the underlying key (U - a value) in (A - a permanent linked list) through (B - a permanent linked list tail): (- {B} = (llo_getField((+ enqueuing a key and underlying key in a permanent linked list +), 1))({B}, {K}, {U}); if (~~{A}) {A} = {B}; -).
 
-To enqueue the textual key (K - some text) in (A - a permanent linked list) through (B - a permanent linked list tail): (- {B}=(llo_getField((+ enqueuing a key and underlying key in a permanent linked list +),1))({B},llo_stringHash32({K}),{K});if(~~{A}) {A}={B}; -).
+To enqueue the textual key (K - some text) in (A - a permanent linked list) through (B - a permanent linked list tail): (- {B} = (llo_getField((+ enqueuing a key and underlying key in a permanent linked list +), 1))({B}, llo_stringHash32({K}), {K}); if (~~{A}) {A} = {B}; -).
 
-To enqueue the key (K - a value) and the value (V - a value) in (A - a permanent linked list) through (B - a permanent linked list tail): (- {B}=(llo_getField((+ enqueuing a key and value in a permanent linked list +),1))({B},{K},{V});if(~~{A}) {A}={B}; -).
+To enqueue the key (K - a value) and the value (V - a value) in (A - a permanent linked list) through (B - a permanent linked list tail): (- {B} = (llo_getField((+ enqueuing a key and value in a permanent linked list +), 1))({B}, {K}, {V}); if (~~{A}) {A} = {B}; -).
 
-To enqueue the key (K - a value) and the underlying key (U - a value) and the value (V - a value) in (A - a permanent linked list) through (B - a permanent linked list tail): (- {B}=(llo_getField((+ enqueuing a key and underlying key and value in a permanent linked list +),1))({B},{K},{U},{V});if(~~{A}) {A}={B}; -).
+To enqueue the key (K - a value) and the underlying key (U - a value) and the value (V - a value) in (A - a permanent linked list) through (B - a permanent linked list tail): (- {B} = (llo_getField((+ enqueuing a key and underlying key and value in a permanent linked list +), 1))({B}, {K}, {U}, {V}); if (~~{A}) {A} = {B}; -).
 
-To enqueue the textual key (K - some text) and the value (V - a value) in (A - a permanent linked list) through (B - a permanent linked list tail): (- {B}=(llo_getField((+ enqueuing a key and underlying key and value in a permanent linked list +),1))({B},llo_stringHash32({K}),{K},{V});if(~~{A}) {A}={B}; -).
+To enqueue the textual key (K - some text) and the value (V - a value) in (A - a permanent linked list) through (B - a permanent linked list tail): (- {B} = (llo_getField((+ enqueuing a key and underlying key and value in a permanent linked list +), 1))({B}, llo_stringHash32({K}), {K}, {V}); if (~~{A}) {A} = {B}; -).
 
 Section "Dequeuing"
 
-To decide what linked list vertex is a linked list vertex dequeued from (A - a linked list) through (B - a linked list tail): (- ({A}=(llo_getField((+ popping a linked list vertex off of a linked list +),1))({A}),{A}||({B}=0),llll_transfer) -).
+To decide what linked list vertex is a linked list vertex dequeued from (A - a linked list) through (B - a linked list tail): (- ({A} = (llo_getField((+ popping a linked list vertex off of a linked list +), 1))({A}), {A} || ({B} = 0), llll_transfer) -).
 
-To decide what K is a/an (D - a description of values of kind K) key dequeued from (A - a linked list) through (B - a linked list tail): (- ({A}=(llo_getField((+ popping a key off of a linked list +),1))({A}),{A}||({B}=0),llll_transfer) -).
+To decide what K is a/an (D - a description of values of kind K) key dequeued from (A - a linked list) through (B - a linked list tail): (- ({A} = (llo_getField((+ popping a key off of a linked list +), 1))({A}), {A} || ({B} = 0), llll_transfer) -).
 
-To decide what K is an underlying (D - a description of values of kind K) key dequeued from (A - a linked list) through (B - a linked list tail): (- ({A}=(llo_getField((+ popping an underlying key off of a linked list +),1))({A}),{A}||({B}=0),llll_transfer) -).
+To decide what K is an underlying (D - a description of values of kind K) key dequeued from (A - a linked list) through (B - a linked list tail): (- ({A} = (llo_getField((+ popping an underlying key off of a linked list +), 1))({A}), {A} || ({B} = 0), llll_transfer) -).
 
-To decide what K is a/an (D - a description of values of kind K) value dequeued from (A - a linked list) through (B - a linked list tail): (- ({A}=(llo_getField((+ popping a value off of a linked list +),1))({A}),{A}||({B}=0),llll_transfer) -).
+To decide what K is a/an (D - a description of values of kind K) value dequeued from (A - a linked list) through (B - a linked list tail): (- ({A} = (llo_getField((+ popping a value off of a linked list +), 1))({A}), {A} || ({B} = 0), llll_transfer) -).
 
 Chapter "Search Interface"
 
 Section "Linked List Traversals used by the Search Interface" - unindexed
 
 Include (-
-	[ llll_atOrAfter key address result;
-		if(~~address){
+	[ llll_atOrAfter key address
+		result;
+		if (~~address) {
 			return 0;
 		}
 		@linkedsearch
-			key ! the key to search for
-			4 ! the size of the key in bytes
+			key     ! the key to search for
+			4       ! the size of the key in bytes
 			address ! the address of the first structure to search
-			0 ! the offset to the key
-			12 ! the offset to the link
-			0 ! the options (no need for special options)
+			0       ! the offset to the key
+			12      ! the offset to the link
+			0       ! the options (no need for special options)
 			result;
 		return result;
 	];
 	Array llll_keyValuePair --> 0 0;
-	[ llll_atOrAfterWithValue key value address result;
-		if(~~address){
+	[ llll_atOrAfterWithValue key value address
+		result;
+		if (~~address) {
 			return 0;
 		}
 		llo_setInt(llll_keyValuePair,key);
-		llo_setField(llll_keyValuePair,1,value);
+		llo_setField(llll_keyValuePair, 1,value);
 		@linkedsearch
 			llll_keyValuePair ! the address of the key to search for
-			8 ! the size of the key in bytes
-			address ! the address of the first structure to search
-			0 ! the offset to the key
-			12 ! the offset to the link
-			1 ! the options (the key is given as an address)
+			8                 ! the size of the key in bytes
+			address           ! the address of the first structure to search
+			0                 ! the offset to the key
+			12                ! the offset to the link
+			1                 ! the options (the key is given as an address)
 			result;
 		return result;
 	];
-	[ llll_atOrAfterWithUnderlying key underlyingKey address comparator result;
-		comparator=llo_getField(comparator,1);
-		for(result=llll_atOrAfter(key,address):result:result=llll_atOrAfter(key,llo_getField(result,3))){
-			if(comparator(underlyingKey,llo_getField(result,2))){
+	[ llll_atOrAfterWithUnderlying key underlyingKey address comparator
+		result;
+		comparator = llo_getField(comparator, 1);
+		for (result = llll_atOrAfter(key, address): result: result = llll_atOrAfter(key, llo_getField(result, 3))) {
+			if (comparator(underlyingKey, llo_getField(result, 2))) {
 				break;
 			}
 		}
 		return result;
 	];
-	[ llll_atOrAfterSynthetic key underlyingKey address comparator result;
-		comparator=llo_getField((+ testing equality between synthetic text and text +),1);
-		for(result=llll_atOrAfter(key,address):result:result=llll_atOrAfter(key,llo_getField(result,3))){
-			if(comparator(underlyingKey,llo_getField(result,2))){
+	[ llll_atOrAfterSynthetic key underlyingKey address comparator
+		result;
+		comparator = llo_getField((+ testing equality between synthetic text and text +), 1);
+		for (result = llll_atOrAfter(key, address): result: result = llll_atOrAfter(key, llo_getField(result, 3))) {
+			if (comparator(underlyingKey, llo_getField(result, 2))) {
 				break;
 			}
 		}
 		return result;
 	];
-	[ llll_atOrAfterWithBoth key underlyingKey value address comparator result;
-		comparator=llo_getField(comparator,1);
-		for(result=llll_atOrAfterWithValue(key,value,address):result:result=llll_atOrAfterWithValue(key,value,llo_getField(result,3))){
-			if(comparator(underlyingKey,llo_getField(result,2))){
+	[ llll_atOrAfterWithBoth key underlyingKey value address comparator
+		result;
+		comparator = llo_getField(comparator, 1);
+		for (result = llll_atOrAfterWithValue(key, value, address): result: result = llll_atOrAfterWithValue(key, value, llo_getField(result, 3))) {
+			if (comparator(underlyingKey, llo_getField(result, 2))) {
 				break;
 			}
 		}
@@ -741,18 +761,18 @@ Include (-
 
 Section "Searching by Key"
 
-To decide what linked list vertex is the first match for the key (K - a value) in (A - a linked list): (- llll_atOrAfter({K},{A}) -).
+To decide what linked list vertex is the first match for the key (K - a value) in (A - a linked list): (- llll_atOrAfter({K}, {A}) -).
 
-To decide what linked list vertex is the first match for the key (K - a value) at or after (A - a linked list vertex): (- llll_atOrAfter({K},{A}) -).
+To decide what linked list vertex is the first match for the key (K - a value) at or after (A - a linked list vertex): (- llll_atOrAfter({K}, {A}) -).
 
 To decide what linked list vertex is the first match for the key (K - a value) after (A - a linked list vertex):
 	if A is null:
 		decide on a null linked list vertex;
 	decide on the first match for the key K at or after the link of A.
 
-To decide what permanent linked list vertex is the first match for the key (K - a value) in (A - a permanent linked list): (- llll_atOrAfter({K},{A}) -).
+To decide what permanent linked list vertex is the first match for the key (K - a value) in (A - a permanent linked list): (- llll_atOrAfter({K}, {A}) -).
 
-To decide what permanent linked list vertex is the first match for the key (K - a value) at or after (A - a permanent linked list vertex): (- llll_atOrAfter({K},{A}) -).
+To decide what permanent linked list vertex is the first match for the key (K - a value) at or after (A - a permanent linked list vertex): (- llll_atOrAfter({K}, {A}) -).
 
 To decide what permanent linked list vertex is the first match for the key (K - a value) after (A - a permanent linked list vertex):
 	if A is null:
@@ -761,90 +781,90 @@ To decide what permanent linked list vertex is the first match for the key (K - 
 
 Section "Searching by Underlying Key"
 
-To decide what linked list vertex is the first match for the key (K - a value) and the underlying key (U - a value) in (A - a linked list) with the comparator (P - a phrase (value of kind K,K) -> nothing): (- llll_atOrAfterWithUnderlying({K},{U},{A},{P}) -).
+To decide what linked list vertex is the first match for the key (K - a value) and the underlying key (U - a value) in (A - a linked list) with the comparator (P - a phrase (value of kind K, K) -> nothing [@] [truth state]): (- llll_atOrAfterWithUnderlying({K}, {U}, {A}, {P}) -).
 
-To decide what linked list vertex is the first match for the synthetic textual key (K - some text) in (A - a linked list): (- llll_atOrAfterSynthetic(llo_stringHash32({K}),{K},{A}) -).
+To decide what linked list vertex is the first match for the synthetic textual key (K - some text) in (A - a linked list): (- llll_atOrAfterSynthetic(llo_stringHash32({K}), {K}, {A}) -).
 
-To decide what linked list vertex is the first match for the textual key (K - some text) in (A - a linked list):
+To decide what linked list vertex is the first match for the textual key (K - some text) in (A - a linked list) (this is finding the first match for a textual key in a linked list):
 	let the key be a new synthetic text copied from K;
 	let the result be the first match for the synthetic textual key key in A;
 	delete the synthetic text key;
 	decide on the result.
 
-To decide what linked list vertex is the first match for the key (K - a value) and the underlying key (U - a value) at or after (A - a linked list vertex) with the comparator (P - a phrase (value of kind K,K) -> nothing): (- llll_atOrAfterWithUnderlying({K},{U},{A},{P}) -).
+To decide what linked list vertex is the first match for the key (K - a value) and the underlying key (U - a value) at or after (A - a linked list vertex) with the comparator (P - a phrase (value of kind K, K) -> nothing [@] [truth state]): (- llll_atOrAfterWithUnderlying({K}, {U}, {A}, {P}) -).
 
-To decide what linked list vertex is the first match for the synthetic textual key (K - some text) at or after (A - a linked list vertex): (- llll_atOrAfterSynthetic(llo_stringHash32({K}),{K},{A}) -).
+To decide what linked list vertex is the first match for the synthetic textual key (K - some text) at or after (A - a linked list vertex): (- llll_atOrAfterSynthetic(llo_stringHash32({K}), {K}, {A}) -).
 
-To decide what linked list vertex is the first match for the textual key (K - some text) at or after (A - a linked list vertex):
+To decide what linked list vertex is the first match for the textual key (K - some text) at or after (A - a linked list vertex) (this is finding a loosely subsequent match for a textual key in a linked list):
 	let the key be a new synthetic text copied from K;
 	let the result be the first match for the synthetic textual key key at or after A;
 	delete the synthetic text key;
 	decide on the result.
 
-To decide what linked list vertex is the first match for the key (K - a value) and the underlying key (U - a value) after (A - a linked list vertex) with the comparator (P - a phrase (value of kind K,K) -> nothing):
+To decide what linked list vertex is the first match for the key (K - a value) and the underlying key (U - a value) after (A - a linked list vertex) with the comparator (P - a phrase (value of kind K, K) -> nothing [@] [truth state]):
 	if A is null:
 		decide on a null linked list vertex;
 	decide on the first match for the key K and the underlying key U at or after the link of A with the comparator P.
 
-To decide what linked list vertex is the first match for the synthetic textual key (K - some text) after (A - a linked list vertex):
+To decide what linked list vertex is the first match for the synthetic textual key (K - some text) after (A - a linked list vertex) (this is finding a subsequent match for a synthetic textual key in a linked list):
 	if A is null:
 		decide on a null linked list vertex;
 	decide on the first match for the synthetic textual key K at or after the link of A.
 
-To decide what linked list vertex is the first match for the synthetic textual key (K - some text) after (A - a linked list vertex):
+To decide what linked list vertex is the first match for the textual key (K - some text) after (A - a linked list vertex) (this is finding a subsequent match for a textual key in a linked list):
 	if A is null:
 		decide on a null linked list vertex;
 	decide on the first match for the textual key K at or after the link of A.
 
-To decide what permanent linked list vertex is the first match for the key (K - a value) and the underlying key (U - a value) in (A - a permanent linked list) with the comparator (P - a phrase (value of kind K,K) -> nothing): (- llll_atOrAfterWithUnderlying({K},{U},{A},{P}) -).
+To decide what permanent linked list vertex is the first match for the key (K - a value) and the underlying key (U - a value) in (A - a permanent linked list) with the comparator (P - a phrase (value of kind K, K) -> nothing [@] [truth state]): (- llll_atOrAfterWithUnderlying({K}, {U}, {A}, {P}) -).
 
-To decide what permanent linked list vertex is the first match for the synthetic textual key (K - some text) in (A - a permanent linked list): (- llll_atOrAfterSynthetic(llo_stringHash32({K}),{K},{A}) -).
+To decide what permanent linked list vertex is the first match for the synthetic textual key (K - some text) in (A - a permanent linked list): (- llll_atOrAfterSynthetic(llo_stringHash32({K}), {K}, {A}) -).
 
-To decide what permanent linked list vertex is the first match for the textual key (K - some text) in (A - a permanent linked list):
+To decide what permanent linked list vertex is the first match for the textual key (K - some text) in (A - a permanent linked list) (this is finding the first match for a textual key in a permanent linked list):
 	let the key be a new synthetic text copied from K;
 	let the result be the first match for the synthetic textual key key in A;
 	delete the synthetic text key;
 	decide on the result.
 
-To decide what permanent linked list vertex is the first match for the key (K - a value) and the underlying key (U - a value) at or after (A - a permanent linked list vertex) with the comparator (P - a phrase (value of kind K,K) -> nothing): (- llll_atOrAfterWithUnderlying({K},{U},{A},{P}) -).
+To decide what permanent linked list vertex is the first match for the key (K - a value) and the underlying key (U - a value) at or after (A - a permanent linked list vertex) with the comparator (P - a phrase (value of kind K, K) -> nothing [@] [truth state]): (- llll_atOrAfterWithUnderlying({K}, {U}, {A}, {P}) -).
 
-To decide what permanent linked list vertex is the first match for the synthetic textual key (K - some text) at or after (A - a permanent linked list vertex): (- llll_atOrAfterSynthetic(llo_stringHash32({K}),{K},{A}) -).
+To decide what permanent linked list vertex is the first match for the synthetic textual key (K - some text) at or after (A - a permanent linked list vertex): (- llll_atOrAfterSynthetic(llo_stringHash32({K}), {K}, {A}) -).
 
-To decide what permanent linked list vertex is the first match for the textual key (K - some text) at or after (A - a permanent linked list vertex):
+To decide what permanent linked list vertex is the first match for the textual key (K - some text) at or after (A - a permanent linked list vertex) (this is finding a loosely subsequent match for a textual key in a permanent linked list):
 	let the key be a new synthetic text copied from K;
 	let the result be the first match for the synthetic textual key key at or after A;
 	delete the synthetic text key;
 	decide on the result.
 
-To decide what permanent linked list vertex is the first match for the key (K - a value) and the underlying key (U - a value) after (A - a permanent linked list vertex) with the comparator (P - a phrase (value of kind K,K) -> nothing):
+To decide what permanent linked list vertex is the first match for the key (K - a value) and the underlying key (U - a value) after (A - a permanent linked list vertex) with the comparator (P - a phrase (value of kind K, K) -> nothing [@] [truth state]):
 	if A is null:
 		decide on a null permanent linked list vertex;
 	decide on the first match for the key K and the underlying key U at or after the link of A with the comparator P.
 
-To decide what permanent linked list vertex is the first match for the synthetic textual key (K - some text) after (A - a permanent linked list vertex):
+To decide what permanent linked list vertex is the first match for the synthetic textual key (K - some text) after (A - a permanent linked list vertex) (this is finding a subsequent match for a synthetic textual key in a permanent linked list):
 	if A is null:
 		decide on a null permanent linked list vertex;
 	decide on the first match for the synthetic textual key K at or after the link of A.
 
-To decide what permanent linked list vertex is the first match for the synthetic textual key (K - some text) after (A - a permanent linked list vertex):
+To decide what permanent linked list vertex is the first match for the textual key (K - some text) after (A - a permanent linked list vertex) (this is finding a subsequent match for a textual key in a permanent linked list):
 	if A is null:
 		decide on a null permanent linked list vertex;
 	decide on the first match for the textual key K at or after the link of A.
 
 Section "Searching by Key and Value"
 
-To decide what linked list vertex is the first match for the key (K - a value) and the value (V - a value) in (A - a linked list): (- llll_atOrAfterWithValue({K},{V},{A}) -).
+To decide what linked list vertex is the first match for the key (K - a value) and the value (V - a value) in (A - a linked list): (- llll_atOrAfterWithValue({K}, {V}, {A}) -).
 
-To decide what linked list vertex is the first match for the key (K - a value) and the value (V - a value) at or after (A - a linked list vertex): (- llll_atOrAfterWithValue({K},{V},{A}) -).
+To decide what linked list vertex is the first match for the key (K - a value) and the value (V - a value) at or after (A - a linked list vertex): (- llll_atOrAfterWithValue({K}, {V}, {A}) -).
 
 To decide what linked list vertex is the first match for the key (K - a value) and the value (V - a value) after (A - a linked list vertex):
 	if A is null:
 		decide on a null linked list vertex;
 	decide on the first match for the key K and the value V at or after the link of A.
 
-To decide what permanent linked list vertex is the first match for the key (K - a value) and the value (V - a value) in (A - a permanent linked list): (- llll_atOrAfterWithValue({K},{V},{A}) -).
+To decide what permanent linked list vertex is the first match for the key (K - a value) and the value (V - a value) in (A - a permanent linked list): (- llll_atOrAfterWithValue({K}, {V}, {A}) -).
 
-To decide what permanent linked list vertex is the first match for the key (K - a value) and the value (V - a value) at or after (A - a permanent linked list vertex): (- llll_atOrAfterWithValue({K},{V},{A}) -).
+To decide what permanent linked list vertex is the first match for the key (K - a value) and the value (V - a value) at or after (A - a permanent linked list vertex): (- llll_atOrAfterWithValue({K}, {V}, {A}) -).
 
 To decide what permanent linked list vertex is the first match for the key (K - a value) and the value (V - a value) after (A - a permanent linked list vertex):
 	if A is null:
@@ -853,9 +873,9 @@ To decide what permanent linked list vertex is the first match for the key (K - 
 
 Section "Searching by Underlying Key and Value"
 
-To decide what linked list vertex is the first match for the key (K - a value) and the underlying key (U - a value) and the value (V - a value) in (A - a linked list) with the comparator (P - a phrase (value of kind K,K) -> nothing): (- llll_atOrAfterWithBoth({K},{U},{V},{A},{P}) -).
+To decide what linked list vertex is the first match for the key (K - a value) and the underlying key (U - a value) and the value (V - a value) in (A - a linked list) with the comparator (P - a phrase (value of kind K, K) -> nothing [@] [truth state]): (- llll_atOrAfterWithBoth({K}, {U}, {V}, {A}, {P}) -).
 
-To decide what linked list vertex is the first match for the synthetic textual key (K - some text) and the value (V - a value) in (A - a linked list): (- llll_atOrAfterWithBoth(llo_stringHash32({K}),{K},{V},{A},(+ testing equality between synthetic text and text +)) -).
+To decide what linked list vertex is the first match for the synthetic textual key (K - some text) and the value (V - a value) in (A - a linked list): (- llll_atOrAfterWithBoth(llo_stringHash32({K}), {K}, {V}, {A}, (+ testing equality between synthetic text and text +)) -).
 
 To decide what linked list vertex is the first match for the textual key (K - some text) and the value (V - a value) in (A - a linked list):
 	let the key be a new synthetic text copied from K;
@@ -863,9 +883,9 @@ To decide what linked list vertex is the first match for the textual key (K - so
 	delete the synthetic text key;
 	decide on the result.
 
-To decide what linked list vertex is the first match for the key (K - a value) and the underlying key (U - a value) and the value (V - a value) at or after (A - a linked list vertex) with the comparator (P - a phrase (value of kind K,K) -> nothing): (- llll_atOrAfterWithBoth({K},{U},{V},{A},{P}) -).
+To decide what linked list vertex is the first match for the key (K - a value) and the underlying key (U - a value) and the value (V - a value) at or after (A - a linked list vertex) with the comparator (P - a phrase (value of kind K, K) -> nothing [@] [truth state]): (- llll_atOrAfterWithBoth({K}, {U}, {V}, {A}, {P}) -).
 
-To decide what linked list vertex is the first match for the synthetic textual key (K - some text) and the value (V - a value) at or after (A - a linked list vertex): (- llll_atOrAfterWithBoth(llo_stringHash32({K}),{K},{V},{A},(+ testing equality between synthetic text and text +)) -).
+To decide what linked list vertex is the first match for the synthetic textual key (K - some text) and the value (V - a value) at or after (A - a linked list vertex): (- llll_atOrAfterWithBoth(llo_stringHash32({K}), {K}, {V}, {A}, (+ testing equality between synthetic text and text +)) -).
 
 To decide what linked list vertex is the first match for the textual key (K - some text) and the value (V - a value) at or after (A - a linked list vertex):
 	let the key be a new synthetic text copied from K;
@@ -873,7 +893,7 @@ To decide what linked list vertex is the first match for the textual key (K - so
 	delete the synthetic text key;
 	decide on the result.
 
-To decide what linked list vertex is the first match for the key (K - a value) and the underlying key (U - a value) and the value (V - a value) after (A - a linked list vertex) with the comparator (P - a phrase (value of kind K,K) -> nothing):
+To decide what linked list vertex is the first match for the key (K - a value) and the underlying key (U - a value) and the value (V - a value) after (A - a linked list vertex) with the comparator (P - a phrase (value of kind K, K) -> nothing [@] [truth state]):
 	if A is null:
 		decide on a null linked list vertex;
 	decide on the first match for the key K and the underlying key U and the value V at or after the link of A with the comparator P.
@@ -888,9 +908,9 @@ To decide what linked list vertex is the first match for the textual key (K - so
 		decide on a null linked list vertex;
 	decide on the first match for the textual key K and the value V at or after the link of A with the comparator P.
 
-To decide what permanent linked list vertex is the first match for the key (K - a value) and the underlying key (U - a value) and the value (V - a value) in (A - a permanent linked list) with the comparator (P - a phrase (value of kind K,K) -> nothing): (- llll_atOrAfterWithBoth({K},{U},{V},{A},{P}) -).
+To decide what permanent linked list vertex is the first match for the key (K - a value) and the underlying key (U - a value) and the value (V - a value) in (A - a permanent linked list) with the comparator (P - a phrase (value of kind K, K) -> nothing [@] [truth state]): (- llll_atOrAfterWithBoth({K}, {U}, {V}, {A}, {P}) -).
 
-To decide what permanent linked list vertex is the first match for the synthetic textual key (K - some text) and the value (V - a value) in (A - a permanent linked list): (- llll_atOrAfterWithBoth(llo_stringHash32({K}),{K},{V},{A},(+ testing equality between synthetic text and text +)) -).
+To decide what permanent linked list vertex is the first match for the synthetic textual key (K - some text) and the value (V - a value) in (A - a permanent linked list): (- llll_atOrAfterWithBoth(llo_stringHash32({K}), {K}, {V}, {A}, (+ testing equality between synthetic text and text +)) -).
 
 To decide what permanent linked list vertex is the first match for the textual key (K - some text) and the value (V - a value) in (A - a permanent linked list):
 	let the key be a new synthetic text copied from K;
@@ -898,9 +918,9 @@ To decide what permanent linked list vertex is the first match for the textual k
 	delete the synthetic text key;
 	decide on the result.
 
-To decide what permanent linked list vertex is the first match for the key (K - a value) and the underlying key (U - a value) and the value (V - a value) at or after (A - a permanent linked list vertex) with the comparator (P - a phrase (value of kind K,K) -> nothing): (- llll_atOrAfterWithBoth({K},{U},{V},{A},{P}) -).
+To decide what permanent linked list vertex is the first match for the key (K - a value) and the underlying key (U - a value) and the value (V - a value) at or after (A - a permanent linked list vertex) with the comparator (P - a phrase (value of kind K, K) -> nothing [@] [truth state]): (- llll_atOrAfterWithBoth({K}, {U}, {V}, {A}, {P}) -).
 
-To decide what permanent linked list vertex is the first match for the synthetic textual key (K - some text) and the value (V - a value) at or after (A - a permanent linked list vertex): (- llll_atOrAfterWithBoth(llo_stringHash32({K}),{K},{V},{A},(+ testing equality between synthetic text and text +)) -).
+To decide what permanent linked list vertex is the first match for the synthetic textual key (K - some text) and the value (V - a value) at or after (A - a permanent linked list vertex): (- llll_atOrAfterWithBoth(llo_stringHash32({K}), {K}, {V}, {A}, (+ testing equality between synthetic text and text +)) -).
 
 To decide what permanent linked list vertex is the first match for the textual key (K - some text) and the value (V - a value) at or after (A - a permanent linked list vertex):
 	let the key be a new synthetic text copied from K;
@@ -908,7 +928,7 @@ To decide what permanent linked list vertex is the first match for the textual k
 	delete the synthetic text key;
 	decide on the result.
 
-To decide what permanent linked list vertex is the first match for the key (K - a value) and the underlying key (U - a value) and the value (V - a value) after (A - a permanent linked list vertex) with the comparator (P - a phrase (value of kind K,K) -> nothing):
+To decide what permanent linked list vertex is the first match for the key (K - a value) and the underlying key (U - a value) and the value (V - a value) after (A - a permanent linked list vertex) with the comparator (P - a phrase (value of kind K, K) -> nothing [@] [truth state]):
 	if A is null:
 		decide on a null permanent linked list vertex;
 	decide on the first match for the key K and the underlying key U and the value V at or after the link of A with the comparator P.
@@ -927,9 +947,9 @@ Chapter "Map Interface"
 
 Section "Linked List Traversals used by the Map Interface" - unindexed
 
-To decide what linked list vertex is the linked list vertex just before (B - a linked list vertex) in (A - a linked list): (- llll_justBefore({A},{B}) -).
+To decide what linked list vertex is the linked list vertex just before (B - a linked list vertex) in (A - a linked list): (- llll_justBefore({A}, {B}) -).
 
-To decide what permanent linked list vertex is the permanent linked list vertex just before (B - a permanent linked list vertex) in (A - a permanent linked list): (- llll_justBefore({A},{B}) -).
+To decide what permanent linked list vertex is the permanent linked list vertex just before (B - a permanent linked list vertex) in (A - a permanent linked list): (- llll_justBefore({A}, {B}) -).
 
 Section "Linked List Transformations used by the Map Interface" - unindexed
 
@@ -955,7 +975,7 @@ To decide what K is the first (D - a description of values of kind K) value matc
 		decide on V;
 	decide on the D value of the linked list vertex.
 
-To remove the first occurrence of the key (K - a value) from (A - a linked list): (- {A}=(llo_getField((+ removing a vertex from a linked list +),1))({A},llll_atOrAfter({K},{A})); -).
+To remove the first occurrence of the key (K - a value) from (A - a linked list): (- {A} = (llo_getField((+ removing a vertex from a linked list +), 1))({A}, llll_atOrAfter({K}, {A})); -).
 
 To decide whether (A - a permanent linked list) contains the key (K - a value):
 	decide on whether or not the first match for the key K in A is not null.
@@ -968,16 +988,16 @@ To decide what K is the first (D - a description of values of kind K) value matc
 
 Section "Map Operations by Underlying Key"
 
-To decide whether (A - a linked list) contains the key (K - a value) and the underlying key (U - a value) with the comparator (P - a phrase (value of kind K,K) -> nothing):
+To decide whether (A - a linked list) contains the key (K - a value) and the underlying key (U - a value) with the comparator (P - a phrase (value of kind K, K) -> nothing [@] [truth state]):
 	decide on whether or not the first match for the key K and the underlying key U in A with the comparator P is not null.
 
-To decide whether (A - a linked list) contains the synthetic textual key (K - some text):
+To decide whether (A - a linked list) contains the synthetic textual key (K - some text) (this is testing synthetic textual key presence in a linked list):
 	decide on whether or not the first match for the synthetic textual key K in A is not null.
 
-To decide whether (A - a linked list) contains the textual key (K - some text):
+To decide whether (A - a linked list) contains the textual key (K - some text) (this is testing textual key presence in a linked list):
 	decide on whether or not the first match for the textual key K in A is not null.
 
-To decide what K is the first (D - a description of values of kind K) value matching the key (K - a value) and the underlying key (U - a value) in (A - a linked list) with the comparator (P - a phrase (value of kind L,L) -> nothing) or (V - a K) if there are no matches:
+To decide what K is the first (D - a description of values of kind K) value matching the key (K - a value) and the underlying key (U - a value) in (A - a linked list) with the comparator (P - a phrase (value of kind L, L) -> nothing [@] [truth state]) or (V - a K) if there are no matches:
 	let the linked list vertex be the first match for the key K and the underlying key U in A with the comparator P;
 	if the linked list vertex is null:
 		decide on V;
@@ -995,25 +1015,25 @@ To decide what K is the first (D - a description of values of kind K) value matc
 		decide on V;
 	decide on the D value of the linked list vertex.
 
-To remove the first occurrence of the key (K - a value) and the underlying key (U - a value) from (A - a linked list) with the comparator (P - a phrase (value of kind K,K) -> nothing): (- {A}=(llo_getField((+ removing a vertex from a linked list +),1))({A},llll_atOrAfterWithUnderlying({K},{U},{A},{P})); -).
+To remove the first occurrence of the key (K - a value) and the underlying key (U - a value) from (A - a linked list) with the comparator (P - a phrase (value of kind K, K) -> nothing [@] [truth state]): (- {A} = (llo_getField((+ removing a vertex from a linked list +), 1))({A}, llll_atOrAfterWithUnderlying({K}, {U}, {A}, {P})); -).
 
-To remove the first occurrence of the synthetic textual key (K - some text) from (A - a linked list): (- {A}=(llo_getField((+ removing a vertex from a linked list +),1))({A},llll_atOrAfterSynthetic(llo_stringHash32({K}),{K},{A})); -).
+To remove the first occurrence of the synthetic textual key (K - some text) from (A - a linked list): (- {A} = (llo_getField((+ removing a vertex from a linked list +), 1))({A}, llll_atOrAfterSynthetic(llo_stringHash32({K}), {K}, {A})); -).
 
-To remove the first occurrence of the textual key (K - some text) from (A - a linked list):
+To remove the first occurrence of the textual key (K - some text) from (A - a linked list) (this is removing the first occurrence of a textual key from a linked list):
 	let the key be a new synthetic text copied from K;
 	remove the first occurrence of the synthetic textual key key from A;
 	delete the synthetic text key.
 
-To decide whether (A - a permanent linked list) contains the key (K - a value) and the underlying key (U - a value) with the comparator (P - a phrase (value of kind K,K) -> nothing):
+To decide whether (A - a permanent linked list) contains the key (K - a value) and the underlying key (U - a value) with the comparator (P - a phrase (value of kind K, K) -> nothing [@] [truth state]):
 	decide on whether or not the first match for the key K and the underlying key U in A with the comparator P is not null.
 
-To decide whether (A - a permanent linked list) contains the synthetic textual key (K - some text):
+To decide whether (A - a permanent linked list) contains the synthetic textual key (K - some text) (this is testing synthetic textual key presence in a permanent linked list):
 	decide on whether or not the first match for the synthetic textual key K in A is not null.
 
-To decide whether (A - a permanent linked list) contains the textual key (K - some text):
+To decide whether (A - a permanent linked list) contains the textual key (K - some text) (this is testing textual key presence in a permanent linked list):
 	decide on whether or not the first match for the textual key K in A is not null.
 
-To decide what K is the first (D - a description of values of kind K) value matching the key (K - a value) and the underlying key (U - a value) in (A - a permanent linked list) with the comparator (P - a phrase (value of kind L,L) -> nothing) or (V - a K) if there are no matches:
+To decide what K is the first (D - a description of values of kind K) value matching the key (K - a value) and the underlying key (U - a value) in (A - a permanent linked list) with the comparator (P - a phrase (value of kind L, L) -> nothing [@] [truth state]) or (V - a K) if there are no matches:
 	let the permanent linked list vertex be the first match for the key K and the underlying key U in A with the comparator P;
 	if the permanent linked list vertex is null:
 		decide on V;
@@ -1036,14 +1056,14 @@ Section "Map Operations by Key/Value Pairs"
 To decide whether (A - a linked list) contains the key (K - a value) and the value (V - a value):
 	decide on whether or not the first match for the key K and the value V in A is not null.
 
-To remove the first occurrence of the key (K - a value) and the value (V - a value) from (A - a linked list): (- {A}=(llo_getField((+ removing a vertex from a linked list +),1))({A},llll_atOrAfterWithValue({K},{V},{A})); -).
+To remove the first occurrence of the key (K - a value) and the value (V - a value) from (A - a linked list): (- {A} = (llo_getField((+ removing a vertex from a linked list +), 1))({A}, llll_atOrAfterWithValue({K}, {V}, {A})); -).
 
 To decide whether (A - a permanent linked list) contains the key (K - a value) and the value (V - a value):
 	decide on whether or not the first match for the key K and the value V in A is not null.
 
 Section "Map Operations by Underlying Key/Value Pairs"
 
-To decide whether (A - a linked list) contains the key (K - a value) and the underlying key (U - a value) and the value (V - a value) with the comparator (P - a phrase (value of kind K,K) -> nothing):
+To decide whether (A - a linked list) contains the key (K - a value) and the underlying key (U - a value) and the value (V - a value) with the comparator (P - a phrase (value of kind K, K) -> nothing [@] [truth state]):
 	decide on whether or not the first match for the key K and the underlying key U and the value V in A with the comparator P is not null.
 
 To decide whether (A - a linked list) contains the synthetic textual key (K - some text) and the value (V - a value):
@@ -1052,16 +1072,16 @@ To decide whether (A - a linked list) contains the synthetic textual key (K - so
 To decide whether (A - a linked list) contains the textual key (K - some text) and the value (V - a value):
 	decide on whether or not the first match for the textual key K and the value V in A is not null.
 
-To remove the first occurrence of the key (K - a value) and the underlying key (U - a value) and the value (V - a value) from (A - a linked list) with the comparator (P - a phrase (value of kind K,K) -> nothing): (- {A}=(llo_getField((+ removing a vertex from a linked list +),1))({A},llll_atOrAfterWithBoth({K},{U},{V},{A},{P})); -).
+To remove the first occurrence of the key (K - a value) and the underlying key (U - a value) and the value (V - a value) from (A - a linked list) with the comparator (P - a phrase (value of kind K, K) -> nothing [@] [truth state]): (- {A} = (llo_getField((+ removing a vertex from a linked list +), 1))({A}, llll_atOrAfterWithBoth({K}, {U}, {V}, {A}, {P})); -).
 
-To remove the first occurrence of the synthetic textual key (K - some text) and the value (V - a value) from (A - a linked list): (- {A}=(llo_getField((+ removing a vertex from a linked list +),1))({A},llll_atOrAfterWithBoth(llo_stringHash32({K}),{K},{V},{A},(+ testing equality between synthetic text and text +))); -).
+To remove the first occurrence of the synthetic textual key (K - some text) and the value (V - a value) from (A - a linked list): (- {A} = (llo_getField((+ removing a vertex from a linked list +), 1))({A}, llll_atOrAfterWithBoth(llo_stringHash32({K}), {K}, {V}, {A}, (+ testing equality between synthetic text and text +))); -).
 
 To remove the first occurrence of the textual key (K - some text) and the value (V - a value) from (A - a linked list):
 	let the key be a new synthetic text copied from K;
 	remove the first occurrence of the synthetic textual key key and the value V from A;
 	delete the synthetic text key.
 
-To decide whether (A - a permanent linked list) contains the key (K - a value) and the underlying key (U - a value) and the value (V - a value) with the comparator (P - a phrase (value of kind K,K) -> nothing):
+To decide whether (A - a permanent linked list) contains the key (K - a value) and the underlying key (U - a value) and the value (V - a value) with the comparator (P - a phrase (value of kind K, K) -> nothing [@] [truth state]):
 	decide on whether or not the first match for the key K and the underlying key U and the value V in A with the comparator P is not null.
 
 To decide whether (A - a permanent linked list) contains the synthetic textual key (K - some text) and the value (V - a value):
@@ -1077,466 +1097,466 @@ Section "Iterator Variables used by the Iteration Interface" - unindexed
 Include (-
 	Global llll_iterator;
 	Global llll_hash;
-	Global llll_syntheticCopy;
+	Global llll_copy;
 -) after "Definitions.i6t".
 
 Section "Unfiltered Repetition"
 
 To repeat with (I - a nonexisting linked list vertex variable) running through (A - a linked list) begin -- end: (-
-	for({I}={A}:{I}:{I}=llo_getField({I},3))
+	for ({I} = {A}: {I}: {I} = llo_getField({I}, 3))
 -).
 
 To repeat with (I - a nonexisting K variable) running through the (D - a description of values of kind K) keys of (A - a linked list) begin -- end: (-
-	llll_iterator={A};
+	llll_iterator = {A};
 	jump LLO_LOOP_{-counter:LLO_LOOP}_ENTRY;
-	for(::)
-		if(llo_advance){
+	for (::)
+		if (llo_advance) {
 			@pull llll_iterator;
-			if(llo_broken){
+			if (llo_broken) {
 				break;
 			}
 			@aload llll_iterator 3 llll_iterator;
 		.LLO_LOOP_{-advance-counter:LLO_LOOP}_ENTRY;
-			if(~~llll_iterator){
-				llo_broken=true;
+			if (~~llll_iterator) {
+				llo_broken = true;
 				break;
 			}
 			@push llll_iterator;
-			llo_advance=false;
+			llo_advance = false;
 			@aload llll_iterator 0 {I};
-		}else for(llo_oneTime=true,llo_broken=true,llo_advance=true:llo_oneTime&&((llo_oneTime=false),true)||(llo_broken=false):)
+		} else for (llo_oneTime = true, llo_broken = true, llo_advance = true: llo_oneTime && ((llo_oneTime = false), true) || (llo_broken = false):)
 -).
 
 To repeat with (I - a nonexisting K variable) running through the underlying (D - a description of values of kind K) keys of (A - a linked list) begin -- end: (-
-	llll_iterator={A};
+	llll_iterator = {A};
 	jump LLO_LOOP_{-counter:LLO_LOOP}_ENTRY;
-	for(::)
-		if(llo_advance){
+	for (::)
+		if (llo_advance) {
 			@pull llll_iterator;
-			if(llo_broken){
+			if (llo_broken) {
 				break;
 			}
 			@aload llll_iterator 3 llll_iterator;
 		.LLO_LOOP_{-advance-counter:LLO_LOOP}_ENTRY;
-			if(~~llll_iterator){
-				llo_broken=true;
+			if (~~llll_iterator) {
+				llo_broken = true;
 				break;
 			}
 			@push llll_iterator;
-			llo_advance=false;
+			llo_advance = false;
 			@aload llll_iterator 2 {I};
-		}else for(llo_oneTime=true,llo_broken=true,llo_advance=true:llo_oneTime&&((llo_oneTime=false),true)||(llo_broken=false):)
+		} else for (llo_oneTime = true, llo_broken = true, llo_advance = true: llo_oneTime && ((llo_oneTime = false), true) || (llo_broken = false):)
 -).
 
 To repeat with (I - a nonexisting K variable) running through the (D - a description of values of kind K) values of (A - a linked list) begin -- end: (-
-	llll_iterator={A};
+	llll_iterator = {A};
 	jump LLO_LOOP_{-counter:LLO_LOOP}_ENTRY;
-	for(::)
-		if(llo_advance){
+	for (::)
+		if (llo_advance) {
 			@pull llll_iterator;
-			if(llo_broken){
+			if (llo_broken) {
 				break;
 			}
 			@aload llll_iterator 3 llll_iterator;
 		.LLO_LOOP_{-advance-counter:LLO_LOOP}_ENTRY;
-			if(~~llll_iterator){
-				llo_broken=true;
+			if (~~llll_iterator) {
+				llo_broken = true;
 				break;
 			}
 			@push llll_iterator;
-			llo_advance=false;
+			llo_advance = false;
 			@aload llll_iterator 1 {I};
-		}else for(llo_oneTime=true,llo_broken=true,llo_advance=true:llo_oneTime&&((llo_oneTime=false),true)||(llo_broken=false):)
+		} else for (llo_oneTime = true, llo_broken = true, llo_advance = true: llo_oneTime && ((llo_oneTime = false), true) || (llo_broken = false):)
 -).
 
 To repeat with (I - a nonexisting permanent linked list vertex variable) running through (A - a permanent linked list) begin -- end: (-
-	for({I}={A}:{I}:{I}=llo_getField({I},3))
+	for ({I} = {A}: {I}: {I} = llo_getField({I}, 3))
 -).
 
 To repeat with (I - a nonexisting K variable) running through the (D - a description of values of kind K) keys of (A - a permanent linked list) begin -- end: (-
-	llll_iterator={A};
+	llll_iterator = {A};
 	jump LLO_LOOP_{-counter:LLO_LOOP}_ENTRY;
-	for(::)
-		if(llo_advance){
+	for (::)
+		if (llo_advance) {
 			@pull llll_iterator;
-			if(llo_broken){
+			if (llo_broken) {
 				break;
 			}
 			@aload llll_iterator 3 llll_iterator;
 		.LLO_LOOP_{-advance-counter:LLO_LOOP}_ENTRY;
-			if(~~llll_iterator){
-				llo_broken=true;
+			if (~~llll_iterator) {
+				llo_broken = true;
 				break;
 			}
 			@push llll_iterator;
-			llo_advance=false;
+			llo_advance = false;
 			@aload llll_iterator 0 {I};
-		}else for(llo_oneTime=true,llo_broken=true,llo_advance=true:llo_oneTime&&((llo_oneTime=false),true)||(llo_broken=false):)
+		} else for (llo_oneTime = true, llo_broken = true, llo_advance = true: llo_oneTime && ((llo_oneTime = false), true) || (llo_broken = false):)
 -).
 
 To repeat with (I - a nonexisting K variable) running through the underlying (D - a description of values of kind K) keys of (A - a permanent linked list) begin -- end: (-
-	llll_iterator={A};
+	llll_iterator = {A};
 	jump LLO_LOOP_{-counter:LLO_LOOP}_ENTRY;
-	for(::)
-		if(llo_advance){
+	for (::)
+		if (llo_advance) {
 			@pull llll_iterator;
-			if(llo_broken){
+			if (llo_broken) {
 				break;
 			}
 			@aload llll_iterator 3 llll_iterator;
 		.LLO_LOOP_{-advance-counter:LLO_LOOP}_ENTRY;
-			if(~~llll_iterator){
-				llo_broken=true;
+			if (~~llll_iterator) {
+				llo_broken = true;
 				break;
 			}
 			@push llll_iterator;
-			llo_advance=false;
+			llo_advance = false;
 			@aload llll_iterator 2 {I};
-		}else for(llo_oneTime=true,llo_broken=true,llo_advance=true:llo_oneTime&&((llo_oneTime=false),true)||(llo_broken=false):)
+		} else for (llo_oneTime = true, llo_broken = true, llo_advance = true: llo_oneTime && ((llo_oneTime = false), true) || (llo_broken = false):)
 -).
 
 To repeat with (I - a nonexisting K variable) running through the (D - a description of values of kind K) values of (A - a permanent linked list) begin -- end: (-
-	llll_iterator={A};
+	llll_iterator = {A};
 	jump LLO_LOOP_{-counter:LLO_LOOP}_ENTRY;
-	for(::)
-		if(llo_advance){
+	for (::)
+		if (llo_advance) {
 			@pull llll_iterator;
-			if(llo_broken){
+			if (llo_broken) {
 				break;
 			}
 			@aload llll_iterator 3 llll_iterator;
 		.LLO_LOOP_{-advance-counter:LLO_LOOP}_ENTRY;
-			if(~~llll_iterator){
-				llo_broken=true;
+			if (~~llll_iterator) {
+				llo_broken = true;
 				break;
 			}
 			@push llll_iterator;
-			llo_advance=false;
+			llo_advance = false;
 			@aload llll_iterator 1 {I};
-		}else for(llo_oneTime=true,llo_broken=true,llo_advance=true:llo_oneTime&&((llo_oneTime=false),true)||(llo_broken=false):)
+		} else for (llo_oneTime = true, llo_broken = true, llo_advance = true: llo_oneTime && ((llo_oneTime = false), true) || (llo_broken = false):)
 -).
 
 Section "Repetition Filtered by Key"
 
 To repeat with (I - a nonexisting linked list vertex variable) running through occurrences of the key (K - a value) in (A - a linked list) begin -- end: (-
-	for({I}=llll_atOrAfter({K},{A}):{I}:{I}=llll_atOrAfter({K},llo_getField({I},3)))
+	for ({I} = llll_atOrAfter({K}, {A}): {I}: {I} = llll_atOrAfter({K}, llo_getField({I}, 3)))
 -).
 
 To repeat with (I - a nonexisting K variable) running through the (D - a description of values of kind K) values matching the key (K - a value) in (A - a linked list) begin -- end: (-
-	llll_iterator=llll_atOrAfter({K},{A});
+	llll_iterator = llll_atOrAfter({K}, {A});
 	jump LLO_LOOP_{-counter:LLO_LOOP}_ENTRY;
-	for(::)
-		if(llo_advance){
+	for (::)
+		if (llo_advance) {
 			@pull llll_iterator;
-			if(llo_broken){
+			if (llo_broken) {
 				break;
 			}
 			@aload llll_iterator 3 llll_iterator;
-			llll_iterator=llll_atOrAfter({K},llll_iterator);
+			llll_iterator = llll_atOrAfter({K}, llll_iterator);
 		.LLO_LOOP_{-advance-counter:LLO_LOOP}_ENTRY;
-			if(~~llll_iterator){
-				llo_broken=true;
+			if (~~llll_iterator) {
+				llo_broken = true;
 				break;
 			}
 			@push llll_iterator;
-			llo_advance=false;
+			llo_advance = false;
 			@aload llll_iterator 1 {I};
-		}else for(llo_oneTime=true,llo_broken=true,llo_advance=true:llo_oneTime&&((llo_oneTime=false),true)||(llo_broken=false):)
+		} else for (llo_oneTime = true, llo_broken = true, llo_advance = true: llo_oneTime && ((llo_oneTime = false), true) || (llo_broken = false):)
 -).
 
 To repeat with (I - a nonexisting permanent linked list vertex variable) running through occurrences of the key (K - a value) in (A - a permanent linked list) begin -- end: (-
-	for({I}=llll_atOrAfter({K},{A}):{I}:{I}=llll_atOrAfter({K},llo_getField({I},3)))
+	for ({I} = llll_atOrAfter({K}, {A}): {I}: {I} = llll_atOrAfter({K}, llo_getField({I}, 3)))
 -).
 
 To repeat with (I - a nonexisting K variable) running through the (D - a description of values of kind K) values matching the key (K - a value) in (A - a permanent linked list) begin -- end: (-
-	llll_iterator=llll_atOrAfter({K},{A});
+	llll_iterator = llll_atOrAfter({K}, {A});
 	jump LLO_LOOP_{-counter:LLO_LOOP}_ENTRY;
-	for(::)
-		if(llo_advance){
+	for (::)
+		if (llo_advance) {
 			@pull llll_iterator;
-			if(llo_broken){
+			if (llo_broken) {
 				break;
 			}
 			@aload llll_iterator 3 llll_iterator;
-			llll_iterator=llll_atOrAfter({K},llll_iterator);
+			llll_iterator = llll_atOrAfter({K}, llll_iterator);
 		.LLO_LOOP_{-advance-counter:LLO_LOOP}_ENTRY;
-			if(~~llll_iterator){
-				llo_broken=true;
+			if (~~llll_iterator) {
+				llo_broken = true;
 				break;
 			}
 			@push llll_iterator;
-			llo_advance=false;
+			llo_advance = false;
 			@aload llll_iterator 1 {I};
-		}else for(llo_oneTime=true,llo_broken=true,llo_advance=true:llo_oneTime&&((llo_oneTime=false),true)||(llo_broken=false):)
+		} else for (llo_oneTime = true, llo_broken = true, llo_advance = true: llo_oneTime && ((llo_oneTime = false), true) || (llo_broken = false):)
 -).
 
 Section "Repetition Filtered by Underlying Key"
 
-To repeat with (I - a nonexisting linked list vertex variable) running through occurrences of the key (K - a value) and the underlying key (U - a value) in (A - a linked list) with the comparator (P - a phrase (value of kind K,K) -> nothing) begin -- end: (-
-	for({I}=llll_atOrAfterWithUnderlying({K},{U},{A},{P}):{I}:{I}=llll_atOrAfterWithUnderlying({K},{U},llo_getField({I},3),{P}))
+To repeat with (I - a nonexisting linked list vertex variable) running through occurrences of the key (K - a value) and the underlying key (U - a value) in (A - a linked list) with the comparator (P - a phrase (value of kind K, K) -> nothing [@] [truth state]) begin -- end: (-
+	for ({I} = llll_atOrAfterWithUnderlying({K}, {U}, {A}, {P}): {I}: {I} = llll_atOrAfterWithUnderlying({K}, {U}, llo_getField({I}, 3), {P}))
 -).
 
 To repeat with (I - a nonexisting linked list vertex variable) running through occurrences of the synthetic textual key (K - some text) in (A - a linked list) begin -- end: (-
-	llll_hash=llo_stringHash32({K});
-	{I}=llll_atOrAfterSynthetic(llll_hash,{K},{A});
+	llll_hash = llo_stringHash32({K});
+	{I} = llll_atOrAfterSynthetic(llll_hash, {K}, {A});
 	jump LLO_LOOP_{-counter:LLO_LOOP}_ENTRY;
-	for(::)
-		if(llo_advance){
+	for (::)
+		if (llo_advance) {
 			@pull llll_hash;
-			if(llo_broken){
+			if (llo_broken) {
 				break;
 			}
 			@aload {I} 3 {I};
-			{I}=llll_atOrAfterSynthetic(llll_hash,{K},{I});
+			{I} = llll_atOrAfterSynthetic(llll_hash, {K}, {I});
 		.LLO_LOOP_{-advance-counter:LLO_LOOP}_ENTRY;
-			if(~~{I}){
-				llo_broken=true;
+			if (~~{I}) {
+				llo_broken = true;
 				break;
 			}
 			@push llll_hash;
-			llo_advance=false;
-		}else for(llo_oneTime=true,llo_broken=true,llo_advance=true:llo_oneTime&&((llo_oneTime=false),true)||(llo_broken=false):)
+			llo_advance = false;
+		} else for (llo_oneTime = true, llo_broken = true, llo_advance = true: llo_oneTime && ((llo_oneTime = false), true) || (llo_broken = false):)
 -).
 
 To repeat with (I - a nonexisting linked list vertex variable) running through occurrences of the textual key (K - some text) in (A - a linked list) begin -- end: (-
-	llll_syntheticCopy=(llo_getField((+ copying text to synthetic text +),1))({K});
-	llll_hash=llo_stringHash32(llll_syntheticCopy);
-	{I}=llll_atOrAfterSynthetic(llll_hash,llll_syntheticCopy,{A});
+	llll_copy = (llo_getField((+ copying text to synthetic text +), 1))({K});
+	llll_hash = llo_stringHash32(llll_copy);
+	{I} = llll_atOrAfterSynthetic(llll_hash, llll_copy, {A});
 	jump LLO_LOOP_{-counter:LLO_LOOP}_ENTRY;
-	for(::)
-		if(llo_advance){
+	for (::)
+		if (llo_advance) {
 			@pull llll_hash;
-			@pull llll_syntheticCopy;
-			if(llo_broken){
-				(llo_getField((+ deleting synthetic text +),1))(llll_syntheticCopy);
+			@pull llll_copy;
+			if (llo_broken) {
+				(llo_getField((+ deleting synthetic text +), 1))(llll_copy);
 				break;
 			}
 			@aload {I} 3 {I};
-			{I}=llll_atOrAfterSynthetic(llll_hash,llll_syntheticCopy,{I});
+			{I} = llll_atOrAfterSynthetic(llll_hash, llll_copy, {I});
 		.LLO_LOOP_{-advance-counter:LLO_LOOP}_ENTRY;
-			if(~~{I}){
-				llo_broken=true;
-				(llo_getField((+ deleting synthetic text +),1))(llll_syntheticCopy);
+			if (~~{I}) {
+				llo_broken = true;
+				(llo_getField((+ deleting synthetic text +), 1))(llll_copy);
 				break;
 			}
-			@push llll_syntheticCopy;
+			@push llll_copy;
 			@push llll_hash;
-			llo_advance=false;
-		}else for(llo_oneTime=true,llo_broken=true,llo_advance=true:llo_oneTime&&((llo_oneTime=false),true)||(llo_broken=false):)
+			llo_advance = false;
+		} else for (llo_oneTime = true, llo_broken = true, llo_advance = true: llo_oneTime && ((llo_oneTime = false), true) || (llo_broken = false):)
 -).
 
-To repeat with (I - a nonexisting K variable) running through the (D - a description of values of kind K) values matching the key (K - a value) and the underlying key (U - a value) in (A - a linked list) with the comparator (P - a phrase (value of kind L,L) -> nothing) begin -- end: (-
-	llll_iterator=llll_atOrAfterWithUnderlying({K},{U},{A},{P});
+To repeat with (I - a nonexisting K variable) running through the (D - a description of values of kind K) values matching the key (K - a value) and the underlying key (U - a value) in (A - a linked list) with the comparator (P - a phrase (value of kind L, L) -> nothing [@] [truth state]) begin -- end: (-
+	llll_iterator = llll_atOrAfterWithUnderlying({K}, {U}, {A}, {P});
 	jump LLO_LOOP_{-counter:LLO_LOOP}_ENTRY;
-	for(::)
-		if(llo_advance){
+	for (::)
+		if (llo_advance) {
 			@pull llll_iterator;
-			if(llo_broken){
+			if (llo_broken) {
 				break;
 			}
 			@aload llll_iterator 3 llll_iterator;
-			llll_iterator=llll_atOrAfterWithUnderlying({K},{U},llll_iterator,{P});
+			llll_iterator = llll_atOrAfterWithUnderlying({K}, {U}, llll_iterator, {P});
 		.LLO_LOOP_{-advance-counter:LLO_LOOP}_ENTRY;
-			if(~~llll_iterator){
-				llo_broken=true;
+			if (~~llll_iterator) {
+				llo_broken = true;
 				break;
 			}
 			@push llll_iterator;
-			llo_advance=false;
+			llo_advance = false;
 			@aload llll_iterator 1 {I};
-		}else for(llo_oneTime=true,llo_broken=true,llo_advance=true:llo_oneTime&&((llo_oneTime=false),true)||(llo_broken=false):)
+		} else for (llo_oneTime = true, llo_broken = true, llo_advance = true: llo_oneTime && ((llo_oneTime = false), true) || (llo_broken = false):)
 -).
 
 To repeat with (I - a nonexisting K variable) running through the (D - a description of values of kind K) values matching the synthetic textual key (K - some text) in (A - a linked list) begin -- end: (-
-	llll_hash=llo_stringHash32({K});
-	llll_iterator=llll_atOrAfterSynthetic(llll_hash,{K},{A});
+	llll_hash = llo_stringHash32({K});
+	llll_iterator = llll_atOrAfterSynthetic(llll_hash, {K}, {A});
 	jump LLO_LOOP_{-counter:LLO_LOOP}_ENTRY;
-	for(::)
-		if(llo_advance){
+	for (::)
+		if (llo_advance) {
 			@pull llll_iterator;
 			@pull llll_hash;
-			if(llo_broken){
+			if (llo_broken) {
 				break;
 			}
 			@aload llll_iterator 3 llll_iterator;
-			llll_iterator=llll_atOrAfterSynthetic(llll_hash,{K},llll_iterator);
+			llll_iterator = llll_atOrAfterSynthetic(llll_hash, {K}, llll_iterator);
 		.LLO_LOOP_{-advance-counter:LLO_LOOP}_ENTRY;
-			if(~~llll_iterator){
-				llo_broken=true;
+			if (~~llll_iterator) {
+				llo_broken = true;
 				break;
 			}
 			@push llll_hash;
 			@push llll_iterator;
-			llo_advance=false;
+			llo_advance = false;
 			@aload llll_iterator 1 {I};
-		}else for(llo_oneTime=true,llo_broken=true,llo_advance=true:llo_oneTime&&((llo_oneTime=false),true)||(llo_broken=false):)
+		} else for (llo_oneTime = true, llo_broken = true, llo_advance = true: llo_oneTime && ((llo_oneTime = false), true) || (llo_broken = false):)
 -).
 
 To repeat with (I - a nonexisting K variable) running through the (D - a description of values of kind K) values matching the textual key (K - some text) in (A - a linked list) begin -- end: (-
-	llll_syntheticCopy=(llo_getField((+ copying text to synthetic text +),1))({K});
-	llll_hash=llo_stringHash32(llll_syntheticCopy);
-	llll_iterator=llll_atOrAfterSynthetic(llll_hash,llll_syntheticCopy,{A});
+	llll_copy = (llo_getField((+ copying text to synthetic text +), 1))({K});
+	llll_hash = llo_stringHash32(llll_copy);
+	llll_iterator = llll_atOrAfterSynthetic(llll_hash, llll_copy, {A});
 	jump LLO_LOOP_{-counter:LLO_LOOP}_ENTRY;
-	for(::)
-		if(llo_advance){
+	for (::)
+		if (llo_advance) {
 			@pull llll_iterator;
 			@pull llll_hash;
-			@pull llll_syntheticCopy;
-			if(llo_broken){
-				(llo_getField((+ deleting synthetic text +),1))(llll_syntheticCopy);
+			@pull llll_copy;
+			if (llo_broken) {
+				(llo_getField((+ deleting synthetic text +), 1))(llll_copy);
 				break;
 			}
 			@aload llll_iterator 3 llll_iterator;
-			llll_iterator=llll_atOrAfterSynthetic(llll_hash,llll_syntheticCopy,llll_iterator);
+			llll_iterator = llll_atOrAfterSynthetic(llll_hash, llll_copy, llll_iterator);
 		.LLO_LOOP_{-advance-counter:LLO_LOOP}_ENTRY;
-			if(~~llll_iterator){
-				llo_broken=true;
-				(llo_getField((+ deleting synthetic text +),1))(llll_syntheticCopy);
+			if (~~llll_iterator) {
+				llo_broken = true;
+				(llo_getField((+ deleting synthetic text +), 1))(llll_copy);
 				break;
 			}
-			@push llll_syntheticCopy;
+			@push llll_copy;
 			@push llll_hash;
 			@push llll_iterator;
-			llo_advance=false;
+			llo_advance = false;
 			@aload llll_iterator 1 {I};
-		}else for(llo_oneTime=true,llo_broken=true,llo_advance=true:llo_oneTime&&((llo_oneTime=false),true)||(llo_broken=false):)
+		} else for (llo_oneTime = true, llo_broken = true, llo_advance = true: llo_oneTime && ((llo_oneTime = false), true) || (llo_broken = false):)
 -).
 
-To repeat with (I - a nonexisting permanent linked list vertex variable) running through occurrences of the key (K - a value) and the underlying key (U - a value) in (A - a permanent linked list) with the comparator (P - a phrase (value of kind K,K) -> nothing) begin -- end: (-
-	for({I}=llll_atOrAfterWithUnderlying({K},{U},{A},{P}):{I}:{I}=llll_atOrAfterWithUnderlying({K},{U},llo_getField({I},3),{P}))
+To repeat with (I - a nonexisting permanent linked list vertex variable) running through occurrences of the key (K - a value) and the underlying key (U - a value) in (A - a permanent linked list) with the comparator (P - a phrase (value of kind K, K) -> nothing [@] [truth state]) begin -- end: (-
+	for ({I} = llll_atOrAfterWithUnderlying({K}, {U}, {A}, {P}): {I}: {I} = llll_atOrAfterWithUnderlying({K}, {U}, llo_getField({I}, 3), {P}))
 -).
 
 To repeat with (I - a nonexisting permanent linked list vertex variable) running through occurrences of the synthetic textual key (K - some text) in (A - a permanent linked list) begin -- end: (-
-	llll_hash=llo_stringHash32({K});
-	{I}=llll_atOrAfterSynthetic(llll_hash,{K},{A});
+	llll_hash = llo_stringHash32({K});
+	{I} = llll_atOrAfterSynthetic(llll_hash, {K}, {A});
 	jump LLO_LOOP_{-counter:LLO_LOOP}_ENTRY;
-	for(::)
-		if(llo_advance){
+	for (::)
+		if (llo_advance) {
 			@pull llll_hash;
-			if(llo_broken){
+			if (llo_broken) {
 				break;
 			}
 			@aload {I} 3 {I};
-			{I}=llll_atOrAfterSynthetic(llll_hash,{K},{I});
+			{I} = llll_atOrAfterSynthetic(llll_hash, {K}, {I});
 		.LLO_LOOP_{-advance-counter:LLO_LOOP}_ENTRY;
-			if(~~{I}){
-				llo_broken=true;
+			if (~~{I}) {
+				llo_broken = true;
 				break;
 			}
 			@push llll_hash;
-			llo_advance=false;
-		}else for(llo_oneTime=true,llo_broken=true,llo_advance=true:llo_oneTime&&((llo_oneTime=false),true)||(llo_broken=false):)
+			llo_advance = false;
+		} else for (llo_oneTime = true, llo_broken = true, llo_advance = true: llo_oneTime && ((llo_oneTime = false), true) || (llo_broken = false):)
 -).
 
 To repeat with (I - a nonexisting permanent linked list vertex variable) running through occurrences of the textual key (K - some text) in (A - a permanent linked list) begin -- end: (-
-	llll_syntheticCopy=(llo_getField((+ copying text to synthetic text +),1))({K});
-	llll_hash=llo_stringHash32(llll_syntheticCopy);
-	{I}=llll_atOrAfterSynthetic(llll_hash,llll_syntheticCopy,{A});
+	llll_copy = (llo_getField((+ copying text to synthetic text +), 1))({K});
+	llll_hash = llo_stringHash32(llll_copy);
+	{I} = llll_atOrAfterSynthetic(llll_hash, llll_copy, {A});
 	jump LLO_LOOP_{-counter:LLO_LOOP}_ENTRY;
-	for(::)
-		if(llo_advance){
+	for (::)
+		if (llo_advance) {
 			@pull llll_hash;
-			@pull llll_syntheticCopy;
-			if(llo_broken){
-				(llo_getField((+ deleting synthetic text +),1))(llll_syntheticCopy);
+			@pull llll_copy;
+			if (llo_broken) {
+				(llo_getField((+ deleting synthetic text +), 1))(llll_copy);
 				break;
 			}
 			@aload {I} 3 {I};
-			{I}=llll_atOrAfterSynthetic(llll_hash,llll_syntheticCopy,{I});
+			{I} = llll_atOrAfterSynthetic(llll_hash, llll_copy, {I});
 		.LLO_LOOP_{-advance-counter:LLO_LOOP}_ENTRY;
-			if(~~{I}){
-				llo_broken=true;
-				(llo_getField((+ deleting synthetic text +),1))(llll_syntheticCopy);
+			if (~~{I}) {
+				llo_broken = true;
+				(llo_getField((+ deleting synthetic text +), 1))(llll_copy);
 				break;
 			}
-			@push llll_syntheticCopy;
+			@push llll_copy;
 			@push llll_hash;
-			llo_advance=false;
-		}else for(llo_oneTime=true,llo_broken=true,llo_advance=true:llo_oneTime&&((llo_oneTime=false),true)||(llo_broken=false):)
+			llo_advance = false;
+		} else for (llo_oneTime = true, llo_broken = true, llo_advance = true: llo_oneTime && ((llo_oneTime = false), true) || (llo_broken = false):)
 -).
 
-To repeat with (I - a nonexisting K variable) running through the (D - a description of values of kind K) values matching the key (K - a value) and the underlying key (U - a value) in (A - a permanent linked list) with the comparator (P - a phrase (value of kind L,L) -> nothing) begin -- end: (-
-	llll_iterator=llll_atOrAfterWithUnderlying({K},{U},{A},{P});
+To repeat with (I - a nonexisting K variable) running through the (D - a description of values of kind K) values matching the key (K - a value) and the underlying key (U - a value) in (A - a permanent linked list) with the comparator (P - a phrase (value of kind L, L) -> nothing [@] [truth state]) begin -- end: (-
+	llll_iterator = llll_atOrAfterWithUnderlying({K}, {U}, {A}, {P});
 	jump LLO_LOOP_{-counter:LLO_LOOP}_ENTRY;
-	for(::)
-		if(llo_advance){
+	for (::)
+		if (llo_advance) {
 			@pull llll_iterator;
-			if(llo_broken){
+			if (llo_broken) {
 				break;
 			}
 			@aload llll_iterator 3 llll_iterator;
-			llll_iterator=llll_atOrAfterWithUnderlying({K},{U},llll_iterator,{P});
+			llll_iterator = llll_atOrAfterWithUnderlying({K}, {U}, llll_iterator, {P});
 		.LLO_LOOP_{-advance-counter:LLO_LOOP}_ENTRY;
-			if(~~llll_iterator){
-				llo_broken=true;
+			if (~~llll_iterator) {
+				llo_broken = true;
 				break;
 			}
 			@push llll_iterator;
-			llo_advance=false;
+			llo_advance = false;
 			@aload llll_iterator 1 {I};
-		}else for(llo_oneTime=true,llo_broken=true,llo_advance=true:llo_oneTime&&((llo_oneTime=false),true)||(llo_broken=false):)
+		} else for (llo_oneTime = true, llo_broken = true, llo_advance = true: llo_oneTime && ((llo_oneTime = false), true) || (llo_broken = false):)
 -).
 
 To repeat with (I - a nonexisting K variable) running through the (D - a description of values of kind K) values matching the synthetic textual key (K - some text) in (A - a permanent linked list) begin -- end: (-
-	llll_hash=llo_stringHash32({K});
-	llll_iterator=llll_atOrAfterSynthetic(llll_hash,{K},{A});
+	llll_hash = llo_stringHash32({K});
+	llll_iterator = llll_atOrAfterSynthetic(llll_hash, {K}, {A});
 	jump LLO_LOOP_{-counter:LLO_LOOP}_ENTRY;
-	for(::)
-		if(llo_advance){
+	for (::)
+		if (llo_advance) {
 			@pull llll_iterator;
 			@pull llll_hash;
-			if(llo_broken){
+			if (llo_broken) {
 				break;
 			}
 			@aload llll_iterator 3 llll_iterator;
-			llll_iterator=llll_atOrAfterSynthetic(llll_hash,{K},llll_iterator);
+			llll_iterator = llll_atOrAfterSynthetic(llll_hash, {K}, llll_iterator);
 		.LLO_LOOP_{-advance-counter:LLO_LOOP}_ENTRY;
-			if(~~llll_iterator){
-				llo_broken=true;
+			if (~~llll_iterator) {
+				llo_broken = true;
 				break;
 			}
 			@push llll_hash;
 			@push llll_iterator;
-			llo_advance=false;
+			llo_advance = false;
 			@aload llll_iterator 1 {I};
-		}else for(llo_oneTime=true,llo_broken=true,llo_advance=true:llo_oneTime&&((llo_oneTime=false),true)||(llo_broken=false):)
+		} else for (llo_oneTime = true, llo_broken = true, llo_advance = true: llo_oneTime && ((llo_oneTime = false), true) || (llo_broken = false):)
 -).
 
 To repeat with (I - a nonexisting K variable) running through the (D - a description of values of kind K) values matching the textual key (K - some text) in (A - a permanent linked list) begin -- end: (-
-	llll_syntheticCopy=(llo_getField((+ copying text to synthetic text +),1))({K});
-	llll_hash=llo_stringHash32(llll_syntheticCopy);
-	llll_iterator=llll_atOrAfterSynthetic(llll_hash,llll_syntheticCopy,{A});
+	llll_copy = (llo_getField((+ copying text to synthetic text +), 1))({K});
+	llll_hash = llo_stringHash32(llll_copy);
+	llll_iterator = llll_atOrAfterSynthetic(llll_hash, llll_copy, {A});
 	jump LLO_LOOP_{-counter:LLO_LOOP}_ENTRY;
-	for(::)
-		if(llo_advance){
+	for (::)
+		if (llo_advance) {
 			@pull llll_iterator;
 			@pull llll_hash;
-			@pull llll_syntheticCopy;
-			if(llo_broken){
-				(llo_getField((+ deleting synthetic text +),1))(llll_syntheticCopy);
+			@pull llll_copy;
+			if (llo_broken) {
+				(llo_getField((+ deleting synthetic text +), 1))(llll_copy);
 				break;
 			}
 			@aload llll_iterator 3 llll_iterator;
-			llll_iterator=llll_atOrAfterSynthetic(llll_hash,llll_syntheticCopy,llll_iterator);
+			llll_iterator = llll_atOrAfterSynthetic(llll_hash, llll_copy, llll_iterator);
 		.LLO_LOOP_{-advance-counter:LLO_LOOP}_ENTRY;
-			if(~~llll_iterator){
-				llo_broken=true;
-				(llo_getField((+ deleting synthetic text +),1))(llll_syntheticCopy);
+			if (~~llll_iterator) {
+				llo_broken = true;
+				(llo_getField((+ deleting synthetic text +), 1))(llll_copy);
 				break;
 			}
-			@push llll_syntheticCopy;
+			@push llll_copy;
 			@push llll_hash;
 			@push llll_iterator;
-			llo_advance=false;
+			llo_advance = false;
 			@aload llll_iterator 1 {I};
-		}else for(llo_oneTime=true,llo_broken=true,llo_advance=true:llo_oneTime&&((llo_oneTime=false),true)||(llo_broken=false):)
+		} else for (llo_oneTime = true, llo_broken = true, llo_advance = true: llo_oneTime && ((llo_oneTime = false), true) || (llo_broken = false):)
 -).
 
 Chapter "Filter Interface"
 
 Section "Implementation the Filter Interface" - unindexed
 
-To decide what linked list is (A - a linked list) after filtering it with (F - a phrase linked list vertex -> nothing) (this is filtering a linked list):
+To decide what linked list is (A - a linked list) after filtering it with (F - a phrase linked list vertex -> nothing [@] [truth state]) (this is filtering a linked list):
 	let the first linked list vertex be A converted to a linked list vertex;
 	let the previous linked list vertex be a null linked list vertex;
 	let the linked list vertex be the first linked list vertex;
@@ -1555,7 +1575,7 @@ To decide what linked list is (A - a linked list) after filtering it with (F - a
 
 Section "Filtration"
 
-To filter (A - a linked list) by (F - a phrase linked list vertex -> nothing): (- {A}=(llo_getField((+ filtering a linked list +),1))({A},{F}); -).
+To filter (A - a linked list) by (F - a phrase linked list vertex -> nothing [@] [truth state]): (- {A} = (llo_getField((+ filtering a linked list +), 1))({A}, {F}); -).
 
 Low-Level Linked Lists ends here.
 
@@ -1569,8 +1589,8 @@ the possibility that the instrumentation will be called from within Inform's
 block value management system.  The block value management routines are not
 reentrant, so in such a case we cannot safely use Inform's lists; we must turn
 to another data structure.  Low-Level Linked Lists contains a replacement list
-implementation that, while less elegant, is a safe alternative even in these
-extreme scenarios.
+implementation that, while less cleanly encapsulated, is a safe alternative even
+in these extreme scenarios.
 
 Details are in the following chapters.
 
@@ -1591,6 +1611,7 @@ Section: Some words of caution
 Lest the warning above be taken lightly, we should mention several risks
 associated with low-level linked lists up front.
 
+[@]
 First, many of the phrases in Low-Level Linked Lists expect to operate on
 variables, either a global value that varies or a temporary named value, and not
 on the result of some computation.  For instance, we can write
@@ -1662,6 +1683,7 @@ an I6 macro), or simply
 Most of the time it is wisest to take the latter approach and not copy linked
 lists in the first place.
 
+[@]
 And finally, there is a bug in the Inform 6 compilers that ship with early
 Inform versions (at least the versions up through 6G60, and possibly others)
 such that the popping and dequeuing phrases are sometimes miscompiled when used
@@ -1746,6 +1768,8 @@ are obtained via the phrase
 
 	the tail of (L - a linked list)
 
+They never need to be deleted.
+
 All of the caveats in the previous section that applied to linked lists also
 apply to tails: most phrases expect to be given a variable, not a computed
 value, and changing one copy of a tail invalidates the others.  A further
@@ -1762,8 +1786,8 @@ is okay, because the intermediate change mentions the tail, but code like
 	push the key four onto the demonstration list;
 	enqueue the key four in the demonstration list through the demonstration tail;
 
-is invalid: the third line uses a tail that the second line has rendered
-useless.  We can crash the story with such code.
+is invalid: the third line uses a tail that expired on the second line.  We can
+crash the story with such code.
 
 The onus is also on us to keep tails matched with their lists.  Giving a phrase
 a mismatched tail will, in the best case, cause some memory to become forever
@@ -1812,7 +1836,7 @@ linked lists currently carry no information about their contents' kinds.)
 
 Keys are normally only useful for kinds where distinct values are guaranteed to
 be unequal.  There is no way to equate seven and four, for instance, so numbers
-can be used as keys.  Likewise with text because, at least in ordinary
+can be used as keys.  [@] Likewise with text because, at least in ordinary
 situations, a text like "foo" is unalterable and cannot be made into "bar".  But
 if we were to include the extension Low-Level Text, then we could alter the
 characters inside of synthetic text, and such text would not be suitable.
@@ -1841,7 +1865,7 @@ and
 	write the value (V - a value) to (X - a linked list vertex)
 
 It is also possible to ask a vertex for the vertex that follows it, provided
-that a vertex does in fact follow it:
+that a (possibly null) vertex does in fact follow it:
 
 	the link of (X - a linked list vertex)
 
@@ -1957,7 +1981,7 @@ queue operations.
 
 Section: The search and lookup interface
 
-The phrase
+The phrase [@]
 
 	the first match for the key (K - a value) and the underlying key (U - a value) and the value (V - a value) in (L - a linked list) with the comparator (C - a phrase (value, value) -> truth state)
 
@@ -1969,7 +1993,7 @@ argument and a vertex's underlying key as its second, decides on true, the
 underlying keys are considered sufficiently similar to constitute a match.
 
 Yet again, we may omit some of the data, in which case they will not be
-considered when deciding whether a vertex matches:
+considered when deciding whether a vertex matches: [@]
 
 	the first match for the key (K - a value) and the underlying key (U - a value) in (L - a linked list) with the comparator (C - a phrase (value, value) -> truth state)
 
@@ -2003,7 +2027,7 @@ can be replaced with
 
 	... after (X - a linked list vertex) ...
 
-as in
+as in [@]
 
 	the first match for the key (K - a value) and the underlying key (U - a value) and the value (V - a value) after (X - a linked list vertex) with the comparator (C - a phrase (value, value) -> truth state)
 
@@ -2011,7 +2035,7 @@ or with
 
 	... at or after (X - a linked list vertex) ...
 
-as in
+as in [@]
 
 	the first match for the key (K - a value) and the underlying key (U - a value) and the value (V - a value) at or after (X - a linked list vertex) with the comparator (C - a phrase (value, value) -> truth state)
 
@@ -2020,7 +2044,7 @@ section on loops, which explains how to loop through vertices matching given
 criteria.
 
 Sometimes we are not interested in the matching linked list vertex, but only its
-value.  The phrase
+value.  The phrase [@]
 
 	first (D - a kind) value matching the key (K - a value) and the underlying key (U - a value) in (L - a linked list) with the comparator (C - a phrase (value, value) -> truth state) or (V - a value) if there are no matches
 
@@ -2030,7 +2054,7 @@ key and comparator can be omitted.
 
 At other times we may not be interested in the vertex's contents at all, but
 only in whether a match exists.  The convenience phrases for such tests have
-this form:
+this form: [@]
 
 	if (L - a linked list) contains the key (K - a value) and the underlying key (U - a value) and the value (V - a value) with the comparator (C - phrase (value, value) -> truth state):
 		....
@@ -2043,7 +2067,7 @@ Or, for text specifically, the form is
 where the modifier "synthetic" can be added before "textual" if we know T to be
 synthetic.
 
-Lastly, we can remove matching vertices, using
+Lastly, we can remove matching vertices, using [@]
 
 	remove the first occurrence of the key (K - a value) and the underlying key (U - a value) and the value (V - a value) from (L - a linked list) with the comparator (C - a phrase (value, value) -> truth state)
 
@@ -2079,7 +2103,7 @@ of the data held by these vertices, we can use the variations
 		....
 
 An analogous family of phrases allows us to repeat over just the vertices
-matching some key or key/underlying key pair.  For instance,
+matching some key or key/underlying key pair.  For instance, [@]
 
 	repeat with (I - a name not used so far) running through occurrences of the key (K - a value) and the underlying key (U - a value) in (L - a linked list) with the comparator (C - phrase (value, value) -> truth state):
 		....
@@ -2089,7 +2113,7 @@ or
 	repeat with (I - a name not used so far) running through occurrences of the textual key (T - some text) in (L - a linked list):
 		....
 
-And when we are only interested in the corresponding values, we use:
+And when we are only interested in the corresponding values, we use: [@]
 
 	repeat with (I - a name not used so far) running through the (D - a kind) values matching the key (K - a value) and the underlying key (U - a value) in (L - a linked list) with the comparator (C - phrase (value, value) -> truth state):
 		....
@@ -2118,19 +2142,18 @@ counts vertices in a permanent linked list.
 
 Section: Filtration
 
-The phrase
+The phrase [@]
 
 	filter (L - a linked list) by (F - a phrase linked list vertex -> truth state)
 
-can be used to alter a linked list while looping over it.  Each vertex of A is
-given to F, but only those vertices for which F decides on true are retained.
-The others are deleted.
+can be used to conditionally destroy vertices in a linked list.  Each vertex of
+A is given to F, but only those vertices for which F decides on true are
+retained.  The others are deleted.
 
 Chapter: Requirements, Limitations, and Bugs
 
-This version was tested with Inform 6G60.  It will probably function on newer
-versions, and it may function under slightly older versions, though there is no
-guarantee.
+This version was tested with Inform 6G60.  It may not function under other
+versions.
 
 Section: Regarding bugs
 
@@ -2146,31 +2169,53 @@ time.
 
 Chapter: Acknowledgements
 
-Low-Level Linked Lists was prepared as part of a project on Glulx runtime
-instrumentation.  For this first edition of the project, special thanks go to
-these people, in chronological order:
+Low-Level Linked Lists was prepared as part of the Glulx Runtime Instrumentation
+Project (https://github.com/i7/i7grip).
 
-- Graham Nelson, Emily Short, and others, not only for Inform, but also for the
-  countless hours the high-quality technical documentation saved me and for the
-  work that made the Glulx VM possible,
+GRIP owes a great deal to everyone who made Inform possible and everyone who
+continues to contribute.  I'd like to give especial thanks to Graham Nelson and
+Emily Short, not only for their design and coding work, but also for all of the
+documentation, both of the language and its internals---it proved indispensable.
 
-- Andrew Plotkin for the Glulx VM and the Glk library, as well as their clear,
-  always up-to-date specifications,
+I am likewise indebted to everybody who worked to make Glulx and Glk a reality.
+Without them, there simply wouldn't have been any hope for this kind of project.
+My special thanks to Andrew Plotkin, with further kudos for his work maintaining
+the specifications.  They proved as essential as Inform's documentation.
 
-- Jacqueline Lott, David Welbourn, and all of the other attendees for Club
-  Floyd, my first connection to the interactive fiction community,
+The project itself was inspired by suggestions from Ron Newcomb and Esteban
+Montecristo on Inform's feature request page.  It's only because of their posts
+that I ever started.  (And here's hoping that late is better than never.)
 
-- Jesse McGrew and Emily Short for getting me involved with Inform 7,
+Esteban Montecristo also made invaluable contributions as an alpha tester.  I
+cannot thank him enough: he signed on as a beta tester but then quickly
+uncovered a slew of problems that forced me to reconsider both the term ``beta''
+and my timeline.  The impetus for the new, cleaner design and several clues that
+led to huge performance improvements are all due to him.  Moreover, he
+contributed code, since modified to fit the revised framework, for the extension
+Verbose Diagnostics.
 
-- all of the Inform 7 developers for their hard work, the ceaseless flow of
-  improvements, and their willingness to take me on as a collaborator,
+As for Ron Newcomb, I can credit him for nearly half of the bugs unearthed in
+the beta proper, not to mention sound advice on the organization of the
+documentation and the extensions.  GRIP is much sturdier as a result.
 
-- Ron Newcomb and Esteban Montecristo for the idea to write Call Stack Tracking
-  and Verbose Diagnostics,
+Roger Carbol, Jesse McGrew, Michael Martin, Dan Shiovitz, Johnny Rivera, and
+probably several others deserve similar thanks for answering questions on
+ifMUD's I6 and I7 channels.  I am grateful to Andrew Plotkin, David Kinder, and
+others for the same sort of help on intfiction.org.
 
-- Roger Carbol, Jesse McGrew, Michael Martin, Dan Shiovitz, Johnny Rivera, and
-  everyone else for their helpful comments on ifMUD's I6 and I7 channels,
+On top of that, David Kinder was kind enough to accommodate Debug File Parsing
+in the Windows IDE; consequently, authors who have a sufficiently recent version
+of Windows no longer need to write batch scripts.  His help is much appreciated,
+particularly because the majority of downloaders are running Windows.
 
-- Esteban Montecristo, for invaluable alpha testing,
+Even with the IDEs creating debug files, setting up symbolic links to those
+files can be a chore.  Jim Aiken suggested an automated solution, which now
+ships with the project.
 
-- and all of the beta testers who are reading this.
+And preliminary support for authors who want to debug inside a browser stems
+from discussion with Erik Temple and Andrew Plotkin; my thanks for their ideas.
+
+Finally, I should take this opportunity to express my gratitude to everyone who
+helped me get involved in the IF community.  Notable among these people are
+Jesse McGrew and Emily Short, not to mention Jacqueline Lott, David Welbourn,
+and all of the other Club Floyd attendees.
