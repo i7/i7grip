@@ -1,5 +1,6 @@
-Version 1 of Low-Level Text (for Glulx only) by Brady Garvin begins here.
+Version 2 of Low-Level Text (for Glulx only) by Brady Garvin begins here.
 
+[@]
 "Mutable text for situations where Inform's indexed text isn't an option."
 
 Include Runtime Checks by Brady Garvin.
@@ -15,6 +16,7 @@ Book "Copyright and License"
 
 Book "Extension Information"
 
+[@]
 [Inform already has mutable text in the form of indexed text.  But for the Glulx Runtime Instrumentation Framework we need to worry about:
 
 1. Reentrancy---if we inject a call into the middle of a block value management routine (which we will), the callee can't be sure that the block value record keeping is in a consistent state.
@@ -34,7 +36,7 @@ An environment check rule (this is the check for dynamic memory allocation to su
 
 Book "Synthetic Text"
 
-Chapter  "The Synthetic Text Structure" - unindexed
+Chapter "The Synthetic Text Structure" - unindexed
 
 [Layout:
 	4 bytes padding (at offset -8 bytes)
@@ -45,7 +47,7 @@ Chapter  "The Synthetic Text Structure" - unindexed
 
 Chapter "Construction and Destruction of Synthetic Text"
 
-To decide what text is a new uninitialized synthetic text with length (L - a number) character/characters:
+To decide what text is a new uninitialized synthetic text with length (L - a number) character/characters (this is creating uninitialized synthetic text by length):
 	let the result be a memory allocation of L plus ten bytes;
 	increase the result by four;
 	write the integer L to address result;
@@ -54,7 +56,7 @@ To decide what text is a new uninitialized synthetic text with length (L - a num
 	write the byte zero to address result plus L plus one;
 	decide on the result converted to some text.
 
-To decide what text is a new uninitialized permanent synthetic text with length (L - a number) character/characters:
+To decide what text is a new uninitialized permanent synthetic text with length (L - a number) character/characters (this is creating uninitialized permanent synthetic text by length):
 	let the result be a permanent memory allocation of L plus ten bytes;
 	increase the result by four;
 	write the integer L to address result;
@@ -83,18 +85,18 @@ To decide what text is a new permanent synthetic text copied from (T - some text
 	write the byte zero to address result plus the length plus one;
 	decide on the result converted to some text.
 
-To decide what text is a new synthetic text extracted from the (N - a number) bytes at address (A - a number):
+To decide what text is a new synthetic text extracted from the (N - a number) bytes at address (A - a number) (this is creating synthetic text from an array):
 	let the result be a new uninitialized synthetic text with length N characters;
 	copy N bytes from address A to address the character array address of the synthetic text result;
 	decide on the result.
 
-To decide what text is a new permanent synthetic text extracted from the (N - a number) bytes at address (A - a number):
+To decide what text is a new permanent synthetic text extracted from the (N - a number) bytes at address (A - a number) (this is creating permanent synthetic text from an array):
 	let the result be a new uninitialized permanent synthetic text with length N characters;
 	copy N bytes from address A to address the character array address of the synthetic text result;
 	decide on the result.
 
 [The result is taken to be the text between the first occurrence of P and the first subsequent occurrence of S in T (all of which are synthetic), returned as a new synthetic text.  If there is no such text, this phrase returns the interned empty string.]
-To decide what text is a new synthetic text extracted from the synthetic text (T - some text) between the synthetic prefix (P - some text) and the synthetic suffix (S - some text) or the interned empty string if there is no match:
+To decide what text is a new synthetic text extracted from the synthetic text (T - some text) between the synthetic prefix (P - some text) and the synthetic suffix (S - some text) or the interned empty string if there is no match (this is creating synthetic text by extraction):
 	let the beginning index be the index of the synthetic text P in the synthetic text T;
 	if beginning index is zero:
 		decide on "";
@@ -108,7 +110,7 @@ To decide what text is a new synthetic text extracted from the synthetic text (T
 	decide on a new synthetic text extracted from the length bytes at address array address.
 
 [The result is taken to be the text between the first occurrence of P and the first subsequent occurrence of S in T (all of which are synthetic), returned as a new permanent synthetic text.  If there is no such text, this phrase returns the interned empty string.]
-To decide what text is a new permanent synthetic text extracted from the synthetic text (T - some text) between the synthetic prefix (P - some text) and the synthetic suffix (S - some text) or the interned empty string if there is no match:
+To decide what text is a new permanent synthetic text extracted from the synthetic text (T - some text) between the synthetic prefix (P - some text) and the synthetic suffix (S - some text) or the interned empty string if there is no match (this is creating permanent synthetic text by extraction):
 	let the beginning index be the index of the synthetic text P in the synthetic text T;
 	if beginning index is zero:
 		decide on "";
@@ -127,19 +129,19 @@ To delete the synthetic text (T - some text) (this is deleting synthetic text):
 
 Chapter "Private Synthetic Text Accessors and Mutators" - unindexed
 
-To write the length (L - a number) to the synthetic text (T - some text): (- llo_setField({T},-1,{L}); -).
+To write the length (L - a number) to the synthetic text (T - some text): (- llo_setField({T}, -1, {L}); -).
 
 Chapter "Public Synthetic Text Accessors and Mutators"
 
-To decide what number is the length of the synthetic text (T - some text): (- llo_getField({T},-1) -).
+To decide what number is the length of the synthetic text (T - some text): (- llo_getField({T}, -1) -).
 
-To decide what number is the character array address of the synthetic text (T - some text): (- ({T}+1) -).
+To decide what number is the character array address of the synthetic text (T - some text): (- ({T} + 1) -).
 
-To decide what Unicode character is the character at index (I - a number) of the synthetic text (T - some text): (- llo_getByte({T}+{I}) -).  [I is one-based; no plus one]
-To decide what number is the character code at index (I - a number) of the synthetic text (T - some text): (- llo_getByte({T}+{I}) -).  [I is one-based; no plus one]
+To decide what Unicode character is the character at index (I - a number) of the synthetic text (T - some text): (- llo_getByte({T} + {I}) -).  [I is one-based, hence the absence of a plus one.]
+To decide what number is the character code at index (I - a number) of the synthetic text (T - some text): (- llo_getByte({T} + {I}) -).  [I is one-based, hence the absence of a plus one.]
 
-To write (C - a Unicode character) to index (I - a number) of the synthetic text (T - some text): (- llo_setByte({T}+{I},{C}); -).  [I is one-based; no plus one]
-To write the character code (C - a number) to index (I - a number) of the synthetic text (T - some text): (- llo_setByte({T}+{I},{C}); -).  [I is one-based; no plus one]
+To write (C - a Unicode character) to index (I - a number) of the synthetic text (T - some text): (- llo_setByte({T} + {I}, {C}); -).  [I is one-based, hence the absence of a plus one.]
+To write the character code (C - a number) to index (I - a number) of the synthetic text (T - some text): (- llo_setByte({T} + {I}, {C}); -).  [I is one-based, hence the absence of a plus one.]
 
 Section "Capture to Synthetic Text"
 
@@ -153,68 +155,69 @@ Include (-
 [Using a pure stream implementation, CocoaGlk spends too much time flushing streams, and as a result some ordinarily split-second operations in Debug File Parsing take half a minute or so.  If we detect CocoaGlk, we want the option of the filter I/O system available.]
 
 Include (-
-[ llt_enter text;
-#ifndef COCOA_QUIET;
-	llt_oldStream=glk_stream_get_current();
-#endif;
-	llt_oldLength=llo_getField(text,-1);
-	if(llo_cocoaGlkDetected){
-#ifndef COCOA_QUIET;
-		glk_stream_set_current(0);
-#endif;
-		llo_cocoaTargetAddress=text+1;
-		llo_cocoaSpaceRemaining=llt_oldLength;
-		rtrue;
-	}
-	llt_stream=glk_stream_open_memory(text+1,llt_oldLength,filemode_Write,0);
-	if(llt_stream){
-		glk_stream_set_current(llt_stream);
-		rtrue;
-	}
-	llt_length=0;
-	rfalse;
-];
+	[ llt_enter text;
+	#ifndef COCOA_QUIET;
+		llt_oldStream = glk_stream_get_current();
+	#endif;
+		llt_oldLength = llo_getField(text, -1);
+		if (llo_cocoaGlkDetected) {
+	#ifndef COCOA_QUIET;
+			glk_stream_set_current(0);
+	#endif;
+			llo_cocoaTargetAddress = text + 1;
+			llo_cocoaSpaceRemaining = llt_oldLength;
+			rtrue;
+		}
+		llt_stream = glk_stream_open_memory(text + 1, llt_oldLength, filemode_Write, 0);
+		if (llt_stream) {
+			glk_stream_set_current(llt_stream);
+			rtrue;
+		}
+		llt_length = 0;
+		rfalse;
+	];
 
-[ llt_exit text;
-#ifndef COCOA_QUIET;
-	glk_stream_set_current(llt_oldStream);
-#endif;
-	if(llo_cocoaGlkDetected){
-		llt_length=llt_oldLength-llo_cocoaSpaceRemaining;
-	}else{
-		glk_stream_close(llt_stream,llo_streamToStringMetrics);
-		llt_length=llo_getField(llo_streamToStringMetrics,1);
-	}
-	if(llt_length<llt_oldLength){
-		llo_setField(text,-1,llt_length);
-		llo_setByte(text+llt_length+1,0);
-	}else{
-		llo_setByte(text+llt_oldLength+1,0);
-	}
-];
+	[ llt_exit text;
+	#ifndef COCOA_QUIET;
+		glk_stream_set_current(llt_oldStream);
+	#endif;
+		if (llo_cocoaGlkDetected) {
+			llt_length = llt_oldLength - llo_cocoaSpaceRemaining;
+		} else {
+			glk_stream_close(llt_stream, llo_streamToStringMetrics);
+			llt_length = llo_getField(llo_streamToStringMetrics, 1);
+		}
+		if (llt_length < llt_oldLength) {
+			llo_setField(text, -1, llt_length);
+			llo_setByte(text + llt_length + 1, 0);
+		} else {
+			llo_setByte(text + llt_oldLength + 1, 0);
+		}
+	];
 -).
 
 To overwrite the synthetic text (T - some text) with the text printed when we (P - a phrase): (-
 	@push say__p;
 	@push say__pc;
 	@push say__n;
-	@push debug_rules; debug_rules=0;
+	@push debug_rules;
+	debug_rules = 0;
 	@push llt_oldStream;
 	@push llt_stream;
 	@push llt_oldLength;
 	@push llt_length;
-	llt_oldLength=llo_getField({T},-1);
-	if(llo_cocoaGlkDetected){
+	llt_oldLength = llo_getField({T}, -1);
+	if (llo_cocoaGlkDetected) {
 		@getiosys sp sp;
 		@setiosys 1 llo_cocoaPrint;
 		@push llo_cocoaTargetAddress;
 		@push llo_cocoaSpaceRemaining;
 	}
-	if(llt_enter({T})){
+	if (llt_enter({T})) {
 		if(true) {P}
 		llt_exit({T});
 	}
-	if(llo_cocoaGlkDetected){
+	if (llo_cocoaGlkDetected) {
 		@pull llo_cocoaSpaceRemaining;
 		@pull llo_cocoaTargetAddress;
 		@stkswap;
@@ -235,7 +238,7 @@ Section "Synthetic Text Case Changes"
 To decide what number is the Latin-1 character code (C - a number) downcased: (- glk_char_to_lower({C}) -).
 To decide what number is the Latin-1 character code (C - a number) upcased: (- glk_char_to_upper({C}) -).
 
-To downcase the synthetic text (T - some text):
+To downcase the synthetic text (T - some text) (this is downcasing synthetic text):
 	let the length be the length of the synthetic text T;
 	let the character array address be the character array address of the synthetic text T;
 	let the limit be the character array address plus the length;
@@ -243,7 +246,7 @@ To downcase the synthetic text (T - some text):
 		let the downcased character code be the Latin-1 character code the byte at address character code address downcased;
 		write the byte downcased character code to address character code address.
 
-To upcase the synthetic text (T - some text):
+To upcase the synthetic text (T - some text) (this is upcasing synthetic text):
 	let the length be the length of the synthetic text T;
 	let the character array address be the character array address of the synthetic text T;
 	let the limit be the character array address plus the length;
@@ -253,37 +256,37 @@ To upcase the synthetic text (T - some text):
 
 Section "Synthetic Text Prefix and Suffix Removal"
 
-To remove (N - a number) character/characters from the beginning of the synthetic text (T - some text):
+To remove (N - a number) character/characters from the beginning of the synthetic text (T - some text) (this is removing characters from the beginning of synthetic text):
 	let the destination address be the character array address of the synthetic text T;
 	let the source address be the destination address plus N;
 	let the new length be the length of the synthetic text T minus N;
 	copy one plus the new length bytes from address source address to address destination address;
 	write the length new length to the synthetic text T.
 
-To remove (N - a number) character/characters from the end of the synthetic text (T - some text):
+To remove (N - a number) character/characters from the end of the synthetic text (T - some text) (this is removing characters from the end of synthetic text):
 	let the new length be the length of the synthetic text T minus N;
 	write the length new length to the synthetic text T;
 	let the terminator address be the new length plus the character array address of the synthetic text T;
 	write the byte zero to address the terminator address.
 
-To possibly remove the synthetic text prefix (P - some text) from the beginning of the synthetic text (T - some text):
+To possibly remove the synthetic text prefix (P - some text) from the beginning of the synthetic text (T - some text) (this is possibly removing a prefix from synthetic text):
 	if the synthetic text T begins with the synthetic text P:
 		let the prefix length be the length of the synthetic text P;
 		remove prefix length characters from the beginning of the synthetic text T.
 
-To decide whether we successfully remove the synthetic text prefix (P - some text) from the beginning of the synthetic text (T - some text):
+To decide whether we successfully remove the synthetic text prefix (P - some text) from the beginning of the synthetic text (T - some text) (this is reporting success or failure after possibly removing a prefix from synthetic text):
 	if the synthetic text T begins with the synthetic text P:
 		let the prefix length be the length of the synthetic text P;
 		remove prefix length characters from the beginning of the synthetic text T;
 		decide yes;
 	decide no.
 
-To possibly remove the synthetic text suffix (S - some text) from the end of the synthetic text (T - some text):
+To possibly remove the synthetic text suffix (S - some text) from the end of the synthetic text (T - some text) (this is possibly removing a suffix from synthetic text):
 	if the synthetic text T ends with the synthetic text S:
 		let the suffix length be the length of the synthetic text S;
 		remove suffix length characters from the end of the synthetic text T.
 
-To decide whether we successfully remove the synthetic text suffix (S - some text) from the end of the synthetic text (T - some text):
+To decide whether we successfully remove the synthetic text suffix (S - some text) from the end of the synthetic text (T - some text) (this is reporting success or failure after possibly removing a suffix from synthetic text):
 	if the synthetic text T ends with the synthetic text S:
 		let the suffix length be the length of the synthetic text S;
 		remove suffix length characters from the end of the synthetic text T;
@@ -297,26 +300,27 @@ Include (-
 -) after "Definitions.i6t".
 
 To repeat with (I - a nonexisting number variable) running through the character codes in the synthetic text (T - some text) begin -- end: (-
-	llt_iterator={T}+1;
+	llt_iterator = {T} + 1;
 	jump LLO_LOOP_{-counter:LLO_LOOP}_ENTRY;
-	for(::)
-		if(llo_advance){
+	for (::)
+		if (llo_advance) {
 			@pull llt_iterator;
-			if(llo_broken){
+			if (llo_broken) {
 				break;
 			}
 			llt_iterator++;
 		.LLO_LOOP_{-advance-counter:LLO_LOOP}_ENTRY;
 			@aloadb llt_iterator 0 {I};
-			if(~~{I}){
-				llo_broken=true;
+			if (~~{I}) {
+				llo_broken = true;
 				break;
 			}
 			@push llt_iterator;
-			llo_advance=false;
-		}else for(llo_oneTime=true,llo_broken=true,llo_advance=true:llo_oneTime&&((llo_oneTime=false),true)||(llo_broken=false):)
+			llo_advance = false;
+		} else for(llo_oneTime = true, llo_broken = true, llo_advance = true: llo_oneTime && ((llo_oneTime = false), true) || (llo_broken = false):)
 -).
 
+[@]
 Chapter "Synthetic Text Equality Tests"
 
 To decide whether the synthetic text (S - some text) is identical to the synthetic text (T - some text) (this is testing equality between synthetic text and synthetic text):
@@ -344,24 +348,24 @@ To decide whether (S - some text) is identical to (T - some text) (this is testi
 
 Chapter "Synthetic Text Substring Tests"
 
-To decide what number is the index of (C - a Unicode character) in the synthetic text (T - some text):
+To decide what number is the index of (C - a Unicode character) in the synthetic text (T - some text) (this is finding a character in synthetic text):
 	let the length be the length of the synthetic text T;
 	let the array address be the character array address of the synthetic text T;
 	decide on one plus the index of the byte C converted to a number in the length bytes at address array address.
 
-To decide what number is the index of the character code (C - a number) in the synthetic text (T - some text):
+To decide what number is the index of the character code (C - a number) in the synthetic text (T - some text) (this is finding a character code in synthetic text):
 	let the length be the length of the synthetic text T;
 	let the array address be the character array address of the synthetic text T;
 	decide on one plus the index of the byte C in the length bytes at address array address.
 
-To decide what number is the index of the synthetic text (S - some text) in the synthetic text (T - some text):
+To decide what number is the index of the synthetic text (S - some text) in the synthetic text (T - some text) (this is finding synthetic text in synthetic text):
 	let the first length be the length of the synthetic text S;
 	let the second length be the length of the synthetic text T;
 	let the first array address be the character array address of the synthetic text S;
 	let the second array address be the character array address of the synthetic text T;
 	decide on one plus the index of the first length bytes at address first array address in the second length bytes at address second array address.
 
-To decide what number is the index of (C - a Unicode character) in the synthetic text (T - some text) starting after index (I - a number):
+To decide what number is the index of (C - a Unicode character) in the synthetic text (T - some text) starting after index (I - a number) (this is finding a subsequent character in synthetic text):
 	let the length be the length of the synthetic text T minus I;
 	if the length is at most zero:
 		decide on zero;
@@ -371,7 +375,7 @@ To decide what number is the index of (C - a Unicode character) in the synthetic
 		decide on zero;
 	decide on one plus I plus the result.
 
-To decide what number is the index of the character code (C - a number) in the synthetic text (T - some text) starting after index (I - a number):
+To decide what number is the index of the character code (C - a number) in the synthetic text (T - some text) starting after index (I - a number) (this is finding a subsequent character code in synthetic text):
 	let the length be the length of the synthetic text T minus I;
 	if the length is at most zero:
 		decide on zero;
@@ -381,7 +385,7 @@ To decide what number is the index of the character code (C - a number) in the s
 		decide on zero;
 	decide on one plus I plus the result.
 
-To decide what number is the index of the synthetic text (S - some text) in the synthetic text (T - some text) starting after index (I - a number):
+To decide what number is the index of the synthetic text (S - some text) in the synthetic text (T - some text) starting after index (I - a number) (this is finding subsequent synthetic text in synthetic text):
 	let the second length be the length of the synthetic text T minus I;
 	if the second length is at most zero:
 		decide on zero;
@@ -395,10 +399,10 @@ To decide what number is the index of the synthetic text (S - some text) in the 
 
 Chapter "Synthetic Text Prefix and Suffix Tests"
 
-To decide whether the synthetic text (T - some text) begins with the synthetic text (S - some text):
+To decide whether the synthetic text (T - some text) begins with the synthetic text (S - some text) (this is testing for a synthetic text prefix):
  	decide on whether or not the index of the synthetic text S in the synthetic text T is one.
 
-To decide whether the synthetic text (T - some text) ends with the synthetic text (S - some text):
+To decide whether the synthetic text (T - some text) ends with the synthetic text (S - some text) (this is testing for a synthetic text suffix):
 	let the excess be the length of the synthetic text T minus the length of the synthetic text S;
 	decide on whether or not the excess is at least zero and the index of the synthetic text S in the synthetic text T starting after index excess is one plus the excess.
 
@@ -408,16 +412,18 @@ Low-Level Text ends here.
 
 Chapter: Synopsis
 
+[@]
 When we build on the extension Glulx Runtime Instrumentation Framework to create
 Inform debugging tools, we often encounter situations where Inform's block value
 management system needs to remain untouched, and we are unable to use Inform's
 indexed text.  Low-Level Text contains a replacement text implementation that,
-while less elegant, is a safe alternative even in these scenarios.
+while less cleanly encapsulated, is a safe alternative even in these scenarios.
 
 Details are in the following chapters.
 
 Chapter: Usage
 
+[@]
 As story authors we have Inform's indexed text for text that we generate on the
 fly.  But when we write instrumentation with the Glulx Runtime Instrumentation
 Framework, any phrases involving Inform's block value management system are
@@ -434,7 +440,7 @@ Section: Overview
 
 Low-Level Text introduces a new kind of text, synthetic text.  It behaves very
 much like indexed text except that we cannot change its length, we cannot use
-non-Latin-1 characters (at least in the current version; see
+non-Latin-1 characters (at least in the current version) (see
 http://en.wikipedia.org/wiki/ISO/IEC_8859-1 for a description of the Latin-1
 encoding and its list of characters), and we must watch out for two potential
 pitfalls:
@@ -443,9 +449,11 @@ First, Inform understandably does not allow declarations like
 
 	Synthetic text is a kind of text.
 
-so it is up to us to keep track of which texts are synthetic and which are not;
-the story will likely crash if we apply synthetic text phrases to ordinary text.
+unless we use some awkward per-project template hacking.  So instead, it is up
+to us to keep track of which texts are synthetic and which are not; the story
+will likely crash if we apply synthetic text phrases to ordinary text.
 
+[@]
 Second, we must be very careful with the word "is".  Suppose that we have
 synthetic text called X with the contents "plugh".  The line
 
@@ -469,11 +477,11 @@ We can obtain a gibberish text by asking for
 
 and then correct its contents later.  We can copy characters from another text
 (ordinary or synthetic, so long as it doesn't contain substitutions that will
-change length after being said) as in
+change length after being said), as in
 
 	a new synthetic text copied from (T - some text)
 
-Or we can build text from an I6 byte array of character codes:
+Or we can build text from a byte array of character codes:
 
 	a new synthetic text extracted from the (N - a number) bytes at address (A - a number)
 
@@ -525,7 +533,7 @@ and its relative
 
 	write the character code (C - a number) to index (I - a number) of the synthetic text (T - some text)
 
-Another option is to write
+Another option is the phrase
 
 	overwrite the synthetic text (T - some text) with the text printed when we ...
 
@@ -542,6 +550,7 @@ is legal, but not
 T will be replaced with whatever is said by that line, except that the output
 may be cut off if it is longer than T has room to store.
 
+[@]
 Section: Comparing
 
 We can compare the contents---rather than the identities---of two texts by
@@ -677,9 +686,8 @@ the other synthetic text constructors.
 
 Chapter: Requirements, Limitations, and Bugs
 
-This version was tested with Inform 6G60.  It will probably function on newer
-versions, and it may function under slightly older versions, though there is no
-guarantee.
+This version was tested with Inform 6G60.  It may not function under other
+versions.
 
 Section: Obscure limitations, which should affect almost nobody
 
@@ -702,30 +710,52 @@ time.
 Chapter: Acknowledgements
 
 Low-Level Text was prepared as part of the Glulx Runtime Instrumentation Project
-(https://github.com/i7/i7grip).  For this first edition of the project, special
-thanks go to these people, in chronological order:
+(https://github.com/i7/i7grip).
 
-- Graham Nelson, Emily Short, and others, not only for Inform, but also for the
-  countless hours the high-quality technical documentation saved me and for the
-  work that made the Glulx VM possible,
+GRIP owes a great deal to everyone who made Inform possible and everyone who
+continues to contribute.  I'd like to give especial thanks to Graham Nelson and
+Emily Short, not only for their design and coding work, but also for all of the
+documentation, both of the language and its internals---it proved indispensable.
 
-- Andrew Plotkin for the Glulx VM and the Glk library, as well as their clear,
-  always up-to-date specifications,
+I am likewise indebted to everybody who worked to make Glulx and Glk a reality.
+Without them, there simply wouldn't have been any hope for this kind of project.
+My special thanks to Andrew Plotkin, with further kudos for his work maintaining
+the specifications.  They proved as essential as Inform's documentation.
 
-- Jacqueline Lott, David Welbourn, and all of the other attendees for Club
-  Floyd, my first connection to the interactive fiction community,
+The project itself was inspired by suggestions from Ron Newcomb and Esteban
+Montecristo on Inform's feature request page.  It's only because of their posts
+that I ever started.  (And here's hoping that late is better than never.)
 
-- Jesse McGrew and Emily Short for getting me involved with Inform 7,
+Esteban Montecristo also made invaluable contributions as an alpha tester.  I
+cannot thank him enough: he signed on as a beta tester but then quickly
+uncovered a slew of problems that forced me to reconsider both the term ``beta''
+and my timeline.  The impetus for the new, cleaner design and several clues that
+led to huge performance improvements are all due to him.  Moreover, he
+contributed code, since modified to fit the revised framework, for the extension
+Verbose Diagnostics.
 
-- all of the Inform 7 developers for their hard work, the ceaseless flow of
-  improvements, and their willingness to take me on as a collaborator,
+As for Ron Newcomb, I can credit him for nearly half of the bugs unearthed in
+the beta proper, not to mention sound advice on the organization of the
+documentation and the extensions.  GRIP is much sturdier as a result.
 
-- Ron Newcomb and Esteban Montecristo for the idea to write Call Stack Tracking
-  and Verbose Diagnostics,
+Roger Carbol, Jesse McGrew, Michael Martin, Dan Shiovitz, Johnny Rivera, and
+probably several others deserve similar thanks for answering questions on
+ifMUD's I6 and I7 channels.  I am grateful to Andrew Plotkin, David Kinder, and
+others for the same sort of help on intfiction.org.
 
-- Roger Carbol, Jesse McGrew, Michael Martin, Dan Shiovitz, Johnny Rivera, and
-  everyone else for their helpful comments on ifMUD's I6 and I7 channels,
+On top of that, David Kinder was kind enough to accommodate Debug File Parsing
+in the Windows IDE; consequently, authors who have a sufficiently recent version
+of Windows no longer need to write batch scripts.  His help is much appreciated,
+particularly because the majority of downloaders are running Windows.
 
-- Esteban Montecristo, for invaluable alpha testing,
+Even with the IDEs creating debug files, setting up symbolic links to those
+files can be a chore.  Jim Aiken suggested an automated solution, which now
+ships with the project.
 
-- and all of the beta testers who are reading this.
+And preliminary support for authors who want to debug inside a browser stems
+from discussion with Erik Temple and Andrew Plotkin; my thanks for their ideas.
+
+Finally, I should take this opportunity to express my gratitude to everyone who
+helped me get involved in the IF community.  Notable among these people are
+Jesse McGrew and Emily Short, not to mention Jacqueline Lott, David Welbourn,
+and all of the other Club Floyd attendees.
