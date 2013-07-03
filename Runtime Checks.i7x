@@ -1,4 +1,4 @@
-Version 1 of Runtime Checks (for Glulx only) by Brady Garvin begins here.
+Version 2 of Runtime Checks (for Glulx only) by Brady Garvin begins here.
 
 "Phrases for testing authorial expectations at runtime."
 
@@ -28,7 +28,7 @@ Include (-
 
 Chapter "Rulebooks"
 
-The environment check rules are [rulebook is] a rulebook.
+The environment check rulebook is a rulebook.
 
 This is the environment check stage rule:
 	traverse the environment check rules.
@@ -40,8 +40,8 @@ To terminate the story: (- quit; -).
 
 Book "Runtime Checks"
 
-To check that (C - a condition) or else (P - a phrase): (- if(true){-open-brace} #ifdef RC_ENABLE_ASSERTIONS; if(~~{C}) {P} {-close-brace} #endif; -).
-To always check that (C - a condition) or else (P - a phrase): (- if(~~{C}) {P} -).
+To check that (C - a condition) or else (P - a phrase): (- if (true) {-open-brace} #ifdef RC_ENABLE_ASSERTIONS; if (~~{C}) {P} {-close-brace} #endif; -).
+To always check that (C - a condition) or else (P - a phrase): (- if (~~{C}) {P} -).
 
 Book "Presentation of Runtime Failures"
 
@@ -52,24 +52,26 @@ To say warning type: (- glk_set_style(style_Alert); -).
 Chapter "Glulx Visibility Assurance" - unindexed
 
 Include (-
-	Global rc_mustTerminate=false;
-	[ rc_ensureVisibility root window iosystem iorock;
-		if(rc_mustTerminate){
+	Constant RC_ROCK = -4123;
+	Global rc_mustTerminate = false;
+	[ rc_ensureVisibility
+		root window iosystem iorock;
+		if (rc_mustTerminate) {
 			return;
 		}
 		@getiosys iosystem iorock;
-		if(~~iosystem){
+		if (~~iosystem) {
 			@setiosys 2 0;
 		}
-		root=glk_window_get_root();
-		if(root){
-			window=glk_window_open(root,winmethod_Above|winmethod_Fixed,12,wintype_TextBuffer,-4123);
-		}else{
-			window=glk_window_open(0,0,0,wintype_TextBuffer,-4123);
+		root = glk_window_get_root();
+		if (root) {
+			window = glk_window_open(root, winmethod_Above | winmethod_Fixed, 12, wintype_TextBuffer, RC_ROCK);
+		} else {
+			window = glk_window_open(0, 0, 0, wintype_TextBuffer, RC_ROCK);
 		}
-		if(window){
+		if (window) {
 			glk_set_window(window);
-			rc_mustTerminate=true;
+			rc_mustTerminate = true;
 		}
 	];
 -) after "Definitions.i6t".
@@ -80,23 +82,23 @@ To decide whether the runtime failure must terminate the story: (- rc_mustTermin
 
 Chapter "Segmented Substitutions"
 
-To say runtime failure in -- beginning say_runtime_failure_in -- running on:
+To say runtime failure in -- beginning say_runtime_failure_in -- running on (this is saying runtime failure in):
 	say "[line break][warning type]*** Runtime failure in ".
 
-To say low-level runtime failure in -- beginning say_runtime_failure_in -- running on:
+To say low-level runtime failure in -- beginning say_runtime_failure_in -- running on (this is saying low-level runtime failure in):
 	ensure failure visibility;
 	say "[line break][warning type]*** Runtime failure in ".
 
-To say with explanation -- continuing say_runtime_failure_in -- running on:
+To say with explanation -- continuing say_runtime_failure_in -- running on (this is saying with explanation):
 	say ": ".
 
-To say continuing anyway -- ending say_runtime_failure_in -- running on:
+To say continuing anyway -- ending say_runtime_failure_in -- running on (this is saying continuing anyway):
 	if the runtime failure must terminate the story:
 		say " ***[line break]*** I would attempt to continue anyway, but the failure was low-level, and I had to change the Glk window tree to reliably report it.  I've terminated the story instead. ***[roman type][line break]";
 		terminate the story;
 	say " ***[line break]*** Attempting to continue anyway... ***[roman type][line break]".
 
-To say terminating the story -- ending say_runtime_failure_in -- running on:
+To say terminating the story -- ending say_runtime_failure_in -- running on (this is saying terminating the story):
 	say " ***[line break]*** Continuing further seems like a bad idea, so I've terminated the story. ***[roman type][line break]";
 	terminate the story.
 
@@ -264,9 +266,8 @@ and write
 
 Chapter: Requirements, Limitations, and Bugs
 
-This version was tested with Inform 6G60.  It will probably function on newer
-versions, and it may function under slightly older versions, though there is no
-guarantee.
+This version was tested with Inform 6G60.  It may not function under other
+versions.
 
 Section: Regarding bugs
 
@@ -283,30 +284,52 @@ time.
 Chapter: Acknowledgements
 
 Runtime Checks was prepared as part of the Glulx Runtime Instrumentation Project
-(https://github.com/i7/i7grip).  For this first edition of the project, special
-thanks go to these people, in chronological order:
+(https://github.com/i7/i7grip).
 
-- Graham Nelson, Emily Short, and others, not only for Inform, but also for the
-  countless hours the high-quality technical documentation saved me and for the
-  work that made the Glulx VM possible,
+GRIP owes a great deal to everyone who made Inform possible and everyone who
+continues to contribute.  I'd like to give especial thanks to Graham Nelson and
+Emily Short, not only for their design and coding work, but also for all of the
+documentation, both of the language and its internals---it proved indispensable.
 
-- Andrew Plotkin for the Glulx VM and the Glk library, as well as their clear,
-  always up-to-date specifications,
+I am likewise indebted to everybody who worked to make Glulx and Glk a reality.
+Without them, there simply wouldn't have been any hope for this kind of project.
+My special thanks to Andrew Plotkin, with further kudos for his work maintaining
+the specifications.  They proved as essential as Inform's documentation.
 
-- Jacqueline Lott, David Welbourn, and all of the other attendees for Club
-  Floyd, my first connection to the interactive fiction community,
+The project itself was inspired by suggestions from Ron Newcomb and Esteban
+Montecristo on Inform's feature request page.  It's only because of their posts
+that I ever started.  (And here's hoping that late is better than never.)
 
-- Jesse McGrew and Emily Short for getting me involved with Inform 7,
+Esteban Montecristo also made invaluable contributions as an alpha tester.  I
+cannot thank him enough: he signed on as a beta tester but then quickly
+uncovered a slew of problems that forced me to reconsider both the term ``beta''
+and my timeline.  The impetus for the new, cleaner design and several clues that
+led to huge performance improvements are all due to him.  Moreover, he
+contributed code, since modified to fit the revised framework, for the extension
+Verbose Diagnostics.
 
-- all of the Inform 7 developers for their hard work, the ceaseless flow of
-  improvements, and their willingness to take me on as a collaborator,
+As for Ron Newcomb, I can credit him for nearly half of the bugs unearthed in
+the beta proper, not to mention sound advice on the organization of the
+documentation and the extensions.  GRIP is much sturdier as a result.
 
-- Ron Newcomb and Esteban Montecristo for the idea to write Call Stack Tracking
-  and Verbose Diagnostics,
+Roger Carbol, Jesse McGrew, Michael Martin, Dan Shiovitz, Johnny Rivera, and
+probably several others deserve similar thanks for answering questions on
+ifMUD's I6 and I7 channels.  I am grateful to Andrew Plotkin, David Kinder, and
+others for the same sort of help on intfiction.org.
 
-- Roger Carbol, Jesse McGrew, Michael Martin, Dan Shiovitz, Johnny Rivera, and
-  everyone else for their helpful comments on ifMUD's I6 and I7 channels,
+On top of that, David Kinder was kind enough to accommodate Debug File Parsing
+in the Windows IDE; consequently, authors who have a sufficiently recent version
+of Windows no longer need to write batch scripts.  His help is much appreciated,
+particularly because the majority of downloaders are running Windows.
 
-- Esteban Montecristo, for invaluable alpha testing,
+Even with the IDEs creating debug files, setting up symbolic links to those
+files can be a chore.  Jim Aiken suggested an automated solution, which now
+ships with the project.
 
-- and all of the beta testers who are reading this.
+And preliminary support for authors who want to debug inside a browser stems
+from discussion with Erik Temple and Andrew Plotkin; my thanks for their ideas.
+
+Finally, I should take this opportunity to express my gratitude to everyone who
+helped me get involved in the IF community.  Notable among these people are
+Jesse McGrew and Emily Short, not to mention Jacqueline Lott, David Welbourn,
+and all of the other Club Floyd attendees.
