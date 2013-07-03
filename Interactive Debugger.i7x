@@ -3455,7 +3455,7 @@ To handle the debug command rooted at (V - a parse tree vertex that has the pars
 	let the line number vertex be the first match for a line number among the children of V;
 	let the decimal vertex be the first match for a decimal number for the debugger among the children of the line number vertex;
 	let the beginning line number be the decimal number named by the decimal vertex;
-	now the line number vertex is the next match for a line number after the child the line number vertex;
+	now the line number vertex is the first match for a line number after the child the line number vertex;
 	now the decimal vertex is the first match for a decimal number for the debugger among the children of the line number vertex;
 	let the end line number be the decimal number named by the decimal vertex plus one;
 	let the language vertex be the first match for a debugging language among the children of V;
@@ -3506,7 +3506,7 @@ To handle the debug command rooted at (V - a parse tree vertex that has the pars
 	if the function address is zero:
 		say "There is no instruction at address [the beginning instruction address in hexadecimal] (at least according to the debug information file).[paragraph break]";
 		stop;
-	let the end hexadecimal vertex be the next match for a hexadecimal number for the debugger after the child the beginning hexadecimal vertex;
+	let the end hexadecimal vertex be the first match for a hexadecimal number for the debugger after the child the beginning hexadecimal vertex;
 	let the end instruction address be the hexadecimal number named by the end hexadecimal vertex;
 	if the end instruction address is less than the beginning instruction address:
 		say "There are no instructions in that range.  The end address precedings the beginning address.[paragraph break]";
