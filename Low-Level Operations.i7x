@@ -417,7 +417,7 @@ Include (-
 
 Include (-
 	[ llo_stringToArray text array length metrics
-		oldStream stream i;
+		oldStream stream iosystem iorock;
 		oldStream = glk_stream_get_current();
 		stream = glk_stream_open_memory(array, length, filemode_Write, 0);
 		if (~~stream) {
@@ -429,12 +429,15 @@ Include (-
 		@push debug_rules;
 		debug_rules = 0;
 		glk_stream_set_current(stream);
+		@getiosys iosystem iorock;
+		@setiosys 2 0;
 		! [@]
 		if (llo_getByte(text) == 224 or 225 or 226) {
 			print (string)text;
 		} else {
 			text();
 		}
+		@setiosys iosystem iorock;
 		glk_stream_set_current(oldStream);
 		glk_stream_close(stream, metrics);
 		@pull debug_rules;
@@ -454,7 +457,7 @@ Include (-
 	];
 
 	[ llo_stringToArrayCocoa text array length metrics
-		oldStream original i;
+		oldStream original iosystem iorock;
 	#ifndef COCOA_QUIET;
 		oldStream = glk_stream_get_current();
 		glk_stream_set_current(0); ! to error out on attempts to set a style
@@ -464,25 +467,24 @@ Include (-
 		@push say__n;
 		@push debug_rules;
 		debug_rules = 0;
-		@getiosys sp sp;
-		@setiosys 1 llo_cocoaPrint;
 		@push llo_cocoaTargetAddress;
 		@push llo_cocoaSpaceRemaining;
 		llo_cocoaTargetAddress = array;
 		llo_cocoaSpaceRemaining = length;
+		@getiosys iosystem iorock;
+		@setiosys 1 llo_cocoaPrint;
 		! [@]
 		if (llo_getByte(text) == 224 or 225 or 226) {
 			print (string)text;
 		} else {
 			text();
 		}
+		@setiosys iosystem iorock;
 		length = length - llo_cocoaSpaceRemaining;
 		@astore metrics 0 0;
 		@astore metrics 1 length;
 		@pull llo_cocoaSpaceRemaining;
 		@pull llo_cocoaTargetAddress;
-		@stkswap;
-		@setiosys sp sp;
 		@pull debug_rules;
 		@pull say__n;
 		@pull say__pc;
@@ -494,8 +496,8 @@ Include (-
 
 	Array llo_cocoaKeyWindowCheck --> 1;
 	[ llo_stringToArrayChoosingRule
-		root nonroot recreateRoot rootType rootRock firstWindow secondWindow;
-		@getiosys sp sp;
+		root nonroot recreateRoot rootType rootRock firstWindow secondWindow iosystem iorock;
+		@getiosys iosystem iorock;
 		@setiosys 2 0;
 		! Detect CocoaGlk via Inform bug 819, without falling afoul of Inform bug 961.
 		llo_cocoaGlkDetected = false;
@@ -550,8 +552,7 @@ Include (-
 		if (recreateRoot) {
 			glk_window_open(0, 0, 0, rootType, rootRock);
 		}
-		@stkswap;
-		@setiosys sp sp;
+		@setiosys iosystem iorock;
 		if (llo_cocoaGlkDetected) {
 			llo_stringToArrayChoice = llo_stringToArrayCocoa;
 		} else {
@@ -594,7 +595,11 @@ To record the number of characters printed when we (P - a phrase): (-
 	llo_stream = glk_stream_open_memory(1, 0, filemode_Write, llo_streamToStringMetrics);
 	if (llo_stream) {
 		glk_stream_set_current(llo_stream);
+		@getiosys sp sp;
+		@setiosys 2 0;
 		if (true) {P}
+		@stkswap;
+		@setiosys sp sp;
 		glk_stream_set_current(llo_oldStream);
 		glk_stream_close(llo_stream, llo_streamToStringMetrics);
 	}

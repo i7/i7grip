@@ -207,11 +207,13 @@ To overwrite the synthetic text (T - some text) with the text printed when we (P
 	@push llt_oldLength;
 	@push llt_length;
 	llt_oldLength = llo_getField({T}, -1);
+	@getiosys sp sp;
 	if (llo_cocoaGlkDetected) {
-		@getiosys sp sp;
 		@setiosys 1 llo_cocoaPrint;
 		@push llo_cocoaTargetAddress;
 		@push llo_cocoaSpaceRemaining;
+	} else {
+		@setiosys 2 0;
 	}
 	if (llt_enter({T})) {
 		if(true) {P}
@@ -220,9 +222,9 @@ To overwrite the synthetic text (T - some text) with the text printed when we (P
 	if (llo_cocoaGlkDetected) {
 		@pull llo_cocoaSpaceRemaining;
 		@pull llo_cocoaTargetAddress;
-		@stkswap;
-		@setiosys sp sp;
 	}
+	@stkswap;
+	@setiosys sp sp;
 	@pull llt_length;
 	@pull llt_oldLength;
 	@pull llt_stream;

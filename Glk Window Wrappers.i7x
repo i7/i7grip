@@ -1323,8 +1323,12 @@ To while within (W - a wrapped window) via (A - a wrapping layer) begin -- end: 
 	@push say__pc; say__pc=0;
 	@push say__n;
 	@push debug_rules; debug_rules=0;
+	@getiosys sp sp;
+	@setiosys 2 0;
 	for(llo_advance=false::)
 		if(llo_advance){
+			@stkswap;
+			@setiosys sp sp;
 			@pull debug_rules;
 			@pull say__n;
 			@pull say__pc;
