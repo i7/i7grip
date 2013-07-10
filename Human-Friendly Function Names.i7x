@@ -1,4 +1,4 @@
-Version 1 of Human-Friendly Function Names (for Glulx only) by Brady Garvin begins here.
+Version 2 of Human-Friendly Function Names (for Glulx only) by Brady Garvin begins here.
 
 "Facilities for printing and parsing human-friendly names for Glulx functions."
 
@@ -21,31 +21,33 @@ Book "Extension Information"
 
 Chapter "Use Options" - unindexed
 
-Use a function name hash table size of at least 2311 translates as (- Constant HFFN_FUNCTION_NAME_HASH_SIZE={N}; -).
+Use a function name hash table size of at least 2311 translates as (- Constant HFFN_FUNCTION_NAME_HASH_SIZE = {N}; -).
 
 To decide what number is the function name hash table size: (- HFFN_FUNCTION_NAME_HASH_SIZE -).
 
 Chapter "Rulebooks"
 
-The function name setup rules are [rulebook is] a rulebook.
-The function-naming rules are [rulebook is] a rulebook.
+The function name setup rulebook is a rulebook.
+The function-naming rulebook is a rulebook.
 
 Book "Phrase Stubs"
 
+[@]
 Chapter "Routine Kernel Guessing might be Unavailable without GRIF" (for use without Glulx Runtime Instrumentation Framework by Brady Garvin)
 
 Section "Routine Kernel Guessing is Unavailable without GRIF or Debug File Parsing" (for use without Debug File Parsing by Brady Garvin)
 
-To guess the routine kernel for (A - a sayable value):
+To guess the routine kernel for (A - a sayable value) (this is guessing a routine kernel):
 	do nothing.
 
 Book "Lazy Initialization" - unindexed
 
+[@]
 Chapter "Lazily Initializing Shell-and-Kernel Storage" - unindexed
 
 Shell-and-kernel storage initialized is a truth state that varies.  Shell-and-kernel storage initialized is false.
 
-To ensure that the shell-and-kernel storage is initialized:
+To ensure that the shell-and-kernel storage is initialized (this is initializing the shell-and-kernel storage as necessary):
 	if shell-and-kernel storage initialized is false:
 		now shell-and-kernel storage initialized is true;
 		allocate permanent hash tables for routine shells and kernels.
@@ -54,7 +56,7 @@ Chapter "Lazily Initializing Human-Friendly Function Names" - unindexed
 
 Human-friendly function names initialized is a truth state that varies.  Human-friendly function names initialized is false.
 
-To ensure that the human-friendly function names are initialized:
+To ensure that the human-friendly function names are initialized (this is initializing the human-friendly function names as necessary):
 	ensure that the shell-and-kernel storage is initialized;
 	if human-friendly function names initialized is false:
 		now human-friendly function names initialized is true;
@@ -89,7 +91,7 @@ To decide what linked list is the list of function addresses for the rules with 
 
 Section "Rule Hash Table Mutators"
 
-To give the rule at address (A - a number) the rule name (T - some text):
+To give the rule at address (A - a number) the rule name (T - some text) (this is giving a function a rule name):
 	insert the key A and the value T into the rule name hash table;
 	let the canonical input form be the canonical input form of the function name T;
 	insert the textual key the canonical input form and the value A into the rule lookup hash table.
@@ -120,7 +122,7 @@ To decide what linked list is the list of function addresses for the phrases wit
 
 Section "Phrase Hash Table Mutators"
 
-To give the phrase function at address (A - a number) the phrase name (T - some text):
+To give the phrase function at address (A - a number) the phrase name (T - some text) (this is giving a function a phrase name):
 	insert the key A and the value T into the phrase name hash table;
 	let the canonical input form be the canonical input form of the function name T;
 	insert the textual key the canonical input form and the value A into the phrase lookup hash table.
@@ -187,6 +189,7 @@ To give the routine at address (A - a number) the routine name (T - some text) (
 	let the canonical input form be the canonical input form of the function name T;
 	insert the textual key the canonical input form and the value A into the routine lookup hash table.
 
+[@]
 Chapter "Routine Shell Hash Tables" - unindexed
 
 [Map a function address to the address of the routine shell that encloses it.  Non-kernels should not be keys.]
@@ -194,7 +197,7 @@ The routine shell hash table is a permanent hash table that varies.
 [Map a function address to the address of the routine kernel that it encloses.  Non-shells should not be keys.]
 The routine kernel hash table is a permanent hash table that varies.
 
-To allocate permanent hash tables for routine shells and kernels:
+To allocate permanent hash tables for routine shells and kernels (this is allocating permanent hash tables for routine shells and kernels):
 	now the routine shell hash table is a new permanent hash table with the function name hash table size buckets;
 	now the routine kernel hash table is a new permanent hash table with the function name hash table size buckets.
 
@@ -225,16 +228,16 @@ A function name setup rule (this is the allocate permanent hash tables for human
 
 Book "Setup"
 
+[@]
 Chapter "Rules" - unindexed
 
 [These magic numbers are fairly sensitive to the workings of both ni and the I6N compiler.]
-
 To repeat with (I - a nonexisting number variable) running through the rule-printing branch addresses begin -- end: (-
-	for({I}=RulePrintingRule+79:(llo_getInt({I})==624492800)&&(llo_getShort({I}+9)==29187):{I}={I}+18)
+	for({I} = RulePrintingRule + 79: (llo_getInt({I}) == 624492800) && (llo_getShort({I} + 9) == 29187): {I} = {I} + 18)
 -).
 
-To decide what number is the function address of the rule-printing branch at address (A - a number): (- llo_getField({A},1) -).
-To decide what text is the name of the rule-printing branch at address (A - a number): (- llo_getInt({A}+11) -).
+To decide what number is the function address of the rule-printing branch at address (A - a number): (- llo_getField({A}, 1) -).
+To decide what text is the name of the rule-printing branch at address (A - a number): (- llo_getInt({A} + 11) -).
 
 A function-naming rule (this is the name rules rule):
 	repeat with the rule-printing branch address running through the rule-printing branch addresses:
@@ -243,17 +246,17 @@ A function-naming rule (this is the name rules rule):
 			let the name be the name of the rule-printing branch at address rule-printing branch address;
 			give the rule at address function address the rule name name.
 
+[@]
 Chapter "Phrases" - unindexed
 
 [These magic numbers are fairly sensitive to the workings of both ni and the I6N compiler.]
-
 To repeat with (I - a nonexisting number variable) running through the phrase addresses begin -- end: (-
-	for({I}=Closure_0:(llo_getField((+ the phrase that guarantees that we have at least one named phrase +),1))({I}):{I}={I}+12)
+	for({I} = Closure_0: (llo_getField((+ the phrase that guarantees that we have at least one named phrase +), 1))({I}): {I} = {I} + 12)
 -).
 
-To decide what number is the function address of the phrase at address (A - a number): (- llo_getField({A},1) -).
-To decide what number is the name address of the phrase at address (A - a number): (- llo_getField({A},2) -).
-To decide what text is the name of the phrase at address (A - a number): (- llo_getField({A},2) -).
+To decide what number is the function address of the phrase at address (A - a number): (- llo_getField({A}, 1) -).
+To decide what number is the name address of the phrase at address (A - a number): (- llo_getField({A}, 2) -).
+To decide what text is the name of the phrase at address (A - a number): (- llo_getField({A}, 2) -).
 
 To decide whether address (A - a number) could contain a phrase (this is the phrase that guarantees that we have at least one named phrase):
 	let the function address be the function address of the phrase at address A;
@@ -294,8 +297,8 @@ The third canonically removed function name prefix is some text that varies.
 The fourth canonically removed function name prefix is some text that varies.
 The fifth canonically removed function name prefix is some text that varies.
 The sixth canonically removed function name prefix is some text that varies.
-The kernel prefix is some text that varies.
-The kernel suffix is some text that varies.
+[@] The kernel prefix is some text that varies.
+[@] The kernel suffix is some text that varies.
 A function name setup rule (this is the allocate the synthetic text for the routine shell prefix and suffix rule):
 	now the source text rule keyword is a new permanent synthetic text copied from "rule";
 	now the source text definite article is a new permanent synthetic text copied from "the ";
@@ -308,8 +311,8 @@ A function name setup rule (this is the allocate the synthetic text for the rout
 	now the fourth canonically removed function name prefix is a new permanent synthetic text copied from "veneer routine ";
 	now the fifth canonically removed function name prefix is a new permanent synthetic text copied from "i6 routine ";
 	now the sixth canonically removed function name prefix is a new permanent synthetic text copied from "routine ";
-	now the kernel prefix is a new permanent synthetic text copied from "kernel of '";
-	now the kernel suffix is a new permanent synthetic text copied from "'".
+	[@] now the kernel prefix is a new permanent synthetic text copied from "kernel of '";
+	[@] now the kernel suffix is a new permanent synthetic text copied from "'".
 
 Book "Rewriting States" - unindexed
 
@@ -321,7 +324,7 @@ Book "Output"
 
 Chapter "Canonical Output Forms of Rule and Phrase Names" - unindexed
 
-To destructively say the canonical output form of the synthetic rule or phrase name (T - some text) with the article flag set to (F - a truth state):
+To destructively say the canonical output form of the synthetic rule or phrase name (T - some text) with the article flag set to (F - a truth state) (this is destructively saying the canonical output form of a synthetic rule or phrase name):
 	let the length be the length of the synthetic text T;
 	if the length is at least two:
 		let the second character code be the character code at index two of the synthetic text T;
@@ -348,7 +351,7 @@ To destructively say the canonical output form of the synthetic rule or phrase n
 				say "[if the current state is transitioning after function name whitespace] [end if][the character code converted to a unicode character]";
 				now the current state is transitioning after a function name symbol.
 
-To decide what text is the canonical output form of the rule or phrase name (T - some text), adding an article if necessary:
+To decide what text is the canonical output form of the rule or phrase name (T - some text), adding an article if necessary (this is determining the canonical output form of a rule or phrase name):
 	let the source be a new synthetic text copied from T;
 	let the maximum length be the length of the synthetic text source plus the length of the synthetic text source text definite article;
 	let the destination be a new uninitialized permanent synthetic text with length maximum length characters;
@@ -358,7 +361,7 @@ To decide what text is the canonical output form of the rule or phrase name (T -
 
 Chapter "Canonical Output Forms of Routine Names" - unindexed
 
-To decide what text is the canonical output form of the routine name (T - some text) for the routine at address (A - a number):
+To decide what text is the canonical output form of the routine name (T - some text) for the routine at address (A - a number) (this is determining the canonical output form of a routine name):
 	let the permanent linked list vertex be the first match for the key A in the veneer routine override hash table;
 	let the annotation be the annotation for the function at address A;
 	let the length be the length of T plus the length of the annotation plus 36;
@@ -368,7 +371,7 @@ To decide what text is the canonical output form of the routine name (T - some t
 
 Chapter "Human-Friendly Output Names"
 
-To decide whether the function at address (A - a number) already has a human-friendly name:
+To decide whether the function at address (A - a number) already has a human-friendly name (this is determining whether a function already has a human-friendly name):
 	decide on whether or not the rule name hash table contains the key A or the phrase name hash table contains the key A or the routine shell hash table contains the key A or the routine name hash table contains the key A.
 
 To decide what text is the human-friendly name for the function at address (A - a number) (this is determining the human-friendly name of a function):
@@ -384,6 +387,7 @@ To decide what text is the human-friendly name for the function at address (A - 
 		if the result is not empty:
 			now the result is the canonical output form of the rule or phrase name result;
 		otherwise:
+			[@]
 			let the routine shell address be the routine shell address of the function at address A;
 			if the routine shell address is not zero:
 				let the shell name be the human-friendly name for the function at address routine shell address;
@@ -403,9 +407,9 @@ Book "Input"
 
 Chapter "Removing Parentheticals and Normalizing Spacing" - unindexed
 
-To decide whether (C - a number) is a character code for punctuation: (- (({C}>=33)&&({C}<=47)||({C}>=58)&&({C}<=64)||({C}>=91)&&({C}<=96)||({C}>=123)&&({C}<=126)) -).
+To decide whether (C - a number) is a character code for punctuation: (- (({C} >= 33) && ({C} <= 47) || ({C} >= 58) && ({C} <= 64) || ({C} >= 91) && ({C} <= 96) || ({C} >= 123) && ({C} <= 126)) -).
 
-To say (T - some text) after removing parentheticals and normalizing spacing:
+To say (T - some text) after removing parentheticals and normalizing spacing (this is saying some text after removing parentheticals and normalizing spacing):
 	let the current state be transitioning to gobble whitespace;
 	let the nesting level be zero;
 	repeat with the character code running through the character codes in the synthetic text T:
@@ -426,7 +430,7 @@ To say (T - some text) after removing parentheticals and normalizing spacing:
 					otherwise:
 						now the current state is transitioning after a function name symbol.
 
-To decide what text is the synthetic text (T - some text) after removing parentheticals and normalizing spacing:
+To decide what text is the synthetic text (T - some text) after removing parentheticals and normalizing spacing (this is removing parentheticals and normalizing spacing):
 	let the length be the length of the synthetic text T;
 	let the destination be a new uninitialized permanent synthetic text with length two times length characters;
 	overwrite the synthetic text destination with the text printed when we say T after removing parentheticals and normalizing spacing;
@@ -466,6 +470,7 @@ To decide what linked list is the list of addresses matching the function name (
 	possibly remove the synthetic text prefix source text indefinite article for vowel sounds from the beginning of the synthetic text name;
 	possibly remove the synthetic text prefix source text indefinite article for consonant sounds from the beginning of the synthetic text name;
 	let the result be an empty linked list;
+	[@]
 	if the synthetic text name begins with the synthetic text kernel prefix and the synthetic text name ends with the synthetic text kernel suffix:
 		let the prefix length be the length of the synthetic text kernel prefix;
 		let the suffix length be the length of the synthetic text kernel suffix;
@@ -566,6 +571,7 @@ when we think about it as a rule, but perhaps
 when we regard it as an I6 routine.  It would have no known names if we treated
 it as a phrase, since it isn't one.
 
+[@]
 There are some complications, first of all because rules and phrases might
 compile to two I6 routines instead of one.  For example, the rule
 
@@ -674,6 +680,7 @@ Similarly, given a name, we can request a set of function addresses:
 
 	the list of addresses matching the function name (T - some text)
 
+[@]
 (Note that the phrase takes text, not indexed text.  If we need to compute the
 name at runtime, we must use synthetic text from the extension Low-Level Text.)
 
@@ -701,6 +708,7 @@ or even
 (In the HTML format that Inform generates, the whitespace issues in the last
 example might not be visible.)
 
+[@]
 Section: Routine shells and kernels
 
 Having the address of a function that might be a kernel, we can ask for
@@ -763,10 +771,10 @@ Third,
 
 	give the veneer routine at address (A - a number) the override flag (F - a truth state) and the routine name (T - some text) and the annotation (Z - some text)
 
-In addition to the function address and a name in a certain category, veneer
-routines are expected to be marked as overridden or not, hence F, and to have an
-explanation of what they do, Z.  Normally all of this data is taken from I6
-Routine Names, and we do not have to worry about it.
+In addition to the function address and a name, veneer routines are expected to
+be marked as overridden or not, hence F, and to have an explanation of what they
+do, Z.  Normally all of this data is taken from I6 Routine Names, and we do not
+have to worry about it.
 
 The final one,
 
@@ -775,6 +783,7 @@ The final one,
 acts much like the other three, but applies to routines that don't fit in any of
 the above categories.
 
+[@]
 Section: Updating routine shells and kernels 
 
 Just as we can associate names with functions, we can also manually associate
@@ -787,6 +796,7 @@ running.
 
 Section: Some words of caution
 
+[@]
 Most text stored by Human-Friendly Function Names is synthetic (see the
 extension Low-Level Text).  As a consequence, a test like
 
@@ -804,9 +814,8 @@ the condition with "is identical to":
 
 Chapter: Requirements, Limitations, and Bugs
 
-This version was tested with Inform 6G60.  It will probably function on newer
-versions, and it may function under slightly older versions, though there is no
-guarantee.
+This version was tested with Inform 6G60.  It may not function under other
+versions.
 
 Section: Regarding bugs
 
@@ -823,30 +832,52 @@ time.
 Chapter: Acknowledgements
 
 Human-Friendly Function Names was prepared as part of the Glulx Runtime
-Instrumentation Project (https://github.com/i7/i7grip).  For this first edition
-of the project, special thanks go to these people, in chronological order:
+Instrumentation Project (https://github.com/i7/i7grip).
 
-- Graham Nelson, Emily Short, and others, not only for Inform, but also for the
-  countless hours the high-quality technical documentation saved me and for the
-  work that made the Glulx VM possible,
+GRIP owes a great deal to everyone who made Inform possible and everyone who
+continues to contribute.  I'd like to give especial thanks to Graham Nelson and
+Emily Short, not only for their design and coding work, but also for all of the
+documentation, both of the language and its internals---it proved indispensable.
 
-- Andrew Plotkin for the Glulx VM and the Glk library, as well as their clear,
-  always up-to-date specifications,
+I am likewise indebted to everybody who worked to make Glulx and Glk a reality.
+Without them, there simply wouldn't have been any hope for this kind of project.
+My special thanks to Andrew Plotkin, with further kudos for his work maintaining
+the specifications.  They proved as essential as Inform's documentation.
 
-- Jacqueline Lott, David Welbourn, and all of the other attendees for Club
-  Floyd, my first connection to the interactive fiction community,
+The project itself was inspired by suggestions from Ron Newcomb and Esteban
+Montecristo on Inform's feature request page.  It's only because of their posts
+that I ever started.  (And here's hoping that late is better than never.)
 
-- Jesse McGrew and Emily Short for getting me involved with Inform 7,
+Esteban Montecristo also made invaluable contributions as an alpha tester.  I
+cannot thank him enough: he signed on as a beta tester but then quickly
+uncovered a slew of problems that forced me to reconsider both the term ``beta''
+and my timeline.  The impetus for the new, cleaner design and several clues that
+led to huge performance improvements are all due to him.  Moreover, he
+contributed code, since modified to fit the revised framework, for the extension
+Verbose Diagnostics.
 
-- all of the Inform 7 developers for their hard work, the ceaseless flow of
-  improvements, and their willingness to take me on as a collaborator,
+As for Ron Newcomb, I can credit him for nearly half of the bugs unearthed in
+the beta proper, not to mention sound advice on the organization of the
+documentation and the extensions.  GRIP is much sturdier as a result.
 
-- Ron Newcomb and Esteban Montecristo for the idea to write Call Stack Tracking
-  and Verbose Diagnostics,
+Roger Carbol, Jesse McGrew, Michael Martin, Dan Shiovitz, Johnny Rivera, and
+probably several others deserve similar thanks for answering questions on
+ifMUD's I6 and I7 channels.  I am grateful to Andrew Plotkin, David Kinder, and
+others for the same sort of help on intfiction.org.
 
-- Roger Carbol, Jesse McGrew, Michael Martin, Dan Shiovitz, Johnny Rivera, and
-  everyone else for their helpful comments on ifMUD's I6 and I7 channels,
+On top of that, David Kinder was kind enough to accommodate Debug File Parsing
+in the Windows IDE; consequently, authors who have a sufficiently recent version
+of Windows no longer need to write batch scripts.  His help is much appreciated,
+particularly because the majority of downloaders are running Windows.
 
-- Esteban Montecristo, for invaluable alpha testing,
+Even with the IDEs creating debug files, setting up symbolic links to those
+files can be a chore.  Jim Aiken suggested an automated solution, which now
+ships with the project.
 
-- and all of the beta testers who are reading this.
+And preliminary support for authors who want to debug inside a browser stems
+from discussion with Erik Temple and Andrew Plotkin; my thanks for their ideas.
+
+Finally, I should take this opportunity to express my gratitude to everyone who
+helped me get involved in the IF community.  Notable among these people are
+Jesse McGrew and Emily Short, not to mention Jacqueline Lott, David Welbourn,
+and all of the other Club Floyd attendees.
