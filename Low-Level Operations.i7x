@@ -131,6 +131,7 @@ Include (-
 	Array LLO_DIGITS --> "0" "1" "2" "3" "4" "5" "6" "7" "8" "9" "A" "B" "C" "D" "E" "F";
 -).
 
+[@@]
 To decide what text is digit (D - a number): (- (LLO_DIGITS-->{D}) -).
 
 To decide what number is the upper bit mask: (- $80000000 -).

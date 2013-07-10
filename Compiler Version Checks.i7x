@@ -53,8 +53,10 @@ Include (-
 
 Chapter "Phrases"
 
+[@@]
 To decide what text is the formatted current compiler version: (- NI_BUILD_COUNT -).
 To decide what number is the current compiler version: (- ConvertNIVersionToNumber(NI_BUILD_COUNT) -).
+[@@]
 To decide what number is compiler version (V - some text): (- ConvertNIVersionToNumber({V}) -).
 
 Compiler Version Checks ends here.

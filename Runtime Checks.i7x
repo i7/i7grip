@@ -104,6 +104,7 @@ To say terminating the story -- ending say_runtime_failure_in -- running on (thi
 
 Chapter "Story Title"
 
+[@@]
 To decide what text is the story title: (- Story -).
 
 Runtime Checks ends here.

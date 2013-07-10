@@ -38,6 +38,7 @@ Book "Synthetic Text"
 
 Chapter "The Synthetic Text Structure" - unindexed
 
+[@@]
 [Layout:
 	4 bytes padding (at offset -8 bytes)
 	4 bytes for the length (at offset -4 bytes)
@@ -47,6 +48,7 @@ Chapter "The Synthetic Text Structure" - unindexed
 
 Chapter "Construction and Destruction of Synthetic Text"
 
+[@@]
 To decide what text is a new uninitialized synthetic text with length (L - a number) character/characters (this is creating uninitialized synthetic text by length):
 	let the result be a memory allocation of L plus ten bytes;
 	increase the result by four;
@@ -56,6 +58,7 @@ To decide what text is a new uninitialized synthetic text with length (L - a num
 	write the byte zero to address result plus L plus one;
 	decide on the result converted to some text.
 
+[@@]
 To decide what text is a new uninitialized permanent synthetic text with length (L - a number) character/characters (this is creating uninitialized permanent synthetic text by length):
 	let the result be a permanent memory allocation of L plus ten bytes;
 	increase the result by four;
@@ -65,6 +68,7 @@ To decide what text is a new uninitialized permanent synthetic text with length 
 	write the byte zero to address result plus L plus one;
 	decide on the result converted to some text.
 
+[@@]
 [We assume that T doesn't change length, for example because of substitutions' side-effects.]
 To decide what text is a new synthetic text copied from (T - some text) (this is copying text to synthetic text):
 	let the length be the length of T;
@@ -75,6 +79,7 @@ To decide what text is a new synthetic text copied from (T - some text) (this is
 	write the byte zero to address result plus the length plus one;
 	decide on the result converted to some text.
 
+[@@]
 [We assume that T doesn't change length, for example because of substitutions' side-effects.]
 To decide what text is a new permanent synthetic text copied from (T - some text) (this is copying text to permanent synthetic text):
 	let the length be the length of T;
@@ -123,14 +128,17 @@ To decide what text is a new permanent synthetic text extracted from the synthet
 	let the array address be the character array address of the synthetic text T plus the beginning index;
 	decide on a new permanent synthetic text extracted from the length bytes at address array address.
 
+[@@]
 To delete the synthetic text (T - some text) (this is deleting synthetic text):
 	let the text address be T converted to a number;
 	free the memory allocation at address text address minus eight.
 
 Chapter "Private Synthetic Text Accessors and Mutators" - unindexed
 
+[@@]
 To write the length (L - a number) to the synthetic text (T - some text): (- llo_setField({T}, -1, {L}); -).
 
+[@@]
 Chapter "Public Synthetic Text Accessors and Mutators"
 
 To decide what number is the length of the synthetic text (T - some text): (- llo_getField({T}, -1) -).
@@ -159,15 +167,18 @@ Include (-
 	#ifndef COCOA_QUIET;
 		llt_oldStream = glk_stream_get_current();
 	#endif;
+		! [@@]
 		llt_oldLength = llo_getField(text, -1);
 		if (llo_cocoaGlkDetected) {
 	#ifndef COCOA_QUIET;
 			glk_stream_set_current(0);
 	#endif;
+			! [@@]
 			llo_cocoaTargetAddress = text + 1;
 			llo_cocoaSpaceRemaining = llt_oldLength;
 			rtrue;
 		}
+		! [@@]
 		llt_stream = glk_stream_open_memory(text + 1, llt_oldLength, filemode_Write, 0);
 		if (llt_stream) {
 			glk_stream_set_current(llt_stream);
@@ -188,9 +199,12 @@ Include (-
 			llt_length = llo_getField(llo_streamToStringMetrics, 1);
 		}
 		if (llt_length < llt_oldLength) {
+			! [@@]
 			llo_setField(text, -1, llt_length);
+			! [@@]
 			llo_setByte(text + llt_length + 1, 0);
 		} else {
+			! [@@]
 			llo_setByte(text + llt_oldLength + 1, 0);
 		}
 	];
@@ -206,6 +220,7 @@ To overwrite the synthetic text (T - some text) with the text printed when we (P
 	@push llt_stream;
 	@push llt_oldLength;
 	@push llt_length;
+	! [@@]
 	llt_oldLength = llo_getField({T}, -1);
 	@getiosys sp sp;
 	if (llo_cocoaGlkDetected) {
@@ -302,6 +317,7 @@ Include (-
 -) after "Definitions.i6t".
 
 To repeat with (I - a nonexisting number variable) running through the character codes in the synthetic text (T - some text) begin -- end: (-
+	! [@@]
 	llt_iterator = {T} + 1;
 	jump LLO_LOOP_{-counter:LLO_LOOP}_ENTRY;
 	for (::)
