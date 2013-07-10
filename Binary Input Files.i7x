@@ -1,4 +1,4 @@
-Version 1 of Binary Input Files (for Glulx only) by Brady Garvin begins here.
+Version 2 of Binary Input Files (for Glulx only) by Brady Garvin begins here.
 
 "A support extension for Debug File Parsing: phrases for reading structured binary data from a persisting stream."
 
@@ -27,7 +27,7 @@ This bewildering statement actually sets up binary input file streams as a quali
 
 Chapter "Use Options" - unindexed
 
-Use a binary input file stream buffer length of at least 65536 translates as (- Constant BIF_BUFFER_LENGTH={N}; -).
+Use a binary input file stream buffer length of at least 65536 translates as (- Constant BIF_BUFFER_LENGTH = {N}; -).
 
 To decide what number is the binary input file stream buffer length: (- BIF_BUFFER_LENGTH -).
 
@@ -40,52 +40,54 @@ An environment check rule (this is the check for dynamic memory allocation to su
 
 Chapter "Messages" - unindexed
 
-To fail at finding an allocated rock for a binary input file:
-	say "[low-level runtime failure in]Binary Input Files[with explanation]I tried to allocated a rock to a binary input file, but they were all in use.  Try defining the I6 constant BIF_ROCK_COUNT as a larger value.  (Currently it is [the maximum number of rocks available for binary input files]).[terminating the story]".
+To fail at finding an allocated rock for a binary input file (this is failing to find an allocated rock for a binary input file):
+	say "[low-level runtime failure in]Binary Input Files[with explanation]I tried to allocate a rock to a binary input file, but they were all in use.  Try defining the I6 constant BIF_ROCK_COUNT as a larger value.  (Currently it is [the maximum number of rocks available for binary input files]).[terminating the story]".
 
-To fail at opening an invalid binary input file stream for a file named (F - some text):
+To fail at opening an invalid binary input file stream for a file named (F - some text) (this is failing to open an invalid binary input file stream for a file):
 	say "[low-level runtime failure in]Binary Input Files[with explanation]I was asked to use an invalid stream to open the file named '[F converted to some text]' (without the surrounding quotes).[terminating the story]".
 
-To fail at opening an invalid binary input file stream for blorb resource (R - a number):
+To fail at opening an invalid binary input file stream for blorb resource (R - a number) (this is failing to open an invalid binary input file stream for a blorb resource):
 	say "[low-level runtime failure in]Binary Input Files[with explanation]I was asked to use an invalid stream to open the resource numbered '[R converted to a number]'.[terminating the story]".
 
-To fail at opening a binary input file stream for a file named (F - some text):
+To fail at opening a binary input file stream for a file named (F - some text) (this is failing to open a binary input file stream for a file):
 	say "[low-level runtime failure in]Binary Input Files[with explanation]I tried to use a stream to open the file named '[F converted to some text]' (without the surrounding quotes), but Glk rejected that file name.  It might be invalid, or I might not have permission to read the file, or the file name might refer to a broken symbolic link, or there might be no such file at all.[terminating the story]".
 
-To fail at opening a binary input file stream for blorb resource (R - a number):
+To fail at opening a binary input file stream for blorb resource (R - a number) (this is failing to open a binary input file stream for a blorb resource):
 	say "[low-level runtime failure in]Binary Input Files[with explanation]I tried to use a stream to open the resource numbered '[R converted to a number]', but Glk rejected that resource number.[terminating the story]".
 
-To fail at clearing position information in a closed binary input file stream:
+To fail at clearing position information in a closed binary input file stream (this is failing to clear position information in a closed binary input file stream):
 	say "[low-level runtime failure in]Binary Input Files[with explanation]I tried to clear position information in a binary input file stream that was closed.  But that doesn't make sense, because I should only make such an attempt after I've successfully opened a stream.[terminating the story]".
 
-To fail at opening a binary input file stream for a second file named (F - some text):
+To fail at opening a binary input file stream for a second file named (F - some text) (this is failing to open a binary input file stream for a second file):
 	say "[low-level runtime failure in]Binary Input Files[with explanation]I tried to use a stream to open the file '[F converted to some text]', but it was already open for reading another file or resource.[terminating the story]".
 
-To fail at opening a binary input file stream for a second resource numbered (R - a number):
+To fail at opening a binary input file stream for a second resource numbered (R - a number) (this is failing to open a binary input file stream for a second resource):
 	say "[low-level runtime failure in]Binary Input Files[with explanation]I tried to use a stream to open the resource numbered '[R converted to a number]', but it was already open for reading another file or resource.[terminating the story]".
 
-To fail at reopening a binary input file stream that isn't open:
+To fail at reopening a binary input file stream that isn't open (this is failing to reopen a binary input file stream that isn't open):
 	say "[low-level runtime failure in]Binary Input Files[with explanation]I tried to decide whether I needed to reopen a file after a restore or an undo, but part of my bookkeeping says yes while the other part says no.  Something must have gone wrong before the save or the undo checkpoint.[terminating the story]".
 
-To fail at using a null binary input file reference for the file named (F - some text):
+To fail at using a null binary input file reference for a file named (F - some text) (this is failing to use a null binary input file reference for a file):
 	say "[low-level runtime failure in]Binary Input Files[with explanation]I asked Glk for a file reference to the file '[F converted to some text]', but it returned null.[terminating the story]".
 
-To fail at scrolling a closed binary input file stream:
+To fail at scrolling a closed binary input file stream (this is failing to scroll a closed binary input file stream):
 	say "[low-level runtime failure in]Binary Input Files[with explanation]I tried to scroll a binary input file stream, but it was closed.[terminating the story]".
 
-To fail at reading (N - a number) bytes when the available bytes are insufficient:
+To fail at reading (N - a number) bytes when the available bytes are insufficient (this is failing to read bytes when the available bytes are insufficient):
 	if N is greater than the binary input file stream buffer length:
 		let the thousands count be N divided by 1000;
 		increment the thousands count;
 		say "[low-level runtime failure in]Binary Input Files[with explanation]I tried to read [N converted to a number] bytes from a binary input file stream, but there weren't that many available.  The buffer size is [the binary input file stream buffer length] bytes, and I can only read that many at once.  If you need a larger buffer, try adding a line like[line break][line break][fixed letter spacing]    Use a binary input file stream buffer length of at least [the thousands count times 1000].[variable letter spacing][warning type][line break][line break]to the source text.[terminating the story]";
 	say "[low-level runtime failure in]Binary Input Files[with explanation]I tried to read [N converted to a number] bytes from a binary input file stream, but there weren't that many available.  The end of the file appeared first.[terminating the story]".
  
-To fail at reading up through character code (C - a number) when the available bytes are insufficient:
+To fail at reading up through character code (C - a number) when the available bytes are insufficient (this is failing to read up through a character code when the available bytes are insufficient):
 	let the thousands count be the binary input file stream buffer length divided by 1000;
 	increment the thousands count;
 	say "[low-level runtime failure in]Binary Input Files[with explanation]I tried to read up through character code [C converted to a number] from a binary input file stream, but there weren't enough bytes available for me to find that code within the span of one buffer.  It may help to know that the buffer size is [the binary input file stream buffer length] bytes.  You can increase it by adding a line like[line break][line break][fixed letter spacing]    Use a binary input file stream buffer length of at least [the thousands count times 1000].[variable letter spacing][warning type][line break][line break]to the source text.[terminating the story]".
 
 Book "Early Adoption" - unindexed
+
+[Because the infglk.h that ships with 6G60 doesn't include this function.]
 
 Include (-
 #ifndef glk_stream_open_resource;
@@ -110,37 +112,21 @@ Include (-
 Chapter "Rock Bookkeeping" - unindexed
 
 Include (-
-	Global bif_rocksAvailable = -1; ! -1 means unknown, since they haven't been allocated yet
+	Global bif_rocksAvailable = -1; ! -1 means unknown, since they haven't been allocated yet.
 	Array bif_rockStack --> BIF_ROCK_COUNT;
-	! Because the previous declarations might appear after their uses in I7, we make accessors and mutators:
-	[ bif_getMinimumRock;
-		return BIF_MINIMUM_ROCK;
-	];
-	[ bif_getRockCount;
-		return BIF_ROCK_COUNT;
-	];
-	[ bif_getRocksAvailable;
-		return bif_rocksAvailable;
-	];
-	[ bif_setRocksAvailable value;
-		bif_rocksAvailable=value;
-	];
-	[ bif_getRockStack;
-		return bif_rockStack;
-	];
--).
+-) after "Definitions.i6t"
 
-To decide what number is the minimum rock available for binary input files: (- bif_getMinimumRock() -).
-To decide what number is the maximum number of rocks available for binary input files: (- bif_getRockCount() -).
-To decide whether the rock (R - a number) is for a binary input file: (- llo_unsignedLessThan({R}-bif_getMinimumRock(),bif_getRockCount()) -)
+To decide what number is the minimum rock available for binary input files: (- BIF_MINIMUM_ROCK -).
+To decide what number is the maximum number of rocks available for binary input files: (- BIF_ROCK_COUNT -).
+To decide whether the rock (R - a number) is for a binary input file: (- llo_unsignedLessThan({R} - BIF_MINIMUM_ROCK, BIF_ROCK_COUNT) -)
 
-To decide what number is the number of rocks available for binary input files: (- bif_getRocksAvailable() -).
-To set the number of rocks available for binary input files to (N - a number): (- bif_setRocksAvailable({N}); -).
-To decide what number is the address of the rock stack for binary input files: (- bif_getRockStack() -).
+To decide what number is the number of rocks available for binary input files: (- bif_rocksAvailable -).
+To set the number of rocks available for binary input files to (N - a number): (- bif_rocksAvailable = {N}; -).
+To decide what number is the address of the rock stack for binary input files: (- bif_rockStack -).
 
 Chapter "Allocation" - unindexed
 
-To allocate rocks for binary input files:
+To allocate rocks for binary input files (this is allocating rocks for binary input files):
 	if the number of rocks available for binary input files is -1:
 		let the limit be the maximum number of rocks available for binary input files;
 		repeat with the index running over the half-open interval from zero to the limit:
@@ -152,7 +138,7 @@ To allocate rocks for binary input files:
 
 Chapter "Popping and Returning Rocks" - unindexed
 
-To decide what number is a binary input file rock popped from the rock stack:
+To decide what number is a binary input file rock popped from the rock stack (this is popping a binary input file rock from the rock stack):
 	allocate rocks for binary input files;
 	let the index be the number of rocks available for binary input files;
 	always check that the index is greater than zero or else fail at finding an allocated rock for a binary input file;
@@ -161,7 +147,7 @@ To decide what number is a binary input file rock popped from the rock stack:
 	let the offset be the index times four;
 	decide on the integer at address address of the rock stack for binary input files plus the offset.
 
-To return the binary input file rock (R - a number) to the rock stack:
+To return the binary input file rock (R - a number) to the rock stack (this is pushing a binary input file onto the rock stack):
 	let the index be the number of rocks available for binary input files;
 	let the offset be the index times four;
 	write the integer R to address address of the rock stack for binary input files plus the offset;
@@ -172,16 +158,17 @@ Book "Binary Input File References" - unindexed
 
 [Now that we support text mode, the extension title is a misnomer.  Oh well.]
 
-To decide what number is a new binary input file reference for the synthetic file name (F - some text): (- glk_fileref_create_by_name(fileusage_Data|fileusage_BinaryMode,{F},0) -).
-To decide what number is a new binary input file reference for the synthetic file name (F - some text) in text mode: (- glk_fileref_create_by_name(fileusage_Data,{F},0) -).
+[@@]
+To decide what number is a new binary input file reference for the synthetic file name (F - some text): (- glk_fileref_create_by_name(fileusage_Data | fileusage_BinaryMode, {F}, 0) -).
+To decide what number is a new binary input file reference for the synthetic file name (F - some text) in text mode: (- glk_fileref_create_by_name(fileusage_Data, {F}, 0) -).
 
-To decide what number is a new binary input file reference for the file name (F - some text):
+To decide what number is a new binary input file reference for the file name (F - some text) (this is creating a binary input file reference):
 	let the synthetic file name be a new synthetic text copied from F;
 	let the result be a new binary input file reference for the synthetic file name synthetic file name;
 	delete the synthetic text synthetic file name;
 	decide on the result.
 
-To decide what number is a new binary input file reference for the file name (F - some text) in text mode:
+To decide what number is a new binary input file reference for the file name (F - some text) in text mode (this is creating a binary input file reference in text mode):
 	let the synthetic file name be a new synthetic text copied from F;
 	let the result be a new binary input file reference for the synthetic file name synthetic file name in text mode;
 	delete the synthetic text synthetic file name;
@@ -191,16 +178,16 @@ To delete the binary input file reference (R - a number): (- glk_fileref_destroy
 
 Book "Binary Input File Stream IDs" - unindexed
 
-To decide what number is a new binary input file stream id for the binary input file reference (R - a number) and rock (RR - a number): (- glk_stream_open_file({R},filemode_Read,{RR}) -).
-To decide what number is a new binary input file stream id for blorb resource (R - a number) and rock (RR - a number): (- glk_stream_open_resource({R},{RR}) -).
-To close the binary input file stream with id (I - a number): (- glk_stream_close({I},0); -).
+To decide what number is a new binary input file stream id for the binary input file reference (R - a number) and rock (K - a number): (- glk_stream_open_file({R}, filemode_Read, {K}) -).
+To decide what number is a new binary input file stream id for blorb resource (R - a number) and rock (K - a number): (- glk_stream_open_resource({R}, {K}) -).
+To close the binary input file stream with id (I - a number): (- glk_stream_close({I}, 0); -).
 
 To decide what number is the current position in the binary input file stream with id (I - a number): (- glk_stream_get_position({I}) -).
-To move the binary input file stream with id (I - a number) to its beginning position: (- glk_stream_set_position({I},0,seekmode_Start); -).
-To move the binary input file stream with id (I - a number) to position (P - a number): (- glk_stream_set_position({I},{P},seekmode_Start); -).
-To move the binary input file stream with id (I - a number) to its end position: (- glk_stream_set_position({I},0,seekmode_End); -).
+To move the binary input file stream with id (I - a number) to its beginning position: (- glk_stream_set_position({I}, 0, seekmode_Start); -).
+To move the binary input file stream with id (I - a number) to position (P - a number): (- glk_stream_set_position({I}, {P}, seekmode_Start); -).
+To move the binary input file stream with id (I - a number) to its end position: (- glk_stream_set_position({I}, 0, seekmode_End); -).
 
-To decide what number is the number of bytes filled after filling the standard buffer at address (B - a number) from the binary input file stream with id (I - a number): (- glk_get_buffer_stream({I},{B},BIF_BUFFER_LENGTH) -).
+To decide what number is the number of bytes filled after filling the standard buffer at address (B - a number) from the binary input file stream with id (I - a number): (- glk_get_buffer_stream({I}, {B}, BIF_BUFFER_LENGTH) -).
 
 Book "Binary Input File Streams"
 
@@ -225,7 +212,7 @@ Chapter "The Binary Input File Stream Structure" - unindexed
 	BIF_BUFFER_LENGTH bytes for the buffer]
 [As it may not be obvious what code is affected by this layout, the affected lines are tagged [BIF LAYOUT SENSITIVE].]
 
-To decide what number is the size in memory of a binary input file stream: (- (36+BIF_BUFFER_LENGTH) -). [BIF LAYOUT SENSITIVE]
+To decide what number is the size in memory of a binary input file stream: (- (36 + BIF_BUFFER_LENGTH) -). [BIF LAYOUT SENSITIVE]
 
 Chapter "Binary Input File Stream Construction and Destruction"
 
@@ -245,30 +232,30 @@ To delete (A - a binary input file stream) (this is deleting a binary input file
 
 Chapter "Private Binary Input File Stream Accessors and Mutators" - unindexed
 
-To write the file name (X - some text) to (A - a binary input file stream): (- llo_setInt({A},{X}); -). [BIF LAYOUT SENSITIVE]
+To write the file name (X - some text) to (A - a binary input file stream): (- llo_setInt({A}, {X}); -). [BIF LAYOUT SENSITIVE]
 
-To write the resource number (X - a number) to (A - a binary input file stream): (- llo_setField({A},1,{X}); -). [BIF LAYOUT SENSITIVE]
+To write the resource number (X - a number) to (A - a binary input file stream): (- llo_setField({A}, 1, {X}); -). [BIF LAYOUT SENSITIVE]
 
-To reset the text mode flag in (A - a binary input file stream): (- llo_setField({A},2,0); -). [BIF LAYOUT SENSITIVE]
-To set the text mode flag in (A - a binary input file stream): (- llo_setField({A},2,1); -). [BIF LAYOUT SENSITIVE]
+To reset the text mode flag in (A - a binary input file stream): (- llo_setField({A}, 2, 0); -). [BIF LAYOUT SENSITIVE]
+To set the text mode flag in (A - a binary input file stream): (- llo_setField({A}, 2, 1); -). [BIF LAYOUT SENSITIVE]
 
-To decide what number is the rock of (A - a binary input file stream): (- llo_getField({A},3) -). [BIF LAYOUT SENSITIVE]
-To write the rock (X - a number) to (A - a binary input file stream): (- llo_setField({A},3,{X}); -). [BIF LAYOUT SENSITIVE]
+To decide what number is the rock of (A - a binary input file stream): (- llo_getField({A}, 3) -). [BIF LAYOUT SENSITIVE]
+To write the rock (X - a number) to (A - a binary input file stream): (- llo_setField({A}, 3, {X}); -). [BIF LAYOUT SENSITIVE]
 
-To decide what number is the stream id of (A - a binary input file stream): (- llo_getField({A},4) -). [BIF LAYOUT SENSITIVE]
-To write the stream id (X - a number) to (A - a binary input file stream): (- llo_setField({A},4,{X}); -). [BIF LAYOUT SENSITIVE]
+To decide what number is the stream id of (A - a binary input file stream): (- llo_getField({A}, 4) -). [BIF LAYOUT SENSITIVE]
+To write the stream id (X - a number) to (A - a binary input file stream): (- llo_setField({A}, 4, {X}); -). [BIF LAYOUT SENSITIVE]
 
-To write the stream position (X - a number) to (A - a binary input file stream): (- llo_setField({A},5,{X}); -). [BIF LAYOUT SENSITIVE]
+To write the stream position (X - a number) to (A - a binary input file stream): (- llo_setField({A}, 5, {X}); -). [BIF LAYOUT SENSITIVE]
 
-To write the end-of-stream position (X - a number) to (A - a binary input file stream): (- llo_setField({A},6,{X}); -). [BIF LAYOUT SENSITIVE]
+To write the end-of-stream position (X - a number) to (A - a binary input file stream): (- llo_setField({A}, 6, {X}); -). [BIF LAYOUT SENSITIVE]
 
-To decide what number is the next buffer offset of (A - a binary input file stream): (- llo_getField({A},7) -). [BIF LAYOUT SENSITIVE]
-To write the next buffer offset (X - a number) to (A - a binary input file stream): (- llo_setField({A},7,{X}); -). [BIF LAYOUT SENSITIVE]
+To decide what number is the next buffer offset of (A - a binary input file stream): (- llo_getField({A}, 7) -). [BIF LAYOUT SENSITIVE]
+To write the next buffer offset (X - a number) to (A - a binary input file stream): (- llo_setField({A}, 7, {X}); -). [BIF LAYOUT SENSITIVE]
 
-To decide what number is the first invalid buffer offset of (A - a binary input file stream): (- llo_getField({A},8) -). [BIF LAYOUT SENSITIVE]
-To write the first invalid buffer offset (X - a number) to (A - a binary input file stream): (- llo_setField({A},8,{X}); -). [BIF LAYOUT SENSITIVE]
+To decide what number is the first invalid buffer offset of (A - a binary input file stream): (- llo_getField({A}, 8) -). [BIF LAYOUT SENSITIVE]
+To write the first invalid buffer offset (X - a number) to (A - a binary input file stream): (- llo_setField({A}, 8, {X}); -). [BIF LAYOUT SENSITIVE]
 
-To decide what number is the buffer address of (A - a binary input file stream): (- ({A}+36) -). [BIF LAYOUT SENSITIVE]
+To decide what number is the buffer address of (A - a binary input file stream): (- ({A} + 36) -). [BIF LAYOUT SENSITIVE]
 
 To clear position information in (A - a binary input file stream) (this is clearing stream position information):
 	always check that A is open or else fail at clearing position information in a closed binary input file stream;
@@ -278,6 +265,7 @@ To clear position information in (A - a binary input file stream) (this is clear
 	write the end-of-stream position the current position in the binary input file stream with id binary input file stream id to A;
 	move the binary input file stream with id binary input file stream id to its beginning position.
 
+[We use a transfer variable, not sp, because we allow {N} in the phrase below to not be a valid assembly operand.]
 Include (-
 	Global bif_transfer;
 -) after "Definitions.i6t".
@@ -285,10 +273,10 @@ Include (-
 [This procedure is hot, so it gets hand optimization.  Note that A must not be a computed value.]
 To advance the stream position and offset by (N - a number) in (A - a binary input file stream): (-
 	@aload {A} 5 bif_transfer; ! stream position [BIF LAYOUT SENSITIVE]
-	bif_transfer=bif_transfer+{N};
+	bif_transfer = bif_transfer + {N};
 	@astore {A} 5 bif_transfer; ! stream position [BIF LAYOUT SENSITIVE]
 	@aload {A} 7 bif_transfer; ! next buffer offset [BIF LAYOUT SENSITIVE]
-	bif_transfer=bif_transfer+{N};
+	bif_transfer = bif_transfer + {N};
 	@astore {A} 7 bif_transfer; ! next buffer offset [BIF LAYOUT SENSITIVE]
 -).
 
@@ -296,15 +284,15 @@ Chapter "Public Binary Input File Stream Accessors and Mutators"
 
 To decide what text is the file name of (A - a binary input file stream): (- llo_getInt({A}) -). [BIF LAYOUT SENSITIVE]
 
-To decide what number is the resource number of (A - a binary input file stream): (- llo_getField({A},1) -). [BIF LAYOUT SENSITIVE]
+To decide what number is the resource number of (A - a binary input file stream): (- llo_getField({A}, 1) -). [BIF LAYOUT SENSITIVE]
 
-To decide whether the text mode flag is set in (A - a binary input file stream): (- llo_getField({A},2) -). [BIF LAYOUT SENSITIVE]
+To decide whether the text mode flag is set in (A - a binary input file stream): (- llo_getField({A}, 2) -). [BIF LAYOUT SENSITIVE]
 
-Definition: a binary input file stream is open rather than closed if I6 condition "llo_getField((*1),4)" says so (it has a non-null stream id). [BIF LAYOUT SENSITIVE]
+Definition: a binary input file stream is open rather than closed if I6 condition "llo_getField((*1), 4)" says so (it has a non-null stream id). [BIF LAYOUT SENSITIVE]
 
-To decide what number is the stream position of (A - a binary input file stream): (- llo_getField({A},5) -). [BIF LAYOUT SENSITIVE]
+To decide what number is the stream position of (A - a binary input file stream): (- llo_getField({A}, 5) -). [BIF LAYOUT SENSITIVE]
 
-To decide what number is the end-of-stream position of (A - a binary input file stream): (- llo_getField({A},6) -). [BIF LAYOUT SENSITIVE]
+To decide what number is the end-of-stream position of (A - a binary input file stream): (- llo_getField({A}, 6) -). [BIF LAYOUT SENSITIVE]
 
 Chapter "Opening and Closing Binary Input File Streams"
 
@@ -322,7 +310,7 @@ To open (A - a binary input file stream) for the binary input file name (F - som
 		now the binary input file reference is a new binary input file reference for the file name F;
 	otherwise:
 		now the binary input file reference is a new binary input file reference for the file name F in text mode;
-	always check that the binary input file reference is not zero or else fail at using a null binary input file reference for the file named F;
+	always check that the binary input file reference is not zero or else fail at using a null binary input file reference for a file named F;
 	let the rock be a binary input file rock popped from the rock stack;
 	let the binary input file stream id be a new binary input file stream id for the binary input file reference binary input file reference and rock rock;
 	always check that the binary input file stream id is not zero or else fail at opening a binary input file stream for a file named F;
@@ -362,7 +350,7 @@ To reopen (A - a binary input file stream) (this is reopening a binary input fil
 			now the binary input file reference is a new binary input file reference for the file name the file name of A;
 		otherwise:
 			now the binary input file reference is a new binary input file reference for the file name the file name of A in text mode;
-		always check that the binary input file reference is not zero or else fail at using a null binary input file reference for the file named the file name of A;
+		always check that the binary input file reference is not zero or else fail at using a null binary input file reference for a file named the file name of A;
 		now the binary input file stream id is a new binary input file stream id for the binary input file reference binary input file reference and rock the rock of A;
 		delete the binary input file reference binary input file reference;
 	always check that the binary input file stream id is not zero or else fail at opening a binary input file stream for a file named the file name of A;
@@ -380,6 +368,8 @@ To close (A - a binary input file stream) (this is closing a binary input file s
 		remove the first occurrence of the key A from the open binary input file stream linked list.
 
 Chapter "Stream Recovery"
+
+[@: We really should use Glk Interception when GRIF is available, but how we do that depends on the resolution of Inform bug 666.]
 
 Section "Stream Recovery Data Structures" - unindexed
 
@@ -413,6 +403,7 @@ A Glulx object-updating rule (this is the tying up loose ends after associating 
 Section "Recovery Shielding" (for use with Glulx Runtime Instrumentation Framework by Brady Garvin)
 
 [If we don't shield IdentifyGlkObject against instrumentation, it or one of its eventual callees might be called for the first time in an instrumented context.  Then GRIF would need to instrument the callee, possibly while the input streams that an instrumentation extension needs for debug information are still invalid or closed.]
+[@: Of course, if we were using Glk Interception, this wouldn't be a problem.  See above.]
 
 To decide what number is the function address of the Glk object identifier: (- IdentifyGlkObject -).
 
@@ -497,9 +488,9 @@ Section "Measuring Distance to a Character Code"
 
 Include (-
 	[ bif_countBytesToCharacter binaryInputFileStream characterCode nextOffset arrayStart arraySize result;
-		nextOffset=llo_getField(binaryInputFileStream,7); ! next buffer offset [BIF LAYOUT SENSITIVE]
-		arrayStart=binaryInputFileStream+36+nextOffset; ! the buffer address + nextOffset [BIF LAYOUT SENSITIVE]
-		arraySize=llo_getField(binaryInputFileStream,8)-nextOffset; ! first invalid buffer offset - nextOffset [BIF LAYOUT SENSITIVE]
+		nextOffset = llo_getField(binaryInputFileStream, 7); ! next buffer offset [BIF LAYOUT SENSITIVE]
+		arrayStart = binaryInputFileStream + 36 + nextOffset; ! the buffer address + nextOffset [BIF LAYOUT SENSITIVE]
+		arraySize = llo_getField(binaryInputFileStream, 8) - nextOffset; ! first invalid buffer offset - nextOffset [BIF LAYOUT SENSITIVE]
 		@linearsearch
 			characterCode ! search for characterCode
 			1             ! size of key in bytes
@@ -513,7 +504,7 @@ Include (-
 	];
 -).
 
-To decide what number is the number of bytes until character code (C - a number) in the buffer of (A - a binary input file stream): (- bif_countBytesToCharacter({A},{C}) -).
+To decide what number is the number of bytes until character code (C - a number) in the buffer of (A - a binary input file stream): (- bif_countBytesToCharacter({A}, {C}) -).
 
 To decide what number is the number of bytes until character code (C - a number) in (A - a binary input file stream) (this is reading from a binary input file stream until a given character code):
 	let the result be the number of bytes until character code C in the buffer of A;
@@ -711,7 +702,7 @@ bytes that we would like to read:
 
 These correspond to one, two, three, and four bytes respectively.  Multi-byte
 words are read in big-endian order.  Reading advances the stream position past
-the data that was read.
+the data that were read.
 
 Section: Reading text
 
@@ -753,9 +744,8 @@ anymore, we should delete it to free up memory:
 
 Chapter: Requirements, Limitations, and Bugs
 
-This version was tested with Inform 6G60.  It will probably function on newer
-versions, and it may function under slightly older versions, though there is no
-guarantee.
+This version was tested with Inform 6G60.  It may not function under other
+versions.
 
 Binary Input Files is willing to keep files open across several turns, whereas
 Inform will normally never do so.  This behavior adds complications to the
@@ -790,13 +780,6 @@ for instance, will assign Binary Input Files the rocks 400 through 449 instead.
 might not display or paste correctly.  Instead, you should open the extension,
 search for "Modified Rock Range", and copy and paste from there.)
 
-Binary Input Files also replaces the I6 stub IdentifyGlkObject with a routine of
-its own.  If other extensions try to do the same, you will receive error
-messages from the I6 compiler.  Consult your local I6 guru (or the gurus on a
-forum like http://www.intfiction.org/forum/) for a fix; the correction to make
-depends on what the other extension is trying to do.  You can also send a bug
-report as explained in the next chapter.
-
 Section: Regarding bugs
 
 If you encounter a bug, check first on the project website
@@ -812,30 +795,52 @@ time.
 Chapter: Acknowledgements
 
 Binary Input Files was prepared as part of the Glulx Runtime Instrumentation
-Project (https://github.com/i7/i7grip).  For this first edition of the project,
-special thanks go to these people, in chronological order:
+Project (https://github.com/i7/i7grip).
 
-- Graham Nelson, Emily Short, and others, not only for Inform, but also for the
-  countless hours the high-quality technical documentation saved me and for the
-  work that made the Glulx VM possible,
+GRIP owes a great deal to everyone who made Inform possible and everyone who
+continues to contribute.  I'd like to give especial thanks to Graham Nelson and
+Emily Short, not only for their design and coding work, but also for all of the
+documentation, both of the language and its internals---it proved indispensable.
 
-- Andrew Plotkin for the Glulx VM and the Glk library, as well as their clear,
-  always up-to-date specifications,
+I am likewise indebted to everybody who worked to make Glulx and Glk a reality.
+Without them, there simply wouldn't have been any hope for this kind of project.
+My special thanks to Andrew Plotkin, with further kudos for his work maintaining
+the specifications.  They proved as essential as Inform's documentation.
 
-- Jacqueline Lott, David Welbourn, and all of the other attendees for Club
-  Floyd, my first connection to the interactive fiction community,
+The project itself was inspired by suggestions from Ron Newcomb and Esteban
+Montecristo on Inform's feature request page.  It's only because of their posts
+that I ever started.  (And here's hoping that late is better than never.)
 
-- Jesse McGrew and Emily Short for getting me involved with Inform 7,
+Esteban Montecristo also made invaluable contributions as an alpha tester.  I
+cannot thank him enough: he signed on as a beta tester but then quickly
+uncovered a slew of problems that forced me to reconsider both the term ``beta''
+and my timeline.  The impetus for the new, cleaner design and several clues that
+led to huge performance improvements are all due to him.  Moreover, he
+contributed code, since modified to fit the revised framework, for the extension
+Verbose Diagnostics.
 
-- all of the Inform 7 developers for their hard work, the ceaseless flow of
-  improvements, and their willingness to take me on as a collaborator,
+As for Ron Newcomb, I can credit him for nearly half of the bugs unearthed in
+the beta proper, not to mention sound advice on the organization of the
+documentation and the extensions.  GRIP is much sturdier as a result.
 
-- Ron Newcomb and Esteban Montecristo for the idea to write Call Stack Tracking
-  and Verbose Diagnostics,
+Roger Carbol, Jesse McGrew, Michael Martin, Dan Shiovitz, Johnny Rivera, and
+probably several others deserve similar thanks for answering questions on
+ifMUD's I6 and I7 channels.  I am grateful to Andrew Plotkin, David Kinder, and
+others for the same sort of help on intfiction.org.
 
-- Roger Carbol, Jesse McGrew, Michael Martin, Dan Shiovitz, Johnny Rivera, and
-  everyone else for their helpful comments on ifMUD's I6 and I7 channels,
+On top of that, David Kinder was kind enough to accommodate Debug File Parsing
+in the Windows IDE; consequently, authors who have a sufficiently recent version
+of Windows no longer need to write batch scripts.  His help is much appreciated,
+particularly because the majority of downloaders are running Windows.
 
-- Esteban Montecristo, for invaluable alpha testing,
+Even with the IDEs creating debug files, setting up symbolic links to those
+files can be a chore.  Jim Aiken suggested an automated solution, which now
+ships with the project.
 
-- and all of the beta testers who are reading this.
+And preliminary support for authors who want to debug inside a browser stems
+from discussion with Erik Temple and Andrew Plotkin; my thanks for their ideas.
+
+Finally, I should take this opportunity to express my gratitude to everyone who
+helped me get involved in the IF community.  Notable among these people are
+Jesse McGrew and Emily Short, not to mention Jacqueline Lott, David Welbourn,
+and all of the other Club Floyd attendees.
