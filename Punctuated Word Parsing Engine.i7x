@@ -1,4 +1,4 @@
-Version 1 of Punctuated Word Parsing Engine (for Glulx only) by Brady Garvin begins here.
+Version 2 of Punctuated Word Parsing Engine (for Glulx only) by Brady Garvin begins here.
 
 "Convenience phrases for the most common use of Context-Free Parsing Engine, parsing sequences of (possibly punctuated) words."
 
@@ -23,28 +23,29 @@ This bewildering statement actually sets up punctuated word arrays as a qualitat
 
 Chapter "Use Options"
 
-Use a punctuated word terminal hash table size of at least 1123 translates as (- Constant PWPE_TERMINAL_HASH_SIZE={N}; -).
+Use a punctuated word terminal hash table size of at least 1123 translates as (- Constant PWPE_TERMINAL_HASH_SIZE = {N}; -).
 
 To decide what number is the punctuated word terminal hash table size: (- PWPE_TERMINAL_HASH_SIZE -).
 
 Chapter "Text Constants"
 
+[@@]
 To decide what text is the parseme placeholder for understand lines: (- "placeholderForAParseme" -).
 
 Book "Runtime Checks"
 
 Chapter "Messages" - unindexed
 
-To fail at building a punctuated word array from changing text:
+To fail at building a punctuated word array from changing text (this is failing to build a punctuated word array from changing text):
 	say "[low-level runtime failure in]Punctuated Word Parsing Engine[with explanation]I tried to build a punctuated word array from some text, which means first counting the number of words and then recording each of them.  But the recording process came up with a different number of words than I had originally counted, which means that this text is changing as I print it.[terminating the story]".
 
-To fail at understand line reentrancy:
+To fail at understanding line reentrancy (this is failing to understand line reentrancy):
 	say "[low-level runtime failure in]Punctuated Word Parsing Engine[with explanation]I tried to interpret an understand line as part of interpreting an understand line.  But I can only handle one at a time.[terminating the story]".
 
-To fail at understanding as multiple tokens:
+To fail at understanding as multiple tokens (this is failing to understand as multiple tokens):
 	say "[low-level runtime failure in]Punctuated Word Parsing Engine[with explanation]I encountered a malformed understand line where the right-hand side was more than a single parseme.  (Sometimes this happens if you forget the square brackets.)[terminating the story]".
 
-To fail at understanding as a single literal word:
+To fail at understanding as a single literal word (this is failing to understand as a single literal word):
 	say "[low-level runtime failure in]Punctuated Word Parsing Engine[with explanation]I encountered a malformed understand line where the right-hand side was a single word rather than a single parseme.  Perhaps the square brackets were forgotten?[terminating the story]".
 
 Book "Punctuated Words"
@@ -70,8 +71,8 @@ Include (-
 		;
 -) after "Definitions.i6t".
 
-To decide whether (C - a number) is a character code for whitespace: (- llo_unsignedLessThanOrEqual({C},32) -).
-To decide whether (C - a number) is a character code for independent punctuation: (- (llo_byteIndex({C},pwpe_punctuation,PWPE_PUNCTUATION_COUNT)~=-1) -).
+To decide whether (C - a number) is a character code for whitespace: (- llo_unsignedLessThanOrEqual({C}, 32) -).
+To decide whether (C - a number) is a character code for independent punctuation: (- (llo_byteIndex({C}, pwpe_punctuation, PWPE_PUNCTUATION_COUNT) ~= -1) -).
 
 Chapter "State Machine" - unindexed
 
@@ -84,7 +85,7 @@ The punctuated word states are
 	and transitioning after nonpunctuation.
 The specification of a punctuated word state is "Punctuated word states are used to classify between-character positions when Punctuated Word Parsing Engine breaks text into punctuated words."
 
-To decide what punctuated word state is the punctuated word state that follows (C - a number):
+To decide what punctuated word state is the punctuated word state that follows (C - a number) (this is transitioning to a punctuated word state):
 	if C is a character code for whitespace:
 		decide on transitioning after whitespace;
 	if C is a character code for independent punctuation:
@@ -95,18 +96,18 @@ To decide what punctuated word state is the punctuated word state that follows (
 		decide on transitioning after a full stop;
 	decide on transitioning after nonpunctuation.
 
-To decide whether (A - a punctuated word state) followed by (B - a punctuated word state) ends a punctuated word:
+To decide whether (A - a punctuated word state) followed by (B - a punctuated word state) ends a punctuated word (this is testing for the end of a punctuated word in the middle of input):
 	decide on whether or not A is transitioning after independent punctuation or A is not transitioning after whitespace and A is not B.
 
-To decide whether (A - a punctuated word state) followed by no punctuated word state ends a punctuated word:
+To decide whether (A - a punctuated word state) followed by no punctuated word state ends a punctuated word (this is testing for the end of a punctuated word at the end of input):
 	decide on whether or not A is not transitioning after whitespace.
 
-To decide whether (A - a punctuated word state) followed by (B - a punctuated word state) begins a punctuated word:
+To decide whether (A - a punctuated word state) followed by (B - a punctuated word state) begins a punctuated word (this is testing for the beginning of a punctuated word):
 	decide on whether or not B is transitioning after independent punctuation or B is not transitioning after whitespace and B is not A.
 
 Chapter "Word Counting"
 
-To decide what number is the punctuated word count of the synthetic text (T - some text):
+To decide what number is the punctuated word count of the synthetic text (T - some text) (this is counting punctuated words):
 	let the result be zero;
 	let the current state be transitioning after whitespace;
 	repeat with the character code running through the character codes in the synthetic text T:
@@ -130,11 +131,11 @@ Section "The Punctuated Word Array Structure" - unindexed
 	4 bytes for the number of words
 	4 bytes per punctuated word]
 
-To decide what number is the size in memory of a punctuated word array for (N - a number) punctuated words: (- (4+4*{N}) -).
+To decide what number is the size in memory of a punctuated word array for (N - a number) punctuated words: (- (4 + 4 * {N}) -).
 
 Section "Punctuated Word Array Construction and Destruction"
 
-To decide what punctuated word array is a new punctuated word array for the synthetic text (T - some text):
+To decide what punctuated word array is a new punctuated word array for the synthetic text (T - some text) (this is creating a punctuated word array from synthetic text):
 	let the word count be the punctuated word count of the synthetic text T;
 	let the size be the size in memory of a punctuated word array for the word count punctuated words;
 	let the result be a memory allocation of size bytes converted to a punctuated word array;
@@ -165,28 +166,28 @@ To decide what punctuated word array is a new punctuated word array for the synt
 	always check that the word index is the word count or else fail at building a punctuated word array from changing text;
 	decide on the result.
 
-To decide what punctuated word array is a new punctuated word array for the nonsynthetic text (T - some text):
+To decide what punctuated word array is a new punctuated word array for the nonsynthetic text (T - some text) (this is creating a punctuated word array from nonsynthetic text):
 	let the copy be a new synthetic text copied from T;
 	let the result be a new punctuated word array for the synthetic text the copy;
 	delete the synthetic text the copy;
 	decide on the result.
 
-To delete (A - a punctuated word array):
+To delete (A - a punctuated word array) (this is deleting a punctuated word array):
 	repeat with the word running through A:
 		delete the synthetic text the word;
 	free the memory allocation at address A converted to a number.
 
 Section "Private Punctuated Word Array Accessors and Mutators" - unindexed
 
-To write the word count (N - a number) to (A - a punctuated word array): (- llo_setInt({A},{N}); -).
+To write the word count (N - a number) to (A - a punctuated word array): (- llo_setInt({A}, {N}); -).
 
-To write (X - some text) to word (I - a number) of (A - a punctuated word array): (- llo_setField({A},1+{I},{X}); -).
+To write (X - some text) to word (I - a number) of (A - a punctuated word array): (- llo_setField({A}, 1 + {I}, {X}); -).
 
 Section "Public Punctuated Word Array Accessors and Mutators"
 
 To decide what number is the word count of (A - a punctuated word array): (- llo_getInt({A}) -).
 
-To decide what text is word (I - a number) of (A - a punctuated word array): (- llo_getField({A},1+{I}) -).
+To decide what text is word (I - a number) of (A - a punctuated word array): (- llo_getField({A}, 1 + {I}) -).
 
 Section "Iteration over Punctuated Word Arrays"
 
@@ -195,55 +196,55 @@ Include (-
 -).
 
 To repeat with (I - a nonexisting text variable) running through (A - a punctuated word array) begin -- end: (-
-	pwpe_iterator=0;
+	pwpe_iterator = 0;
 	jump LLO_LOOP_{-counter:LLO_LOOP}_ENTRY;
-	for(::)
-		if(llo_advance){
+	for (::)
+		if (llo_advance) {
 			@pull pwpe_iterator;
-			if(llo_broken){
+			if (llo_broken) {
 				break;
 			}
 		.LLO_LOOP_{-advance-counter:LLO_LOOP}_ENTRY;
 			pwpe_iterator++;
-			if(pwpe_iterator>llo_getInt({A})){
-				llo_broken=true;
+			if (pwpe_iterator > llo_getInt({A})) {
+				llo_broken = true;
 				break;
 			}
 			@push pwpe_iterator;
-			llo_advance=false;
-			{I}=llo_getField({A},pwpe_iterator);
-		}else for(llo_oneTime=true,llo_broken=true,llo_advance=true:llo_oneTime&&((llo_oneTime=false),true)||(llo_broken=false):)
+			llo_advance = false;
+			{I} = llo_getField({A}, pwpe_iterator);
+		} else for (llo_oneTime = true, llo_broken = true, llo_advance = true: llo_oneTime && ((llo_oneTime = false), true) || (llo_broken = false):)
 -).
 
 To repeat with (I - a nonexisting text variable) running through (A - a punctuated word array) backwards begin -- end: (-
-	pwpe_iterator=llo_getInt({A});
+	pwpe_iterator = llo_getInt({A});
 	jump LLO_LOOP_{-counter:LLO_LOOP}_ENTRY;
-	for(::)
-		if(llo_advance){
+	for (::)
+		if (llo_advance) {
 			@pull pwpe_iterator;
-			if(llo_broken){
+			if (llo_broken) {
 				break;
 			}
 			pwpe_iterator--;
 		.LLO_LOOP_{-advance-counter:LLO_LOOP}_ENTRY;
-			if(pwpe_iterator<=0){
-				llo_broken=true;
+			if (pwpe_iterator <= 0) {
+				llo_broken = true;
 				break;
 			}
 			@push pwpe_iterator;
-			llo_advance=false;
+			llo_advance = false;
 			@aload {A} pwpe_iterator {I};
-		}else for(llo_oneTime=true,llo_broken=true,llo_advance=true:llo_oneTime&&((llo_oneTime=false),true)||(llo_broken=false):)
+		} else for (llo_oneTime = true, llo_broken = true, llo_advance = true: llo_oneTime && ((llo_oneTime = false), true) || (llo_broken = false):)
 -).
 
 Book "Punctuated Word Parsing"
 
 Chapter "The Punctuated Word Terminal Hash Table" - unindexed
 
-[Maps terminal parsemes to the zero or more synthetic texts that they match, *in order*, not as alternatives.  For example the terminal that matches "xyzzy plugh" will be a key with values "xyzzy" and "plugh", where the former comes before the latter in iteration order.]
+[Maps terminal parsemes to the zero or more synthetic texts that they will match, *in order*, not as alternatives.  For example the terminal that matches "xyzzy plugh" will be a key with values "xyzzy" and "plugh", where the former comes before the latter in iteration order.]
 The punctuated word terminal hash table is a hash table that varies.
 
-To ensure that the punctuated word terminal hash table is initialized:
+To ensure that the punctuated word terminal hash table is initialized (this is initializing the punctuated word terminal hash table as necessary):
 	if the punctuated word terminal hash table is an invalid hash table:
 		now the punctuated word terminal hash table is a new hash table with the punctuated word terminal hash table size buckets.
 
@@ -282,20 +283,20 @@ The understand parseme linked list is a linked list that varies.
 
 Definition: a parseme is understanding encoded if the flag for building parsemes from understand text is true.
 
-To say (A - an understanding encoded parseme):
+To say (A - an understanding encoded parseme) (this is saying an understanding encoded parseme):
 	say "[the parseme placeholder for understand lines]";
 	push the key A onto the understand parseme linked list.
 
-To decide what punctuated word array is (T - some text) with parsemes recorded for understanding:
+To decide what punctuated word array is (T - some text) with parsemes recorded for understanding (this is creating a punctuated word array by recording parsemes):
 	if the understand parseme linked list is an invalid linked list:
 		now the understand parseme linked list is an empty linked list;
-	always check that the understand parseme linked list is empty or else fail at understand line reentrancy;
+	always check that the understand parseme linked list is empty or else fail at understanding line reentrancy;
 	now the flag for building parsemes from understand text is true;
 	let the signature be a new punctuated word array for the nonsynthetic text T;
 	now the flag for building parsemes from understand text is false;
 	decide on the signature.
 
-To say (S - a parseme) as a punctuated word terminal:
+To say (S - a parseme) as a punctuated word terminal (this is saying a parseme as a punctuated word terminal):
 	say "'";
 	let the first time flag be true;
 	repeat with the lexeme running through the text values matching the key S in the punctuated word terminal hash table:
@@ -306,7 +307,7 @@ To say (S - a parseme) as a punctuated word terminal:
 		say "[the lexeme]";
 	say "'".
 
-To name (S - a parseme) as a punctuated word terminal:
+To name (S - a parseme) as a punctuated word terminal (this is naming a parseme as a punctuated word terminal):
 	let the length be one;
 	repeat with the lexeme running through the text values matching the key S in the punctuated word terminal hash table:
 		increment the length;
@@ -361,11 +362,11 @@ Chapter "Punctuated Word Content"
 
 Section "Content Accessor and Mutator for Punctuated Word Parsers"
 
-To write the punctuated words of (T - some text) to (A - a context-free parser):
+To write the punctuated words of (T - some text) to (A - a context-free parser) (this is writing punctuated words to a context-free parser):
 	let the words be a new punctuated word array for the nonsynthetic text T;
 	write the content the words and the lexeme count the word count of the words to A.
 
-To delete the punctuated words from (A - a context-free parser):
+To delete the punctuated words from (A - a context-free parser) (this is deleting punctuated words from a context-free parser):
 	delete the punctuated word array content of A.
 
 Section "Private Globals for Text Extraction" - unindexed
@@ -377,7 +378,7 @@ The matched punctuated words accumulator's punctuated word array is a punctuated
 Section "Text Extraction"
 
 [Only works if the parser's content hasn't changed.]
-To decide what text is a new synthetic text representing the words matched by (V - a parse tree vertex):
+To decide what text is a new synthetic text representing the words matched by (V - a parse tree vertex) (this is creating a synthetic text from matched words):
 	let the beginning lexeme index be the beginning lexeme index of V;
 	let the end lexeme index be the end lexeme index of V;
 	now the matched punctuated words accumulator's punctuated word array is the punctuated word array content of the owner of V;
@@ -405,7 +406,7 @@ Section "Recursive Phrase for Saying and Debugging Parse Tree Vertices" - uninde
 
 Line break needed for saying an indented parse tree vertex is a truth state that varies.
 
-To say (A - a parse tree vertex) with indentation (I - a number):
+To say (A - a parse tree vertex) with indentation (I - a number) (this is saying a parse tree vertex with given indentation):
 	let the beginning lexeme index be the beginning lexeme index of A;
 	let the end lexeme index be the end lexeme index of A;
 	let the length be the end lexeme index minus the beginning lexeme index;
@@ -423,7 +424,7 @@ To say (A - a parse tree vertex) with indentation (I - a number):
 
 Section "Public Phrase for Saying and Debugging Parse Tree Vertices"
 
-To say (A - a parse tree vertex) with indentation:
+To say (A - a parse tree vertex) with indentation (this is saying a parse tree vertex with indentation):
 	now line break needed for saying an indented parse tree vertex is false;
 	say A with indentation zero.
 
@@ -445,17 +446,17 @@ The specification of a list of understand texts becoming case-insensitive produc
 
 Section "Understanding Multiple Productions"
 
-To understand (X - a list of understand texts becoming productions for a parseme): (- pwpe_parsemeUnderConstruction=({X}); -).
-To decide what list of understand texts becoming productions for a parseme is (T - some text) or (L - a list of understand texts becoming productions for a parseme): (- {L},(llo_getField((+ understanding an understand text as a production +),1))({T},pwpe_parsemeUnderConstruction) -).
-To decide what list of understand texts becoming productions for a parseme is (T - some text) and (L - a list of understand texts becoming productions for a parseme): (- {L},(llo_getField((+ understanding an understand text as a production +),1))({T},pwpe_parsemeUnderConstruction) -).
-To decide what list of understand texts becoming productions for a parseme is (T - some text) as (S - a parseme): (- pwpe_parsemeUnderConstruction={S},(llo_getField((+ understanding an understand text as a production +),1))({T},pwpe_parsemeUnderConstruction) -).
-To decide what list of understand texts becoming productions for a parseme is (T - some text) as (U - some text): (- pwpe_parsemeUnderConstruction=(llo_getField((+ deciding on a sole parseme +),1))({U}),(llo_getField((+ understanding an understand text as a production +),1))({T},pwpe_parsemeUnderConstruction) -).
+To understand (X - a list of understand texts becoming productions for a parseme): (- pwpe_parsemeUnderConstruction = ({X}); -).
+To decide what list of understand texts becoming productions for a parseme is (T - some text) or (L - a list of understand texts becoming productions for a parseme): (- {L}, (llo_getField((+ understanding an understand text as a production +), 1))({T}, pwpe_parsemeUnderConstruction) -).
+To decide what list of understand texts becoming productions for a parseme is (T - some text) and (L - a list of understand texts becoming productions for a parseme): (- {L}, (llo_getField((+ understanding an understand text as a production +), 1))({T}, pwpe_parsemeUnderConstruction) -).
+To decide what list of understand texts becoming productions for a parseme is (T - some text) as (S - a parseme): (- pwpe_parsemeUnderConstruction = {S}, (llo_getField((+ understanding an understand text as a production +), 1))({T}, pwpe_parsemeUnderConstruction) -).
+To decide what list of understand texts becoming productions for a parseme is (T - some text) as (U - some text): (- pwpe_parsemeUnderConstruction = (llo_getField((+ deciding on a sole parseme +), 1))({U}), (llo_getField((+ understanding an understand text as a production +), 1))({T}, pwpe_parsemeUnderConstruction) -).
 
-To understand (X - a list of understand texts becoming case-insensitive productions for a parseme): (- pwpe_parsemeUnderConstruction=({X}); -).
-To decide what list of understand texts becoming case-insensitive productions for a parseme is (T - some text) or (L - a list of understand texts becoming case-insensitive productions for a parseme): (- {L},(llo_getField((+ understanding an understand text as a production +),1))({T},pwpe_parsemeUnderConstruction,1) -).
-To decide what list of understand texts becoming case-insensitive productions for a parseme is (T - some text) and (L - a list of understand texts becoming case-insensitive productions for a parseme): (- {L},(llo_getField((+ understanding an understand text as a production +),1))({T},pwpe_parsemeUnderConstruction,1) -).
-To decide what list of understand texts becoming case-insensitive productions for a parseme is (T - some text) as (S - a parseme) regardless of case: (- pwpe_parsemeUnderConstruction={S},(llo_getField((+ understanding an understand text as a production +),1))({T},pwpe_parsemeUnderConstruction,1) -).
-To decide what list of understand texts becoming productions for a parseme is (T - some text) as (U - some text) regardless of case: (- pwpe_parsemeUnderConstruction=(llo_getField((+ deciding on a sole parseme +),1))({U}),(llo_getField((+ understanding an understand text as a production +),1))({T},pwpe_parsemeUnderConstruction,1) -).
+To understand (X - a list of understand texts becoming case-insensitive productions for a parseme): (- pwpe_parsemeUnderConstruction = ({X}); -).
+To decide what list of understand texts becoming case-insensitive productions for a parseme is (T - some text) or (L - a list of understand texts becoming case-insensitive productions for a parseme): (- {L}, (llo_getField((+ understanding an understand text as a production +), 1))({T}, pwpe_parsemeUnderConstruction, 1) -).
+To decide what list of understand texts becoming case-insensitive productions for a parseme is (T - some text) and (L - a list of understand texts becoming case-insensitive productions for a parseme): (- {L}, (llo_getField((+ understanding an understand text as a production +), 1))({T}, pwpe_parsemeUnderConstruction, 1) -).
+To decide what list of understand texts becoming case-insensitive productions for a parseme is (T - some text) as (S - a parseme) regardless of case: (- pwpe_parsemeUnderConstruction = {S}, (llo_getField((+ understanding an understand text as a production +), 1))({T}, pwpe_parsemeUnderConstruction, 1) -).
+To decide what list of understand texts becoming productions for a parseme is (T - some text) as (U - some text) regardless of case: (- pwpe_parsemeUnderConstruction = (llo_getField((+ deciding on a sole parseme +), 1))({U}), (llo_getField((+ understanding an understand text as a production +), 1))({T}, pwpe_parsemeUnderConstruction, 1) -).
 
 Punctuated Word Parsing Engine ends here.
 
@@ -494,11 +495,18 @@ lines, which have the form
 
 	understand (TA - some text) and/or (TB - some text) and/or ... and/or (TZ - some text) as (S - a parseme)
 
-where each text could contain other parsemes in brackets.  For instance,
+where each text could contain other parsemes in brackets.  For instance, the two
+understand lines in
 
+	The example parser is a context-free parser that varies.
+	The/-- and Zoe's name are parsemes that vary.
 	When play begins:
+		now the example parser is a new context-free parser;
+		now the/-- is a new nonterminal in the example parser named "the/--";
+		now Zoe's name is a new nonterminal in the example parser named "Zoe's name";
 		understand "" or "the" as the/--;
-		understand "Zoe" or "[the/--] enemy" as Zoe's name.
+		understand "Zoe" or "[the/--] enemy" as Zoe's name;
+		put the example parser into normal form.
 
 generates four new productions, just as one might expect.  Note that terminals
 for matching literal words like "the" or "Zoe" or "enemy" are created
@@ -507,19 +515,25 @@ automatically.
 It is also possible to include quotes and brackets after "as" to more closely
 mimic Inform's understanding syntax:
 
+	...
 	When play begins:
+		...
 		understand "" or "the" as "[the/--]";
-		understand "Zoe" or "[the/--] enemy" as "[Zoe's name]".
+		understand "Zoe" or "[the/--] enemy" as "[Zoe's name]";
+		....
 
 By default, the automatically generated terminals are case-sensitive, so "the
 enemy" will be matched, but not "The Enemy".  To get case-insensitive terminals,
 we add the words "regardless of case" to the end of the phrase:
 
+	...
 	When play begins:
+		...
 		understand "" or "the" as "[the/--]" regardless of case;
-		understand "Zoe" or "[the/--] enemy" as "[Zoe's name]" regardless of case.
+		understand "Zoe" or "[the/--] enemy" as "[Zoe's name]" regardless of case;
+		....
 
-Both terminals can be later identified with the test
+Both of these kinds of terminals can be later identified with the test
 
 	if (S - a parseme) is a punctuated word terminal:
 		....
@@ -745,9 +759,8 @@ which mirrors the outline from Context-Free Parsing Engine's documentation:
 
 Chapter: Requirements, Limitations, and Bugs
 
-This version was tested with Inform 6G60.  It will probably function on newer
-versions, and it may function under slightly older versions, though there is no
-guarantee.
+This version was tested with Inform 6G60.  It may not function under other
+versions.
 
 Section: Regarding bugs
 
@@ -764,30 +777,52 @@ time.
 Chapter: Acknowledgements
 
 Punctuated Word Parsing Engine was prepared as part of the Glulx Runtime
-Instrumentation Project (https://github.com/i7/i7grip).  For this first edition
-of the project, special thanks go to these people, in chronological order:
+Instrumentation Project (https://github.com/i7/i7grip).
 
-- Graham Nelson, Emily Short, and others, not only for Inform, but also for the
-  countless hours the high-quality technical documentation saved me and for the
-  work that made the Glulx VM possible,
+GRIP owes a great deal to everyone who made Inform possible and everyone who
+continues to contribute.  I'd like to give especial thanks to Graham Nelson and
+Emily Short, not only for their design and coding work, but also for all of the
+documentation, both of the language and its internals---it proved indispensable.
 
-- Andrew Plotkin for the Glulx VM and the Glk library, as well as their clear,
-  always up-to-date specifications,
+I am likewise indebted to everybody who worked to make Glulx and Glk a reality.
+Without them, there simply wouldn't have been any hope for this kind of project.
+My special thanks to Andrew Plotkin, with further kudos for his work maintaining
+the specifications.  They proved as essential as Inform's documentation.
 
-- Jacqueline Lott, David Welbourn, and all of the other attendees for Club
-  Floyd, my first connection to the interactive fiction community,
+The project itself was inspired by suggestions from Ron Newcomb and Esteban
+Montecristo on Inform's feature request page.  It's only because of their posts
+that I ever started.  (And here's hoping that late is better than never.)
 
-- Jesse McGrew and Emily Short for getting me involved with Inform 7,
+Esteban Montecristo also made invaluable contributions as an alpha tester.  I
+cannot thank him enough: he signed on as a beta tester but then quickly
+uncovered a slew of problems that forced me to reconsider both the term ``beta''
+and my timeline.  The impetus for the new, cleaner design and several clues that
+led to huge performance improvements are all due to him.  Moreover, he
+contributed code, since modified to fit the revised framework, for the extension
+Verbose Diagnostics.
 
-- all of the Inform 7 developers for their hard work, the ceaseless flow of
-  improvements, and their willingness to take me on as a collaborator,
+As for Ron Newcomb, I can credit him for nearly half of the bugs unearthed in
+the beta proper, not to mention sound advice on the organization of the
+documentation and the extensions.  GRIP is much sturdier as a result.
 
-- Ron Newcomb and Esteban Montecristo for the idea to write Call Stack Tracking
-  and Verbose Diagnostics,
+Roger Carbol, Jesse McGrew, Michael Martin, Dan Shiovitz, Johnny Rivera, and
+probably several others deserve similar thanks for answering questions on
+ifMUD's I6 and I7 channels.  I am grateful to Andrew Plotkin, David Kinder, and
+others for the same sort of help on intfiction.org.
 
-- Roger Carbol, Jesse McGrew, Michael Martin, Dan Shiovitz, Johnny Rivera, and
-  everyone else for their helpful comments on ifMUD's I6 and I7 channels,
+On top of that, David Kinder was kind enough to accommodate Debug File Parsing
+in the Windows IDE; consequently, authors who have a sufficiently recent version
+of Windows no longer need to write batch scripts.  His help is much appreciated,
+particularly because the majority of downloaders are running Windows.
 
-- Esteban Montecristo, for invaluable alpha testing,
+Even with the IDEs creating debug files, setting up symbolic links to those
+files can be a chore.  Jim Aiken suggested an automated solution, which now
+ships with the project.
 
-- and all of the beta testers who are reading this.
+And preliminary support for authors who want to debug inside a browser stems
+from discussion with Erik Temple and Andrew Plotkin; my thanks for their ideas.
+
+Finally, I should take this opportunity to express my gratitude to everyone who
+helped me get involved in the IF community.  Notable among these people are
+Jesse McGrew and Emily Short, not to mention Jacqueline Lott, David Welbourn,
+and all of the other Club Floyd attendees.
