@@ -1,4 +1,4 @@
-Version 1 of Glulx Text Decoding (for Glulx only) by Brady Garvin begins here.
+Version 2 of Glulx Text Decoding (for Glulx only) by Brady Garvin begins here.
 
 "Low-level phrases for looping over the components of substitution-free text, either characters or decoding vertices."
 
@@ -25,26 +25,26 @@ Book "Text Decoding"
 
 Chapter "Printable and Unprintable Characters"
 
-Definition: a Unicode character is printable rather than unprintable if I6 condition "(glk_gestalt_ext(gestalt_CharOutput,*1,0,1)~=gestalt_CharOutput_CannotPrint)" says so (it passes the Glk printability gestalt test).
+Definition: a Unicode character is printable rather than unprintable if I6 condition "(glk_gestalt_ext(gestalt_CharOutput, *1, 0, 1) ~= gestalt_CharOutput_CannotPrint)" says so (it passes the Glk printability gestalt test).
 
 Chapter "Subkinds of Text"
 
-To decide whether (T - some text) could contain null-terminated Latin-1:
+To decide whether (T - some text) could contain null-terminated Latin-1 (this is triaging for null-terminated Latin-1):
 	if T converted to a number is an invalid byte address:
 		decide no;
 	decide on whether or not the byte at address T converted to a number is 224.
 
-To decide whether (T - some text) could contain compressed text:
+To decide whether (T - some text) could contain compressed text (this is triaging for compressed text):
 	if T converted to a number is an invalid byte address:
 		decide no;
 	decide on whether or not the byte at address T converted to a number is 225.
 
-To decide whether (T - some text) could contain null-terminated Unicode:
+To decide whether (T - some text) could contain null-terminated Unicode (this is triaging for null-terminated Unicode):
 	if T converted to a number is an invalid byte address:
 		decide no;
 	decide on whether or not the byte at address T converted to a number is 226.
 
-To decide whether (T - some text) could contain substitution-free text:
+To decide whether (T - some text) could contain [@] substitution-free text (this is triaging for [@] substitution-free text):
 	decide on whether or not address T converted to a number could contain a string.
 
 Chapter "Decoding Vertices"
@@ -65,18 +65,18 @@ Section "Private Decoding Vertex Accessors" - unindexed
 
 To decide what number is the decoding vertex type of (A - a decoding vertex): (- llo_getByte({A}) -).
 
-To decide what Unicode character is the Latin-1 character of (A - a decoding vertex): (- llo_getByte({A}+1) -).
-To decide what Unicode character is the Unicode character of (A - a decoding vertex): (- llo_getInt({A}+1) -).
+To decide what Unicode character is the Latin-1 character of (A - a decoding vertex): (- llo_getByte({A} + 1) -).
+To decide what Unicode character is the Unicode character of (A - a decoding vertex): (- llo_getInt({A} + 1) -).
 
 [It's especially important that this next phrase be private because even if it's called on a decoding vertex where it makes sense, the text it returns will have a wrong indicator byte and therefore not work with phrases that check the indicator.]
 To decide what text is the text of (A - a decoding vertex): (- {A} -).
 
 Section "Public Decoding Vertex Accessors"
 
-To decide whether (A - a decoding vertex) is of unknown type: (- (llo_unsignedGreaterThan(llo_getByte({A}),11)||(llo_getByte({A})==6)||(llo_getByte({A})==7)) -).
+To decide whether (A - a decoding vertex) is of unknown type: (- (llo_unsignedGreaterThan(llo_getByte({A}), 11) || (llo_getByte({A}) == 6) || (llo_getByte({A}) == 7)) -).
 
-[Decides on zero for invalid decoding vertex and indirect references (I6 printing variables).]
-To decide what number is the character length of (A - a decoding vertex):
+[Decides on zero for invalid decoding vertices and indirect references (I6 printing variables).]
+To decide what number is the character length of (A - a decoding vertex) (this is measuring a decoding vertex):
 	if the decoding vertex type of A is:
 		-- 2: [Latin-1 character]
 			decide on one;
@@ -92,7 +92,7 @@ To decide what number is the character length of (A - a decoding vertex):
 
 Section "Decoding Vertex Say Phrases"
 
-To say (A - a decoding vertex):
+To say (A - a decoding vertex) (this is saying a decoding vertex):
 	if the decoding vertex type of A is:
 		-- 2: [Latin-1 character]
 			say "[the Latin-1 character of A]";
@@ -118,120 +118,120 @@ Chapter "Repetition through Text"
 Section "Repetition through Latin-1"
 
 Include (-
-	Global k_iterator;
-	Global k_branchBits;
-	Global k_branchOffset;
+	Global gtd_iterator;
+	Global gtd_bits;
+	Global gtd_offset;
 -) after "Definitions.i6t".
 
 To repeat with (I - a nonexisting Unicode character variable) running with paranoia through the Latin-1 (A - some text) begin -- end: (-
-	k_iterator={A};
+	gtd_iterator = {A};
 	jump LLO_LOOP_{-counter:LLO_LOOP}_ENTRY;
-	for(::)
-		if(llo_advance){
-			@pull k_iterator;
-			if(llo_broken){
+	for (::)
+		if (llo_advance) {
+			@pull gtd_iterator;
+			if (llo_broken) {
 				break;
 			}
 		.LLO_LOOP_{-advance-counter:LLO_LOOP}_ENTRY;
-			k_iterator++;
-			if(~~llo_validByteAddress(k_iterator)){
-				llo_broken=true;
+			gtd_iterator++;
+			if (~~llo_validByteAddress(gtd_iterator)) {
+				llo_broken = true;
 				break;
 			}
-			@aloadb k_iterator 0 {I};
-			if(~~{I}){
-				llo_broken=true;
+			@aloadb gtd_iterator 0 {I};
+			if (~~{I}) {
+				llo_broken = true;
 				break;
 			}
-			@push k_iterator;
-			llo_advance=false;
-		}else for(llo_oneTime=true,llo_broken=true,llo_advance=true:llo_oneTime&&((llo_oneTime=false),true)||(llo_broken=false):)
+			@push gtd_iterator;
+			llo_advance = false;
+		} else for (llo_oneTime = true, llo_broken = true, llo_advance = true: llo_oneTime && ((llo_oneTime = false), true) || (llo_broken = false):)
 -).
 
 Section "Repetition through Unicode"
 
 To repeat with (I - a nonexisting Unicode character variable) running with paranoia through the Unicode (A - some text) begin -- end: (-
-	k_iterator={A};
+	gtd_iterator = {A};
 	jump LLO_LOOP_{-counter:LLO_LOOP}_ENTRY;
-	for(::)
-		if(llo_advance){
-			@pull k_iterator;
-			if(llo_broken){
+	for (::)
+		if (llo_advance) {
+			@pull gtd_iterator;
+			if (llo_broken) {
 				break;
 			}
 		.LLO_LOOP_{-advance-counter:LLO_LOOP}_ENTRY;
-			k_iterator=k_iterator+4;
-			if(~~llo_validIntAddress(k_iterator)){
-				llo_broken=true;
+			gtd_iterator = gtd_iterator + 4;
+			if (~~llo_validIntAddress(gtd_iterator)) {
+				llo_broken = true;
 				break;
 			}
-			@aload k_iterator 0 {I};
-			if(~~{I}){
-				llo_broken=true;
+			@aload gtd_iterator 0 {I};
+			if (~~{I}) {
+				llo_broken = true;
 				break;
 			}
-			@push k_iterator;
-			llo_advance=false;
-		}else for(llo_oneTime=true,llo_broken=true,llo_advance=true:llo_oneTime&&((llo_oneTime=false),true)||(llo_broken=false):)
+			@push gtd_iterator;
+			llo_advance = false;
+		} else for (llo_oneTime = true, llo_broken = true, llo_advance = true: llo_oneTime && ((llo_oneTime = false), true) || (llo_broken = false):)
 -).
 
 Section "Repetition through Compressed Text"
 
 Include (-
-	[ k_getRootDecodingVertex result;
+	[ gtd_getRootDecodingVertex result;
 		@getstringtbl result;
-		return llo_getInt(result+8);
+		return llo_getInt(result + 8);
 	];
 -).
 
 To repeat with (I - a nonexisting decoding vertex variable) running with paranoia through the compressed (T - some text) begin -- end: (-
-	{I}=k_getRootDecodingVertex();
+	{I} = gtd_getRootDecodingVertex();
 	@push {I};
-	k_iterator={T}+1;
-	@aloadb k_iterator 0 k_branchBits;
-	k_branchBits=$10000+k_branchBits;
+	gtd_iterator = {T} + 1;
+	@aloadb gtd_iterator 0 gtd_bits;
+	gtd_bits = $10000 + gtd_bits;
 	jump LLO_LOOP_{-counter:LLO_LOOP}_ENTRY;
-	for(::)
-		if(llo_advance){
-			@pull k_branchBits;
-			@pull k_iterator;
-			if(llo_broken){
+	for (::)
+		if (llo_advance) {
+			@pull gtd_bits;
+			@pull gtd_iterator;
+			if (llo_broken) {
 				@pull {I};
 				break;
 			}
-			if(llo_getByte({I})){
+			if (llo_getByte({I})) {
 				@stkpeek 0 {I};
 			}
 		.LLO_LOOP_{-advance-counter:LLO_LOOP}_ENTRY;
-			llo_broken=true;
-			if(k_branchBits&$100){
-				k_iterator++;
-				if(~~llo_validByteAddress(k_iterator)){
+			llo_broken = true;
+			if (gtd_bits & $100) {
+				gtd_iterator++;
+				if (~~llo_validByteAddress(gtd_iterator)) {
 					@pull {I};
 					break;
 				}
-				@aloadb k_iterator 0 k_branchBits;
-				k_branchBits=$10000+k_branchBits;	
+				@aloadb gtd_iterator 0 gtd_bits;
+				gtd_bits = $10000 + gtd_bits;	
 			}
 			{I}++;
-			k_branchOffset=k_branchBits&1;
-			@aload {I} k_branchOffset {I};
-			if(llo_getByte({I})==1){
+			gtd_offset = gtd_bits & 1;
+			@aload {I} gtd_offset {I};
+			if (llo_getByte({I}) == 1) {
 				@pull {I};
 				break;
 			}
-			@push k_iterator;
-			@ushiftr k_branchBits 1 sp;
-			llo_broken=false;
-			llo_advance=~~llo_getByte({I});
-		}else for(llo_oneTime=true,llo_broken=true,llo_advance=true:llo_oneTime&&((llo_oneTime=false),true)||(llo_broken=false):)
+			@push gtd_iterator;
+			@ushiftr gtd_bits 1 sp;
+			llo_broken = false;
+			llo_advance = ~~llo_getByte({I});
+		} else for (llo_oneTime = true, llo_broken = true, llo_advance = true: llo_oneTime && ((llo_oneTime = false), true) || (llo_broken = false):)
 -).
 
 Chapter "Length of Text"
 
 Section "Length of Latin-1"
 
-To decide what number is the character length of the Latin-1 (T - some text):
+To decide what number is the character length of the Latin-1 (T - some text) (this is measuring Latin-1 text):
 	let the text address be T converted to a number plus one;
 	if the text address is an invalid byte address:
 		decide on -1;
@@ -240,7 +240,7 @@ To decide what number is the character length of the Latin-1 (T - some text):
 
 Section "Length of Unicode"
 
-To decide what number is the character length of the Unicode (T - some text):
+To decide what number is the character length of the Unicode (T - some text) (this is measuring Unicode text):
 	let the text address be T converted to a number plus one;
 	if the text address is an invalid integer address:
 		decide on -1;
@@ -249,7 +249,7 @@ To decide what number is the character length of the Unicode (T - some text):
 
 Section "Length of Compressed Text"
 
-To decide what number is the character length of the compressed (T - some text):
+To decide what number is the character length of the compressed (T - some text) (this is measuring compressed text):
 	let the result be zero;
 	repeat with the decoding vertex running with paranoia through the compressed T:
 		let the addition be the character length of the decoding vertex;
@@ -258,9 +258,9 @@ To decide what number is the character length of the compressed (T - some text):
 		increase the result by the addition;
 	decide on the result.
 
-Section "Length of Substitution-Free Text"
+Section "Length of [@] Substitution-Free Text"
 
-To decide what number is the character length of the substitution-free (T - some text):
+To decide what number is the character length of the [@] substitution-free (T - some text) (this is measuring [@] substitution-free text):
 	let the address be T converted to a number;
 	if the address is zero or the address is an invalid byte address:
 		decide on -1;
@@ -279,23 +279,23 @@ Chapter "Validity of Text"
 
 Section "Validity of Latin-1"
 
-To decide whether (T - some text) is valid Latin-1:
+To decide whether (T - some text) is valid Latin-1 (this is validating Latin-1 text):
 	decide on whether or not the character length of the Latin-1 T is at least zero.
 
 Section "Validity of Unicode"
 
-To decide whether (T - some text) is valid Unicode:
+To decide whether (T - some text) is valid Unicode (this is validating Unicode text):
 	decide on whether or not the character length of the Unicode T is at least zero.
 
 Section "Validity of Compressed Text"
 
-To decide whether (T - some text) is valid compressed text:
+To decide whether (T - some text) is valid compressed text (this is validating compressed text):
 	decide on whether or not the character length of the compressed T is at least zero.
 
-Section "Validity of Substitution-Free Text"
+Section "Validity of [@] Substitution-Free Text"
 
-To decide whether (T - some text) is valid substitution-free text:
-	decide on whether or not the character length of the substitution-free T is at least zero.
+To decide whether (T - some text) is valid [@] substitution-free text (this is validating [@] substitution-free text):
+	decide on whether or not the character length of the [@] substitution-free T is at least zero.
 
 Glulx Text Decoding ends here.
 
@@ -303,7 +303,7 @@ Glulx Text Decoding ends here.
 
 Chapter: Synopsis
 
-Glulx Text Decoding is a low-level extension for measuring and inspecting
+Glulx Text Decoding is a low-level extension for measuring and inspecting [@]
 substitution-free text without printing it or otherwise assuming that it is
 valid.  It is rarely useful except in extensions to support debugging tools.
 
@@ -311,18 +311,20 @@ Details are in the following chapters.
 
 Chapter: Usage
 
-Glulx has three encodings for text, and Inform adds one more for text with
+Glulx has three encodings for text, and Inform adds [@] one more for text with
 substitutions.  Glulx Text Decoding lets us classify texts by encoding and
 inspect the contents of texts in the first three encodings.
 
 Section: Classifying substitution-free text
 
-We can check whether a given text value could be substitution-free via the test
+We can check whether a given text value could be [@] substitution-free via the
+test
 
-	if (T - some text) could contain substitution-free text:
+	if (T - some text) could contain [@] substitution-free text:
 		....
 
-Or, if we are looking for a specific kind of substitution-free text, we can ask
+Or, if we are looking for a specific kind of [@] substitution-free text, we can
+ask
 
 	if (T - some text) could contain null-terminated Latin-1:
 		....
@@ -338,7 +340,7 @@ or
 These tests are designed to be fast but not thorough; they will classify a text
 but they will not check its validity.  For that, we have the conditional
 
-	if (T - some text) is valid substitution-free text:
+	if (T - some text) is valid [@] substitution-free text:
 		....
 
 Or, if we already know that T is a particular kind of text, we could ask
@@ -358,13 +360,13 @@ Note that these last three do not verify that T is the kind of text claimed, and
 if it is the wrong kind, there is no guarantee that the validity test will not
 pass by chance.
 
-Section: Measuring substitution-free text
+Section: Measuring [@] substitution-free text
 
 Given a text, we can count the number of characters in it via
 
-	the character length of the substitution-free (T - some text)
+	the character length of the [@] substitution-free (T - some text)
 
-Length measurements automatically entail a validity check, and if T has
+Length measurements automatically entail a validity check, and if T [@] has
 substitutions or is invalid, this phrase will decide on -1.  If we are
 interested both in checking validity and measuring length, it will be faster to
 request the length and see if -1 is returned than to use the validity-checking
@@ -383,7 +385,7 @@ and
 Unlike the general phrase, these phrases blindly assume that T is of the
 specified type; the result may be anything if we do not ensure that T is.
 
-Section: Looping over substitution-free text
+Section: Looping over [@] substitution-free text
 
 For uncompressed text, we can loop over the constituent characters with
 
@@ -435,16 +437,15 @@ character.
 
 Chapter: Requirements, Limitations, and Bugs
 
-This version was tested with Inform 6G60.  It will probably function on newer
-versions, and it may function under slightly older versions, though there is no
-guarantee.
+This version was tested with Inform 6G60.  It may not function under other
+versions.
 
 The Glulx specification allows the string decoding table to contain calls to
-Glulx functions (see Section 1.6.1.4 of the Glulx specification).  The validity
-of these calls will not checked, nor will their output be counted in length
-measurements.  As best I can tell, this limitation only affects authors who
-store routine addresses in I6 printing variables, and code of this sort will
-break on the Z-machine, so it's not a good idea anyway.
+Glulx functions (see Section 1.6.1.4).  The validity of these calls will not
+checked, nor will their output be counted in length measurements.  As best I can
+tell, this limitation only affects authors who store routine addresses in I6
+printing variables, and code of this sort will break on the Z-machine, so it's
+not a good idea anyway.
 
 Section: Regarding bugs
 
@@ -461,30 +462,52 @@ time.
 Chapter: Acknowledgements
 
 Glulx Text Decoding was prepared as part of the Glulx Runtime Instrumentation
-Project (https://github.com/i7/i7grip).  For this first edition of the project,
-special thanks go to these people, in chronological order:
+Project (https://github.com/i7/i7grip).
 
-- Graham Nelson, Emily Short, and others, not only for Inform, but also for the
-  countless hours the high-quality technical documentation saved me and for the
-  work that made the Glulx VM possible,
+GRIP owes a great deal to everyone who made Inform possible and everyone who
+continues to contribute.  I'd like to give especial thanks to Graham Nelson and
+Emily Short, not only for their design and coding work, but also for all of the
+documentation, both of the language and its internals---it proved indispensable.
 
-- Andrew Plotkin for the Glulx VM and the Glk library, as well as their clear,
-  always up-to-date specifications,
+I am likewise indebted to everybody who worked to make Glulx and Glk a reality.
+Without them, there simply wouldn't have been any hope for this kind of project.
+My special thanks to Andrew Plotkin, with further kudos for his work maintaining
+the specifications.  They proved as essential as Inform's documentation.
 
-- Jacqueline Lott, David Welbourn, and all of the other attendees for Club
-  Floyd, my first connection to the interactive fiction community,
+The project itself was inspired by suggestions from Ron Newcomb and Esteban
+Montecristo on Inform's feature request page.  It's only because of their posts
+that I ever started.  (And here's hoping that late is better than never.)
 
-- Jesse McGrew and Emily Short for getting me involved with Inform 7,
+Esteban Montecristo also made invaluable contributions as an alpha tester.  I
+cannot thank him enough: he signed on as a beta tester but then quickly
+uncovered a slew of problems that forced me to reconsider both the term ``beta''
+and my timeline.  The impetus for the new, cleaner design and several clues that
+led to huge performance improvements are all due to him.  Moreover, he
+contributed code, since modified to fit the revised framework, for the extension
+Verbose Diagnostics.
 
-- all of the Inform 7 developers for their hard work, the ceaseless flow of
-  improvements, and their willingness to take me on as a collaborator,
+As for Ron Newcomb, I can credit him for nearly half of the bugs unearthed in
+the beta proper, not to mention sound advice on the organization of the
+documentation and the extensions.  GRIP is much sturdier as a result.
 
-- Ron Newcomb and Esteban Montecristo for the idea to write Call Stack Tracking
-  and Verbose Diagnostics,
+Roger Carbol, Jesse McGrew, Michael Martin, Dan Shiovitz, Johnny Rivera, and
+probably several others deserve similar thanks for answering questions on
+ifMUD's I6 and I7 channels.  I am grateful to Andrew Plotkin, David Kinder, and
+others for the same sort of help on intfiction.org.
 
-- Roger Carbol, Jesse McGrew, Michael Martin, Dan Shiovitz, Johnny Rivera, and
-  everyone else for their helpful comments on ifMUD's I6 and I7 channels,
+On top of that, David Kinder was kind enough to accommodate Debug File Parsing
+in the Windows IDE; consequently, authors who have a sufficiently recent version
+of Windows no longer need to write batch scripts.  His help is much appreciated,
+particularly because the majority of downloaders are running Windows.
 
-- Esteban Montecristo, for invaluable alpha testing,
+Even with the IDEs creating debug files, setting up symbolic links to those
+files can be a chore.  Jim Aiken suggested an automated solution, which now
+ships with the project.
 
-- and all of the beta testers who are reading this.
+And preliminary support for authors who want to debug inside a browser stems
+from discussion with Erik Temple and Andrew Plotkin; my thanks for their ideas.
+
+Finally, I should take this opportunity to express my gratitude to everyone who
+helped me get involved in the IF community.  Notable among these people are
+Jesse McGrew and Emily Short, not to mention Jacqueline Lott, David Welbourn,
+and all of the other Club Floyd attendees.
