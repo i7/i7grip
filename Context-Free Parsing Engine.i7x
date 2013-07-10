@@ -1,10 +1,10 @@
-Version 1 of Context-Free Parsing Engine (for Glulx only) by Brady Garvin begins here.
+Version 2 of Context-Free Parsing Engine (for Glulx only) by Brady Garvin begins here.
 
 "A library for parsing a generic sequence according to a grammar in Backus-Naur form."
 
 Include Runtime Checks by Brady Garvin.
-Include Object Pools by Brady Garvin.
 Include Low-Level Operations by Brady Garvin.
+Include Object Pools by Brady Garvin.
 Include Low-Level Text by Brady Garvin.
 Include Low-Level Linked Lists by Brady Garvin.
 Include Low-Level Hash Tables by Brady Garvin.
@@ -25,17 +25,17 @@ Book "Extension Information"
 
 This bewildering statement actually sets up parsemes as a qualitative value with default value the parseme at address one, which, as we say, is invalid.  (We could have gone with a quantitative kind for default zero, but then we would open up the possibility for arithmetic on the pointers.)  I wish it weren't necessary, but at least in this build Inform doesn't let us provide a default value any other way, and, moreover, we need a default value or else only I6 substitutions are allowed to decide on parsemes.]
 
-[The convenience phrases can build some lengthy expressions.]
+[The convenience phrases can build some lengthy expressions in the 6G60 parser.]
 Use MAX_EXPRESSION_NODES of 4096.
 
 Chapter "Use Options"
 
-Use a context-free parseme hash table size of at least 311 translates as (- Constant CFPE_PARSEME_HASH_SIZE={N}; -).
-Use a context-free production hash table size of at least 311 translates as (- Constant CFPE_PRODUCTION_HASH_SIZE={N}; -).
+Use a context-free parseme hash table size of at least 311 translates as (- Constant CFPE_PARSEME_HASH_SIZE = {N}; -).
+Use a context-free production hash table size of at least 311 translates as (- Constant CFPE_PRODUCTION_HASH_SIZE = {N}; -).
 
-Use a parse step preallocation of at least 2048 translates as (- Constant CFPE_STEP_PREALLOC={N}; -).
-Use a parse goal preallocation of at least 1024 translates as (- Constant CFPE_GOAL_PREALLOC={N}; -).
-Use a parse tree vertex preallocation of at least 2048 translates as (- Constant CFPE_VERTEX_PREALLOC={N}; -).
+Use a parse step preallocation of at least 2048 translates as (- Constant CFPE_STEP_PREALLOC = {N}; -).
+Use a parse goal preallocation of at least 1024 translates as (- Constant CFPE_GOAL_PREALLOC = {N}; -).
+Use a parse tree vertex preallocation of at least 2048 translates as (- Constant CFPE_VERTEX_PREALLOC = {N}; -).
 
 To decide what number is the context-free parseme hash table size: (- CFPE_PARSEME_HASH_SIZE -).
 To decide what number is the context-free production hash table size: (- CFPE_PRODUCTION_HASH_SIZE -).
@@ -48,43 +48,43 @@ Book "Runtime Checks"
 
 Chapter "Messages" - unindexed
 
-To fail at adding parsemes to a parser already in normal form:
+To fail at adding parsemes to a parser already in normal form (this is failing to add parsemes to a parser already in normal form):
 	say "[low-level runtime failure in]Context Free Parsing Engine[with explanation]I tried to add parsemes to a parser, but it had been already put in normal form, which ought not happen until all parsemes and productions have been added.[terminating the story]".
 
-To fail at adding productions to a parser already in normal form:
+To fail at adding productions to a parser already in normal form (this is failing to add productions to a parser already in normal form):
 	say "[low-level runtime failure in]Context Free Parsing Engine[with explanation]I tried to add productions to a parser, but it had been already put in normal form, which ought not happen until all parsemes and productions have been added.[terminating the story]".
 
-To fail at putting a parser into normal form twice:
+To fail at putting a parser into normal form twice (this is failing to put a parser into normal form twice):
 	say "[low-level runtime failure in]Context Free Parsing Engine[with explanation]I tried to put a parser into normal form, but that had already been done, suggesting a bug.[terminating the story]".
 
-To fail at normalizing an absurd grammar:
+To fail at normalizing an absurd grammar (this is failing to normalize an absurd grammar):
 	say "[low-level runtime failure in]Context-Free Parsing Engine[with explanation]I was given a grammar in which the empty text could be understood as a particular parseme, as could several copies of the parseme itself.  This is a problematic edge case that I don't handle, mostly to keep things simple, but also because it is almost always a bug.[terminating the story]".
 
-To fail at initializing a parser that is not in normal form:
+To fail at initializing a parser that is not in normal form (this is failing to initialize a parser that is not in normal form):
 	say "[low-level runtime failure in]Context Free Parsing Engine[with explanation]I tried parse with a parser that hadn't yet been put in normal form.[terminating the story]".
 
-To fail at initializing a parser with a foreign parseme:
+To fail at initializing a parser with a foreign parseme (this is failing to initialize a parser with a foreign parseme):
 	say "[low-level runtime failure in]Context-Free Parsing Engine[with explanation]I was asked to parse for a parseme in a parser where it doesn't belong.[terminating the story]".
 
-To fail at reinitializing a parser mid-parse:
+To fail at reinitializing a parser mid-parse (this is failing to reinitialize a parser mid-parse):
 	say "[low-level runtime failure in]Context Free Parsing Engine[with explanation]I tried to reinitialize a parser mid-parse, which should never happen.[terminating the story]".
 
-To fail at locating a doppelganger parse tree vertex:
+To fail at locating a doppelganger parse tree vertex (this is failing to locate a doppelganger parse tree vertex):
 	say "[low-level runtime failure in]Context-Free Parsing Engine[with explanation]I cloned a parse tree and then went to find the doppelganger of a vertex from the original tree.  But there was no such vertex, which means that the clone must have failed in a way that is only possible if the original tree's internal state has been corrupted.[terminating the story]".
 
-To fail at making a mismatched unsubstitution:
+To fail at making a mismatched unsubstitution (this is failing to make a mismatched unsubstitution):
 	say "[low-level runtime failure in]Context-Free Parsing Engine[with explanation]I was rewriting a parse tree after finding a match, but my list of rewrites contained a nonsense instruction to replace one vertex with two unrelated ones.  Either the tree or the list must have been corrupted.[terminating the story]".
 
-To fail at unrotating from a nonrotation parseme:
+To fail at unrotating from a nonrotation parseme (this is failing to unrotate from a nonrotation parseme):
 	say "[low-level runtime failure in]Context Free Parsing Engine[with explanation]I was rewriting a parse tree after finding a match, but my list of rewrites contained a instruction that led me to try rotating a wrongly shaped or out-of-bounds region.  Either the tree or the list must have been corrupted.[terminating the story]".
 
-To fail at expanding an already expanded parse tree vertex:
+To fail at expanding an already expanded parse tree vertex (this is failing to expand an already expanded parse tree vertex):
 	say "[low-level runtime failure in]Context Free Parsing Engine[with explanation]I tried to expand a vertex in one of the candidate parse trees, but the vertex was already expanded, a sure sign that I'm confused.[terminating the story]".
 
-To fail at rewriting trivial recursion:
+To fail at rewriting trivial recursion (this is failing to rewrite trivial recursion):
 	say "[low-level runtime failure in]Context Free Parsing Engine[with explanation]I found a production that understand a parseme as itself, even after the code to prune such productions.  Either my data structures have been tampered with or I am confused.[terminating the story]".
 
-To fail at finding a parse step in a consistent state:
+To fail at finding a parse step in a consistent state (this is failing to find a parse step in a consistent state):
 	say "[low-level runtime failure in]Context Free Parsing Engine[with explanation]I found a parse step that gave me a sequence of expansions to use for a production, but that sequence didn't match the production's length.  I must have created that parse step wrongly, or else it has been corrupted.[terminating the story]".
 
 Book "Data Structures"
@@ -127,14 +127,14 @@ To decide what number is the size in memory of a parseme: (- 28 -).
 
 Section "Private Parseme Construction and Destruction" - unindexed
 
-To decide what text is the name for a rotation for (A - a parseme):
+To decide what text is the name for a rotation for (A - a parseme) (this is naming a rotation parseme):
 	let the human-friendly name be the human-friendly name of A;
 	let the length be 13 plus the length of the human-friendly name;
 	let the result be a new uninitialized permanent synthetic text with length the length characters;
 	overwrite the synthetic text the result with the text printed when we say "rotation for [the human-friendly name]";
 	decide on the result.
 
-To decide what parseme is a new rotation parseme for (A - a parseme):
+To decide what parseme is a new rotation parseme for (A - a parseme) (this is creating a rotation parseme):
 	let the result be a permanent memory allocation of the size in memory of a parseme bytes converted to a parseme;
 	zero the size in memory of a parseme bytes at address result converted to a number;
 	let the owner be the owner of A;
@@ -147,7 +147,7 @@ To decide what parseme is a new rotation parseme for (A - a parseme):
 
 Section "Public Parseme Construction"
 
-To decide what parseme is a new terminal in (A - a context-free parser) named (T - some text) and parsed by (P - a phrase (parseme, number) -> nothing):
+To decide what parseme is a new terminal in (A - a context-free parser) named (T - some text) and parsed by (P - a phrase (parseme, number) -> nothing) (this is creating a terminal):
 	check that A is not in normal form or else fail at adding parsemes to a parser already in normal form;
 	let the result be a permanent memory allocation of the size in memory of a parseme bytes converted to a parseme;
 	zero the size in memory of a parseme bytes at address result converted to a number;
@@ -157,47 +157,47 @@ To decide what parseme is a new terminal in (A - a context-free parser) named (T
 	push the key the result onto the parseme linked list of A;
 	decide on the result.
 
-To decide what parseme is a new nonterminal in (A - a context-free parser) named (T - some text) (this is allocating a new nonterminal):
+To decide what parseme is a new nonterminal in (A - a context-free parser) named (T - some text) (this is creating a nonterminal):
 	decide on a new terminal in A named T and parsed by the standard nonterminal parsing phrase.
 
 Section "Private Parseme Accessors and Mutators" - unindexed
 
-To write the human-friendly name (X - some text) to (A - a parseme): (- llo_setInt({A},{X}); -).
+To write the human-friendly name (X - some text) to (A - a parseme): (- llo_setInt({A}, {X}); -).
 
-To write the owner (X - a context-free parser) to (A - a parseme): (- llo_setField({A},1,{X}); -).
+To write the owner (X - a context-free parser) to (A - a parseme): (- llo_setField({A}, 1, {X}); -).
 
-To decide what phrase (parseme, number) -> nothing is the parsing phrase of (A - a parseme): (- llo_getField({A},2) -).
-To write the parsing phrase (X - a phrase (parseme, number) -> nothing) to (A - a parseme): (- llo_setField({A},2,{X}); -).
+To decide what phrase (parseme, number) -> nothing is the parsing phrase of (A - a parseme): (- llo_getField({A}, 2) -).
+To write the parsing phrase (X - a phrase (parseme, number) -> nothing) to (A - a parseme): (- llo_setField({A}, 2, {X}); -).
 
 To decide what permanent linked list is the production linked list of (A - a parseme): (- ({A}-->3) -).
-To write the production linked list (X - a permanent linked list) to (A - a parseme): (- llo_setField({A},3,{X}); -).
+To write the production linked list (X - a permanent linked list) to (A - a parseme): (- llo_setField({A}, 3, {X}); -).
 
-To decide what parseme is the original parseme of (A - a parseme): (- llo_getField({A},4) -).
-To write the original parseme (X - a parseme) to (A - a parseme): (- llo_setField({A},4,{X}); -).
+To decide what parseme is the original parseme of (A - a parseme): (- llo_getField({A}, 4) -).
+To write the original parseme (X - a parseme) to (A - a parseme): (- llo_setField({A}, 4, {X}); -).
 
 To decide what linked list is the parse attempt linked list of (A - a parseme): (- ({A}-->5) -).
-To write the parse attempt linked list (X - a linked list) to (A - a parseme): (- llo_setField({A},5,{X}); -).
+To write the parse attempt linked list (X - a linked list) to (A - a parseme): (- llo_setField({A}, 5, {X}); -).
 
 To decide what linked list is the parse step linked list of (A - a parseme): (- ({A}-->6) -).
-To write the parse step linked list (X - a linked list) to (A - a parseme): (- llo_setField({A},6,{X}); -).
+To write the parse step linked list (X - a linked list) to (A - a parseme): (- llo_setField({A}, 6, {X}); -).
 
 Section "Public Parseme Accessors and Mutators"
 
 To decide what text is the human-friendly name of (A - a parseme): (- llo_getInt({A}) -).
 
-To decide what context-free parser is the owner of (A - a parseme): (- llo_getField({A},1) -).
+To decide what context-free parser is the owner of (A - a parseme): (- llo_getField({A}, 1) -).
 
-To decide whether (A - a parseme) is a terminal:
+To decide whether (A - a parseme) is a terminal (this is testing for a terminal):
 	decide on whether or not the parsing phrase of A is not the standard nonterminal parsing phrase.
-To decide whether (A - a parseme) is a nonterminal:
+To decide whether (A - a parseme) is a nonterminal (this is testing for a nonterminal):
 	decide on whether or not the parsing phrase of A is the standard nonterminal parsing phrase.
 
 Section "Saying and Debugging Parsemes"
 
-To say (A - a parseme):
+To say (A - a parseme) (this is saying a parseme):
 	say "(parseme [A converted to a number in hexadecimal]: [the human-friendly name of A])".
 
-To say the productions of (A - a parseme):
+To say the productions of (A - a parseme) (this is saying the productions of a parseme):
 	if the production linked list of A is empty:
 		say "    (no productions)[line break]";
 	otherwise:
@@ -235,7 +235,7 @@ To decide what number is the size in memory of a production: (- 24 -).
 
 Section "Helper Functions for Production Construction and Destruction" - unindexed
 
-To decide what permanent linked list is (A - a permanent linked list) without its first vertex:
+To decide what permanent linked list is (A - a permanent linked list) without its first vertex (this is skipping a linked list vertex):
 	if A is empty:
 		decide on an empty permanent linked list;
 	let the result be the link of A converted to a linked list vertex;
@@ -244,7 +244,7 @@ To decide what permanent linked list is (A - a permanent linked list) without it
 Section "Private Production Construction and Destruction" - unindexed
 
 [With this constructor we are lazy and do *not* ascribe the new production to its left-hand parseme.  This construction is really only useful for normalization, which is going to redo the production linked list anyway.]
-To decide what production is a new production with (I - a production) substituted in for the first right-hand parseme of (O - a production):
+To decide what production is a new production with (I - a production) substituted in for the first right-hand parseme of (O - a production) (this is creating a production by substitution):
 	let the result be a permanent memory allocation of the size in memory of a production bytes converted to a production;
 	zero the size in memory of a production bytes at address result converted to a number;
 	write the left-hand parseme the left-hand parseme of O to the result;
@@ -265,7 +265,7 @@ To decide what production is a new production with (I - a production) substitute
 
 Section "Public Production Construction and Destruction"
 
-To decide what production is a new production for (S - a parseme):
+To decide what production is a new production for (S - a parseme) (this is creating a production):
 	always check that the owner of S is not in normal form or else fail at adding productions to a parser already in normal form;
 	let the result be a permanent memory allocation of the size in memory of a production bytes converted to a production;
 	zero the size in memory of a production bytes at address result converted to a number;
@@ -276,24 +276,24 @@ To decide what production is a new production for (S - a parseme):
 Section "Private Production Accessors and Mutators" - unindexed
 
 To decide what parseme is the left-hand parseme of (A - a production): (- llo_getInt({A}) -).
-To write the left-hand parseme (X - a parseme) to (A - a production): (- llo_setInt({A},{X}); -).
+To write the left-hand parseme (X - a parseme) to (A - a production): (- llo_setInt({A}, {X}); -).
 
 To decide what permanent linked list is the right-hand parseme linked list of (A - a production): (- ({A}-->1) -).
-To write the right-hand parseme linked list (X - a permanent linked list) to (A - a production): (- llo_setField({A},1,{X}); -).
+To write the right-hand parseme linked list (X - a permanent linked list) to (A - a production): (- llo_setField({A}, 1, {X}); -).
 
 To decide what permanent linked list tail is the right-hand parseme linked list tail of (A - a production): (- ({A}-->2) -).
-To write the right-hand parseme linked list tail (X - a permanent linked list tail) to (A - a production): (- llo_setField({A},2,{X}); -).
+To write the right-hand parseme linked list tail (X - a permanent linked list tail) to (A - a production): (- llo_setField({A}, 2, {X}); -).
 
-To decide what production is the inner production of (A - a production): (- llo_getField({A},3) -).
-To write the inner production (X - a production) to (A - a production): (- llo_setField({A},3,{X}); -).
+To decide what production is the inner production of (A - a production): (- llo_getField({A}, 3) -).
+To write the inner production (X - a production) to (A - a production): (- llo_setField({A}, 3, {X}); -).
 
-To decide what production is the outer production of (A - a production): (- llo_getField({A},4) -).
-To write the outer production (X - a production) to (A - a production): (- llo_setField({A},4,{X}); -).
+To decide what production is the outer production of (A - a production): (- llo_getField({A}, 4) -).
+To write the outer production (X - a production) to (A - a production): (- llo_setField({A}, 4, {X}); -).
 
-To decide what number is the substitution size of (A - a production): (- llo_getField({A},5) -).
-To write the substitution size (X - a number) to (A - a production): (- llo_setField({A},5,{X}); -).
+To decide what number is the substitution size of (A - a production): (- llo_getField({A}, 5) -).
+To write the substitution size (X - a number) to (A - a production): (- llo_setField({A}, 5, {X}); -).
 
-To decide what parseme is the first right-hand parseme of (P - a production):
+To decide what parseme is the first right-hand parseme of (P - a production) (this is determining a production's first right-hand parseme):
 	let the linked list vertex be the right-hand parseme linked list of P converted to a permanent linked list vertex;
 	if the linked list vertex is null:
 		decide on a null parseme;
@@ -301,22 +301,22 @@ To decide what parseme is the first right-hand parseme of (P - a production):
 
 Section "Public Production Accessors and Mutators"
 
-To decide what context-free parser is the owner of (A - a production):
+To decide what context-free parser is the owner of (A - a production) (this is determining a production's owner):
 	decide on the owner of the left-hand parseme of A.
 
-To prepend (S - a parseme) to (A - a production):
+To prepend (S - a parseme) to (A - a production) (this is prepending a parseme to a production):
 	[This is somewhat less than ideal: we depend on the internals of linked lists.  If we have to do this anywhere else, it would be better to create a phrase in Low-Level Linked Lists.]
 	push the key S onto the right-hand parseme linked list of A;
 	if the right-hand parseme linked list of A is unit:
 		let the tail be the right-hand parseme linked list of A converted to a permanent linked list tail;
 		write the right-hand parseme linked list tail the tail to A.
 
-To append (S - a parseme) to (A - a production):
+To append (S - a parseme) to (A - a production) (this is appending a parseme to a production):
 	enqueue the key S in the right-hand parseme linked list of A through the right-hand parseme linked list tail of A.
 
 Section "Saying and Debugging Productions"
 
-To say (A - a production):
+To say (A - a production) (this is saying a production):
 	if A is an invalid production:
 		say "<invalid production>";
 	otherwise:
@@ -348,13 +348,13 @@ To decide what number is the size in memory of a parse tree rewrite: (- 8 -).
 
 Section "Parse Tree Rewrite Construction and Destruction" - unindexed
 
-To decide what parse tree rewrite is a new tree unsubstitution rewrite for (P - a production):
+To decide what parse tree rewrite is a new tree unsubstitution rewrite for (P - a production) (this is creating a tree unsubstitution):
 	let the result be a permanent memory allocation of the size in memory of a parse tree rewrite bytes converted to a parse tree rewrite;
 	write the rewriting phrase unsubstituting a production to the result;
 	write the production P to the result;
 	decide on the result.
 
-To decide what parse tree rewrite is a new tree rotation rewrite for (P - a production):
+To decide what parse tree rewrite is a new tree rotation rewrite for (P - a production) (this is creating a tree rotation):
 	let the result be a permanent memory allocation of the size in memory of a parse tree rewrite bytes converted to a parse tree rewrite;
 	write the rewriting phrase rotating a production to the result;
 	write the production P to the result;
@@ -363,14 +363,14 @@ To decide what parse tree rewrite is a new tree rotation rewrite for (P - a prod
 Section "Parse Tree Rewrite Accessors and Mutators" - unindexed
 
 To decide what phrase production -> nothing is the rewriting phrase of (A - a parse tree rewrite): (- llo_getInt({A}) -).
-To write the rewriting phrase (X - a phrase production -> nothing) to (A - a parse tree rewrite): (- llo_setInt({A},{X}); -).
+To write the rewriting phrase (X - a phrase production -> nothing) to (A - a parse tree rewrite): (- llo_setInt({A}, {X}); -).
 
-To decide what production is the production of (A - a parse tree rewrite): (- llo_getField({A},1) -).
-To write the production (X - a production) to (A - a parse tree rewrite): (- llo_setField({A},1,{X}); -).
+To decide what production is the production of (A - a parse tree rewrite): (- llo_getField({A}, 1) -).
+To write the production (X - a production) to (A - a parse tree rewrite): (- llo_setField({A}, 1, {X}); -).
 
 Section "Saying and Debugging Parse Tree Rewrites" - unindexed
 
-To say (A - a parse tree rewrite):
+To say (A - a parse tree rewrite) (this is saying a parse tree rewrite):
 	let the rewriting phrase be the rewriting phrase of A;
 	say "[if the rewriting phrase is unsubstituting a production]unsubstitution of[otherwise if the rewriting phrase is rotating a production]rotation of[otherwise]custom operation ([the rewriting phrase]) on[end if] [the production of A]".
 
@@ -394,19 +394,19 @@ Section "Helper Variables and Functions for Parse Step Construction and Destruct
 
 The parse step object pool is an object pool that varies.
 
-To ensure that the parse step object pool is initialized:
+To ensure that the parse step object pool is initialized (this is initializing the parse step object pool as necessary):
 	if the parse step object pool is an invalid object pool:
 		now the parse step object pool is a new permanent object pool with the parse step preallocation objects of size the size in memory of a parse step bytes.
 
 Section "Parse Step Construction and Destruction" - unindexed
 
-To decide what parse step is a new parse step ending at lexeme index (I - a number):
+To decide what parse step is a new parse step ending at lexeme index (I - a number) (this is creating a parse step by end lexeme index):
 	let the result be a memory allocation from the parse step object pool converted to a parse step;
 	zero the size in memory of a parse step bytes at address result converted to a number;
 	write the end lexeme index I to the result;
 	decide on the result.
 
-To decide what parse step is a new parse step for (P - a production) ending at lexeme index (I - a number):
+To decide what parse step is a new parse step for (P - a production) ending at lexeme index (I - a number) (this is creating a parse step by production and end lexeme index):
 	let the result be a new parse step ending at lexeme index I;
 	write the production P to the result;
 	decide on the result.
@@ -414,13 +414,13 @@ To decide what parse step is a new parse step for (P - a production) ending at l
 Section "Parse Step Accessors and Mutators" - unindexed
 
 To decide what production is the production of (A - a parse step): (- llo_getInt({A}) -).
-To write the production (X - a production) to (A - a parse step): (- llo_setInt({A},{X}); -).
+To write the production (X - a production) to (A - a parse step): (- llo_setInt({A}, {X}); -).
 
 To decide what linked list is the children linked list of (A - a parse step): (- ({A}-->1) -).
-To write the children linked list (X - a linked list) to (A - a parse step): (- llo_setField({A},1,{X}); -).
+To write the children linked list (X - a linked list) to (A - a parse step): (- llo_setField({A}, 1, {X}); -).
 
-To decide what number is the end lexeme index of (A - a parse step): (- llo_getField({A},2) -).
-To write the end lexeme index (X - a number) to (A - a parse step): (- llo_setField({A},2,{X}); -).
+To decide what number is the end lexeme index of (A - a parse step): (- llo_getField({A}, 2) -).
+To write the end lexeme index (X - a number) to (A - a parse step): (- llo_setField({A}, 2, {X}); -).
 
 Part "Mixed-Purpose Data Structures"
 
@@ -430,7 +430,7 @@ Section "The Parse Tree Vertex Kind"
 
 A parse tree vertex is a kind of value.  The plural of parse tree vertex is parse tree vertices.
 A parse tree vertex is an invalid parse tree vertex.  [See the note in the book "Extension Information."]
-The specification of a parse tree vertex is "A parse tree vertex represents all of the input matched by a single occurrence of a parseme.  For instance, if a parseme X matches two occurrences of the parseme Y, and the parseme Y matches the literal text 'z', a parse of the text 'zz' would have three parse tree vertices: one for each time Y matched a 'z' and another for X matching the whole input.  We think of these vertices as organized in a family tree where children vertices constitute their parents, and when we describe adjacent siblings, we say that the vertex that matched earlier input is on the left.  Thus, Y has two vertices, one on the left and one on the right, and their parent is X's vertex."
+The specification of a parse tree vertex is "A parse tree vertex represents all of the input matched by a single occurrence of a parseme.  For instance, if a parseme X matches two occurrences of the parseme Y, and the parseme Y matches the literal text 'z', a parse of the text 'zz' would have three parse tree vertices: one for each time Y matched a 'z' and another for X matching the whole input.  We think of these vertices as organized in a family tree where children vertices constitute their parents, and, when we describe adjacent siblings, we say that the vertex that matched earlier input is on the left.  Thus, Y has two vertices, one on the left and one on the right, and their parent is X's vertex."
 
 Section "Parse Tree Vertex Constants"
 
@@ -459,13 +459,13 @@ Section "Helper Variables and Functions for Parse Tree Vertex Construction and D
 
 The parse tree vertex object pool is an object pool that varies.
 
-To ensure that the parse tree vertex object pool is initialized:
+To ensure that the parse tree vertex object pool is initialized (this is initializing the parse tree vertex object pool as necessary):
 	if the parse tree vertex object pool is an invalid object pool:
 		now the parse tree vertex object pool is a new permanent object pool with the parse tree vertex preallocation objects of size the size in memory of a parse tree vertex bytes.
 
 The doppelganger parse tree vertex is a parse tree vertex that varies.
 
-To decide what parse tree vertex is a clone of (A - a parse tree vertex) with the doppelganger noted for (B - a parse tree vertex):
+To decide what parse tree vertex is a clone of (A - a parse tree vertex) with the doppelganger noted for (B - a parse tree vertex) (this is creating a parse tree vertex by cloning and noting a doppelganger):
 	let the result be a memory allocation from the parse tree vertex object pool converted to a parse tree vertex;
 	if A is B:
 		now the doppelganger parse tree vertex is the result;
@@ -486,13 +486,13 @@ To decide what parse tree vertex is a clone of (A - a parse tree vertex) with th
 
 Section "Private Parse Tree Vertex Construction and Destruction" - unindexed
 
-To decide what parse tree vertex is a new parse tree root for (S - a parseme):
+To decide what parse tree vertex is a new parse tree root for (S - a parseme) (this is creating a parse tree root):
 	let the result be a memory allocation from the parse tree vertex object pool converted to a parse tree vertex;
 	zero the size in memory of a parse tree vertex bytes at address result converted to a number;
 	write the parseme S to the result;
 	decide on the result.
 
-To decide what parse tree vertex is a new parse tree vertex for (S - a parseme) with the parent (A - a parse tree vertex), placed on the left:
+To decide what parse tree vertex is a new parse tree vertex for (S - a parseme) with the parent (A - a parse tree vertex), placed on the left (this is creating a parse tree vertex by parseme and parent):
 	let the result be a memory allocation from the parse tree vertex object pool converted to a parse tree vertex;
 	zero the size in memory of a parse tree vertex bytes at address result converted to a number;
 	write the parseme S to the result;
@@ -515,12 +515,12 @@ To decide what parse tree vertex is a new parse tree vertex for (S - a parseme) 
 		write the last child the result to A;
 	decide on the result.
 
-To delete (A - a parse tree vertex) but not its descendants:
+To delete (A - a parse tree vertex) but not its descendants (this is deleting an individual parse tree vertex):
 	free the memory allocation at address (A converted to a number) to the parse tree vertex object pool.
 
 Section "Public Parse Tree Vertex Construction and Destruction"
 
-To decide what parse tree vertex is the parse tree vertex corresponding to (A - a parse tree vertex) in a new clone of its tree:
+To decide what parse tree vertex is the parse tree vertex corresponding to (A - a parse tree vertex) in a new clone of its tree (this is creating a parse tree vertex by cloning):
 	let the root be the root of A;
 	now the doppelganger parse tree vertex is a null parse tree vertex;
 	let the cloned root be a clone of the root with the doppelganger noted for A;
@@ -537,77 +537,77 @@ To delete (A - a parse tree vertex) and its descendants (this is deleting a pars
 
 Section "Private Parse Tree Vertex Mutators" - unindexed
 
-To write the parseme (X - a parseme) to (A - a parse tree vertex): (- llo_setInt({A},{X}); -).
+To write the parseme (X - a parseme) to (A - a parse tree vertex): (- llo_setInt({A}, {X}); -).
 
-To write the production (X - a production) to (A - a parse tree vertex): (- llo_setField({A},1,{X}); -).
+To write the production (X - a production) to (A - a parse tree vertex): (- llo_setField({A}, 1, {X}); -).
 
-To write the parent (X - a parse tree vertex) to (A - a parse tree vertex): (- llo_setField({A},2,{X}); -).
+To write the parent (X - a parse tree vertex) to (A - a parse tree vertex): (- llo_setField({A}, 2, {X}); -).
 
-To write the first child (X - a parse tree vertex) to (A - a parse tree vertex): (- llo_setField({A},3,{X}); -).
+To write the first child (X - a parse tree vertex) to (A - a parse tree vertex): (- llo_setField({A}, 3, {X}); -).
 
-To write the last child (X - a parse tree vertex) to (A - a parse tree vertex): (- llo_setField({A},4,{X}); -).
+To write the last child (X - a parse tree vertex) to (A - a parse tree vertex): (- llo_setField({A}, 4, {X}); -).
 
-To write the left sibling (X - a parse tree vertex) to (A - a parse tree vertex): (- llo_setField({A},5,{X}); -).
+To write the left sibling (X - a parse tree vertex) to (A - a parse tree vertex): (- llo_setField({A}, 5, {X}); -).
 
-To write the right sibling (X - a parse tree vertex) to (A - a parse tree vertex): (- llo_setField({A},6,{X}); -).
+To write the right sibling (X - a parse tree vertex) to (A - a parse tree vertex): (- llo_setField({A}, 6, {X}); -).
 
-To write the beginning lexeme index (X - a number) to (A - a parse tree vertex): (- llo_setField({A},7,{X}); -).
+To write the beginning lexeme index (X - a number) to (A - a parse tree vertex): (- llo_setField({A}, 7, {X}); -).
 
 Section "Public Parse Tree Vertex Accessors"
 
 To decide what parseme is the parseme of (A - a parse tree vertex): (- llo_getInt({A}) -).
 
-To decide what production is the production of (A - a parse tree vertex): (- llo_getField({A},1) -).
+To decide what production is the production of (A - a parse tree vertex): (- llo_getField({A}, 1) -).
 
-To decide whether (A - a parse tree vertex) is a root: (- (~~llo_getField({A},2)) -).
-To decide whether (A - a parse tree vertex) is not a root: (- llo_getField({A},2) -).
-To decide what parse tree vertex is the parent of (A - a parse tree vertex): (- llo_getField({A},2) -).
+To decide whether (A - a parse tree vertex) is a root: (- (~~llo_getField({A}, 2)) -).
+To decide whether (A - a parse tree vertex) is not a root: (- llo_getField({A}, 2) -).
+To decide what parse tree vertex is the parent of (A - a parse tree vertex): (- llo_getField({A}, 2) -).
 
-To decide what parse tree vertex is the first child of (A - a parse tree vertex): (- llo_getField({A},3) -).
+To decide what parse tree vertex is the first child of (A - a parse tree vertex): (- llo_getField({A}, 3) -).
 
-To decide what parse tree vertex is the last child of (A - a parse tree vertex): (- llo_getField({A},4) -).
+To decide what parse tree vertex is the last child of (A - a parse tree vertex): (- llo_getField({A}, 4) -).
 
-To decide what parse tree vertex is the left sibling of (A - a parse tree vertex): (- llo_getField({A},5) -).
+To decide what parse tree vertex is the left sibling of (A - a parse tree vertex): (- llo_getField({A}, 5) -).
 
-To decide what parse tree vertex is the right sibling of (A - a parse tree vertex): (- llo_getField({A},6) -).
+To decide what parse tree vertex is the right sibling of (A - a parse tree vertex): (- llo_getField({A}, 6) -).
 
-To decide what number is the beginning lexeme index of (A - a parse tree vertex): (- llo_getField({A},7) -).
+To decide what number is the beginning lexeme index of (A - a parse tree vertex): (- llo_getField({A}, 7) -).
 
-To decide what number is the end lexeme index of (A - a parse tree vertex): (- llo_getField({A},8) -).
-To write the end lexeme index (X - a number) to (A - a parse tree vertex): (- llo_setField({A},8,{X}); -).
+To decide what number is the end lexeme index of (A - a parse tree vertex): (- llo_getField({A}, 8) -).
+To write the end lexeme index (X - a number) to (A - a parse tree vertex): (- llo_setField({A}, 8, {X}); -).
 
-To decide what parse tree vertex is the root of (A - a parse tree vertex):
+To decide what parse tree vertex is the root of (A - a parse tree vertex) (this is determining a parse tree's root):
 	let the result be A;
 	while the result is not a root:
 		now the result is the parent of the result;
 	decide on the result.
 
-To decide what context-free parser is the owner of (A - a parse tree vertex):
+To decide what context-free parser is the owner of (A - a parse tree vertex) (this is determining a parse tree vertex's owner):
 	decide on the owner of the parseme of A.
 
 Section "Loops over Parse Tree Vertices"
 
 To repeat with (I - a nonexisting parse tree vertex variable) running through the children of (A - a parse tree vertex) begin -- end: (-
-	for({I}=llo_getField({A},3):{I}:{I}=llo_getField({I},6))
+	for({I} = llo_getField({A}, 3): {I}: {I} = llo_getField({I}, 6))
 -).
 
 To repeat with (I - a nonexisting parse tree vertex variable) running through the right siblings of (A - a parse tree vertex) begin -- end: (-
-	for({I}=llo_getField({A},6):{I}:{I}=llo_getField({I},6))
+	for({I} = llo_getField({A}, 6): {I}: {I} = llo_getField({I}, 6))
 -).
 
-To decide what parse tree vertex is the first match for (S - a parseme) among the children of (V - a parse tree vertex):
+To decide what parse tree vertex is the first match for (S - a parseme) among the children of (V - a parse tree vertex) (this is finding the first match for a parseme among a parse tree vertex's children):
 	repeat with the child running through the children of V:
 		if the parseme of the child is S:
 			decide on the child;
 	decide on an invalid parse tree vertex.
 
-To decide what parse tree vertex is the next match for (S - a parseme) after the child (V - a parse tree vertex):
+To decide what parse tree vertex is the first match for (S - a parseme) after the child (V - a parse tree vertex) (this is finding a subsequent match for a parseme among a parse tree vertex's children):
 	repeat with the child running through the right siblings of V:
 		if the parseme of the child is S:
 			decide on the child;
 	decide on an invalid parse tree vertex.
 
-To decide whether (S - a parseme) appears among the children of (V - a parse tree vertex):
+To decide whether (S - a parseme) appears among the children of (V - a parse tree vertex) (this is testing for a match for a parseme among a parse tree vertex's children):
 	repeat with the child running through the children of V:
 		if the parseme of the child is S:
 			decide yes;
@@ -650,7 +650,7 @@ To decide what number is the size in memory of a context-free parser: (- 20 -).
 
 Section "Context-Free Parser Construction and Destruction"
 
-To decide what context-free parser is a new context-free parser:
+To decide what context-free parser is a new context-free parser (this is creating a context-free parser):
 	ensure that the parse step object pool is initialized;
 	ensure that the parse tree vertex object pool is initialized;
 	let the result be a permanent memory allocation of the size in memory of a context-free parser bytes converted to a context-free parser;
@@ -659,13 +659,13 @@ To decide what context-free parser is a new context-free parser:
 
 Section "Private Context-Free Parser Accessors and Mutators" - unindexed
 
-To mark (A - a context-free parser) as being in normal form: (- llo_setInt({A},1); -).
+To mark (A - a context-free parser) as being in normal form: (- llo_setInt({A}, 1); -).
 
 To decide what permanent linked list is the parseme linked list of (A - a context-free parser): (- ({A}-->1) -).
-To write the parseme linked list (X - a permanent linked list) to (A - a context-free parser): (- llo_setField({A},1,{X}); -).
+To write the parseme linked list (X - a permanent linked list) to (A - a context-free parser): (- llo_setField({A}, 1, {X}); -).
 
 To decide what permanent linked list is the parse tree rewrite linked list of (A - a context-free parser): (- ({A}-->2) -).
-To write the parse tree rewrite linked list (X - a permanent linked list) to (A - a context-free parser): (- llo_setField({A},2,{X}); -).
+To write the parse tree rewrite linked list (X - a permanent linked list) to (A - a context-free parser): (- llo_setField({A}, 2, {X}); -).
 
 Section "Public Context-Free Parser Accessors and Mutators"
 
@@ -674,20 +674,20 @@ To decide whether (A - a context-free parser) is not in normal form: (- (~~llo_g
 
 To decide what K is the (D - a description of values of kind K) content of (A - a context-free parser): (- ({A}-->3) -).
 
-To decide what number is the lexeme count of (A - a context-free parser): (- llo_getField({A},4) -).
+To decide what number is the lexeme count of (A - a context-free parser): (- llo_getField({A}, 4) -).
 
-To write the content (X - a value of kind K) and the lexeme count (N - a number) to (A - a context-free parser): (- llo_setField({A},3,{X});llo_setField({A},4,{N}); -).
+To write the content (X - a value of kind K) and the lexeme count (N - a number) to (A - a context-free parser): (- llo_setField({A}, 3, {X}); llo_setField({A}, 4, {N}); -).
 
 Section "Saying and Debugging Context-Free Parsers"
 
-To say (A - a context-free parser):
+To say (A - a context-free parser) (this is saying a context-free parser):
 	say "Parser[if A is in normal form] in normal form[end if]:[line break]";
 	repeat with the parseme running through the parseme keys of the parseme linked list of A:
 		say "  [the parseme][line break][the productions of the parseme]";
 	repeat with the parse tree rewrite running through the parse tree rewrite keys of the parse tree rewrite linked list of A:
 		say "  Rewrite: [the parse tree rewrite][line break]".
 
-To say the matches made by (A - a context-free parser):
+To say the matches made by (A - a context-free parser) (this is saying the matches made by a context-free parser):
 	say "Matches made by a parser[if A is in normal form] in normal form[end if]:[line break]";
 	repeat with the parseme running through the parseme keys of the parseme linked list of A:
 		if the parse step linked list of the parseme is not empty:
@@ -710,7 +710,7 @@ Chapter "Normalization"
 
 Section "Purging Indirect Cycles" - unindexed
 
-To decide what permanent linked list is the list of left-recursive productions that remain after purging productions that immediately produce keys of (H - a hash table) from (S - a parseme) of (A - a context-free parser):
+To decide what permanent linked list is the list of left-recursive productions that remain after purging productions that immediately produce keys of (H - a hash table) from (S - a parseme) of (A - a context-free parser) (this is purging indirect cycles from a parseme):
 	let the production worklist be the production linked list of S;
 	let the composite production worklist be an empty permanent linked list;
 	let the non-left-recursive production linked list be an empty permanent linked list;
@@ -740,7 +740,7 @@ To decide what permanent linked list is the list of left-recursive productions t
 
 Section "Purging All Cycles" - unindexed
 
-To put (S - a parseme) of (A - a context-free parser) into normal form with the seen parsemes being the keys of (H - a hash table):
+To put (S - a parseme) of (A - a context-free parser) into normal form with the seen parsemes being the keys of (H - a hash table) (this is purging all cycles from a parseme):
 	let the left-recursive production linked list be the list of left-recursive productions that remain after purging productions that immediately produce keys of H from S of A;
 	insert the key S into H;
 	if the left-recursive production linked list is empty:
@@ -769,7 +769,7 @@ To put (S - a parseme) of (A - a context-free parser) into normal form with the 
 
 Section "Normalization Proper"
 
-To put (A - a context-free parser) into normal form:
+To put (A - a context-free parser) into normal form (this is putting a context-free parser into normal form):
 	if A is in normal form:
 		fail at putting a parser into normal form twice;
 	let the seen hash table be a new hash table with the context-free parseme hash table size buckets;
@@ -783,7 +783,6 @@ Chapter "Parsing" - unindexed
 
 To parse for (S - a parseme) (this is parsing for a parseme):
 	let the owner be the owner of S;
-	[////fail at reinitializing a parser mid-parse;]
 	repeat with the parseme running through the parseme keys of the parseme linked list of the owner:
 		delete the parse attempt linked list of the parseme;
 		write the parse attempt linked list an empty linked list to the parseme;
@@ -800,7 +799,7 @@ To decide what linked list vertex is the first parse step linked list vertex for
 			decide on the candidate;
 	decide on a null linked list vertex.
 
-To decide what linked list vertex is the next parse step for (S - a parseme) after (L - a linked list vertex) (this is finding a next parse step linked list vertex):
+To decide what linked list vertex is the next parse step for (S - a parseme) after (L - a linked list vertex) (this is finding a subsequent parse step linked list vertex):
 	let the end lexeme index be the lexeme count of the owner of S;
 	let the candidate be the first match for the key zero after L;
 	while the candidate is not null:
@@ -812,7 +811,7 @@ To decide what linked list vertex is the next parse step for (S - a parseme) aft
 Chapter "Expansion" - unindexed
 
 [V should already know its parseme, parent, siblings, and beginning lexeme index.  We will set its production, children, and end lexeme index.]
-To expand (V - a parse tree vertex) using (T - a parse step):
+To expand (V - a parse tree vertex) using (T - a parse step) (this is expanding a parse tree vertex according to a parse step):
 	write the end lexeme index the end lexeme index of T to V;
 	let the production be the production of T;
 	if the production is null:
@@ -838,7 +837,7 @@ Chapter "Rewriting" - unindexed
 
 Section "Iteration Order"
 
-To decide what parse tree vertex is the parse tree vertex to visit after (V - a parse tree vertex):
+To decide what parse tree vertex is the parse tree vertex to visit after (V - a parse tree vertex) (this is finding a subsequent parse tree vertex):
 	let the child be the first child of V;
 	if the child is not null:
 		decide on the child;
@@ -857,7 +856,7 @@ Section "Hashing Production Instantiations" - unindexed
 [The production instantiation hash table maps productions to the vertices that use them.]
 The production instantiation hash table is a hash table that varies.
 
-To hash the productions of vertices rooted at (V - a parse tree vertex):
+To hash the productions of vertices rooted at (V - a parse tree vertex) (this is hashing a parse tree's productions):
 	let the current vertex be V;
 	while the current vertex is not null:
 		let the production be the production of the current vertex;
@@ -903,7 +902,7 @@ To unsubstitute (P - a production) (this is unsubstituting a production):
 
 Section "Rotation" - unindexed
 
-To detach vertices after (V - a parse tree vertex) from its parent (P - a parse tree vertex):
+To detach vertices after (V - a parse tree vertex) from its parent (P - a parse tree vertex) (this is detaching subsequent vertices from a parent parse tree vertex):
 	if V is null:
 		if P is null:
 			stop;
@@ -914,11 +913,11 @@ To detach vertices after (V - a parse tree vertex) from its parent (P - a parse 
 		write the right sibling a null parse tree vertex to V;
 	write the last child V to P.
 
-To remove the rotation terminator (V - a parse tree vertex):
+To remove the rotation terminator (V - a parse tree vertex) (this is removing a rotation terminator):
 	detach vertices after the left sibling of V from its parent the parent of V;
 	delete V and its descendants.
 
-To have (V - a parse tree vertex) claim the detached (W - a parse tree vertex) as its first child:
+To have (V - a parse tree vertex) claim the detached (W - a parse tree vertex) as its first child (this is claiming a detached parse tree vertex as a first child):
 	write the left sibling a null parse tree vertex to W;
 	let the sibling be the first child of V;
 	if the sibling is null:
@@ -929,7 +928,7 @@ To have (V - a parse tree vertex) claim the detached (W - a parse tree vertex) a
 	write the parent V to W;
 	write the first child W to V.
 
-To join (V - a parse tree vertex) to the parent (P - a parse tree vertex) and the left sibling (L - a parse tree vertex) and the right sibling (R - a parse tree vertex):
+To join (V - a parse tree vertex) to the parent (P - a parse tree vertex) and the left sibling (L - a parse tree vertex) and the right sibling (R - a parse tree vertex) (this is joining a parse tree vertex to new relatives):
 	if P is null:
 		write the parent a null parse tree vertex to V;
 		write the left sibling a null parse tree vertex to V;
@@ -981,7 +980,7 @@ To rotate away (P - a production) (this is rotating a production):
 
 Section "Rewriting Proper" - unindexed
 
-To rewrite the match rooted at (V - a parse tree vertex):
+To rewrite the match rooted at (V - a parse tree vertex) (this is rewriting a parse tree):
 	let the owner be the owner of V;
 	now the production instantiation hash table is a new hash table with the context-free production hash table size buckets;
 	hash the productions of vertices rooted at V;
@@ -993,12 +992,12 @@ Chapter "Parsing Callbacks"
 
 Section "Private Parsing Callbacks" - unindexed
 
-To match (A - a parseme) from lexeme index (B - a number) to lexeme index (E - a number) via (P - a production):
+To match (A - a parseme) from lexeme index (B - a number) to lexeme index (E - a number) via (P - a production) (this is matching a parseme via a production):
 	let the parse step be a new parse step for P ending at lexeme index E;
 	push the key B and the value the parse step onto the parse step linked list of A.
 
 [L should be an expansion stack as described later.  The relevant part here is that it should have the children of the new parse step as values of values in reverse order.]
-To match (A - a parseme) from lexeme index (B - a number) to lexeme index (E - a number) via (P - a production) as described by (L - a linked list):
+To match (A - a parseme) from lexeme index (B - a number) to lexeme index (E - a number) via (P - a production) as described by (L - a linked list) (this is matching a parseme via a production and expansion stack):
 	let the new parse step be a new parse step for P ending at lexeme index E;
 	repeat with the parse step linked list vertex running through the linked list vertex values of L:
 		push the key the parse step value of the parse step linked list vertex onto the children linked list of the new parse step;
@@ -1006,13 +1005,13 @@ To match (A - a parseme) from lexeme index (B - a number) to lexeme index (E - a
 
 Section "Public Parsing Callbacks"
 
-To match (A - a parseme) from lexeme index (B - a number) to lexeme index (E - a number):
+To match (A - a parseme) from lexeme index (B - a number) to lexeme index (E - a number) (this is matching a parseme):
 	let the parse step be a new parse step ending at lexeme index E;
 	push the key B and the value the parse step onto the parse step linked list of A.
 
 Chapter "Standard Nonterminal Parsing Phrase" - unindexed
 
-To decide what linked list vertex is the first candidate step linked list vertex for (S - a parseme) beginning at lexeme index (I - a number):
+To decide what linked list vertex is the first candidate step linked list vertex for (S - a parseme) beginning at lexeme index (I - a number) (this is finding the first candidate step linked list vertex for a parseme and beginning lexeme index):
 	unless the parse attempt linked list of S contains the key I:
 		push the key I onto the parse attempt linked list of S;
 		apply the parsing phrase of S to S and I;
@@ -1083,26 +1082,26 @@ Include (-
 -) after "Definitions.i6t".
 
 To repeat with (I - a nonexisting parse tree vertex variable) running through matches for (S - a parseme) begin -- end: (-
-	(llo_getField((+ parsing for a parseme +),1))({S});
-	cfpe_iterator=(llo_getField((+ finding a first parse step linked list vertex +),1))({S});
+	(llo_getField((+ parsing for a parseme +), 1))({S});
+	cfpe_iterator = (llo_getField((+ finding a first parse step linked list vertex +), 1))({S});
 	jump LLO_LOOP_{-counter:LLO_LOOP}_ENTRY;
-	for(::)
-		if(llo_advance){
+	for (::)
+		if (llo_advance) {
 			@pull cfpe_iterator;
-			if(cfpe_iterator) (llo_getField((+ deleting a parse tree +),1))({I});
-			if(llo_broken){
+			if (cfpe_iterator) (llo_getField((+ deleting a parse tree +), 1))({I});
+			if (llo_broken) {
 				break;
 			}
-			cfpe_iterator=(llo_getField((+ finding a next parse step linked list vertex +),1))({S},cfpe_iterator);
+			cfpe_iterator = (llo_getField((+ finding a subsequent parse step linked list vertex +), 1))({S}, cfpe_iterator);
 		.LLO_LOOP_{-advance-counter:LLO_LOOP}_ENTRY;
 			@push cfpe_iterator;
-			if(cfpe_iterator){
-				{I}=(llo_getField((+ extracting a parse tree +),1))({S},llo_getField(cfpe_iterator,1));
-				llo_advance=llo_broken=false;
-			}else{
-				llo_advance=llo_broken=true;
+			if (cfpe_iterator) {
+				{I} = (llo_getField((+ extracting a parse tree +), 1))({S}, llo_getField(cfpe_iterator, 1));
+				llo_advance = llo_broken = false;
+			} else {
+				llo_advance = llo_broken = true;
 			}
-		}else for(llo_oneTime=true,llo_broken=true,llo_advance=true:llo_oneTime&&((llo_oneTime=false),true)||(llo_broken=false):)
+		} else for(llo_oneTime = true, llo_broken = true, llo_advance = true: llo_oneTime && ((llo_oneTime = false), true) || (llo_broken = false):)
 -).
 
 Context-Free Parsing Engine ends here.
@@ -1124,7 +1123,8 @@ and then parse something like
 	"tell Jemison to tell Watson to kill Zoe"
 
 On the other hand, Context-Free Parsing Engine is slower and has no built-in
-facilities for disambiguating or handling malformed input.
+facilities for disambiguating or handling malformed input.  (However, see the
+extension Disambiguation Framework.)
 
 Details are in the following chapters.
 
@@ -1185,12 +1185,12 @@ manifest as several different lexeme sequences.  "[an NPC]", for instance, can
 on closer inspection turn out to be "Jemison", "Watson", or "Zoe".  As one might
 expect, the term for these parsemes is "nonterminals".
 
-While the terminals that appear in a parse tree are governed by the input, the
-choice and arrangement of nonterminals must be controlled some other way, by
-rules termed "productions" (so called because an entry in a parse tree is said
-to "produce" its subentries).  Productions are much like Inform's understand
-lines.  In the example above we would have five of them, two for imperative
-commands:
+While the terminals that appear in a parse tree are mostly governed by the
+input, the choice and arrangement of nonterminals must be controlled some other
+way, by rules termed "productions" (so called because an entry in a parse tree
+is said to "produce" its subentries).  Productions are much like Inform's
+understand lines.  In the example above we would have five of them, two for
+imperative commands:
 
 	Understand "tell [an NPC] to [an imperative command]" as "[an imperative command]".
 
@@ -1450,10 +1450,10 @@ as in
 
 	delete the clone and its descendants;
 
-It is a bad idea to let clones accumulate in memory unnecessarily, so we should
-be sure to delete them as soon as they are no longer needed.  But be careful; it
-is a worse idea to delete only part of a tree.  If we have a vertex that is not
-topmost in its tree, we should not give it to the deletion phrase.
+It is a bad idea to let clones accumulate unnecessarily (cf. Episode III), so we
+should be sure to delete them as soon as they are no longer needed.  But be
+careful; it is a worse idea to delete only part of a tree.  If we have a vertex
+that is not topmost in its tree, we should not give it to the deletion phrase.
 
 One final warning: if we break out of a loop over parse trees by a mechanism
 other than "break", like "stop" or "decide on", the loop won't have a chance to
@@ -1546,7 +1546,7 @@ would produce vertex 1d3 (the preceding vertex at the same level), whereas
 	the right sibling of (A - a parse tree vertex)
 
 ought not decide on a vertex at all---1d4 has no such sibling.  In fact,
-whenever we ask for a relation that does not exist, all of these phrases will
+whenever we ask for a relative that does not exist, all of these phrases will
 return
 
 	a null parse tree vertex
@@ -1615,7 +1615,7 @@ which decides on the left-most vertex that is both a child of V and annotated
 with the parseme S.  If it cannot find any such vertex, it decides on a null
 one.  The similar
 
-	the next match for (S - a parseme) after the child (V - a parse tree vertex)
+	the first match for (S - a parseme) after the child (V - a parse tree vertex)
 
 starts from one such match and finds the next one.  Again, if there are no
 suitable vertices, the phrase produces a null vertex as its result.
@@ -1708,7 +1708,7 @@ On the other hand, if there is a lexeme to match, we should retrieve it:
 
 	let the lexeme be entry list index of the lexeme list;
 
-We then compare the lexeme against the parseme:
+We then compare the lexeme against the parseme' meaning:
 
 	if the lexeme is ...:
 
@@ -1795,9 +1795,8 @@ An epsilon is used to indicate an empty list of parsemes.
 
 Chapter: Requirements, Limitations, and Bugs
 
-This version was tested with Inform 6G60.  It will probably function on newer
-versions, and it may function under slightly older versions, though there is no
-guarantee.
+This version was tested with Inform 6G60.  It may not function under other
+versions.
 
 Section: Regarding bugs
 
@@ -1814,30 +1813,52 @@ time.
 Chapter: Acknowledgements
 
 Context-Free Parsing Engine was prepared as part of the Glulx Runtime
-Instrumentation Project (https://github.com/i7/i7grip).  For this first edition
-of the project, special thanks go to these people, in chronological order:
+Instrumentation Project (https://github.com/i7/i7grip).
 
-- Graham Nelson, Emily Short, and others, not only for Inform, but also for the
-  countless hours the high-quality technical documentation saved me and for the
-  work that made the Glulx VM possible,
+GRIP owes a great deal to everyone who made Inform possible and everyone who
+continues to contribute.  I'd like to give especial thanks to Graham Nelson and
+Emily Short, not only for their design and coding work, but also for all of the
+documentation, both of the language and its internals---it proved indispensable.
 
-- Andrew Plotkin for the Glulx VM and the Glk library, as well as their clear,
-  always up-to-date specifications,
+I am likewise indebted to everybody who worked to make Glulx and Glk a reality.
+Without them, there simply wouldn't have been any hope for this kind of project.
+My special thanks to Andrew Plotkin, with further kudos for his work maintaining
+the specifications.  They proved as essential as Inform's documentation.
 
-- Jacqueline Lott, David Welbourn, and all of the other attendees for Club
-  Floyd, my first connection to the interactive fiction community,
+The project itself was inspired by suggestions from Ron Newcomb and Esteban
+Montecristo on Inform's feature request page.  It's only because of their posts
+that I ever started.  (And here's hoping that late is better than never.)
 
-- Jesse McGrew and Emily Short for getting me involved with Inform 7,
+Esteban Montecristo also made invaluable contributions as an alpha tester.  I
+cannot thank him enough: he signed on as a beta tester but then quickly
+uncovered a slew of problems that forced me to reconsider both the term ``beta''
+and my timeline.  The impetus for the new, cleaner design and several clues that
+led to huge performance improvements are all due to him.  Moreover, he
+contributed code, since modified to fit the revised framework, for the extension
+Verbose Diagnostics.
 
-- all of the Inform 7 developers for their hard work, the ceaseless flow of
-  improvements, and their willingness to take me on as a collaborator,
+As for Ron Newcomb, I can credit him for nearly half of the bugs unearthed in
+the beta proper, not to mention sound advice on the organization of the
+documentation and the extensions.  GRIP is much sturdier as a result.
 
-- Ron Newcomb and Esteban Montecristo for the idea to write Call Stack Tracking
-  and Verbose Diagnostics,
+Roger Carbol, Jesse McGrew, Michael Martin, Dan Shiovitz, Johnny Rivera, and
+probably several others deserve similar thanks for answering questions on
+ifMUD's I6 and I7 channels.  I am grateful to Andrew Plotkin, David Kinder, and
+others for the same sort of help on intfiction.org.
 
-- Roger Carbol, Jesse McGrew, Michael Martin, Dan Shiovitz, Johnny Rivera, and
-  everyone else for their helpful comments on ifMUD's I6 and I7 channels,
+On top of that, David Kinder was kind enough to accommodate Debug File Parsing
+in the Windows IDE; consequently, authors who have a sufficiently recent version
+of Windows no longer need to write batch scripts.  His help is much appreciated,
+particularly because the majority of downloaders are running Windows.
 
-- Esteban Montecristo, for invaluable alpha testing,
+Even with the IDEs creating debug files, setting up symbolic links to those
+files can be a chore.  Jim Aiken suggested an automated solution, which now
+ships with the project.
 
-- and all of the beta testers who are reading this.
+And preliminary support for authors who want to debug inside a browser stems
+from discussion with Erik Temple and Andrew Plotkin; my thanks for their ideas.
+
+Finally, I should take this opportunity to express my gratitude to everyone who
+helped me get involved in the IF community.  Notable among these people are
+Jesse McGrew and Emily Short, not to mention Jacqueline Lott, David Welbourn,
+and all of the other Club Floyd attendees.
