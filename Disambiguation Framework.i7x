@@ -1,4 +1,4 @@
-Version 1 of Disambiguation Framework (for Glulx only) by Brady Garvin begins here.
+Version 2 of Disambiguation Framework (for Glulx only) by Brady Garvin begins here.
 
 "A standard process for disambiguating parses made by Context-Free Parsing Engine."
 
@@ -25,25 +25,25 @@ This bewildering statement actually sets up disambiguation features as a qualita
 
 Chapter "Use Options" - unindexed
 
-Use a disambiguation hash table size of at least 11 translates as (- Constant DF_DISAMBIGUATION_HASH_SIZE={N}; -).
+Use a disambiguation hash table size of at least 11 translates as (- Constant DF_DISAMBIGUATION_HASH_SIZE = {N}; -).
 
 To decide what number is the disambiguation hash table size: (- DF_DISAMBIGUATION_HASH_SIZE -).
 
 Chapter "Rulebooks"
 
-The disambiguation setup rules are [rulebook is] a rulebook.
+The disambiguation setup rulebook is a rulebook.
 
 Book "Runtime Checks"
 
 Chapter "Messages" - unindexed
 
-To fail at scoring a valid feature alternative list:
+To fail at scoring a valid feature alternative list (this is failing to score a valid feature alternative list):
 	say "[low-level runtime failure in]Disambiguation Framework[with explanation]I found a disambiguation question that I might ask and then discovered that one of the options would be impossible.  Probably my process for building questions is broken.[terminating the story]".
 
-To fail at finding disambiguation choices:
+To fail at finding disambiguation choices (this is failing to find disambiguation choices):
 	say "[low-level runtime failure in]Disambiguation Framework[with explanation]I found a set of parse trees that I considered distinct, but then I failed to find a disambiguation question that would differentiate them.  Therefore, one of those two steps must be buggy.[terminating the story]".
 
-To fail at finding matches for a disambiguation choice:
+To fail at finding matches for a disambiguation choice (this is failing to find matches for a disambiguation choice):
 	say "[low-level runtime failure in]Disambiguation Framework[with explanation]I pruned the possible matches according to a disambiguation question that should have differentiated them and ended up with no survivors.  Therefore, either the choices I offered were wrong or the pruning went awry.[terminating the story]".
 
 Book "Disambiguation Framework"
@@ -54,7 +54,7 @@ Chapter "Canonicalization"
 [Not all members of canonical parse tree vertices are significant; only their parsemes and their tree structure count.]
 [The main contract for canonicalization is that parse trees shall share a canonical form if and only if they have the same semantics.  Usually that means paring a parse tree down to an abstract syntax tree.]
 [A canonicalization rulebook will be traversed once per parse tree vertex, visiting them from bottom to top (i.e., seeing the root last).  It may rewrite anything in the subtree rooted at the vertex to canonicalize.  If it changes the root of the subtree, it should store the new root as ``the parse tree vertex to canonicalize''; the parent and sibling pointers will be automatically updated at the end of the rulebook.]
-[(An alternative design would be to run the rulebook once and give it access to the root.  But almost all rewrites are location-agnostic, so we get simpler code when they don't have to each reimplement the loop over vertices.)]
+[(An alternative design would be to run the rulebook once and give it access to the root.  But almost all rewrites are location-agnostic, so we get simpler code when they don't have to each re-implement the loop over vertices.)]
 
 [Available to canonicalization rulebooks:
 	the parse tree vertex to canonicalize, a mutable variable]
@@ -68,7 +68,7 @@ The parse tree vertex to canonicalize is a parse tree vertex that varies.  The p
 
 Section "Canonicalization Subroutines" - unindexed
 
-To canonicalize (A - a parse tree vertex) by (C - a rulebook) after its children:
+To canonicalize (A - a parse tree vertex) by (C - a rulebook) after its children (this is recursively canonicalizing a parse tree vertex):
 	let the previous child be a null parse tree vertex;
 	now the parse tree vertex to canonicalize is the first child of A;
 	while the parse tree vertex to canonicalize is not null:
@@ -90,7 +90,7 @@ To canonicalize (A - a parse tree vertex) by (C - a rulebook) after its children
 	now the parse tree vertex to canonicalize is A;
 	traverse C.
 
-To decide what parse tree vertex is the root of a new canonicalization by (C - a rulebook) of the parse tree rooted at (A - a parse tree vertex):
+To decide what parse tree vertex is the root of a new canonicalization by (C - a rulebook) of the parse tree rooted at (A - a parse tree vertex) (this is creating a parse tree by canonicalization):
 	push the parse tree vertex to canonicalize;
 	canonicalize the parse tree vertex corresponding to A in a new clone of its tree by C after its children;
 	let the result be the parse tree vertex to canonicalize;
@@ -102,7 +102,7 @@ To decide what parse tree vertex is the root of a new canonicalization by (C - a
 
 Section "Canonicalization Client Subroutines" - unindexed
 
-To decide whether the canonical tree rooted at (A - a parse tree vertex) is identical to the canonical tree rooted at (B - a parse tree vertex):
+To decide whether the canonical tree rooted at (A - a parse tree vertex) is identical to the canonical tree rooted at (B - a parse tree vertex) (this is comparing canonical parse trees):
 	unless the parseme of A is the parseme of B:
 		decide no;
 	let A's child be the first child of A;
@@ -118,7 +118,7 @@ To decide whether the canonical tree rooted at (A - a parse tree vertex) is iden
 
 Section "Canonicalization Phrase" - unindexed
 
-To decide what linked list is (L - a linked list) after canonicalizing with (C - a rulebook) the parse trees rooted at the keys and storing the resulting roots as values:
+To decide what linked list is (L - a linked list) after canonicalizing with (C - a rulebook) the parse trees rooted at the keys and storing the resulting roots as values (this is running the canonicalization phase of the disambiguation framework):
 	repeat with the linked list vertex running through L:
 		write the value the root of a new canonicalization by C of the parse tree rooted at the parse tree vertex key of the linked list vertex to the linked list vertex;
 	decide on L.
@@ -153,7 +153,7 @@ To decide what parse tree vertex is the root of the canonicalized parse tree to 
 
 Section "Scoring Callbacks"
 
-To give the parse tree to score (N - a number) point/points for (T - some text):
+To give the parse tree to score (N - a number) point/points for (T - some text) (this is scoring a parse tree):
 	let the linked list vertex be the first match for the key the root of the canonicalized parse tree to score in the parse tree score hash table;
 	if the linked list vertex is null:
 		insert the key the root of the canonicalized parse tree to score and the value an empty linked list into the parse tree score hash table;
@@ -164,7 +164,7 @@ To give the parse tree to score (N - a number) point/points for (T - some text):
 
 Section "Scoring Subroutines" - unindexed
 
-To score the parse tree rooted at (A - a parse tree vertex) and having a canonical parse tree rooted at (B - a parse tree vertex) with (S - a rulebook):
+To score the parse tree rooted at (A - a parse tree vertex) and having a canonical parse tree rooted at (B - a parse tree vertex) with (S - a rulebook) (this is scoring a parse tree with a rulebook):
 	push the variable holding the root of the parse tree to score;
 	now the variable holding the root of the parse tree to score is A;
 	push the variable holding the root of the canonicalized parse tree to score;
@@ -180,7 +180,7 @@ A disambiguation setup rule (this is the initialize the parse tree score hash ta
 
 Section "Scoring Phrase" - unindexed
 
-To score the parse trees rooted at the keys and canonically rooted at the values of (L - a linked list) with (S - a rulebook):
+To score the parse trees rooted at the keys and canonically rooted at the values of (L - a linked list) with (S - a rulebook) (this is running the scoring phase of the disambiguation framework):
 	push the key the parse tree score hash table onto the parse tree score hash table stack;
 	now the parse tree score hash table is a new hash table with the disambiguation hash table size buckets;
 	repeat with the linked list vertex running through L:
@@ -236,7 +236,7 @@ To decide whether the parse-tree-filtering rulebook retains (A - linked list ver
 
 Section "Filtration Phrase" - unindexed
 
-To decide what linked list is (L - a linked list) after filtering with (F - a rulebook) the parse trees rooted at the keys and canonically rooted at the values:
+To decide what linked list is (L - a linked list) after filtering with (F - a rulebook) the parse trees rooted at the keys and canonically rooted at the values (this is running the filtration phase of the disambiguation framework):
 	push the parse-tree-filtering rulebook;
 	push the variable holding the root of the parse tree to filter;
 	push the variable holding the root of the canonicalized parse tree to filter;
@@ -260,7 +260,7 @@ Section "Global Disambiguation Subroutines" - unindexed
 
 A Pareto challenge outcome is a kind of value.  The Pareto challenge outcomes are Pareto victory, Pareto draw, Pareto defeat, and Pareto incomparability.
 
-To decide what Pareto challenge outcome is the result of challenging (M - a linked list) with (L - a linked list):
+To decide what Pareto challenge outcome is the result of challenging (M - a linked list) with (L - a linked list) (this is deciding a Pareto challenge):
 	let the challenger winning flag be false;
 	let the challenger losing flag be false;
 	repeat with the score vertex running through M:
@@ -281,7 +281,7 @@ To decide what Pareto challenge outcome is the result of challenging (M - a link
 		decide on Pareto victory;
 	decide on Pareto draw.
 
-To decide what linked list is a new list of canonical parse trees at a Pareto front point:
+To decide what linked list is a new list of canonical parse trees at a Pareto front point (this is listing canonical parse trees at a Pareto front point):
 	[The trees at the current best guess are stored in the candidate list, and one such tree is the representative candidate, whose scores are cached.]
 	[Trees whose points are dominated by the representative are accumulated in the excluded list and eventually deleted from the score hash table.]
 	[Trees decided on are also deleted from the score hash table, so that further queries will yield trees at a different point.]
@@ -327,13 +327,13 @@ To decide what linked list is a new list of canonical parse trees at a Pareto fr
 	delete the excluded list;
 	decide on the candidate list.
 
-To clean up after finding the Pareto front:
+To clean up after finding the Pareto front (this is cleaning up after finding a Pareto front):
 	repeat with the linked list vertex running through the parse tree score hash table:
 		delete the linked list value of the linked list vertex;
 	delete the parse tree score hash table;
 	now the parse tree score hash table is a hash table key popped off of the parse tree score hash table stack.
 
-To decide what linked list is (L - a linked list) filtered to the vertex with the key (K - a parse tree vertex):
+To decide what linked list is (L - a linked list) filtered to the vertex with the key (K - a parse tree vertex) (this is filtering a linked list to one vertex by key):
 	repeat until a break:
 		let the result vertex be a linked list vertex popped off of L;
 		if the parse tree vertex value of the result vertex is K:
@@ -349,7 +349,7 @@ To decide what linked list is (L - a linked list) filtered to the vertex with th
 
 Section "Global Disambiguation Phrase" - unindexed
 
-To decide what linked list is (L - a linked list) after choosing the Pareto front if it has a unique canonical parse tree:
+To decide what linked list is (L - a linked list) after choosing the Pareto front if it has a unique canonical parse tree (this is running the global disambiguation phase of the disambiguation framework):
 	let the result be a null parse tree vertex;
 	while the parse tree score hash table is not empty:
 		let the tree list be a new list of canonical parse trees at a Pareto front point;
@@ -385,7 +385,7 @@ A disambiguation setup rule (this is the initialize the canonical tree count lis
 
 Section "Unification Phrase" - unindexed
 
-To decide what linked list is (L - a linked list) after unifying identical canonical trees:
+To decide what linked list is (L - a linked list) after unifying identical canonical trees (this is running the unification phase of the disambiguation framework):
 	push the key the canonical tree count list onto the canonical tree count list stack;
 	now the canonical tree count list is an empty linked list;
 	repeat with the linked list vertex running through L:
@@ -407,7 +407,7 @@ Chapter "Local Disambiguation"
 [The phrase is given a set of mutually exclusive features and asked which one appears in the input's intended parse.  In some cases it may also be allowed to decide on "none of the offered disambiguation features", and it always has the option to decide on "aborting disambiguation".]
 
 [Available to local disambiguation phrases:
-	its first argument (a context-free parser), the parser from whom disambiguation is occuring
+	its first argument (a context-free parser), the parser for whom disambiguation is occurring
 	its second argument (a linked list), the available alternatives; each linked list vertex should be converted to a disambiguation feature
 	its third argument (a linked list), whether the phrase may decide on "none of the offered disambiguation features"]
 
@@ -419,10 +419,18 @@ Section "Private Local Disambiguation Variables" - unindexed
 [The parse tree feature hash table maps beginning lexeme indices to comparable feature lists.]
 [A comparable feature list maps parsemes and (underlying) end lexeme indices to a matching trees list.]
 [A feature is represented by a vertex in a comparable feature list; such a vertex uniquely identifies a parseme at a particular lexeme range.]
-[A matching trees list maps parse tree roots to unified canonical roots, just like the phase phrase's L.]
+[A matching trees list maps parse tree roots to unified canonical roots, just like the arguments named L.]
 [A feature alternative list is a list whose vertices are copies of features.]
 
+[Mnemonically:
+	PTFHT = beginning -> CFL
+	CFL = FAL = (parseme, end) -> MTL
+	F [in CFL, not in FAL] = FA [in FAL, not in CFL] = (parseme, end; MTL)
+	MTL [type of L throughout] = root -> canonical root]
+
 [The reason for grouping by beginning lexeme index first is to get more friendly disambiguation questions: ``Which do you mean, `mark' as a verb or `mark' as a person's name?'' rather than ``Which do you mean, `mark' as a person's name or `twain' as two fathoms?'']
+
+[Scores in this chapter are always in the reverse sense: lower scores are better.]
 
 The parse tree feature hash table is a hash table that varies.
 
@@ -432,14 +440,14 @@ A disambiguation setup rule (this is the initialize the parse tree feature hash 
 	now the parse tree feature hash table stack is an empty linked list.
 
 [Used in place of a closure for pruning away overlapping features.]
-The already matchable tree list is a linked list that varies.
+The already matchable tree list is a linked list [MTL] that varies.
 
 [Used in place of a closure for preparing the offered alternatives, consulting the local disambiguator, and filtering after its decision.]
 The offered beginning lexeme index is a number that varies.
-The offered feature alternative list is a linked list that varies.
+The offered feature alternative list is a linked list [FAL] that varies.
 The none-of-the-above-features offering is a truth state that varies.
 The offered feature alternative list score is a number that varies.
-The chosen feature alternative is a linked list vertex that varies.
+The chosen feature alternative is a linked list vertex [FA] that varies.
 
 The offered beginning lexeme index stack is a linked list that varies.
 The offered feature alternative list stack is a linked list that varies.
@@ -453,7 +461,7 @@ Section "Local Disambiguation Subroutines" - unindexed
 To decide whether (X - a number) is the same number as (Y - a number) (this is numeric equality):
 	decide on whether or not X is Y.
 
-To decide what linked list vertex is the feature exhibited by (A - a parse tree vertex):
+To decide what linked list vertex is the feature exhibited by (A - a parse tree vertex) (this is interning a disambiguation feature):
 	let the parseme be the parseme of A;
 	let the beginning index be the beginning lexeme index of A;
 	let the end index be the end lexeme index of A;
@@ -469,7 +477,7 @@ To decide what linked list vertex is the feature exhibited by (A - a parse tree 
 		now the feature is the first match for the key the parseme and the underlying key the end index in the comparable feature list with the comparator numeric equality;
 	decide on the feature.
 
-To initialize the parse tree feature hash table from (L - a linked list):
+To initialize the parse tree feature hash table from (L - a linked list [MTL]) (this is initializing the parse tree feature hash table):
 	push the key the parse tree feature hash table onto the parse tree feature hash table stack;
 	now the parse tree feature hash table is a new hash table with the disambiguation hash table size buckets;
 	repeat with the linked list vertex running through L:
@@ -483,7 +491,7 @@ To initialize the parse tree feature hash table from (L - a linked list):
 			write the value the matching trees list to the feature;
 			now the current vertex is the parse tree vertex to visit after the current vertex.
 
-To decide what number is the score of letting (L - a linked list) survive disambiguation:
+To decide what number is the score of letting (L - a linked list [MTL]) survive disambiguation (this is scoring surviving parses according to the number of distinct canonical trees):
 	let the canonical root count be zero;
 	let the seen hash table be a new hash table with the disambiguation hash table size buckets;
 	repeat with the canonical root running through the parse tree vertex values of L:
@@ -494,7 +502,7 @@ To decide what number is the score of letting (L - a linked list) survive disamb
 	decide on the canonical root count times (the canonical root count minus one).
 
 [We also encode the presence of leftovers by flipping the score's bits.  That will do for now, since this is just an internal phrase, though I'm not sure the ickiness is worth the gains in performance and avoidance of code duplication.]
-To decide what number is the score of the feature alternative list (A - a linked list) when applied to (L - a linked list):
+To decide what number is the score of the feature alternative list (A - a linked list) when applied to (L - a linked list [MTL]) (this is scoring a feature alternative list):
 	let the result be zero;
 	let the leftovers be a new copy of L;
 	let the entirety be the length of L;
@@ -521,21 +529,21 @@ To decide whether independence from the already matchable tree list is exhibited
 			decide no;
 	decide yes.
 
-To consider applying feature alternative lists beginning at lexeme index (B - a number) that include (A - a linked list) and select from the pruned comparable feature list (P - a linked list) to (L - a linked list):
+To consider applying feature alternative lists beginning at lexeme index (B - a number) that both include (A - a linked list [FAL]) and select from the pruned comparable feature list (P - a linked list) to (L - a linked list [MTL]) (this is recursively exploring possible feature alternative lists):
 	unless P is empty:
-		let the selections be A;
-		repeat with the selection running through P:
+		let the selections [FAL] be A;
+		repeat with the selection [F] running through P:
 			now the already matchable tree list is the linked list value of the selection;
 			push the key the parseme key of the selection and the underlying key the underlying number key of the selection and the value the already matchable tree list onto the selections;
 			let the pruned suffix be the link of the selection converted to a linked list;
 			now the pruned suffix is a new copy of the pruned suffix;
 			filter the pruned suffix by enforcing independence from the already matchable tree list;
-			consider applying feature alternative lists beginning at lexeme index B that include the selections and select from the pruned comparable feature list the pruned suffix to L;
+			consider applying feature alternative lists beginning at lexeme index B that both include the selections and select from the pruned comparable feature list the pruned suffix to L;
 			delete the pruned suffix;
 			delete a linked list vertex popped off of the selections;
 		stop;
 	let the score be the score of the feature alternative list A when applied to L;
-	let the leftovers flag be whether or not the score is less than zero;
+	let the leftovers flag be whether or not the score is less than zero; [see above]
 	if the leftovers flag is true:
 		now the score is the bitwise not of the score;
 	if the score is less than the offered feature alternative list score or the score is the offered feature alternative list score and B is less than the offered beginning lexeme index:
@@ -545,7 +553,7 @@ To consider applying feature alternative lists beginning at lexeme index (B - a 
 		now the none-of-the-above-features offering is the leftovers flag;
 		now the offered feature alternative list score is the score.
 
-To offer a feature alternative list for (L - a linked list):
+To offer a feature alternative list for (L - a linked list [MTL]) (this is offering the best scoring feature alternative list):
 	push the key the offered beginning lexeme index onto the offered beginning lexeme index stack;
 	push the key the offered feature alternative list onto the offered feature alternative list stack;
 	now the offered beginning lexeme index is zero;
@@ -554,10 +562,10 @@ To offer a feature alternative list for (L - a linked list):
 	repeat with the hash table vertex running through the parse tree feature hash table:
 		let the beginning index be the number key of the hash table vertex;
 		let the comparable feature list be the linked list value of the hash table vertex;
-		consider applying feature alternative lists beginning at lexeme index the beginning index that include an empty linked list and select from the pruned comparable feature list the comparable feature list to L;
+		consider applying feature alternative lists beginning at lexeme index the beginning index that both include an empty linked list and select from the pruned comparable feature list the comparable feature list to L;
 	always check that the offered feature alternative list is not empty or else fail at finding disambiguation choices.
 
-To decide whether the chosen feature alternative retains (A - a linked list vertex) (this is applying the chosen feature alternative):
+To decide whether the chosen feature alternative retains (A - a linked list vertex [MTL entry]) (this is applying the chosen feature alternative as a predicate that deletes on false):
 	let the result be true;
 	let the root be the parse tree vertex key of A;
 	if the chosen feature alternative is null:
@@ -580,7 +588,7 @@ To decide whether the chosen feature alternative retains (A - a linked list vert
 			write the value the count to the canonical tree count vertex;
 	decide on the result.
 
-To destroy the parse tree feature hash table:
+To destroy the parse tree feature hash table (this is destroying the parse tree feature hash table):
 	repeat with the hash table vertex running through the parse tree feature hash table:
 		let the comparable feature list be the linked list value of the hash table vertex;
 		repeat with the feature running through the comparable feature list:
@@ -597,18 +605,18 @@ The specification of a disambiguation feature is "Disambiguation features are in
 
 To decide what disambiguation feature is none of the offered disambiguation features: (- 0 -).
 
-To decide what parseme is the parseme of (A - a disambiguation feature):
+To decide what parseme is the parseme of (A - a disambiguation feature) (this is determining the parseme of a disambiguation feature):
 	decide on the parseme key of A converted to a linked list vertex.
 
-To decide what number is the beginning lexeme index of (A - a disambiguation feature):
+To decide what number is the beginning lexeme index of (A - a disambiguation feature) (this is determining the beginning lexeme index of a disambiguation feature):
 	decide on the offered beginning lexeme index.
 
-To decide what number is the end lexeme index of (A - a disambiguation feature):
+To decide what number is the end lexeme index of (A - a disambiguation feature) (this is determining the end lexeme index of a disambiguation feature):
 	decide on the underlying number key of A converted to a linked list vertex.
 
 Section "Local Disambiguation Phrase" - unindexed
 
-To decide what linked list is (L - a linked list) after disambiguating locally with (D - a phrase (context-free parser, linked list, truth state) -> disambiguation feature) for (A - a context-free parser):
+To decide what linked list is (L - a linked list [MTL]) after disambiguating locally with (D - a phrase (context-free parser, linked list, truth state) -> disambiguation feature) for (A - a context-free parser) (this is running the local disambiguation phase of the disambiguation framework):
 	while the canonical tree count list is not unit:
 		initialize the parse tree feature hash table from L;
 		offer a feature alternative list for L;
@@ -627,7 +635,7 @@ To decide what linked list is (L - a linked list) after disambiguating locally w
 			delete the canonical tree count list;
 			now the canonical tree count list is a linked list key popped off of the canonical tree count list stack;
 			decide on an empty linked list;
-		filter L by applying the chosen feature alternative;
+		filter L by applying the chosen feature alternative as a predicate that deletes on false;
 		always check that L is not empty or else fail at finding matches for a disambiguation choice;
 		delete the offered feature alternative list;
 		now the offered feature alternative list is a linked list key popped off of the offered feature alternative list stack;
@@ -638,7 +646,7 @@ To decide what linked list is (L - a linked list) after disambiguating locally w
 
 Chapter "Orchestration"
 
-To decide what parse tree vertex is the root of the match for (S - a parseme) canonicalized by (C - a rulebook) and disambiguated by scores from (E - a rulebook) and primary filtration from (F - a rulebook) and secondary filtration from (G - a rulebook) and disambiguating choices from (D - a phrase (context-free parser, linked list, truth state) -> disambiguation feature):
+To decide what parse tree vertex is the root of the match for (S - a parseme) canonicalized by (C - a rulebook) and disambiguated by scores from (E - a rulebook) and primary filtration from (F - a rulebook) and secondary filtration from (G - a rulebook) and disambiguating choices from (D - a phrase (context-free parser, linked list, truth state) -> disambiguation feature) (this is running the disambiguation framework):
 	set up the disambiguation framework;
 	let the possibilities be an empty linked list;
 	repeat with the root running through matches for S:
@@ -687,7 +695,7 @@ The disambiguation framework setup flag is a truth state that varies.  The disam
 
 Chapter "Setup Phrase" - unindexed
 
-To set up the disambiguation framework:
+To set up the disambiguation framework (this is setting up the disambiguation framework):
 	if the disambiguation framework setup flag is false:
 		traverse the disambiguation setup rulebook;
 		now the disambiguation framework setup flag is true.
@@ -711,15 +719,90 @@ Section: Background
 Authors using this extension should be familiar with the documentation for
 Context-Free Parsing Engine.
 
-Section: Process
+Section: The disambiguation process
+
+////
+
+Section: Canonicalization
+
+Canonicalization is the responsibility of a rulebook, which is traversed once
+per parse tree vertex with that guarantee that the rulebook will never see a
+vertex without first seeing all of its descendents.  The vertex under
+consideration is called
+
+	the parse tree vertex to canonicalize
+
+The rules are free to rewrite anything in the subtree rooted at the parse tree
+vertex to canonicalize, and may even reassign that variable to reroot the
+subtree.  (If it does, the replacement's parent and sibling bookkeeping will be
+overwritten with appropriate values when the rulebook completes.)
+
+A vertex's parseme can be rewritten with the phrase
+
+	write the parseme (S - a parseme) to (V - a parse tree vertex)
+
+Its lexeme indices and production can also be changed via
+
+	write the beginning lexeme index (B - a number) to (V - a parse tree vertex)
+
+	write the end lexeme index (E - a number) to (V - a parse tree vertex)
+
+and
+
+	write the production (P - a production) to (V - a parse tree vertex)
+
+although, because only parsemes are considered when comparing canonicalizations
+for equality, none of these are necessary, except perhaps for the benefit of
+later rewrites.
+
+Vertices can also be rearranged, though this requires more care.  The phrases
+available are
+
+	write the parent (U - a parse tree vertex) to (V - a parse tree vertex)
+
+	write the first child (U - a parse tree vertex) to (V - a parse tree vertex)
+
+	write the last child (U - a parse tree vertex) to (V - a parse tree vertex)
+
+	write the left sibling (U - a parse tree vertex) to (V - a parse tree vertex)
+
+and
+
+	write the right sibling (U - a parse tree vertex) to (V - a parse tree vertex)
+
+Each phrase affects only the bookkeeping for the parse tree vertex called V.  It
+is our responsibility to make sure that all vertices are notified of their new
+relations, which usually means several lines of related updates.
+
+If there are parse tree vertices to be gotten rid of entirely, we may use either
+
+	delete (V - a parse tree vertex) but not its descendants
+
+or
+
+	delete (V - a parse tree vertex) and its descendants
+
+It is an error to delete all of a subtree; there must always be a valid value
+stored as the parse tree vertex to canonicalize.  And again, we must be careful
+that surviving vertices are not left believing that any of the destroyed
+vertices are their relatives.
+
+Section: Scoring
+
+////
+
+Section: Filtration
+
+////
+
+Section: Disambiguation Questions
 
 ////
 
 Chapter: Requirements, Limitations, and Bugs
 
-This version was tested with Inform 6G60.  It will probably function on newer
-versions, and it may function under slightly older versions, though there is no
-guarantee.
+This version was tested with Inform 6G60.  It may not function under other
+versions.
 
 Section: Regarding bugs
 
@@ -736,30 +819,52 @@ time.
 Chapter: Acknowledgements
 
 Punctuated Word Parsing Engine was prepared as part of the Glulx Runtime
-Instrumentation Project (https://github.com/i7/i7grip).  For this first edition
-of the project, special thanks go to these people, in chronological order:
+Instrumentation Project (https://github.com/i7/i7grip).
 
-- Graham Nelson, Emily Short, and others, not only for Inform, but also for the
-  countless hours the high-quality technical documentation saved me and for the
-  work that made the Glulx VM possible,
+GRIP owes a great deal to everyone who made Inform possible and everyone who
+continues to contribute.  I'd like to give especial thanks to Graham Nelson and
+Emily Short, not only for their design and coding work, but also for all of the
+documentation, both of the language and its internals---it proved indispensable.
 
-- Andrew Plotkin for the Glulx VM and the Glk library, as well as their clear,
-  always up-to-date specifications,
+I am likewise indebted to everybody who worked to make Glulx and Glk a reality.
+Without them, there simply wouldn't have been any hope for this kind of project.
+My special thanks to Andrew Plotkin, with further kudos for his work maintaining
+the specifications.  They proved as essential as Inform's documentation.
 
-- Jacqueline Lott, David Welbourn, and all of the other attendees for Club
-  Floyd, my first connection to the interactive fiction community,
+The project itself was inspired by suggestions from Ron Newcomb and Esteban
+Montecristo on Inform's feature request page.  It's only because of their posts
+that I ever started.  (And here's hoping that late is better than never.)
 
-- Jesse McGrew and Emily Short for getting me involved with Inform 7,
+Esteban Montecristo also made invaluable contributions as an alpha tester.  I
+cannot thank him enough: he signed on as a beta tester but then quickly
+uncovered a slew of problems that forced me to reconsider both the term ``beta''
+and my timeline.  The impetus for the new, cleaner design and several clues that
+led to huge performance improvements are all due to him.  Moreover, he
+contributed code, since modified to fit the revised framework, for the extension
+Verbose Diagnostics.
 
-- all of the Inform 7 developers for their hard work, the ceaseless flow of
-  improvements, and their willingness to take me on as a collaborator,
+As for Ron Newcomb, I can credit him for nearly half of the bugs unearthed in
+the beta proper, not to mention sound advice on the organization of the
+documentation and the extensions.  GRIP is much sturdier as a result.
 
-- Ron Newcomb and Esteban Montecristo for the idea to write Call Stack Tracking
-  and Verbose Diagnostics,
+Roger Carbol, Jesse McGrew, Michael Martin, Dan Shiovitz, Johnny Rivera, and
+probably several others deserve similar thanks for answering questions on
+ifMUD's I6 and I7 channels.  I am grateful to Andrew Plotkin, David Kinder, and
+others for the same sort of help on intfiction.org.
 
-- Roger Carbol, Jesse McGrew, Michael Martin, Dan Shiovitz, Johnny Rivera, and
-  everyone else for their helpful comments on ifMUD's I6 and I7 channels,
+On top of that, David Kinder was kind enough to accommodate Debug File Parsing
+in the Windows IDE; consequently, authors who have a sufficiently recent version
+of Windows no longer need to write batch scripts.  His help is much appreciated,
+particularly because the majority of downloaders are running Windows.
 
-- Esteban Montecristo, for invaluable alpha testing,
+Even with the IDEs creating debug files, setting up symbolic links to those
+files can be a chore.  Jim Aiken suggested an automated solution, which now
+ships with the project.
 
-- and all of the beta testers who are reading this.
+And preliminary support for authors who want to debug inside a browser stems
+from discussion with Erik Temple and Andrew Plotkin; my thanks for their ideas.
+
+Finally, I should take this opportunity to express my gratitude to everyone who
+helped me get involved in the IF community.  Notable among these people are
+Jesse McGrew and Emily Short, not to mention Jacqueline Lott, David Welbourn,
+and all of the other Club Floyd attendees.
