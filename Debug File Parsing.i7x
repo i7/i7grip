@@ -1,4 +1,4 @@
-Version 1 of Debug File Parsing (for Glulx only) by Brady Garvin begins here.
+Version 2 of Debug File Parsing (for Glulx only) by Brady Garvin begins here.
 
 "Loads debug information produced by the Inform compilers."
 
@@ -8,9 +8,9 @@ Include Low-Level Operations by Brady Garvin.
 Include Low-Level Text by Brady Garvin.
 Include Low-Level Linked Lists by Brady Garvin.
 Include Low-Level Hash Tables by Brady Garvin.
-Include I6 Routine Names by Brady Garvin.
 Include Punctuated Word Parsing Engine by Brady Garvin.
 Include Human-Friendly Function Names by Brady Garvin.
+Include I6 Routine Names by Brady Garvin.
 Include Binary Input Files by Brady Garvin.
 
 Use authorial modesty.
@@ -46,16 +46,16 @@ Include variable creations in the debugging log.
 
 Chapter "Use Options"
 
-Use a routine record hash table size of at least 2311 translates as (- Constant DFP_ROUTINE_HASH_SIZE={N}; -).
-Use a source line record hash table size of at least 11213 translates as (- Constant DFP_SOURCE_LINE_HASH_SIZE={N}; -).
-Use a sequence point hash table size of at least 11213 translates as (- Constant DFP_SEQUENCE_POINT_HASH_SIZE={N}; -).
-Use a global record hash table size of at least 311 translates as (- Constant DFP_GLOBAL_HASH_SIZE={N}; -).
-Use a memory stack variable record hash table size of at least 311 translates as (- Constant DFP_MSV_HASH_SIZE={N}; -).
-Use a memory stack frame hash table size of at least 31 translates as (- Constant DFP_MEMORY_STACK_FRAME_HASH_SIZE={N}; -).
-Use a debug plural hash table size of at least 1123 translates as (- Constant DFP_PLURAL_HASH_SIZE={N}; -).
-Use a kind hash table size of at least 131 translates as (- Constant DFP_KIND_HASH_SIZE={N}; -).
-Use a source line position hash table size of at least 11213 translates as (- Constant DFP_LINE_POSITION_HASH_SIZE={N}; -).
-Use an object hash table size of at least 1123 translates as (- Constant DFP_OBJECT_HASH_SIZE={N}; -).
+Use a routine record hash table size of at least 2311 translates as (- Constant DFP_ROUTINE_HASH_SIZE = {N}; -).
+Use a source line record hash table size of at least 11213 translates as (- Constant DFP_SOURCE_LINE_HASH_SIZE = {N}; -).
+Use a sequence point hash table size of at least 11213 translates as (- Constant DFP_SEQUENCE_POINT_HASH_SIZE = {N}; -).
+Use a global record hash table size of at least 311 translates as (- Constant DFP_GLOBAL_HASH_SIZE = {N}; -).
+Use a memory stack variable record hash table size of at least 311 translates as (- Constant DFP_MSV_HASH_SIZE = {N}; -).
+Use a memory stack frame hash table size of at least 31 translates as (- Constant DFP_MEMORY_STACK_FRAME_HASH_SIZE = {N}; -).
+Use a debug plural hash table size of at least 1123 translates as (- Constant DFP_PLURAL_HASH_SIZE = {N}; -).
+Use a kind hash table size of at least 131 translates as (- Constant DFP_KIND_HASH_SIZE = {N}; -).
+Use a source line position hash table size of at least 11213 translates as (- Constant DFP_LINE_POSITION_HASH_SIZE = {N}; -).
+Use an object hash table size of at least 1123 translates as (- Constant DFP_OBJECT_HASH_SIZE = {N}; -).
 
 To decide what number is the routine record hash table size: (- DFP_ROUTINE_HASH_SIZE -).
 To decide what number is the source line record hash table size: (- DFP_SOURCE_LINE_HASH_SIZE -).
@@ -79,52 +79,52 @@ The name of the symbolic link to the debugging log file is some text that varies
 
 Chapter "Rulebooks"
 
-The debug file setup rules are [rulebook is] a rulebook.
+The debug file setup rulebook is a rulebook.
 
 Book "Runtime Checks"
 
 Chapter "Messages" - unindexed
 
-To fail at loading debug files twice:
+To fail at loading debug files twice (this is failing to load debug files twice):
 	say "[low-level runtime failure in]Debug File Parsing[with explanation]I was asked to load debug files a second time, but they can only be loaded once.[terminating the story]".
 
-To fail at opening an unnamed debug information file:
-	say "[low-level runtime failure in]Debug File Parsing[with explanation]I wasn't given the name of a symbolic link to the debug information file ([fixed letter spacing]gameinfo.dbg[variable letter spacing][warning type]).  Add a line like[line break][line break][fixed letter spacing]    The name of the symbolic link to the debug information file is 'debuginfo'.[variable letter spacing][warning type][line break][line break]to the source text.  (The i7grip download contains a JAR file that does this automatically.)[terminating the story]".
+To fail at opening an unnamed debug information file (this is failing to open an unnamed debug information file):
+	say "[low-level runtime failure in]Debug File Parsing[with explanation]I wasn't given the name of a symbolic link to the debug information file ([fixed letter spacing]gameinfo.dbg[variable letter spacing][warning type]).  Add a line like[line break][line break][fixed letter spacing]    The name of the symbolic link to the debug information file is 'debuginfo'.[variable letter spacing][warning type][line break][line break]or[line break][line break][fixed letter spacing]    Use blorb resources in lieu of external debug files.[variable letter spacing][warning type][line break][line break]to the source text.  (The i7grip download contains a JAR file that does this automatically.)[terminating the story]".
 
-To fail at matching the header of the debug information file:
-	say "[low-level runtime failure in]Debug File Parsing[with explanation]I need the debug information file to match the story, but the headers are different, so they can't possibly go together.[terminating the story]".
-
-To fail at recognizing the debug information file's format:
+To fail at recognizing the debug information file's format (this is failing to recognize the debug information file's format):
 	say "[low-level runtime failure in]Debug File Parsing[with explanation]The debug information file appears to have the wrong format; the first magic number doesn't match my expectations.[terminating the story]".
 
-To fail at recognizing the debug information file's version:
+To fail at recognizing the debug information file's version (this is failing to recognize the debug information file's version):
 	say "[low-level runtime failure in]Debug File Parsing[with explanation]The debug information file has a version number that is newer than any of the versions that I know about.[terminating the story]".
 
-To fail at recognizing the record type (Y - a number):
+To fail at recognizing the debug record type (Y - a number) (this is failing to recognize a debug record type):
 	say "[low-level runtime failure in]Debug File Parsing[with explanation]The debug information file contains a record of type [Y converted to a number], but that isn't a valid record type for the version of the file format the file claims to use.[terminating the story]".
 
-To fail at opening an unnamed intermediate I6 file:
-	say "[low-level runtime failure in]Debug File Parsing[with explanation]I wasn't given the name of a symbolic link to the intermediate I6 file ([fixed letter spacing]gameinfo.dbg[variable letter spacing][warning type]).  Add a line like[line break][line break][fixed letter spacing]    The name of the symbolic link to the intermediate I6 file is 'debugI6'.[variable letter spacing][warning type][line break][line break]to the source text.  (The i7grip download contains a JAR file that does this automatically.)[terminating the story]".
+To fail at matching the header of the debug information file (this is failing to match the header of the debug information file):
+	say "[low-level runtime failure in]Debug File Parsing[with explanation]I need the debug information file to match the story, but the headers are different, so they can't possibly go together.[terminating the story]".
 
-To fail at handling a second I6 source file named (F - some text):
+To fail at opening an unnamed intermediate I6 file (this is failing to open an unnamed intermediate I6 file):
+	say "[low-level runtime failure in]Debug File Parsing[with explanation]I wasn't given the name of a symbolic link to the intermediate I6 file ([fixed letter spacing]gameinfo.dbg[variable letter spacing][warning type]).  Add a line like[line break][line break][fixed letter spacing]    The name of the symbolic link to the intermediate I6 file is 'debugI6'.[variable letter spacing][warning type][line break][line break]or[line break][line break][fixed letter spacing]    Use blorb resources in lieu of external debug files.[variable letter spacing][warning type][line break][line break]to the source text.  (The i7grip download contains a JAR file that does this automatically.)[terminating the story]".
+
+To fail at handling a second I6 source file named (F - some text) (this is failing to handle a second I6 source file):
 	say "[low-level runtime failure in]Debug File Parsing[with explanation]I assume that every project is reduced to a single I6 source file before the final compilation.  But the debug information file mentions at least one other source of I6 code, '[F converted to some text]', and I'm not prepared to handle it.[terminating the story]".
 
-To fail at finding a cached line position for the I6 line number (L - a number):
+To fail at finding a cached line position for the I6 line number (L - a number) (this is failing to find a cached line position for an I6 line):
 	say "[low-level runtime failure in]Debug File Parsing[with explanation]I should have a cached stream position for the I6 line number [L converted to a number], but I can't find it.  Maybe the I6 source file doesn't match this story?[terminating the story]".
 
-To fail at keeping routine records in order:
+To fail at keeping routine records in order (this is failing to keep routine records in order):
 	say "[low-level runtime failure in]Debug File Parsing[with explanation]I expected that at most the last routine on a line could extend beyond that line, but my bookkeeping says otherwise.[terminating the story]".
 
-To fail at opening an unnamed debugging log file:
-	say "[low-level runtime failure in]Debug File Parsing[with explanation]I wasn't given the name of a symbolic link to the debugging log file ([fixed letter spacing]Debug log.txt[variable letter spacing][warning type]).  Add a line like[line break][line break][fixed letter spacing]    The name of the symbolic link to the debugging log file is 'debuglog'.[variable letter spacing][warning type][line break][line break]to the source text.  (The i7grip download contains a JAR file that does this automatically.)[terminating the story]".
+To fail at opening an unnamed debugging log file (this is failing to open an unnamed debugging log file):
+	say "[low-level runtime failure in]Debug File Parsing[with explanation]I wasn't given the name of a symbolic link to the debugging log file ([fixed letter spacing]Debug log.txt[variable letter spacing][warning type]).  Add a line like[line break][line break][fixed letter spacing]    The name of the symbolic link to the debugging log file is 'debuglog'.[variable letter spacing][warning type][line break][line break]or[line break][line break][fixed letter spacing]    Use blorb resources in lieu of external debug files.[variable letter spacing][warning type][line break][line break]to the source text.  (The i7grip download contains a JAR file that does this automatically.)[terminating the story]".
 
-To fail at finding a reference point for finding the declaration of I7 globals:
+To fail at finding a reference point for finding the declaration of I7 globals (this is failing to find a reference point for finding the declaration of I7 globals):
 	say "[low-level runtime failure in]Debug File Parsing[with explanation]I tried to find the declaration of the I6 array [fixed letter spacing]Global_Vars[variable letter spacing], which stores I7 global variables.  To do so, I normally work my way backwards from the kind information for table columns, but because I couldn't find the latter, I had no way to locate the former.[terminating the story]".
 
-To fail at finding the base address for I6 globals:
+To fail at finding the base address for I6 globals (this is failing to find the base address for I6 globals):
 	say "[low-level runtime failure in]Debug File Parsing[with explanation]I tried to find the location of I6 globals in memory, a location that should exist for all story files, but the debug information files never told me where it is.[terminating the story]".
 
-To fail at associating I7 object names with object numbers:
+To fail at associating I7 object names with object numbers (this is failing to associate I7 object names with object numbers):
 	say "[low-level runtime failure in]Debug File Parsing[with explanation]I tried to associate I7 object names with object numbers, but found more object names than there are objects in the object tree.  My parsing of the debug information must be wrong.[terminating the story]".
 
 Book "Data Structures"
@@ -162,7 +162,7 @@ To decide what number is the size in memory of a routine record: (- 236 -).
 
 Section "Routine Record Construction" - unindexed
 
-To decide what routine record is a new routine record with function address (A - a number) and beginning line number (N - a number) and beginning stream position (P - a number):
+To decide what routine record is a new routine record with function address (A - a number) and beginning line number (N - a number) and beginning stream position (P - a number) (this is creating a routine record):
 	let the result be a permanent memory allocation of the size in memory of a routine record bytes converted to a routine record;
 	zero the size in memory of a routine record bytes at address result converted to a number;
 	write the function address A to the result;
@@ -175,96 +175,96 @@ To decide what routine record is a new routine record with function address (A -
 
 Section "Private Routine Record Accessors and Mutators" - unindexed
 
-To write the function address (X - a number) to (A - a routine record): (- llo_setInt({A},{X}); -).
+To write the function address (X - a number) to (A - a routine record): (- llo_setInt({A}, {X}); -).
 
-To decide what number is the possibly invalid local count of (A - a routine record): (- llo_getField({A},1) -).
-To write the local count (X - a number) to (A - a routine record): (- llo_setField({A},1,{X}); -).
+To decide what number is the possibly invalid local count of (A - a routine record): (- llo_getField({A}, 1) -).
+To write the local count (X - a number) to (A - a routine record): (- llo_setField({A}, 1, {X}); -).
 
-To decide what text is the possibly invalid I6 local name number (I - a number) of (A - a routine record): (- llo_getField({A},2+{I}) -).
-To write (X - some text) to I6 local name number (I - a number) of (A - a routine record): (- llo_setField({A},2+{I},{X}); -).
+To decide what text is the possibly invalid I6 local name number (I - a number) of (A - a routine record): (- llo_getField({A}, 2 + {I}) -).
+To write (X - some text) to I6 local name number (I - a number) of (A - a routine record): (- llo_setField({A}, 2 + {I}, {X}); -).
 
-To decide what text is the possibly invalid sample I7 local name number (I - a number) of (A - a routine record): (- llo_getField({A},18+{I}) -).
-To write (X - some text) to sample I7 local name number (I - a number) of (A - a routine record): (- llo_setField({A},18+{I},{X}); -).
+To decide what text is the possibly invalid sample I7 local name number (I - a number) of (A - a routine record): (- llo_getField({A}, 18 + {I}) -).
+To write (X - some text) to sample I7 local name number (I - a number) of (A - a routine record): (- llo_setField({A}, 18 + {I}, {X}); -).
 
-To decide what text is the possibly invalid I7 local kind name number (I - a number) of (A - a routine record): (- llo_getField({A},34+{I}) -).
-To write (X - some text) to I7 local kind name number (I - a number) of (A - a routine record): (- llo_setField({A},34+{I},{X}); -).
+To decide what text is the possibly invalid I7 local kind name number (I - a number) of (A - a routine record): (- llo_getField({A}, 34 + {I}) -).
+To write (X - some text) to I7 local kind name number (I - a number) of (A - a routine record): (- llo_setField({A}, 34 + {I}, {X}); -).
 
-To decide what number is the possibly invalid source version of (A - a routine record): (- llo_getField({A},50) -).
-To write the source version (X - a number) to (A - a routine record): (- llo_setField({A},50,{X}); -).
+To decide what number is the possibly invalid source version of (A - a routine record): (- llo_getField({A}, 50) -).
+To write the source version (X - a number) to (A - a routine record): (- llo_setField({A}, 50, {X}); -).
 
-To decide what number is the beginning stream position of (A - a routine record): (- llo_getField({A},51) -).
-To write the beginning stream position (X - a number) to (A - a routine record): (- llo_setField({A},51,{X}); -).
+To decide what number is the beginning stream position of (A - a routine record): (- llo_getField({A}, 51) -).
+To write the beginning stream position (X - a number) to (A - a routine record): (- llo_setField({A}, 51, {X}); -).
 
-To decide what number is the sequence point stream position of (A - a routine record): (- llo_getField({A},52) -).
-To write the sequence point stream position (X - a number) to (A - a routine record): (- llo_setField({A},52,{X}); -).
+To decide what number is the sequence point stream position of (A - a routine record): (- llo_getField({A}, 52) -).
+To write the sequence point stream position (X - a number) to (A - a routine record): (- llo_setField({A}, 52, {X}); -).
 
-To decide what number is the end stream position of (A - a routine record): (- llo_getField({A},53) -).
-To write the end stream position (X - a number) to (A - a routine record): (- llo_setField({A},53,{X}); -).
+To decide what number is the end stream position of (A - a routine record): (- llo_getField({A}, 53) -).
+To write the end stream position (X - a number) to (A - a routine record): (- llo_setField({A}, 53, {X}); -).
 
-To decide what number is the possibly invalid preamble line number of (A - a routine record): (- llo_getField({A},54) -).
-To write the preamble line number (X - a number) to (A - a routine record): (- llo_setField({A},54,{X}); -).
+To decide what number is the possibly invalid preamble line number of (A - a routine record): (- llo_getField({A}, 54) -).
+To write the preamble line number (X - a number) to (A - a routine record): (- llo_setField({A}, 54, {X}); -).
 
-To write the beginning line number (X - a number) to (A - a routine record): (- llo_setField({A},55,{X}); -).
+To write the beginning line number (X - a number) to (A - a routine record): (- llo_setField({A}, 55, {X}); -).
 
-To write the end line number (X - a number) to (A - a routine record): (- llo_setField({A},56,{X}); -).
+To write the end line number (X - a number) to (A - a routine record): (- llo_setField({A}, 56, {X}); -).
 
 To decide what permanent linked list is the possibly invalid sequence point linked list of (A - a routine record): (- ({A}-->57) -).
-To write the sequence point linked list (X - a permanent linked list) to (A - a routine record): (- llo_setField({A},57,{X}); -).
+To write the sequence point linked list (X - a permanent linked list) to (A - a routine record): (- llo_setField({A}, 57, {X}); -).
 
 To decide what permanent linked list tail is the possibly invalid sequence point linked list tail of (A - a routine record): (- ({A}-->58) -).
-To write the sequence point linked list tail (X - a permanent linked list tail) to (A - a routine record): (- llo_setField({A},58,{X}); -).
+To write the sequence point linked list tail (X - a permanent linked list tail) to (A - a routine record): (- llo_setField({A}, 58, {X}); -).
 
 Section "Direct Public Routine Record Accessors"
 
 To decide what number is the function address of (A - a routine record): (- llo_getInt({A}) -).
 
-To decide what number is the beginning line number of (A - a routine record): (- llo_getField({A},55) -).
+To decide what number is the beginning line number of (A - a routine record): (- llo_getField({A}, 55) -).
 
-To decide what number is the end line number of (A - a routine record): (- llo_getField({A},56) -).
+To decide what number is the end line number of (A - a routine record): (- llo_getField({A}, 56) -).
 
 Section "Lazy Public Routine Record Accessors"
 
-To decide what number is the local count of (A - a routine record):
+To decide what number is the local count of (A - a routine record) (this is determining the local count of a routine record):
 	let the result be the possibly invalid local count of A;
 	if the result is not -1:
 		decide on the result;
 	load I6 locals into A;
 	decide on the possibly invalid local count of A.
 
-To decide what text is I6 local name number (I - a number) of (A - a routine record):
+To decide what text is I6 local name number (I - a number) of (A - a routine record) (this is determining an I6 local name in a routine record):
 	let the result be the possibly invalid I6 local name number I of A;
 	if the result is not zero converted to a text:
 		decide on the result;
 	load I6 locals into A;
 	decide on the possibly invalid I6 local name number I of A.
 
-To decide what text is sample I7 local name number (I - a number) of (A - a routine record):
+To decide what text is sample I7 local name number (I - a number) of (A - a routine record) (this is determining a sample I7 local name in a routine record):
 	let the result be the possibly invalid sample I7 local name number I of A;
 	if the result is not zero converted to a text:
 		decide on the result;
 	load I7 locals into A;
 	decide on the possibly invalid sample I7 local name number I of A.
 
-To decide what text is I7 local kind name number (I - a number) of (A - a routine record):
+To decide what text is I7 local kind name number (I - a number) of (A - a routine record) (this is determining a I7 local kind in a routine record):
 	let the result be the possibly invalid I7 local kind name number I of A;
 	if the result is not zero converted to a text:
 		decide on the result;
 	load I7 kinds into A;
 	decide on the possibly invalid I7 local kind name number I of A.
 
-To decide what number is the source version of (A - a routine record):
+To decide what number is the source version of (A - a routine record) (this is determining the source version of a routine record):
 	let the result be the possibly invalid source version of A;
 	if the result is not zero:
 		decide on the result;
 	load the source version and preamble line number into A;
 	decide on the possibly invalid source version of A.
 
-To decide what number is the preamble line number of (A - a routine record):
+To decide what number is the preamble line number of (A - a routine record) (this is determining the preamble line number of a routine record):
 	let the discarded value be the source version of A;
 	decide on the possibly invalid preamble line number of A.
 
 [We intentionally return an r-value, not an l-value.]
-To decide what permanent linked list is the sequence point linked list of (A - a routine record):
+To decide what permanent linked list is the sequence point linked list of (A - a routine record) (this is determining the sequence point linked list of a routine record):
 	let the result be the possibly invalid sequence point linked list of A;
 	if the result is not an invalid permanent linked list:
 		decide on the result;
@@ -295,7 +295,7 @@ To decide what number is the size in memory of a source line record: (- 92 -).
 
 Section "Source Line Record Construction" - unindexed
 
-To decide what source line record is a new source line record for line number (N - a number) and the I6 (T - some text) and the routine record list (R - a permanent linked list):
+To decide what source line record is a new source line record for line number (N - a number) and the I6 (T - some text) and the routine record list (R - a permanent linked list) (this is creating a source line record):
 	let the result be a permanent memory allocation of the size in memory of a source line record bytes converted to a source line record;
 	zero the size in memory of a source line record bytes at address result converted to a number;
 	write the line number N to the result;
@@ -306,32 +306,32 @@ To decide what source line record is a new source line record for line number (N
 
 Section "Private Source Line Record Accessors and Mutators" - unindexed
 
-To write the line number (X - a number) to (A - a source line record): (- llo_setInt({A},{X}); -).
+To write the line number (X - a number) to (A - a source line record): (- llo_setInt({A}, {X}); -).
 
-To write the I6 (X - some text) to (A - a source line record): (- llo_setField({A},1,{X}); -).
+To write the I6 (X - some text) to (A - a source line record): (- llo_setField({A}, 1, {X}); -).
 
-To decide what text is the possibly invalid I7 of (A - a source line record): (- llo_getField({A},2) -).
-To write the I7 (X - some text) to (A - a source line record): (- llo_setField({A},2,{X}); -).
+To decide what text is the possibly invalid I7 of (A - a source line record): (- llo_getField({A}, 2) -).
+To write the I7 (X - some text) to (A - a source line record): (- llo_setField({A}, 2, {X}); -).
 
-To decide what number is the possibly invalid I7 indentation of (A - a source line record): (- llo_getField({A},3) -).
-To write the I7 indentation (X - a number) to (A - a source line record): (- llo_setField({A},3,{X}); -).
+To decide what number is the possibly invalid I7 indentation of (A - a source line record): (- llo_getField({A}, 3) -).
+To write the I7 indentation (X - a number) to (A - a source line record): (- llo_setField({A}, 3, {X}); -).
 
-To decide whether the possibly invalid I7 coda flag is set in (A - a source line record): (- llo_getField({A},4) -).
-To set the I7 coda flag in (A - a source line record): (- llo_setField({A},4,1); -).
+To decide whether the possibly invalid I7 coda flag is set in (A - a source line record): (- llo_getField({A}, 4) -).
+To set the I7 coda flag in (A - a source line record): (- llo_setField({A}, 4, 1); -).
 
-To write the routine record list (X - a permanent linked list) to (A - a source line record): (- llo_setField({A},5,{X}); -).
+To write the routine record list (X - a permanent linked list) to (A - a source line record): (- llo_setField({A}, 5, {X}); -).
 
 To decide what permanent linked list is the possibly invalid sequence point linked list of (A - a source line record): (- ({A}-->6) -).
-To write the sequence point linked list (X - a permanent linked list) to (A - a source line record): (- llo_setField({A},6,{X}); -).
+To write the sequence point linked list (X - a permanent linked list) to (A - a source line record): (- llo_setField({A}, 6, {X}); -).
 
-To decide what text is the possibly invalid I7 local name number (I - a number) of (A - a source line record): (- llo_getField({A},7+{I}) -).
-To write (X - some text) to I7 local name number (I - a number) of (A - a source line record): (- llo_setField({A},7+{I},{X}); -).
+To decide what text is the possibly invalid I7 local name number (I - a number) of (A - a source line record): (- llo_getField({A}, 7 + {I}) -).
+To write (X - some text) to I7 local name number (I - a number) of (A - a source line record): (- llo_setField({A}, 7 + {I}, {X}); -).
 
 Section "Direct Public Source Line Record Accessors"
 
 To decide what number is the line number of (A - a source line record): (- llo_getInt({A}) -).
 
-To decide what text is the I6 of (A - a source line record): (- llo_getField({A},1) -).
+To decide what text is the I6 of (A - a source line record): (- llo_getField({A}, 1) -).
 
 To decide what permanent linked list is the routine record list of (A - a source line record): (- ({A}-->5) -).
 
@@ -343,29 +343,29 @@ To decide what routine record is the sole routine record of (A - a source line r
 
 Section "Lazy Public Source Line Record Accessors"
 
-To decide what text is the I7 of (A - a source line record):
+To decide what text is the I7 of (A - a source line record) (this is determining the I7 of a source line record):
 	let the result be the possibly invalid I7 of A;
 	if the result is not zero converted to a text:
 		decide on the result;
 	load I7 into A;
 	decide on the possibly invalid I7 of A.
 
-To decide what number is the I7 indentation of (A - a source line record):
+To decide what number is the I7 indentation of (A - a source line record) (this is determining the I7 indentation of a source line record):
 	let the discarded value be the I7 of A;
 	decide on the possibly invalid I7 indentation of A.
 
-To decide whether the I7 coda flag is set in (A - a source line record):
+To decide whether the I7 coda flag is set in (A - a source line record) (this is determining the I7 coda flag of a source line record):
 	let the discarded value be the I7 of A;
 	decide on whether or not the possibly invalid I7 coda flag is set in A.
 
-To decide what permanent linked list is the sequence point linked list of (A - a source line record):
+To decide what permanent linked list is the sequence point linked list of (A - a source line record) (this is determining the sequence point linked list of a source line record):
 	let the result be the possibly invalid sequence point linked list of A;
 	if the result is not an invalid permanent linked list:
 		decide on the result;
 	load sequence points into A;
 	decide on the possibly invalid sequence point linked list of A.
 
-To decide what text is I7 local name number (I - a number) of (A - a source line record):
+To decide what text is I7 local name number (I - a number) of (A - a source line record) (this is determining an I7 local name in a source line record):
 	let the result be the possibly invalid I7 local name number I of A;
 	if the result is not zero converted to a text:
 		decide on the result;
@@ -384,7 +384,7 @@ Section "The Global Record Structure" - unindexed
 
 [Layout:
 	4 bytes for the global index [either an I6 index (into the globals space) or an I7 index (into the Global_Vars array)]
-	4 bytes for the address [-2 for an I6 global (in which case scale and shift the (I6) global index), -1 if the address has not yet been determined, zero if an address cannot be found]
+	4 bytes for the address [-2 for an I6 global (in which case scale and shift the [I6] global index), -1 if the address has not yet been determined, zero if an address cannot be found]
 	4 bytes for the human-friendly name
 	4 bytes for the kind name]
 
@@ -392,7 +392,7 @@ To decide what number is the size in memory of a global record: (- 16 -).
 
 Section "Global Record Construction" - unindexed
 
-To decide what global record is a new I7 global record with index (I - a number) and human-friendly name (T - some text) and kind name (K - some text):
+To decide what global record is a new I7 global record with index (I - a number) and human-friendly name (T - some text) and kind name (K - some text) (this is creating a global record with a kind):
 	let the result be a permanent memory allocation of the size in memory of a global record bytes converted to a global record;
 	write the global index I to the result;
 	write the address -1 to the result;
@@ -400,7 +400,7 @@ To decide what global record is a new I7 global record with index (I - a number)
 	write the kind name K to the result;
 	decide on the result.
 
-To decide what global record is a new I6 global record with index (I - a number) and human-friendly name (T - some text):
+To decide what global record is a new I6 global record with index (I - a number) and human-friendly name (T - some text) (this is creating a global record without a kind):
 	let the result be a permanent memory allocation of the size in memory of a global record bytes converted to a global record;
 	write the global index I to the result;
 	write the address -2 to the result;
@@ -410,22 +410,22 @@ To decide what global record is a new I6 global record with index (I - a number)
 
 Section "Private Global Record Accessors and Mutators"
 
-To write the global index (X - a number) to (A - a global record): (- llo_setInt({A},{X}); -).
+To write the global index (X - a number) to (A - a global record): (- llo_setInt({A}, {X}); -).
 
-To decide what number is the possibly invalid address of (A - a global record): (- llo_getField({A},1) -).
-To write the address (X - a number) to (A - a global record): (- llo_setField({A},1,{X}); -).
+To decide what number is the possibly invalid address of (A - a global record): (- llo_getField({A}, 1) -).
+To write the address (X - a number) to (A - a global record): (- llo_setField({A}, 1, {X}); -).
 
-To write the human-friendly name (X - some text) to (A - a global record): (- llo_setField({A},2,{X}); -).
+To write the human-friendly name (X - some text) to (A - a global record): (- llo_setField({A}, 2, {X}); -).
 
-To write the kind name (X - some text) to (A - a global record): (- llo_setField({A},3,{X}); -).
+To write the kind name (X - some text) to (A - a global record): (- llo_setField({A}, 3, {X}); -).
 
 Section "Direct Public Global Record Accessors"
 
 To decide what number is the global index of (A - a global record): (- llo_getInt({A}) -).
 
-To decide what text is the human-friendly name of (A - a global record): (- llo_getField({A},2) -).
+To decide what text is the human-friendly name of (A - a global record): (- llo_getField({A}, 2) -).
 
-To decide what text is the kind name of (A - a global record): (- llo_getField({A},3) -).
+To decide what text is the kind name of (A - a global record): (- llo_getField({A}, 3) -).
 
 To decide what number is the source version of (A - a global record):
 	if the possibly invalid address of A is -2:
@@ -434,7 +434,7 @@ To decide what number is the source version of (A - a global record):
 
 Section "Uninstrumented Global Record Address Accessor" (for use without Glulx Runtime Instrumentation Framework by Brady Garvin)
 
-To decide what number is the address of (A - a global record):
+To decide what number is the address of (A - a global record) (this is determining the address of a global record):
 	let the result be the possibly invalid address of A;
 	if the result is:
 		-- -1:
@@ -448,7 +448,9 @@ To decide what number is the address of (A - a global record):
 
 Section "Instrumented Global Record Address Accessor" (for use with Glulx Runtime Instrumentation Framework by Brady Garvin)
 
-To decide what number is the address of (A - a global record):
+[GRIF relocates the I6 temporary space (which comprises low-indexed globals); the global addresses should reflect that relocation.]
+
+To decide what number is the address of (A - a global record) (this is determining the address of a global record):
 	let the result be the possibly invalid address of A;
 	if the result is:
 		-- -1:
@@ -474,8 +476,8 @@ The specification of a memory stack variable record is "A memory stack variable 
 Section "The Memory Stack Variable Record Structure" - unindexed
 
 [Layout:
-	4 bytes for the memory stack identifier [defined by Inform as a rulebook number for rulebook variables, 10000 plus the activity number (that is, the zero-based index in creation order) for activity variables, or 20000 plus the action number (again, the zero-based index in creation order) for action variables; we use -1 for unresolved rulebook variables, -10001, -20001 for unresolved action variables]
-	4 bytes for the memory stack offset [the zero-based index of the variable among all variables sharing the same identifier]
+	4 bytes for the memory stack identifier [@] [defined by Inform as a rulebook number for rulebook variables, 10000 plus the activity number (that is, the zero-based index in creation order) for activity variables, or 20000 plus the action number (again, the zero-based index in creation order) for action variables; we use -1 for unresolved rulebook variables, -10001 for unresolved activity variables, and -20001 for unresolved action variables]
+	4 bytes for the memory stack offset [the zero-based index of the variable among all variables sharing the same memory stack identifier]
 	4 bytes for the owner name [the name of the owning rulebook, activity, or action]
 	4 bytes for the human-friendly name
 	4 bytes for the kind name]
@@ -484,7 +486,7 @@ To decide what number is the size in memory of a memory stack variable record: (
 
 Section "Memory Stack Variable Record Construction" - unindexed
 
-To decide what memory stack variable record is a new rulebook variable record for variable (I - a number) owned by (O - some text) with human-friendly name (T - some text) and kind name (K - some text):
+To decide what memory stack variable record is a new rulebook variable record for variable (I - a number) owned by (O - some text) with human-friendly name (T - some text) and kind name (K - some text) (this is creating a rulebook variable record):
 	let the result be a permanent memory allocation of the size in memory of a memory stack variable record bytes converted to a memory stack variable record;
 	write the memory stack identifier -1 to the result;
 	write the memory stack offset I to the result;
@@ -493,7 +495,7 @@ To decide what memory stack variable record is a new rulebook variable record fo
 	write the kind name K to the result;
 	decide on the result.
 
-To decide what memory stack variable record is a new activity variable record for variable (I - a number) owned by (O - some text) with human-friendly name (T - some text) and kind name (K - some text):
+To decide what memory stack variable record is a new activity variable record for variable (I - a number) owned by (O - some text) with human-friendly name (T - some text) and kind name (K - some text) (this is creating an activity variable record):
 	let the result be a permanent memory allocation of the size in memory of a memory stack variable record bytes converted to a memory stack variable record;
 	write the memory stack identifier -10001 to the result;
 	write the memory stack offset I to the result;
@@ -502,7 +504,7 @@ To decide what memory stack variable record is a new activity variable record fo
 	write the kind name K to the result;
 	decide on the result.
 
-To decide what memory stack variable record is a new action variable record for variable (I - a number) owned by (O - some text) with human-friendly name (T - some text) and kind name (K - some text):
+To decide what memory stack variable record is a new action variable record for variable (I - a number) owned by (O - some text) with human-friendly name (T - some text) and kind name (K - some text) (this is creating an action variable record):
 	let the result be a permanent memory allocation of the size in memory of a memory stack variable record bytes converted to a memory stack variable record;
 	write the memory stack identifier -20001 to the result;
 	write the memory stack offset I to the result;
@@ -514,34 +516,34 @@ To decide what memory stack variable record is a new action variable record for 
 Section "Private Memory Stack Variable Record Accessors and Mutators"
 
 To decide what number is the possibly invalid memory stack identifier of (A - a memory stack variable record): (- llo_getInt({A}) -).
-To write the memory stack identifier (X - a number) to (A - a memory stack variable record): (- llo_setInt({A},{X}); -).
+To write the memory stack identifier (X - a number) to (A - a memory stack variable record): (- llo_setInt({A}, {X}); -).
 
-To write the memory stack offset (X - a number) to (A - a memory stack variable record): (- llo_setField({A},1,{X}); -).
+To write the memory stack offset (X - a number) to (A - a memory stack variable record): (- llo_setField({A}, 1, {X}); -).
 
-To write the owner name (X - some text) to (A - a memory stack variable record): (- llo_setField({A},2,{X}); -).
+To write the owner name (X - some text) to (A - a memory stack variable record): (- llo_setField({A}, 2, {X}); -).
 
-To write the human-friendly name (X - some text) to (A - a memory stack variable record): (- llo_setField({A},3,{X}); -).
+To write the human-friendly name (X - some text) to (A - a memory stack variable record): (- llo_setField({A}, 3, {X}); -).
 
-To write the kind name (X - some text) to (A - a memory stack variable record): (- llo_setField({A},4,{X}); -).
+To write the kind name (X - some text) to (A - a memory stack variable record): (- llo_setField({A}, 4, {X}); -).
 
 Section "Direct Public Memory Stack Variable Record Accessors"
 
-To decide what number is the memory stack offset of (A - a memory stack variable record): (- llo_getField({A},1) -).
+To decide what number is the memory stack offset of (A - a memory stack variable record): (- llo_getField({A}, 1) -).
 
-To decide what text is the owner name of (A - a memory stack variable record): (- llo_getField({A},2) -).
+To decide what text is the owner name of (A - a memory stack variable record): (- llo_getField({A}, 2) -).
 
-To decide what text is the human-friendly name of (A - a memory stack variable record): (- llo_getField({A},3) -).
+To decide what text is the human-friendly name of (A - a memory stack variable record): (- llo_getField({A}, 3) -).
 
-To decide what text is the kind name of (A - a memory stack variable record): (- llo_getField({A},4) -).
+To decide what text is the kind name of (A - a memory stack variable record): (- llo_getField({A}, 4) -).
 
 Section "Inline Definitions for Lazy Public Memory Stack Variable Record Accessors" - unindexed
 
-To decide what number is the memory stack top address: (- (MStack+(4*MStack_Top)) -).
+To decide what number is the memory stack top address: (- (MStack + (4 * MStack_Top)) -).
 To decide what number is the memory stack bottom address: (- MStack -).
 
 Section "Lazy Public Memory Stack Variable Record Accessors"
 
-To decide what number is the memory stack identifier of (A - a memory stack variable record):
+To decide what number is the memory stack identifier of (A - a memory stack variable record) (this is determining the memory stack identifier of a memory stack variable record):
 	let the result be the possibly invalid memory stack identifier of A;
 	if the result is:
 		-- -1:
@@ -555,7 +557,7 @@ To decide what number is the memory stack identifier of (A - a memory stack vari
 			write the memory stack identifier the result to A;
 	decide on the result.
 
-To decide what number is the current address of (A - a memory stack variable record):
+To decide what number is the current address of (A - a memory stack variable record) (this is determining the current address of a memory stack variable record):
 	let the stack address be the memory stack top address;
 	let the previous stack address be the stack address;
 	let the seen hash table be a new hash table with the memory stack frame hash table size buckets;
@@ -697,13 +699,13 @@ Section "Lazy Singleton Accessors"
 To decide what routine record is the routine record for (F - a sayable value):
 	decide on the first routine record value matching the key the function address of F in the routine record hash table or an invalid routine record if there are no matches.
 
-To decide what linked list is a new list of routine records for beginning line number (N - a number):
+To decide what linked list is a new list of routine records for beginning line number (N - a number) (this is creating a routine record list for a beginning line number):
 	let the result be an empty linked list;
 	repeat with the routine record running through the routine record values matching the key N in the routine beginning hash table:
 		push the key the routine record onto the result;
 	decide on the result.
 
-To decide what source line record is the source line record for line number (N - a number):
+To decide what source line record is the source line record for line number (N - a number) (this is determining the source line record of a line number):
 	let the result be the first source line record value matching the key N in the source line record hash table or an invalid source line record if there are no matches;
 	if the result is not an invalid source line record or N is zero:
 		decide on the result;
@@ -712,10 +714,10 @@ To decide what source line record is the source line record for line number (N -
 
 Definition: a number (called A) is a sequence point if the sequence point routine record hash table contains the key A.
 
-To decide what routine record is the routine record owning the sequence point (S - a number):
+To decide what routine record is the routine record owning the sequence point (S - a number) (this is determining the routine record of a sequence point):
 	decide on the first routine record value matching the key S in the sequence point routine record hash table or an invalid routine record if there are no matches.
 
-To decide what number is the I6 line number for the sequence point (S - a number):
+To decide what number is the I6 line number for the sequence point (S - a number) (this is determining the I6 line number of a sequence point):
 	let the linked list vertex be the first match for the key S in the sequence point line number hash table;
 	if the linked list vertex is null:
 		decide on zero;
@@ -726,7 +728,7 @@ To decide what number is the I6 line number for the sequence point (S - a number
 	write the value zero minus the result to the linked list vertex;
 	decide on the result.
 
-To decide what number is the I6 line number for the sequence point (S - a number) in column number (C - a number):
+To decide what number is the I6 line number for the sequence point (S - a number) supposedly in column number (C - a number) (this is determining the I6 line number of a sequence point with correction for labels):
 	let the linked list vertex be the first match for the key S in the sequence point line number hash table;
 	if the linked list vertex is null:
 		decide on zero;
@@ -737,7 +739,7 @@ To decide what number is the I6 line number for the sequence point (S - a number
 	write the value zero minus the result to the linked list vertex;
 	decide on the result.
 
-To decide what number is the I7 line number for the sequence point (S - a number) in the routine record (R - a routine record):
+To decide what number is the I7 line number for the sequence point (S - a number) in the routine record (R - a routine record) (this is determining the I7 line number of a sequence point in a known routine record):
 	let the beginning line number be the beginning line number of R;
 	let the end line number be the end line number of R;
 	let the result be the I6 line number for the sequence point S;
@@ -753,42 +755,42 @@ To decide what number is the I7 line number for the sequence point (S - a number
 	decide on the preamble line number of R.
 
 [We don't ever use this internally.  But other extension authors might want it.]
-To decide what number is the I7 line number for the sequence point (S - a number):
+To decide what number is the I7 line number for the sequence point (S - a number) (this is determining the I7 line number of a sequence point):
 	let the routine record be the routine record owning the sequence point S;
 	if the routine record is an invalid routine record:
 		decide on zero;
 	decide on the I7 line number for the sequence point S in the routine record the routine record.
 
-To decide what global record is the global record for I7 global index (I - a number):
+To decide what global record is the global record for I7 global index (I - a number) (this is determining the global record of an I7 global index):
 	decide on the first global record value matching the key I in the I7 global record hash table or an invalid global record if there are no matches.
 
-To decide what linked list is a new list of global records matching the global name (T - some text):
+To decide what linked list is a new list of global records matching the global name (T - some text) (this is creating a global record list for a global name):
 	let the result be an empty linked list;
 	repeat with the global record running through the global record values matching the textual key T in the global record lookup hash table:
 		push the key the global record onto the result;
 	decide on the result.
 
-To decide what linked list is a new list of memory stack variable records matching the memory stack variable name (T - some text):
+To decide what linked list is a new list of memory stack variable records matching the memory stack variable name (T - some text) (this is creating a memory stack variable record list for a memory stack variable name):
 	let the result be an empty linked list;
 	repeat with the memory stack variable record running through the memory stack variable record values matching the textual key T in the memory stack variable record lookup hash table:
 		push the key the memory stack variable record onto the result;
 	decide on the result.
 
-To decide what linked list is a new list of object addresses matching the object name (T - some text):
+To decide what linked list is a new list of object addresses matching the object name (T - some text) (this is creating an object address list for an object name):
 	let the result be an empty linked list;
 	repeat with the object number running through the number values matching the textual key T in the object number lookup hash table:
 		let the object address be the first number value matching the key the object number in the object address lookup hash table or zero if there are no matches;
 		push the key the object address onto the result;
 	decide on the result.
 
-To decide what text is the debug plural of (T - some text):
+To decide what text is the debug plural of (T - some text) (this is determining a debug plural):
 	decide on the first text value matching the textual key T in the debug plural hash table or "" if there are no matches.
 
 Book "Naming Helper Functions"
 
 Chapter "Private Data Identifier Canonicalization Phrases" - unindexed
 
-To say (A - a punctuated word array) as if it were a match made by a punctuated word parsing engine:
+To say (A - a punctuated word array) as if it were a match made by a punctuated word parsing engine (this is saying a punctuated word array as if it were a match made by a punctuated word parsing engine):
 	let the first time flag be true;
 	repeat with the word running through A:
 		if the first time flag is true:
@@ -797,7 +799,7 @@ To say (A - a punctuated word array) as if it were a match made by a punctuated 
 			say " ";
 		say "[the word]".
 
-To say the canonicalization of the data identifier (T - some text):
+To say the canonicalization of the data identifier (T - some text) (this is saying the canonicalization of a data identifier):
 	let the downcased identifier be a new synthetic text copied from T;
 	downcase the synthetic text the downcased identifier;
 	let the punctuated word array be a new punctuated word array for the synthetic text the downcased identifier;
@@ -809,11 +811,11 @@ Chapter "Public Data Identifier Canonicalization Phrases" - unindexed
 
 The identifier for canonicalizing identifiers is some text that varies.
 
-To decide what text is a new canonicalization of the data identifier (T - some text):
+To decide what text is a new canonicalization of the data identifier (T - some text) (this is creating a canonicalization of a data identifier):
 	now the identifier for canonicalizing identifiers is T;
 	decide on a new synthetic text copied from "[the canonicalization of the data identifier the identifier for canonicalizing identifiers]".
 
-To decide what text is a new permanent canonicalization of the data identifier (T - some text):
+To decide what text is a new permanent canonicalization of the data identifier (T - some text) (this is creating a permanent canonicalization of a data identifier):
 	now the identifier for canonicalizing identifiers is T;
 	decide on a new permanent synthetic text copied from "[the canonicalization of the data identifier the identifier for canonicalizing identifiers]".
 
@@ -826,17 +828,17 @@ Chapter "Infix Record Preprocessing" - unindexed
 Section "Infix Record Preprocessor Array" - unindexed
 
 Include (-
-	Constant DFP_INFIX_RECORD_COUNT=15;
+	Constant DFP_INFIX_RECORD_COUNT = 15;
 	Array dfp_infixRecordPreprocessors --> DFP_INFIX_RECORD_COUNT;
 -) after "Definitions.i6t".
 
 To decide what number is the number of Infix record types: (- DFP_INFIX_RECORD_COUNT -).
-To preprocess type (I - a number) Infix records by (P - a phrase nothing -> nothing): (- llo_setField(dfp_infixRecordPreprocessors,{I},llo_getField({P},1)); -).
-To preprocess a type (I - a number) Infix record: (- (llo_getField(dfp_infixRecordPreprocessors,{I}))(); -).
+To preprocess type (I - a number) Infix records by (P - a phrase nothing -> nothing): (- llo_setField(dfp_infixRecordPreprocessors, {I}, llo_getField({P}, 1)); -).
+To preprocess a type (I - a number) Infix record: (- (llo_getField(dfp_infixRecordPreprocessors, {I}))(); -).
 
 Section "Infix Record Types" - unindexed
 
-To register the Infix record preprocessors:
+To register the Infix record preprocessors (this is registering the Infix record preprocessors):
 	preprocess type 1 Infix records by preprocessing an Infix file record;
 	preprocess type 2 Infix records by preprocessing an Infix class record;
 	preprocess type 3 Infix records by preprocessing an Infix object record;
@@ -880,7 +882,7 @@ To preprocess an Infix object record (this is preprocessing an Infix object reco
 Section "Preprocessing Global Debug Records" - unindexed
 
 The minimum expected I6 global index for working around I6 global index overflow is a number that varies.  The minimum expected I6 global index for working around I6 global index overflow is zero.
-To decide what number is (N - a number) adjusted for I6 global index overflow:
+To decide what number is (N - a number) adjusted for I6 global index overflow (this is adjusting an I6 global index for overflow):
 	let the result be N;
 	while the result is less than the minimum expected I6 global index for working around I6 global index overflow:
 		increase the result by 256;
@@ -918,14 +920,14 @@ Section "Adjusting for Line Number Overflow" - unindexed
 To decide what number is the maximum line number backtrack: (- 2048 -).
 
 The minimum expected line number for working around line number overflow is a number that varies.  The minimum expected line number for working around line number overflow is zero.
-To decide what number is (N - a number) adjusted for line number overflow:
+To decide what number is (N - a number) adjusted for line number overflow (this is adjusting a line number for overflow):
 	let the result be N;
 	while the result is less than the minimum expected line number for working around line number overflow:
 		increase the result by 65536;
 	now the minimum expected line number for working around line number overflow is the result minus the maximum line number backtrack;
 	decide on the result.
 
-To decide what number is (N - a number) adjusted for line number overflow with minimum (M - a number):
+To decide what number is (N - a number) adjusted for line number overflow with minimum (M - a number) (this is adjusting a line number for overflow when a minimum is known):
 	let the result be N;
 	while the result is less than M:
 		increase the result by 65536;
@@ -994,7 +996,7 @@ To preprocess an Infix sequence point set record (this is preprocessing an Infix
 			now the line number is the line number adjusted for line number overflow;
 		otherwise:
 			now the line number is zero;
-		skip one byte in the Infix debug stream;		
+		skip one byte in the Infix debug stream;
 		let the instruction address be the base address plus the next short in the Infix debug stream;
 		insert the key the instruction address and the value the the last-seen routine record into the sequence point routine record hash table;
 		insert the key the instruction address and the value the line number into the sequence point line number hash table.
@@ -1038,7 +1040,7 @@ A debug file setup rule (this is the load debug information from the Infix binar
 		if the record type is zero:
 			break;
 		if the record type is greater than the number of Infix record types:
-			fail at recognizing the record type record type;
+			fail at recognizing the debug record type record type;
 		preprocess a type record type Infix record;
 	let the self global record be a new I6 global record with index four and human-friendly name "self";
 	let the downcased self global variable name be a new permanent synthetic text copied from "self";
@@ -1053,7 +1055,7 @@ Chapter "Lazy Loading" - unindexed
 
 Section "Invalid Local Names"
 
-To decide what text is the name for invalid local number (I - a number):
+To decide what text is the name for invalid local number (I - a number) (this is naming an invalid local):
 	if I is:
 		-- 0:
 			decide on "<invalid-local-0>";
@@ -1092,7 +1094,7 @@ To decide what text is the name for invalid local number (I - a number):
 
 Section "Loading I6 Locals" - unindexed
 
-To load I6 locals into (A - a routine record):
+To load I6 locals into (A - a routine record) (this is loading locals into a routine record):
 	move the Infix debug stream to stream position nine plus the beginning stream position of A expecting to read only 562 bytes;
 	skip the text in the Infix debug stream up through the next null terminator;
 	let the local count be zero;
@@ -1109,7 +1111,7 @@ To load I6 locals into (A - a routine record):
 
 Section "Loading Sequence Points" - unindexed
 
-To load the sequence point list into (A - a routine record):
+To load the sequence point list into (A - a routine record) (this is loading sequence points into a routine record):
 	write the sequence point linked list an empty permanent linked list to A;
 	write the sequence point linked list tail an empty permanent linked list's tail to A;
 	let the base address be the function address of A;
@@ -1122,7 +1124,7 @@ To load the sequence point list into (A - a routine record):
 		let the instruction address be the base address plus the next short in the Infix debug stream;
 		enqueue the key the instruction address in the possibly invalid sequence point linked list of A through the possibly invalid sequence point linked list tail of A.
 
-To load sequence points into (A - a source line record):
+To load sequence points into (A - a source line record) (this is loading sequence points into a source line record):
 	[Strange arrangement of I6 could cause some equally strange clobbering here.  But I doubt that it will matter in practice.]
 	let the routine record list be the routine record list of A;
 	if the routine record list is empty:
@@ -1149,7 +1151,7 @@ To load sequence points into (A - a source line record):
 			let the instruction address be the function address of the routine record;
 			increase the instruction address by the next short in the Infix debug stream;
 			[And note here that we don't trust the line number from the stream, but instead use the accessor that relocates sequence points on end-of-line labels.]
-			let the line number be the I6 line number for the sequence point the instruction address in column number the column number;
+			let the line number be the I6 line number for the sequence point the instruction address supposedly in column number the column number;
 			unless the line number is zero:
 				let the source line record be the source line record for line number line number;
 				unless the possibly invalid sequence point linked list of the source line record contains the key the instruction address:
@@ -1158,7 +1160,7 @@ To load sequence points into (A - a source line record):
 Section "Relocating Sequence Points" - unindexed
 
 [C need only be the byte from the Infix debug stream; we try to deal with overflow here.]
-To decide what number is the relocation of the sequence point (S - a number) from the line number (N - a number) and the column number (C - a number):
+To decide what number is the relocation of the sequence point (S - a number) from the line number (N - a number) and the column number (C - a number) (this is relocating a sequence point from a line and column):
 	let the source line record be the source line record for line number N;
 	let the I6 be the I6 of the source line record;
 	let the length be the length of the synthetic text the I6;
@@ -1203,7 +1205,7 @@ To decide what number is the relocation of the sequence point (S - a number) fro
 						decide on the line number;
 	decide on N.
 
-To decide what number is the relocation of the sequence point (S - a number) from the line number (N - a number):
+To decide what number is the relocation of the sequence point (S - a number) from the line number (N - a number) (this is relocating a sequence point from a line):
 	let the routine record be the routine record owning the sequence point S;
 	move the Infix debug stream to stream position two plus the sequence point stream position of the routine record expecting to read only two bytes;
 	let the sequence point count be the next short in the Infix debug stream;
@@ -1235,7 +1237,7 @@ Chapter "Lazy Loading" - unindexed
 
 Section "Finding Routines by Line" - unindexed
 
-To decide what linked list is a new list of routine records containing line number (N - a number):
+To decide what linked list is a new list of routine records containing line number (N - a number) (this is creating a routine record list for a line number):
 	let the result be a new list of routine records for beginning line number N;
 	let the supplement be an empty linked list;
 	let the line number be N minus one;
@@ -1252,7 +1254,7 @@ To decide what linked list is a new list of routine records containing line numb
 		push the key the sole supplement onto the result;
 	decide on the result.
 
-To decide what routine record is the routine record beginning before line number (N - a number):
+To decide what routine record is the routine record beginning before line number (N - a number) (this is determining the routine record beginning before a line number):
 	let the results be an empty linked list;
 	let the line number be N minus one;
 	while the results are empty and the line number is greater than zero:
@@ -1267,9 +1269,9 @@ To decide what routine record is the routine record beginning before line number
 Section "Loading Sampled Source Line Positions" - unindexed
 
 The source line position hash table is a permanent hash table that varies.
-To decide what number is the sampled line number at or before line number (L - a number): (- ((({L}-1)&$FFFFFF00)+1) -).
+To decide what number is the sampled line number at or before line number (L - a number): (- ((({L} - 1) & $FFFFFF00) + 1) -).
 
-To sample the source line positions:
+To sample the source line positions (this is sampling source line positions):
 	now the source line position hash table is a new permanent hash table with the source line position hash table size buckets;
 	let the line number be one;
 	move the I6 source stream to stream position zero;
@@ -1284,7 +1286,7 @@ To sample the source line positions:
 
 Section "Loading I6 Lines" - unindexed
 
-To load I6 line number (N - a number):
+To load I6 line number (N - a number) (this is loading an I6 line):
 	if the source line position hash table is an invalid permanent hash table:
 		sample the source line positions;
 	let the sampled line number be sampled line number at or before line number N;
@@ -1411,10 +1413,10 @@ A debug file setup rule (this is the allocate permanent synthetic text for the r
 	now the routine preamble comment suffix is a new permanent synthetic text copied from ":".
 
 [We can afford to have an inexact test; we just need to be sure that we aren't claiming a line from another routine.  Since we require the line to be entirely a comment, this is safe.]
-To decide whether the synthetic text (T - some text) could be a routine preamble:
+To decide whether the synthetic text (T - some text) could be a routine preamble (this is testing text for a routine preamble):
 	decide on whether or not the synthetic text T begins with the synthetic text the routine preamble comment prefix and the synthetic text T ends with the synthetic text the routine preamble comment suffix.
 
-To decide whether line number (N - a number) could be a routine preamble:
+To decide whether line number (N - a number) could be a routine preamble (this is testing a line number for a routine preamble):
 	if N is zero or N is -1:
 		decide no;
 	let the source line record be the source line record for line number N;
@@ -1423,7 +1425,7 @@ To decide whether line number (N - a number) could be a routine preamble:
 
 Section "Loading Source Versions and Preamble Line Numbers" - unindexed
 
-To load the source version and preamble line number into (A - a routine record):
+To load the source version and preamble line number into (A - a routine record) (this is loading a source version and preamble line number):
 	let the preamble line number be the beginning line number of A minus one;
 	guess the routine shell for A;
 	let the routine shell address be the routine shell address of the function at address the function address of A;
@@ -1439,7 +1441,7 @@ To load the source version and preamble line number into (A - a routine record):
 
 Section "I7 Preamble Extraction" - unindexed
 
-To say the preamble I7 extracted from address (A - a number) to address (B - a number):
+To say the preamble I7 extracted from address (A - a number) to address (B - a number) (this is saying extracted preamble I7):
 	repeat with the source running over the half-open interval from A to B:
 		let the character code be the byte at address source;
 		if the character code is 126: [tilde]
@@ -1447,12 +1449,12 @@ To say the preamble I7 extracted from address (A - a number) to address (B - a n
 		otherwise:
 			say "[the character code converted to a Unicode character]".
 
-To decide what text is the preamble I7 extracted from address (A - a number) to address (B - a number):
+To decide what text is the preamble I7 extracted from address (A - a number) to address (B - a number) (this is extracting preamble I7):
 	let the result be a new uninitialized permanent synthetic text with length B minus A characters;
 	overwrite the synthetic text result with the text printed when we say "[the preamble I7 extracted from address A to address B]";
 	decide on the result.
 
-To load an I7 preamble into (A - a source line record):
+To load an I7 preamble into (A - a source line record) (this is loading an I7 preamble):
 	let the I6 be the I6 of A;
 	let the beginning address be the character array address of the synthetic text I6 plus two;
 	let the end address be the beginning address plus the length of the synthetic text I6 minus two;
@@ -1489,10 +1491,10 @@ The I6-to-I7 quoted states are
 	and transitioning within I7 quotes.
 The specification of an I6-to-I7 state is "I6-to-I7 quoted states are used, along with I6-to-I7 states, to classify between-character positions when Debug File Parsing detects and extracts I7 from comments in I6."
 
-The indentation level is a number that varies.
-The minimum indentation level is a number that varies.
+The I7 indentation level is a number that varies.
+The minimum I7 indentation level is a number that varies.
 
-To decide what I6-to-I7 state is the I6-to-I7 state reached by beginning at (S - an I6-to-I7 state) and saying the transduction of the synthetic text (T - some text) and adjusting the indentation levels:
+To decide what I6-to-I7 state is the I6-to-I7 state reached by beginning at (S - an I6-to-I7 state) and saying the transduction of the synthetic text (T - some text) and adjusting the I7 indentation levels (this is saying an I6-to-I7 transduction while adjusting state and indentation):
 	let the current state be S;
 	let the current quoted state be transitioning outside of I7 quotes;
 	let the pending character code be 63; [question mark, just in case]
@@ -1507,11 +1509,11 @@ To decide what I6-to-I7 state is the I6-to-I7 state reached by beginning at (S -
 					-- 39: [single quote]
 						now the current state is transitioning within single-quoted I6;
 					-- 123: [open curly brace]
-						increment the indentation level;
+						increment the I7 indentation level;
 					-- 125: [close curly brace]
-						decrement the indentation level;
-						if the indentation level is less than the minimum indentation level:
-							now the minimum indentation level is the indentation level;
+						decrement the I7 indentation level;
+						if the I7 indentation level is less than the minimum I7 indentation level:
+							now the minimum I7 indentation level is the I7 indentation level;
 			-- transitioning within single-quoted I6:
 				if the character code is 39: [single quote]
 					now the current state is transitioning within normal I6;
@@ -1618,9 +1620,9 @@ To decide what I6-to-I7 state is the I6-to-I7 state reached by beginning at (S -
 				decide on transitioning within an non-I7 comment;
 	decide on the current state.
 
-To load an I7 body into the source line records for line number (L - a number) until (M - a number):
-	now the indentation level is one;
-	now the minimum indentation level is one;
+To load an I7 body into the source line records for line number (L - a number) until (M - a number) (this is loading an I7 body):
+	now the I7 indentation level is one;
+	now the minimum I7 indentation level is one;
 	[We might have to subtract indentation from all but the last line if ni has introduced extra curly braces around the phrase translation (e.g. for ifs that test rule conditions).  We subtract the indentation from our running counter when we find the first I7 line, effectively unindenting everything, and we remember the amount subtracted here so that we can add it back when we get to the last line.]
 	let the indentation adjustment be zero;
 	[The following initial value is so that when we see the first real I7 line, ``everything since the last I7 line'' will mean ``everything since the routine began.'']
@@ -1631,7 +1633,7 @@ To load an I7 body into the source line records for line number (L - a number) u
 		let the I6 be the I6 of the source line record;
 		let the length be the length of the synthetic text I6;
 		let the candidate I7 be a new uninitialized synthetic text with length length characters;
-		overwrite the synthetic text candidate I7 with the text printed when we let the end state be the I6-to-I7 state reached by beginning at transitioning within normal I6 and saying the transduction of the synthetic text I6 and adjusting the indentation levels;
+		overwrite the synthetic text candidate I7 with the text printed when we let the end state be the I6-to-I7 state reached by beginning at transitioning within normal I6 and saying the transduction of the synthetic text I6 and adjusting the I7 indentation levels;
 		if the end state is transitioning to the end of an I7 comment:
 			if the last I7 line number is at least L [there is a last line]:
 				now the length is the length of the synthetic text the last I7 line plus one;
@@ -1640,20 +1642,20 @@ To load an I7 body into the source line records for line number (L - a number) u
 				delete the synthetic text the last I7 line;
 				let the last source line record be the source line record for line number last I7 line number;
 				write the I7 I7 to the last source line record;
-				write the I7 indentation minimum indentation level to the last source line record;
+				write the I7 indentation minimum I7 indentation level to the last source line record;
 			otherwise [there is no last line]:
-				now the indentation adjustment is the indentation level minus one;
-				now the indentation level is one;
+				now the indentation adjustment is the I7 indentation level minus one;
+				now the I7 indentation level is one;
 			repeat with the intervening line number running over the half-open interval from the last I7 line number plus one to the line number:
 				let the intervening source line record be the source line record for line number intervening line number;
 				write the I7 "" to the intervening source line record;
-				write the I7 indentation minimum indentation level to the intervening source line record;
+				write the I7 indentation minimum I7 indentation level to the intervening source line record;
 			now the last I7 line number is the line number;
 			now the last I7 line is the candidate I7;
-			now the minimum indentation level is the indentation level;
+			now the minimum I7 indentation level is the I7 indentation level;
 		otherwise:
 			delete the synthetic text the candidate I7;
-			if the minimum indentation level is at most zero:
+			if the minimum I7 indentation level is at most zero:
 				set the I7 coda flag in the source line record;
 	if the last I7 line number is at least L [there is a last line]:
 		let the length be the length of the synthetic text the last I7 line plus one;
@@ -1662,16 +1664,16 @@ To load an I7 body into the source line records for line number (L - a number) u
 		delete the synthetic text the last I7 line;
 		let the last source line record be the source line record for line number last I7 line number;
 		write the I7 I7 to the last source line record;
-		increase the minimum indentation level by the indentation adjustment;
-		write the I7 indentation minimum indentation level to the last source line record;
+		increase the minimum I7 indentation level by the indentation adjustment;
+		write the I7 indentation minimum I7 indentation level to the last source line record;
 	repeat with the intervening line number running over the half-open interval from the last I7 line number plus one to M:
 		let the intervening source line record be the source line record for line number intervening line number;
 		write the I7 "" to the intervening source line record;
-		write the I7 indentation minimum indentation level to the intervening source line record.
+		write the I7 indentation minimum I7 indentation level to the intervening source line record.
 
 Section "Loading I7" - unindexed
 
-To load I7 into (A - a source line record):
+To load I7 into (A - a source line record) (this is loading I7):
 	let the routine record list be the routine record list of A;
 	if the routine record list is empty:
 		[We are going to load I7 for the routine(s) on the next line (if any), hoping that this line might be a preamble.  But if it's not, we need to have set its I7 to nothing because nothing else will write I7 to A.]
@@ -1699,6 +1701,7 @@ To load I7 into (A - a source line record):
 
 Section "Loading I7 Locals" - unindexed
 
+[@@]
 [We use I6 macros to include single quotes without causing ni to emit a text routine.]
 To decide what text is the nonsynthetic call parameter comment prefix: (- " ! Call parameter '" -).
 To decide what text is the nonsynthetic local variable comment prefix: (- " ! Local variable e.g. '" -).
@@ -1742,7 +1745,7 @@ A debug file setup rule (this is the allocate synthetic text for the substrings 
 	now the calling suffix is a new permanent synthetic text copied from ", true)".
 
 [Decides on a negative number if no local names match.]
-To decide what number is the index of the I6 local name from (A - a routine record) almost just before the synthetic suffix (S - some text) in the synthetic text (T - some text):
+To decide what number is the index of the I6 local name from (A - a routine record) almost just before the synthetic suffix (S - some text) in the synthetic text (T - some text) (this is finding an I6 local name as close as possible to a suffix):
 	let the result be -1;
 	let the reference index be the index of the synthetic text S in the synthetic text T;
 	if the reference index is not zero:
@@ -1757,7 +1760,7 @@ To decide what number is the index of the I6 local name from (A - a routine reco
 	decide on the result.
 
 [Decides on a negative number if no local names match.]
-To decide what number is the index of the I6 local name from (A - a routine record) immediately before character index (I - a number) in the synthetic text (T - some text):
+To decide what number is the index of the I6 local name from (A - a routine record) immediately before character index (I - a number) in the synthetic text (T - some text) (this is finding an I6 local name given an end index):
 	let the limit be the local count of A;
 	repeat with the local index running over the half-open interval from zero to the limit:
 		let the local name be I6 local name number local index of A;
@@ -1777,7 +1780,7 @@ The I7-local-extraction states are
 	and expecting a repeat translation.
 The specification of an I7-local-extraction state is "I7-local-extraction states are used to classify between-line positions when Debug File Parsing detects and extracts I7 locals from commented I6."
 
-To note the I7 local name (T - some text) for local number (I - a number) on line number (N - a number), where the declaration is outdented:
+To note the I7 local name (T - some text) for local number (I - a number) on line number (N - a number), where the declaration is outdented (this is noting an I7 local):
 	let the source line record be the source line record for line number N;
 	let the old name be the possibly invalid I7 local name number I of the source line record;
 	if the old name is not the name for invalid local number I:
@@ -1802,7 +1805,7 @@ To note the I7 local name (T - some text) for local number (I - a number) on lin
 		increment N;
 		now the source line record is the source line record for line number N.
 
-To note the I7 kind name in (T - some text) for local number (I - a number) of (R - a routine record):
+To note the I7 kind name in (T - some text) for local number (I - a number) of (R - a routine record) (this is noting an I7 local kind):
 	let the kind name address be the character array address of the synthetic text T;
 	let the kind name offset be the index of the synthetic text the local comment infix in the synthetic text T;
 	if the kind name offset is zero:
@@ -1814,7 +1817,7 @@ To note the I7 kind name in (T - some text) for local number (I - a number) of (
 	let the kind name be a new permanent synthetic text extracted from the length bytes at address the kind name address;
 	write the kind name to I7 local kind name number I of R.
 
-To decide what linked list is the linked list of pending I7 local names introduced by callings in (T - some text):
+To decide what linked list is the linked list of pending I7 local names introduced by callings in (T - some text) (this is creating a list of I7 locals created by callings):
 	let the result be an empty linked list;
 	let the result tail be an empty linked list's tail;
 	let the calling index be the index of the synthetic text the I7 calling prefix in the synthetic text T;
@@ -1833,7 +1836,7 @@ To decide what linked list is the linked list of pending I7 local names introduc
 		now the calling index is the index of the synthetic text the I7 calling prefix in the synthetic text T starting after index the calling index;
 	decide on the result.
 
-To decide whether we successfully pair the pending I7 local names in (L - a linked list) with the calling assignments in (T - some text) on line number (I - a number) to locals from (R - a routine record):
+To decide whether we successfully pair the pending I7 local names in (L - a linked list) with the calling assignments in (T - some text) on line number (I - a number) to locals from (R - a routine record) (this is pairing I7 locals names with their assignments in I6):
 	if L is empty:
 		decide no;
 	let the current linked list vertex be L converted to a linked list vertex;
@@ -1849,7 +1852,7 @@ To decide whether we successfully pair the pending I7 local names in (L - a link
 		now the infix index is the next infix index;
 	decide on whether or not the current linked list vertex is null.
 
-To load I7 locals into (A - a routine record):
+To load I7 locals into (A - a routine record) (this is loading I7 locals into a routine record):
 	repeat with the index running over the half-open interval from zero to the assumed maximum local count:
 		write "<no kind>" to I7 local kind name number index of A;
 		write the name for invalid local number index to sample I7 local name number index of A;
@@ -1954,7 +1957,7 @@ To load I7 locals into (A - a routine record):
 		delete the synthetic text the moribund name;
 	delete the calling name linked list.
 
-To load I7 locals into (A - a source line record):
+To load I7 locals into (A - a source line record) (this is loading I7 locals into a source line record):
 	let the routine record be the sole routine record of A;
 	if the routine record is an invalid routine record:
 		repeat with the index running over the half-open interval from zero to the assumed maximum local count:
@@ -1962,7 +1965,7 @@ To load I7 locals into (A - a source line record):
 	otherwise:
 		load I7 locals into the routine record.
 
-To load I7 kinds into (R - a routine record):
+To load I7 kinds into (R - a routine record) (this is loading I7 kinds into a routine record):
 	let the source line record be the source line record for line number the beginning line number of R;
 	unless the source line record is an invalid source line record:
 		load I7 locals into the source line record.
@@ -1971,7 +1974,7 @@ Section "Loading Global Addresses" - unindexed
 
 To decide what number is the base address for global variables: (- Global_Vars -).
 
-To load addresses into the global records:
+To load addresses into the global records (this is loading addresses into global records):
 	let the routine record be the routine record for the address of I6_TC_KOV;
 	always check that the routine record is not an invalid routine record or else fail at finding a reference point for finding the declaration of I7 globals;
 	let the line number be the beginning line number of the routine record minus one;
@@ -2016,8 +2019,10 @@ Book "The Debugging Log Stream" - unindexed
 
 The debugging log stream is a binary input file stream that varies.
 
+[@]
 Chapter "Debugging Log Delimiters" - unindexed
 
+[@@]
 [We use I6 macros to include single quotes and square brackets without causing ni to emit a text routine.]
 
 To decide what text is the nonsynthetic global variable prefix: (- "Created non-library variable: '" -).
@@ -2114,7 +2119,7 @@ A debug file setup rule (this is the allocate synthetic text for the substrings 
 
 Chapter "Extracting Rulebook Names" - unindexed
 
-To decide whether a rulebook name can be extracted from the synthetic text (T - some text):
+To decide whether a rulebook name can be extracted from the synthetic text (T - some text) (this is extracting a rulebook name):
 	let the rulebook name be a new permanent synthetic text extracted from the synthetic text T between the synthetic prefix the rulebook prefix and the synthetic suffix the rulebook suffix or the interned empty string if there is no match;
 	if the rulebook name is empty:
 		decide no;
@@ -2124,7 +2129,7 @@ To decide whether a rulebook name can be extracted from the synthetic text (T - 
 
 Chapter "Extracting Activity Names" - unindexed
 
-To decide whether an activity name can be extracted from the synthetic text (T - some text):
+To decide whether an activity name can be extracted from the synthetic text (T - some text) (this is extracting an activity name):
 	unless the synthetic text T begins with the synthetic text the activity prefix:
 		decide no;
 	let the prefix length be the length of the synthetic text the activity prefix;
@@ -2136,7 +2141,7 @@ To decide whether an activity name can be extracted from the synthetic text (T -
 
 Chapter "Extracting Action Names" - unindexed
 
-To decide whether an action name can be extracted from the synthetic text (T - some text):
+To decide whether an action name can be extracted from the synthetic text (T - some text) (this is extracting an action name):
 	unless the synthetic text T begins with the synthetic text the action prefix:
 		decide no;
 	let the prefix length be the length of the synthetic text the action prefix;
@@ -2148,7 +2153,7 @@ To decide whether an action name can be extracted from the synthetic text (T - s
 
 Chapter "Extracting I7 Global Names and Aliases" - unindexed
 
-To decide whether a I7 global variable name can be extracted from the synthetic text (T - some text):
+To decide whether a I7 global variable name can be extracted from the synthetic text (T - some text) (this is extracting an I7 global variable name):
 	let the global variable name be a new synthetic text extracted from the synthetic text T between the synthetic prefix the global variable prefix and the synthetic suffix the global variable infix or the interned empty string if there is no match;
 	if the global variable name is empty:
 		decide no;
@@ -2169,7 +2174,7 @@ To decide whether a I7 global variable name can be extracted from the synthetic 
 	increment the I7 global count;
 	decide yes.
 
-To decide whether a global variable alias can be extracted from the synthetic text (T - some text):
+To decide whether a global variable alias can be extracted from the synthetic text (T - some text) (this is extracting an I7 global variable alias):
 	let the global variable name be a new synthetic text extracted from the synthetic text T between the synthetic prefix the global variable translation prefix and the synthetic suffix the global variable infix or the interned empty string if there is no match;
 	if the global variable name is empty:
 		decide no;
@@ -2208,12 +2213,12 @@ A memory stack variable class is a kind of value.  The memory stack variable cla
 
 The memory stack variable precursor class is a memory stack variable class that varies.
 
-To invalidate any memory stack variable precursor:
+To invalidate any memory stack variable precursor (this is invalidating any memory stack variable precursor):
 	unless the memory stack variable precursor is empty:
 		delete the synthetic text the memory stack variable precursor;
 		now the memory stack variable precursor is "".
 
-To decide whether a rulebook variable precursor can be extracted from the synthetic text (T - some text):
+To decide whether a rulebook variable precursor can be extracted from the synthetic text (T - some text) (this is extracting a rulebook variable precursor):
 	let the rulebook name be a new synthetic text extracted from the synthetic text T between the synthetic prefix the rulebook variable precursor prefix and the synthetic suffix the rulebook variable precursor suffix or the interned empty string if there is no match;
 	if the rulebook name is empty:
 		decide no;
@@ -2222,7 +2227,7 @@ To decide whether a rulebook variable precursor can be extracted from the synthe
 	now the memory stack variable precursor class is the rulebook variable class;
 	decide yes.
 
-To decide whether an activity variable precursor can be extracted from the synthetic text (T - some text):
+To decide whether an activity variable precursor can be extracted from the synthetic text (T - some text) (this is extracting an activity variable precursor):
 	let the activity name be a new synthetic text extracted from the synthetic text T between the synthetic prefix the activity variable precursor prefix and the synthetic suffix the activity variable precursor suffix or the interned empty string if there is no match;
 	if the activity name is empty:
 		decide no;
@@ -2231,7 +2236,7 @@ To decide whether an activity variable precursor can be extracted from the synth
 	now the memory stack variable precursor class is the activity variable class;
 	decide yes.
 
-To decide whether an action variable precursor can be extracted from the synthetic text (T - some text):
+To decide whether an action variable precursor can be extracted from the synthetic text (T - some text) (this is extracting an action variable precursor):
 	let the action name be a new synthetic text extracted from the synthetic text T between the synthetic prefix the action variable precursor prefix and the synthetic suffix the action variable precursor suffix or the interned empty string if there is no match;
 	if the action name is empty:
 		decide no;
@@ -2240,7 +2245,7 @@ To decide whether an action variable precursor can be extracted from the synthet
 	now the memory stack variable precursor class is the action variable class;
 	decide yes.
 
-To decide whether a memory stack variable can be extracted from the synthetic text (T - some text):
+To decide whether a memory stack variable can be extracted from the synthetic text (T - some text) (this is extracting a memory stack variable):
 	if the memory stack variable precursor is empty:
 		decide no;
 	let the memory stack variable name be a new synthetic text extracted from the synthetic text T between the synthetic prefix the memory stack variable prefix and the synthetic suffix the memory stack variable infix or the interned empty string if there is no match;
@@ -2293,7 +2298,7 @@ To decide whether a memory stack variable can be extracted from the synthetic te
 
 Chapter "Extracting Kind Names" - unindexed
 
-To decide whether a kind name can be extracted from the synthetic text (T - some text):
+To decide whether a kind name can be extracted from the synthetic text (T - some text) (this is extracting a kind name):
 	let the kind name be a new synthetic text extracted from the synthetic text T between the synthetic prefix the kind prefix and the synthetic suffix the kind infix or the interned empty string if there is no match;
 	if the kind name is empty:
 		decide no;
@@ -2312,7 +2317,7 @@ To decide whether a kind name can be extracted from the synthetic text (T - some
 
 To decide what number is the base kind high water mark: (- BASE_KIND_HWM -).
 
-To adjust the base kind codes:
+To adjust the base kind codes (this is adjusting the base kind codes):
 	let the adjustment be the base kind high water mark minus the excess kind counter;
 	repeat with the linked list vertex running through the kind-of-object hash table:
 		let the adjusted value be the adjustment plus the number value of the linked list vertex;
@@ -2323,7 +2328,7 @@ To adjust the base kind codes:
 
 Chapter "Extracting Plurals" - unindexed
 
-To decide whether a plural can be extracted from the synthetic text (T - some text):
+To decide whether a plural can be extracted from the synthetic text (T - some text) (this is extracting a plural):
 	let the singular be a new synthetic text extracted from the synthetic text T between the synthetic prefix the plural prefix and the synthetic suffix the plural infix or the interned empty string if there is no match;
 	if the singular is empty:
 		decide no;
@@ -2340,7 +2345,7 @@ To decide whether a plural can be extracted from the synthetic text (T - some te
 
 Chapter "Extracting Object Names" - unindexed
 
-To decide whether an object name can be extracted from the synthetic text (T - some text):
+To decide whether an object name can be extracted from the synthetic text (T - some text) (this is extracting an object name):
 	if the index of the synthetic text the object prefix in the synthetic text T is zero or the index of the synthetic text the object suffix in the synthetic text T is zero:
 		decide no;
 	let the object name be a new synthetic text extracted from the synthetic text T between the synthetic prefix the named object prefix and the synthetic suffix the named object suffix or the interned empty string if there is no match;
@@ -2354,7 +2359,7 @@ To decide whether an object name can be extracted from the synthetic text (T - s
 To decide what number is the address of the I6 class Class: (- Class -).
 To decide what number is the offset to an object link: (- 8 -).
 
-To adjust the object numbers and associate addresses:
+To adjust the object numbers and associated addresses (this is adjusting the object numbers and associated addresses):
 	let the iterator be the address of the I6 class Class;
 	let the parallel counter be zero;
 	while the iterator plus the offset to an object link is a valid integer address:
@@ -2421,7 +2426,7 @@ A debug file setup rule (this is the open the debugging log binary input file ru
 		delete the synthetic text the line;
 	invalidate any memory stack variable precursor;
 	adjust the base kind codes;
-	adjust the object numbers and associate addresses;
+	adjust the object numbers and associated addresses;
 	delete the debugging log stream;
 	now the debugging log stream is an invalid binary input file stream.
 
@@ -2436,10 +2441,10 @@ Debug files already loaded is a truth state that varies.  Debug files already lo
 
 Chapter "Debug File Parsing Setup Phrase"
 
-To load the debug files:
-	always check that debug files already loaded is false or else fail at loading debug files twice;
-	now debug files already loaded is true;
-	traverse the debug file setup rulebook.
+To load the debug files (this is loading debug files):
+	if debug files already loaded is false:
+		now debug files already loaded is true;
+		traverse the debug file setup rulebook.
 
 Chapter "GRIF Hooks" (for use with Glulx Runtime Instrumentation Framework by Brady Garvin)
 
@@ -2463,7 +2468,7 @@ A debug file setup rule (this is the allocate synthetic text for the substring u
 
 Section "Adding I6 Names and Preambles for Unnamed Phrases"
 
-To ensure that all routines have names:
+To ensure that all routines have names (this is initializing routine names as necessary):
 	if all routine names initialized is false:
 		now all routine names initialized is true;
 		repeat with the linked list vertex running through the routine record list:
@@ -2488,8 +2493,8 @@ Debug File Parsing ends here.
 Chapter: Synopsis
 
 Debug File Parsing gathers debugging information about source text, routines,
-variables, sequence points, and objects from the files the Inform compiler
-creates and makes the data available to the running story.
+variables, sequence points, and objects from the Inform compiler's output and
+makes the data available to the running story.
 
 Details are in the following chapters.
 
@@ -2515,9 +2520,8 @@ invoke the phrase
 
 	load the debug files
 
-It is an error to use the extension's other phrases before then or to load the
-debug files more than once.  Authors who include the Glulx Runtime
-Instrumentation Framework should be aware of
+for the first time.  Authors who include the Glulx Runtime Instrumentation
+Framework should be aware of
 
 	the set up debug files as part of the GRIF setup rule
 
@@ -2554,10 +2558,10 @@ and sometimes as I7---routines translated from I7 typically read something like
 the following (line numbers have been added in parentheses):
 
 	...
-	! phrase 1 (line 017924)
+	! phrase 1                                    (line 017924)
 	! (1: if the actor is wearing the noun begin) (line 017925)
-	if(((actor == WearerOf(noun)))){ (line 017926)
-		! phrase 2 (line 017927)
+	if(((actor == WearerOf(noun)))){              (line 017926)
+		! phrase 2                            (line 017927)
 		...
 
 and for lines like 017925 that contain part of the original I7 source, the
@@ -2565,8 +2569,8 @@ phrase
 
 	the I7 of (A - a source line record)
 
-will return that I7 as synthetic text.  For any other lines, it just decides on
-the ordinary text "", to which the adjective "empty" applies, as in:
+will return that I7 as synthetic text.  [@] For any other lines, it just decides
+on the ordinary text "", to which the adjective "empty" applies, as in:
 
 	let the I7 be the I7 of the source line record;
 	unless the I7 is empty:
@@ -2625,8 +2629,8 @@ called "locals") can change name from line to line, we have
 	I7 local name number (I - a number) of (A - a source line record)
 
 where I is the index of the local we're interested in.  The first local declared
-by a routine's I6 has index zero, the second has index one, and so on, possibly
-up to index 15.
+by a routine's I6 has index zero, the second has index one, and so on, [@]
+possibly up to index 15.
 
 Section: Routines and associated data
 
@@ -2870,14 +2874,13 @@ The phrase
 
 	the debug plural of (T - some text)
 
-which has made repeated appearances before, returns one last time as the proper
-way to pluralize these source text names.
+which has made repeated appearances before, we recount one last time as the
+proper way to pluralize these source text names.
 
 Chapter: Requirements, Limitations, and Bugs
 
-This version was tested with Inform 6G60.  It will probably function on newer
-versions, and it may function under slightly older versions, though there is no
-guarantee.
+This version was tested with Inform 6G60.  It may not function under other
+versions.
 
 Section: Regarding bugs
 
@@ -2894,30 +2897,52 @@ time.
 Chapter: Acknowledgements
 
 Debug File Parsing was prepared as part of the Glulx Runtime Instrumentation
-Project (https://github.com/i7/i7grip).  For this first edition of the project,
-special thanks go to these people, in chronological order:
+Project (https://github.com/i7/i7grip).
 
-- Graham Nelson, Emily Short, and others, not only for Inform, but also for the
-  countless hours the high-quality technical documentation saved me and for the
-  work that made the Glulx VM possible,
+GRIP owes a great deal to everyone who made Inform possible and everyone who
+continues to contribute.  I'd like to give especial thanks to Graham Nelson and
+Emily Short, not only for their design and coding work, but also for all of the
+documentation, both of the language and its internals---it proved indispensable.
 
-- Andrew Plotkin for the Glulx VM and the Glk library, as well as their clear,
-  always up-to-date specifications,
+I am likewise indebted to everybody who worked to make Glulx and Glk a reality.
+Without them, there simply wouldn't have been any hope for this kind of project.
+My special thanks to Andrew Plotkin, with further kudos for his work maintaining
+the specifications.  They proved as essential as Inform's documentation.
 
-- Jacqueline Lott, David Welbourn, and all of the other attendees for Club
-  Floyd, my first connection to the interactive fiction community,
+The project itself was inspired by suggestions from Ron Newcomb and Esteban
+Montecristo on Inform's feature request page.  It's only because of their posts
+that I ever started.  (And here's hoping that late is better than never.)
 
-- Jesse McGrew and Emily Short for getting me involved with Inform 7,
+Esteban Montecristo also made invaluable contributions as an alpha tester.  I
+cannot thank him enough: he signed on as a beta tester but then quickly
+uncovered a slew of problems that forced me to reconsider both the term ``beta''
+and my timeline.  The impetus for the new, cleaner design and several clues that
+led to huge performance improvements are all due to him.  Moreover, he
+contributed code, since modified to fit the revised framework, for the extension
+Verbose Diagnostics.
 
-- all of the Inform 7 developers for their hard work, the ceaseless flow of
-  improvements, and their willingness to take me on as a collaborator,
+As for Ron Newcomb, I can credit him for nearly half of the bugs unearthed in
+the beta proper, not to mention sound advice on the organization of the
+documentation and the extensions.  GRIP is much sturdier as a result.
 
-- Ron Newcomb and Esteban Montecristo for the idea to write Call Stack Tracking
-  and Verbose Diagnostics,
+Roger Carbol, Jesse McGrew, Michael Martin, Dan Shiovitz, Johnny Rivera, and
+probably several others deserve similar thanks for answering questions on
+ifMUD's I6 and I7 channels.  I am grateful to Andrew Plotkin, David Kinder, and
+others for the same sort of help on intfiction.org.
 
-- Roger Carbol, Jesse McGrew, Michael Martin, Dan Shiovitz, Johnny Rivera, and
-  everyone else for their helpful comments on ifMUD's I6 and I7 channels,
+On top of that, David Kinder was kind enough to accommodate Debug File Parsing
+in the Windows IDE; consequently, authors who have a sufficiently recent version
+of Windows no longer need to write batch scripts.  His help is much appreciated,
+particularly because the majority of downloaders are running Windows.
 
-- Esteban Montecristo, for invaluable alpha testing,
+Even with the IDEs creating debug files, setting up symbolic links to those
+files can be a chore.  Jim Aiken suggested an automated solution, which now
+ships with the project.
 
-- and all of the beta testers who are reading this.
+And preliminary support for authors who want to debug inside a browser stems
+from discussion with Erik Temple and Andrew Plotkin; my thanks for their ideas.
+
+Finally, I should take this opportunity to express my gratitude to everyone who
+helped me get involved in the IF community.  Notable among these people are
+Jesse McGrew and Emily Short, not to mention Jacqueline Lott, David Welbourn,
+and all of the other Club Floyd attendees.
