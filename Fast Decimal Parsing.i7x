@@ -1590,8 +1590,7 @@ To --/-- now (N - a number) are the decimal interpretation of the lower three di
 -).
 
 To --/-- now (N - a number) are the decimal interpretation of the lower two digits of the four Latin-1 characters at address (A - a number): (-
-	@aload {A} 0 sp;
-	@bitand sp $FFFF sp;
+	@aloads {A} 1 sp;
 	@mod sp 122 sp;
 	@aload fdp_twoDigitHashTable sp {N};
 -).
