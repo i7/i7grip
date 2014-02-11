@@ -24,7 +24,6 @@ Book "Copyright and License"
 Book "Extension Information"
 
 [We assume a single I6 source file.]
-[We ignore column numbers, mostly because the client extensions don't need them, and also because the code here becomes simpler (and a tad faster starting up) when they aren't stored.  Also, accounting for their overflow is tricky business.]
 [We use one-based line numbers throughout, even though zero-based would be a little more convenient.  Most text editors use a one-based numbering, so one-based is what we want to show to authors, and there are just too many opportunities for silly mistakes if we have to convert back and forth.]
 [As a consequence, line number zero usually means ``no line at all.'']
 
@@ -383,87 +382,68 @@ The specification of a global record is "A global record represents everything t
 Section "The Global Record Structure" - unindexed
 
 [Layout:
-	4 bytes for the global index [either an I6 index (into the globals space) or an I7 index (into the Global_Vars array)]
-	4 bytes for the address [-2 for an I6 global (in which case scale and shift the [I6] global index), -1 if the address has not yet been determined, zero if an address cannot be found]
+	4 bytes for the address
 	4 bytes for the human-friendly name
-	4 bytes for the kind name]
+	4 bytes for the kind name
+	4 bytes for the source location stream position [zero if none]]
+
+[All stream positions are in the debug information file, not the I6 source.]
 
 To decide what number is the size in memory of a global record: (- 16 -).
 
 Section "Global Record Construction" - unindexed
 
-To decide what global record is a new I7 global record with index (I - a number) and human-friendly name (T - some text) and kind name (K - some text) (this is creating a global record with a kind):
+To decide what global record is a new I7 global record with address (A - a number) and human-friendly name (T - some text) and kind name (K - some text) (this is creating a global record with a kind):
 	let the result be a permanent memory allocation of the size in memory of a global record bytes converted to a global record;
-	write the global index I to the result;
-	write the address -1 to the result;
+	write the address A to the result;
 	write the human-friendly name T to the result;
 	write the kind name K to the result;
+	write the source location stream position zero to the result;
 	decide on the result.
 
-To decide what global record is a new I6 global record with index (I - a number) and human-friendly name (T - some text) (this is creating a global record without a kind):
+To decide what global record is a new I6 global record with address (A - a number) and human-friendly name (T - some text) (this is creating a global record without a kind):
 	let the result be a permanent memory allocation of the size in memory of a global record bytes converted to a global record;
-	write the global index I to the result;
-	write the address -2 to the result;
+	write the address A to the result;
 	write the human-friendly name T to the result;
 	write the kind name "<no kind>" to the result;
+	write the source location stream position zero to the result;
 	decide on the result.
 
 Section "Private Global Record Accessors and Mutators"
 
-To write the global index (X - a number) to (A - a global record): (- llo_setInt({A}, {X}); -).
+To write the address (X - a number) to (A - a global record): (- llo_setInt({A}, {X}); -).
 
-To decide what number is the possibly invalid address of (A - a global record): (- llo_getField({A}, 1) -).
-To write the address (X - a number) to (A - a global record): (- llo_setField({A}, 1, {X}); -).
+To write the human-friendly name (X - some text) to (A - a global record): (- llo_setField({A}, 1, {X}); -).
 
-To write the human-friendly name (X - some text) to (A - a global record): (- llo_setField({A}, 2, {X}); -).
-
-To write the kind name (X - some text) to (A - a global record): (- llo_setField({A}, 3, {X}); -).
+To write the kind name (X - some text) to (A - a global record): (- llo_setField({A}, 2, {X}); -).
 
 Section "Direct Public Global Record Accessors"
 
-To decide what number is the global index of (A - a global record): (- llo_getInt({A}) -).
+To decide what number is the address of (A - a global record): (- llo_getInt({A}) -).
 
-To decide what text is the human-friendly name of (A - a global record): (- llo_getField({A}, 2) -).
+To decide what text is the human-friendly name of (A - a global record): (- llo_getField({A}, 1) -).
 
-To decide what text is the kind name of (A - a global record): (- llo_getField({A}, 3) -).
+To decide what text is the kind name of (A - a global record): (- llo_getField({A}, 2) -).
 
-To decide what number is the source version of (A - a global record):
-	if the possibly invalid address of A is -2:
-		decide on six;
-	decide on seven.
+To decide what number is the source location stream position of (A - a global record): (- llo_getField({A}, 3) -)
+To write the source location stream position (X - a number) to (A - a global record): (- llo_setField({A}, 3, {X}); -).
 
-Section "Uninstrumented Global Record Address Accessor" (for use without Glulx Runtime Instrumentation Framework by Brady Garvin)
+Section "Uninstrumented Global Addresses" (for use without Glulx Runtime Instrumentation Framework by Brady Garvin)
 
-To decide what number is the address of (A - a global record) (this is determining the address of a global record):
-	let the result be the possibly invalid address of A;
-	if the result is:
-		-- -1:
-			load addresses into the global records;
-			decide on the possibly invalid address of A;
-		-- -2:
-			always check that the base address for I6 globals is not zero or else fail at finding the base address for I6 globals;
-			decide on four times the global index of A plus the base address for I6 globals;
-		-- otherwise:
-			decide on the result.
+To decide what number is the global address (A - a number) after relocation (this is determining a global address after relocation):
+	decide on A.
 
-Section "Instrumented Global Record Address Accessor" (for use with Glulx Runtime Instrumentation Framework by Brady Garvin)
+Section "Instrumented Global Addresses" (for use with Glulx Runtime Instrumentation Framework by Brady Garvin)
 
 [GRIF relocates the I6 temporary space (which comprises low-indexed globals); the global addresses should reflect that relocation.]
 
-To decide what number is the address of (A - a global record) (this is determining the address of a global record):
-	let the result be the possibly invalid address of A;
-	if the result is:
-		-- -1:
-			load addresses into the global records;
-			decide on the possibly invalid address of A;
-		-- -2:
-			always check that the base address for I6 globals is not zero or else fail at finding the base address for I6 globals;
-			let the index be the global index of A;
-			if the index is less than the variable count of the temporary space:
-				decide on four times the index plus the address of the alternative temporary space;
-			decide on four times the index plus the base address for I6 globals;
-		-- otherwise:
-			decide on the result.
+[//// Call this phrase when parsing global records.]
+To decide what number is the global address (A - a number) after relocation (this is determining a global address after relocation):
+	always check that the base address for I6 globals is not zero or else fail at finding the base address for I6 globals;
+	let the I6 global offset be A minus the base address for I6 globals;
+	if the I6 global offset is less than four times the variable count of the temporary space:
+		decide on the address of the alternative temporary space plus the I6 global offset;
+	decide on A.
 
 Chapter "Memory Stack Variable Records"
 
@@ -592,7 +572,7 @@ Chapter "Permanent Hash Tables and Other Singletons" - unindexed
 [Maps function addresses to routine records]
 The routine record hash table is a permanent hash table that varies.
 
-[A list of the above key-value pairs, sorted by stream position for the benefit of Glk libraries slower at file I/O.]
+[A list of the above key-value pairs, sorted by stream position for the benefit of Glk libraries slower at file I/O]
 The routine record list is a permanent linked list that varies.
 The routine record list tail is a permanent linked list tail that varies.
 
@@ -605,7 +585,7 @@ The source line record hash table is a permanent hash table that varies.
 [Maps instruction addresses (only for instructions that begin at a sequence point) to routine records]
 The sequence point routine record hash table is a permanent hash table that varies.
 
-[Maps instruction addresses (only for instructions that begin at a sequence point) to one-based I6 line numbers (which are negated when we have made sure that any relocation has taken place)]
+[Maps instruction addresses (only for instructions that begin at a sequence point) to one-based I6 line numbers]
 The sequence point line number hash table is a permanent hash table that varies.
 
 [The base address for I6 globals]
@@ -721,23 +701,7 @@ To decide what number is the I6 line number for the sequence point (S - a number
 	let the linked list vertex be the first match for the key S in the sequence point line number hash table;
 	if the linked list vertex is null:
 		decide on zero;
-	let the result be the number value of the linked list vertex;
-	if the result is less than zero:
-		decide on zero minus the result;
-	now the result is the relocation of the sequence point S from the line number the result;
-	write the value zero minus the result to the linked list vertex;
-	decide on the result.
-
-To decide what number is the I6 line number for the sequence point (S - a number) supposedly in column number (C - a number) (this is determining the I6 line number of a sequence point with correction for labels):
-	let the linked list vertex be the first match for the key S in the sequence point line number hash table;
-	if the linked list vertex is null:
-		decide on zero;
-	let the result be the number value of the linked list vertex;
-	if the result is less than zero:
-		decide on zero minus the result;
-	now the result is the relocation of the sequence point S from the line number the result and the column number C;
-	write the value zero minus the result to the linked list vertex;
-	decide on the result.
+	decide on the number value of the linked list vertex.
 
 To decide what number is the I7 line number for the sequence point (S - a number) in the routine record (R - a routine record) (this is determining the I7 line number of a sequence point in a known routine record):
 	let the beginning line number be the beginning line number of R;
@@ -819,229 +783,240 @@ To decide what text is a new permanent canonicalization of the data identifier (
 	now the identifier for canonicalizing identifiers is T;
 	decide on a new permanent synthetic text copied from "[the canonicalization of the data identifier the identifier for canonicalizing identifiers]".
 
-Book "The Infix Debug Stream" - unindexed
+Book "The Debug Stream" - unindexed
 
-The Infix debug stream is a binary input file stream that varies.
+The debug stream is a binary input file stream that varies.
 
-Chapter "Infix Record Preprocessing" - unindexed
+Chapter "Debug Record Preprocessing" - unindexed
 
-Section "Infix Record Preprocessor Array" - unindexed
+Section "Debug Record Preprocessor Array" - unindexed
 
 Include (-
-	Constant DFP_INFIX_RECORD_COUNT = 15;
-	Array dfp_infixRecordPreprocessors --> DFP_INFIX_RECORD_COUNT;
+	Constant DFP_RECORD_HASH_SIZE = 58;
+	Array dfp_debugRecordPreprocessors -->
+		1013019764 0 1819632958 1014002287 0
+		0 0 0 1013019250 0
+		0 1013410927 0 (+ preprocessing a debug class record [1013148769 means [<cla]] +) 0
+		0 0 0 0 0
+		0 0 0 0 (+ preprocessing a debug object record [1013932650 means [<obj]] +)
+		0 0 0 0 1014195569
+		1014260066 1009742447 0 0 0
+		0 538976288 1013342571 0 1014199407
+		1013149550 (+ preprocessing a debug source file record [1014198133 means [<sou]] +) 0 0 0
+		(+ preprocessing a debug routine record [1014132597 means [<rou]] +) 1009740142 0 0 0
+		0 1013739363 0 0 0
+		0 1013015412 0;
+	Constant DFP_RECORD_SECOND_HASH_SIZE = 3;
+	Array dfp_moreDebugRecordPreprocessors -->
+		(+ preprocessing a debug header record [1886545254 means [pref]] +)
+		0
+		1936024436: [sect]
+	Constant DFP_SUBRECORD_HASH_SIZE = 5;
+	Array dfp_debugSubrecordPreprocessors -->
+		0 0
+		(+ preprocessing a debug subrecord terminator [1009742447 means [</ro]] +)
+		(+ preprocessing a debug local variable subrecord [1013739363 means [<loc]] +)
+		(+ preprocessing a debug sequence point subrecord [1014195569 means [<seq]] +);
 -) after "Definitions.i6t".
 
-To decide what number is the number of Infix record types: (- DFP_INFIX_RECORD_COUNT -).
-To preprocess type (I - a number) Infix records by (P - a phrase nothing -> nothing): (- llo_setField(dfp_infixRecordPreprocessors, {I}, llo_getField({P}, 1)); -).
-To preprocess a type (I - a number) Infix record: (- (llo_getField(dfp_infixRecordPreprocessors, {I}))(); -).
+To preprocess a debug record beginning with the Latin-1 quadruple (I - a number): (-
+	@mod {I} DFP_RECORD_HASH_SIZE sp;
+	@aload dfp_debugRecordPreprocessors sp sp;
+	@callf sp 0;
+-).
 
-Section "Infix Record Types" - unindexed
+To preprocess a debug record continuing with the Latin-1 quadruple (I - a number): (-
+	@mod {I} DFP_RECORD_SECOND_HASH_SIZE sp;
+	@aload dfp_moreDebugRecordPreprocessors sp sp;
+	@callf sp 0;
+-).
 
-To register the Infix record preprocessors (this is registering the Infix record preprocessors):
-	preprocess type 1 Infix records by preprocessing an Infix file record;
-	preprocess type 2 Infix records by preprocessing an Infix class record;
-	preprocess type 3 Infix records by preprocessing an Infix object record;
-	preprocess type 4 Infix records by preprocessing an Infix global record;
-	preprocess type 5 Infix records by preprocessing a common Infix [attribute] record;
-	preprocess type 6 Infix records by preprocessing a common Infix [property] record;
-	preprocess type 7 Infix records by preprocessing a common Infix [fake action] record;
-	preprocess type 8 Infix records by preprocessing a common Infix [action] record;
-	preprocess type 9 Infix records by preprocessing an Infix header record;
-	preprocess type 10 Infix records by preprocessing an Infix sequence point set record;
-	preprocess type 11 Infix records by preprocessing an Infix routine-beginning record;
-	preprocess type 12 Infix records by preprocessing a common Infix [array] record;
-	preprocess type 13 Infix records by preprocessing an Infix map record;
-	preprocess type 14 Infix records by preprocessing an Infix routine-ending record.
+To preprocess a debug subrecord beginning with the Latin-1 quadruple (I - a number): (-
+	@mod {I} DFP_SUBRECORD_HASH_SIZE sp;
+	@aload dfp_debugSubrecordPreprocessors sp sp;
+	@callf sp 0;
+-).
 
-Section "Preprocessing File Debug Records" - unindexed
+Section "Preprocessing Source File Debug Records" - unindexed
 
-To preprocess an Infix file record (this is preprocessing an Infix file record):
-	let the file number be the next byte in the Infix debug stream;
-	if the file number is one:
-		skip the text in the Infix debug stream up through the next null terminator;
-		skip the text in the Infix debug stream up through the next null terminator;
-	otherwise:
-		skip the text in the Infix debug stream up through the next null terminator;
-		let the source file name be a new synthetic text extracted from the Infix debug stream until a null terminator;
-		fail at handling a second I6 source file named the source file name.
+To preprocess a debug source file record (this is preprocessing a debug source file record):
+	[<sou]
+	skip 26 bytes in the debug stream; [rce index="0"><given-path>]
+	let the given path name be a new permanent synthetic text extracted from the debug stream until character code 60 [an open angle bracket]; [...<]
+	skip 27 bytes in the debug stream; [/given-path><resolved-path>]
+	let the resolved path name be a new permanent synthetic text extracted from the debug stream until character code 60 [an open angle bracket]; [...<]
+	skip 53 bytes in the debug stream; [/resolved-path><language>Inform 6</language></source>]
+	[//// put the source file names somewhere accessible]
+	do nothing.
 
 Section "Preprocessing Class Debug Records" - unindexed
 
-To preprocess an Infix class record (this is preprocessing an Infix class record):
-	skip the text in the Infix debug stream up through the next null terminator;
-	skip eight bytes in the Infix debug stream.
+To preprocess a debug class record (this is preprocessing a debug class record):
+	[<cla]
+	skip 15 bytes in the debug stream; [ss><identifier>]
+	let the class name be a new permanent synthetic text extracted from the debug stream until character code 60 [an open angle bracket]; [...<]
+	skip 26 bytes in the debug stream; [/identifier><class-number>]
+	let the class number be a decimal number extracted from the debug stream until character code 60 [an open angle bracket]; [...<]
+	skip 21 bytes in the debug stream; [/class-number><value>]
+	let the class value be a decimal number extracted from the next eleven chararacters in the debug stream; [###]
+	skip 8 bytes in the debug stream; [</value>]
+	read a source location [@@@]
+	skip 8 bytes in the debug stream; [</class>]
+	[//// put the class information somewhere accessible]
+	do nothing.
 
 Section "Preprocessing Object Debug Records" - unindexed
 
-To preprocess an Infix object record (this is preprocessing an Infix object record):
-	skip two bytes in the Infix debug stream;
-	skip the text in the Infix debug stream up through the next null terminator;
-	skip eight bytes in the Infix debug stream.
+To preprocess a debug object record (this is preprocessing a debug object record):
+	[<obj]
+	skip 15 bytes in the debug stream; [ect><identifier]
+	if the integer at address the address where the next four bytes are available in the debug stream is 543257204: [ art]
+		skip 18 bytes in the debug stream; [ artificial="true"]
+	skip 1 byte in the debug stream; [>]
+	let the object name be a new permanent synthetic text extracted from the debug stream until character code 60 [an open angle bracket]; [...<]
+	skip 19 bytes in the debug stream; [/identifier><value>]
+	let the object value be a decimal number extracted from the debug stream until character code 60 [an open angle bracket]; [###<]
+	skip 7 bytes in the debug stream; [/value>]
+	read an optional source location [@@@?]
+	skip 9 bytes in the debug stream; [</object>]
+	[//// put the object information somewhere accessible]
+	do nothing.
 
 Section "Preprocessing Global Debug Records" - unindexed
 
-The minimum expected I6 global index for working around I6 global index overflow is a number that varies.  The minimum expected I6 global index for working around I6 global index overflow is zero.
-To decide what number is (N - a number) adjusted for I6 global index overflow (this is adjusting an I6 global index for overflow):
-	let the result be N;
-	while the result is less than the minimum expected I6 global index for working around I6 global index overflow:
-		increase the result by 256;
-	now the minimum expected I6 global index for working around I6 global index overflow is the result;
-	decide on the result.
-
-To preprocess an Infix global record (this is preprocessing an Infix global record):
-	let the global index be the next byte in the Infix debug stream adjusted for I6 global index overflow;
-	let the global variable name be a new permanent synthetic text extracted from the Infix debug stream until a null terminator;
-	let the global record be a new I6 global record with index the global index and human-friendly name the global variable name;
+To preprocess a debug global record (this is preprocessing a debug global record):
+	[<glo]
+	skip 25 bytes in the debug stream; [bal-variable><identifier>]
+	let the global name be a new permanent synthetic text extracted from the debug stream until character code 60 [an open angle bracket]; [...<]
+	skip 21 bytes in the debug stream; [/identifier><address>]
+	let the global address be a decimal number extracted from the next eleven chararacters in the debug stream; [###]
+	skip 10 bytes in the debug stream; [</address>]
+	read an optional source location [@@@?]
+	skip 18 bytes in the debug stream; [</global-variable>]
+	let the global record be a new I6 global record with address the global address and human-friendly name the global name;
 	let the downcased global variable name be a new permanent synthetic text copied from the global variable name;
 	downcase the synthetic text the downcased global variable name;
-	insert the textual key the downcased global variable name and the value the global record into the global record lookup hash table.
+	insert the textual key the downcased global variable name and the value the global record into the global record lookup hash table;
+	[//// put the source location somewhere accessible]
+	do nothing.
 
-Section "Preprocessing Common Debug Records" - unindexed
+Section "Preprocessing Header and Section Debug Records" - unindexed
 
-To preprocess a common Infix record (this is preprocessing a common Infix record):
-	skip two bytes in the Infix debug stream;
-	skip the text in the Infix debug stream up through the next null terminator.
-
-Section "Preprocessing Header Debug Records" - unindexed
-
-[At the time of writing, the Inform 6 compiler doesn't actually emit these for Glulx, which can be unfortunate for us.]
-
-To preprocess an Infix header record (this is preprocessing an Infix header record):
-	repeat with the index running from zero to 15:
+To preprocess a debug header record (this is preprocessing a debug header record):
+	[<story-file-pref]
+	skip 3 bytes in the debug stream; [ix>]
+	read 88 bytes of Base64-encoded header [---]
+	skip 20 bytes in the debug stream; [</story-file-prefix>]
+	[//// compare the headers]
+	do nothing.
+	[repeat with the index running from zero to 15:
 		let the integer address be the index times four;
 		let the expected integer be the integer at address integer address;
-		let the actual integer be the next integer in the Infix debug stream;
-		always check that the actual integer is the expected integer or else fail at matching the header of the debug information file.
+		let the actual integer be the next integer in the debug stream;
+		always check that the actual integer is the expected integer or else fail at matching the header of the debug information file.]
 
-Section "Adjusting for Line Number Overflow" - unindexed
+To preprocess a debug section record (this is preprocessing a debug section record):
+	[<story-file-sect]
+	skip 10 bytes in the debug stream; [ion><type>]
+	let the section name be a new synthetic text extracted from the debug stream until character code 60 [an open angle bracket]; [...<]
+	skip 15 bytes in the debug stream; [/type><address>]
+	let the section address be a decimal number extracted from the debug stream until character code 60 [an open angle bracket]; [...<]
+	skip 22 bytes in the debug stream; [/address><end-address>]
+	let the section end address be a decimal number extracted from the debug stream until character code 60 [an open angle bracket]; [...<]
+	skip 34 bytes in the debug stream; [/end-address></story-file-section>]
+	[////]
+	delete the synthetic text the section name.
 
-[Line numbers occasionally decrease; we try to separate normal decreases from overflows by thresholding.]
-To decide what number is the maximum line number backtrack: (- 2048 -).
-
-The minimum expected line number for working around line number overflow is a number that varies.  The minimum expected line number for working around line number overflow is zero.
-To decide what number is (N - a number) adjusted for line number overflow (this is adjusting a line number for overflow):
-	let the result be N;
-	while the result is less than the minimum expected line number for working around line number overflow:
-		increase the result by 65536;
-	now the minimum expected line number for working around line number overflow is the result minus the maximum line number backtrack;
-	decide on the result.
-
-To decide what number is (N - a number) adjusted for line number overflow with minimum (M - a number) (this is adjusting a line number for overflow when a minimum is known):
-	let the result be N;
-	while the result is less than M:
-		increase the result by 65536;
-	decide on the result.
-
-Adjusting for line number overflow is a truth state that varies.  Adjusting for line number overflow is true.
+To preprocess a debug header or section record (this is preprocessing a debug header or section record):
+	[<sto]
+	skip 8 bytes; [ry-file-]
+	preprocess a debug record continuing with the Latin-1 quadruple the next integer in the debug stream.
 
 Section "Preprocessing Routine Debug Records" - unindexed
 
 To decide what number is the base address for code: (- 60 -).
 
-[Some routines have no valid line numbers; we can detect them by thresholding.]
-To decide what number is the minimum line number: (- 2 -).
+The current routine record is a routine record that varies.
 
-The last-seen routine record is a routine record that varies.
+To preprocess a debug local variable subrecord (this is preprocessing a debug local variable subrecord):
+	[<loc]
+	skip 24 bytes in the debug stream; [al-variable><identifier>]
+	let the local name be a new permanent synthetic text extracted from the debug stream until character code 60 [an open angle bracket]; [...<]
+	skip 26 bytes in the debug stream; [/identifier><frame-offset>]
+	let the local offset be a decimal number extracted from the debug stream until character code 60 [an open angle bracket]; [...<]
+	skip 31 bytes in the debug stream; [/frame-offset></local-variable>]
+	[////]
+	do nothing.
 
-To preprocess an Infix routine-beginning record (this is preprocessing an Infix routine-beginning record):
-	let the stream position be the stream position of the Infix debug stream;
-	skip three bytes in the Infix debug stream;
-	let the beginning line number be the next short in the Infix debug stream;
-	skip one byte in the Infix debug stream;
-	let the function address be the base address for code plus the next triple in the Infix debug stream;
-	if adjusting for line number overflow is true:
-		if the function address is the address of I6_Print__PName or the beginning line number is less than the minimum line number and the function at address the function address is a veneer routine:
-			now the beginning line number is zero;
-			now adjusting for line number overflow is false;
-		otherwise:
-			now the beginning line number is the beginning line number adjusted for line number overflow;
-	otherwise:
-		now the beginning line number is zero;
-	skip the text in the Infix debug stream up through the next null terminator;
-	while the next byte in the Infix debug stream is not zero:
-		skip the text in the Infix debug stream up through the next null terminator;
-	now the last-seen routine record is a new routine record with function address function address and beginning line number beginning line number and beginning stream position stream position;
-	insert the key the function address and the value the last-seen routine record into the routine record hash table;
-	enqueue the key the function address and the value the last-seen routine record in the routine record list through the routine record list tail;
+To preprocess a debug sequence point subrecord (this is preprocessing a debug sequence point subrecord):
+	[<seq]
+	skip 21 bytes in the debug stream; [uence-point><address>]
+	let the sequence point address be a decimal number extracted from the next eleven chararacters in the debug stream; [###]
+	skip 10 bytes in the debug stream; [</address>]
+	read a source location [@@@]
+	skip 17 bytes in the debug stream; [</sequence-point>]
+	insert the key the sequence point address and the value the current routine record into the sequence point routine record hash table;
+	insert the key the sequence point address and the value the line number into the sequence point line number hash table.
+
+Within debug subrecords is a truth state that varies.  Within debug subrecords is false.
+To preprocess a debug subrecord terminator (this is preprocessing a debug subrecord terminator):
+	[</ro]
+	skip 6 bytes in the debug stream; [utine>]
+	now within debug subrecords is false.
+
+To preprocess a debug routine-beginning record (this is preprocessing a debug routine record):
+	[<rou]
+	skip 16 bytes in the debug stream; [tine><identifier]
+	if the integer at address the address where the next four bytes are available in the debug stream is 543257204: [ art]
+		skip 18 bytes in the debug stream; [ artificial="true"]
+	skip 1 byte in the debug stream; [>]
+	let the routine name be a new permanent synthetic text extracted from the debug stream until character code 60 [an open angle bracket]; [...<]
+	skip 15 bytes in the debug stream; [/identifier><va] [or] [/identifier>   ]
+	if the next integer in the debug stream is:
+		-- 538976288: [    ]
+			skip 43 bytes in the debug stream; [                                    <value>]
+		-- 1819632958: [lue>]
+			do nothing;
+		-- otherwise:
+			fail at [////];
+	let the routine value be a decimal number extracted from the next eleven chararacters in the debug stream; [###]
+	skip 17 bytes in the debug stream; [</value><address>]
+	let the routine address be a decimal number extracted from the next eleven chararacters in the debug stream; [###]
+	skip 22 bytes in the debug stream; [</address><byte-count>]
+	let the routine byte count be a decimal number extracted from the debug stream until character code 60 [an open angle bracket]; [...<]
+	skip 12 bytes in the debug stream; [/byte-count>]
+	read a source location [@@@]
+	now the current routine record is a new routine record with function address the routine value and beginning line number the beginning line number and beginning stream position the beginning stream position; [////]
+	insert the key the routine value and the value the current routine record into the routine record hash table;
+	enqueue the key the routine vaue and the value the current routine record in the routine record list through the routine record list tail;
 	if the beginning line number is not zero:
-		insert the key the beginning line number and the value last-seen routine record into the routine beginning hash table.
-
-To preprocess an Infix routine-ending record (this is preprocessing an Infix routine-ending record):
-	let the stream position be the stream position of the Infix debug stream;
-	skip three bytes in the Infix debug stream;
-	let the end line number be the next short in the Infix debug stream;
-	if adjusting for line number overflow is true:
-		now the end line number is the end line number adjusted for line number overflow;
-	otherwise:
-		now the end line number is zero;
-	if the end line number is less than the beginning line number of the last-seen routine record:
-		now the end line number is the beginning line number of the last-seen routine record;
-	skip four bytes in the Infix debug stream;
-	write the end line number end line number plus one to the last-seen routine record; [plus one to convert from a closed interval to a half-open interval]
-	write the end stream position stream position to the last-seen routine record.
-
-Section "Preprocessing Sequence Point Set Debug Records" - unindexed
-
-To preprocess an Infix sequence point set record (this is preprocessing an Infix sequence point set record):
-	let the stream position be the stream position of the Infix debug stream;
-	skip two bytes in the Infix debug stream;
-	let the sequence point count be the next short in the Infix debug stream;
-	write the sequence point stream position stream position to the last-seen routine record;
-	let the base address be the function address of the last-seen routine record;
-	repeat with the sequence point index running from one to the sequence point count:
-		skip one byte in the Infix debug stream;
-		let the line number be the next short in the Infix debug stream;
-		if adjusting for line number overflow is true:
-			now the line number is the line number adjusted for line number overflow;
-		otherwise:
-			now the line number is zero;
-		skip one byte in the Infix debug stream;
-		let the instruction address be the base address plus the next short in the Infix debug stream;
-		insert the key the instruction address and the value the the last-seen routine record into the sequence point routine record hash table;
-		insert the key the instruction address and the value the line number into the sequence point line number hash table.
-
-Section "Preprocessing Map Debug Records" - unindexed
-
-The global variables map key is a text that varies.
-
-A debug file setup rule (this is the allocate synthetic text for the global variables map key rule):
-	now the global variables map key is a new permanent synthetic text copied from "global variables".
-
-To preprocess an Infix map record (this is preprocessing an Infix map record):
-	repeat until a break:
-		let the key name be a new synthetic text extracted from the Infix debug stream until a null terminator;
-		if the length of the synthetic text the key name is zero:
-			delete the synthetic text the key name;
-			break;
-		if the synthetic text the key name is identical to the synthetic text the global variables map key:
-			now the base address for I6 globals is the size of read-only memory plus the next triple in the Infix debug stream;
-		otherwise:
-			skip three bytes in the Infix debug stream;
-		delete the synthetic text the key name.
+		insert the key the beginning line number and the value the current routine record into the routine beginning hash table;
+	now within debug subrecords is true;
+	while within debug subrecords is true:
+		preprocess a debug subrecord beginning with the Latin-1 quadruple the next integer in the debug stream.
 
 Section "Preprocessing Setup Rule" - unindexed
 
-A debug file setup rule (this is the load debug information from the Infix binary input file rule):
-	register the Infix record preprocessors;
+A debug file setup rule (this is the load debug information from the debug binary input file rule):
+	register the debug record preprocessors;
 	always check that the name of the symbolic link to the debug information file is not empty or else fail at opening an unnamed debug information file;
-	now the Infix debug stream is a new binary input file stream;
+	now the debug stream is a new binary input file stream;
 	if the blorb resources in lieu of external debug files option is active:
-		open the Infix debug stream for blorb resource 9999;
+		open the debug stream for blorb resource 9999;
 	otherwise:
-		open the Infix debug stream for the binary input file name the name of the symbolic link to the debug information file;
-	let the next short be the next short in the Infix debug stream; [for the magic number]
+		open the debug stream for the binary input file name the name of the symbolic link to the debug information file;
+	let the next short be the next short in the debug stream; [for the magic number]
 	always check that next short is 57023 or else fail at recognizing the debug information file's format;
-	now the next short is the next short in the Infix debug stream; [for the Infix file format]
+	now the next short is the next short in the debug stream; [for the debug file format]
 	always check that the next short is 0 or else fail at recognizing the debug information file's version;
-	skip two bytes in the Infix debug stream; [for the compiler version]
+	skip two bytes in the debug stream; [for the compiler version]
 	repeat until a break:
-		let the record type be the next byte in the Infix debug stream;
+		let the record type be the next byte in the debug stream;
 		if the record type is zero:
 			break;
-		if the record type is greater than the number of Infix record types:
+		if the record type is greater than the number of debug record types:
 			fail at recognizing the debug record type record type;
-		preprocess a type record type Infix record;
+		preprocess a type record type debug record;
 	let the self global record be a new I6 global record with index four and human-friendly name "self";
 	let the downcased self global variable name be a new permanent synthetic text copied from "self";
 	insert the textual key the downcased self global variable name and the value the self global record into the global record lookup hash table.
@@ -1049,7 +1024,7 @@ A debug file setup rule (this is the load debug information from the Infix binar
 Section "Shielding" (for use with Glulx Runtime Instrumentation Framework by Brady Garvin)
 
 A GRIF shielding rule (this is the shield debug information loading rule):
-	shield the load debug information from the Infix binary input file rule against instrumentation.
+	shield the load debug information from the debug binary input file rule against instrumentation.
 
 Chapter "Lazy Loading" - unindexed
 
@@ -1095,11 +1070,11 @@ To decide what text is the name for invalid local number (I - a number) (this is
 Section "Loading I6 Locals" - unindexed
 
 To load I6 locals into (A - a routine record) (this is loading locals into a routine record):
-	move the Infix debug stream to stream position nine plus the beginning stream position of A expecting to read only 562 bytes;
-	skip the text in the Infix debug stream up through the next null terminator;
+	move the debug stream to stream position nine plus the beginning stream position of A expecting to read only 562 bytes;
+	skip the text in the debug stream up through the next null terminator;
 	let the local count be zero;
 	repeat until a break:
-		let the local name be a new permanent synthetic text extracted from the Infix debug stream until a null terminator;
+		let the local name be a new permanent synthetic text extracted from the debug stream until a null terminator;
 		if the length of the synthetic text local name is zero:
 			break;
 		downcase the synthetic text the local name;
@@ -1115,13 +1090,13 @@ To load the sequence point list into (A - a routine record) (this is loading seq
 	write the sequence point linked list an empty permanent linked list to A;
 	write the sequence point linked list tail an empty permanent linked list's tail to A;
 	let the base address be the function address of A;
-	move the Infix debug stream to stream position two plus the sequence point stream position of A expecting to read only two bytes;
-	let the sequence point count be the next short in the Infix debug stream;
+	move the debug stream to stream position two plus the sequence point stream position of A expecting to read only two bytes;
+	let the sequence point count be the next short in the debug stream;
 	let the expected length be six times the sequence point count;
-	expect the Infix debug stream to read expected length bytes;
+	expect the debug stream to read expected length bytes;
 	repeat with a counter running from one to the sequence point count:
-		skip four bytes in the Infix debug stream;
-		let the instruction address be the base address plus the next short in the Infix debug stream;
+		skip four bytes in the debug stream;
+		let the instruction address be the base address plus the next short in the debug stream;
 		enqueue the key the instruction address in the possibly invalid sequence point linked list of A through the possibly invalid sequence point linked list tail of A.
 
 To load sequence points into (A - a source line record) (this is loading sequence points into a source line record):
@@ -1140,16 +1115,16 @@ To load sequence points into (A - a source line record) (this is loading sequenc
 			let the source line record be the source line record for line number line number;
 			if the possibly invalid sequence point linked list of the source line record is an invalid permanent linked list:
 				write the sequence point linked list an empty permanent linked list to the source line record;
-		[Note that the previous loop would load I6, so the Infix debug stream shouldn't be disturbed from here on out.]
-		move the Infix debug stream to stream position two plus the sequence point stream position of the routine record expecting to read only two bytes;
-		let the sequence point count be the next short in the Infix debug stream;
+		[Note that the previous loop would load I6, so the debug stream shouldn't be disturbed from here on out.]
+		move the debug stream to stream position two plus the sequence point stream position of the routine record expecting to read only two bytes;
+		let the sequence point count be the next short in the debug stream;
 		let the expected length be six times the sequence point count;
-		expect the Infix debug stream to read expected length bytes;
+		expect the debug stream to read expected length bytes;
 		repeat with a counter running from one to the sequence point count:
-			skip three bytes in the Infix debug stream;
-			let the column number be the next byte in the Infix debug stream;
+			skip three bytes in the debug stream;
+			let the column number be the next byte in the debug stream;
 			let the instruction address be the function address of the routine record;
-			increase the instruction address by the next short in the Infix debug stream;
+			increase the instruction address by the next short in the debug stream;
 			[And note here that we don't trust the line number from the stream, but instead use the accessor that relocates sequence points on end-of-line labels.]
 			let the line number be the I6 line number for the sequence point the instruction address supposedly in column number the column number;
 			unless the line number is zero:
@@ -1159,7 +1134,7 @@ To load sequence points into (A - a source line record) (this is loading sequenc
 
 Section "Relocating Sequence Points" - unindexed
 
-[C need only be the byte from the Infix debug stream; we try to deal with overflow here.]
+[C need only be the byte from the debug stream; we try to deal with overflow here.]
 To decide what number is the relocation of the sequence point (S - a number) from the line number (N - a number) and the column number (C - a number) (this is relocating a sequence point from a line and column):
 	let the source line record be the source line record for line number N;
 	let the I6 be the I6 of the source line record;
@@ -1207,15 +1182,15 @@ To decide what number is the relocation of the sequence point (S - a number) fro
 
 To decide what number is the relocation of the sequence point (S - a number) from the line number (N - a number) (this is relocating a sequence point from a line):
 	let the routine record be the routine record owning the sequence point S;
-	move the Infix debug stream to stream position two plus the sequence point stream position of the routine record expecting to read only two bytes;
-	let the sequence point count be the next short in the Infix debug stream;
+	move the debug stream to stream position two plus the sequence point stream position of the routine record expecting to read only two bytes;
+	let the sequence point count be the next short in the debug stream;
 	let the expected length be six times the sequence point count;
-	expect the Infix debug stream to read expected length bytes;
+	expect the debug stream to read expected length bytes;
 	let the expected entry be S minus the function address of the routine record;
 	repeat with a counter running from one to the sequence point count:
-		skip three bytes in the Infix debug stream;
-		let the column number be the next byte in the Infix debug stream;
-		if the next short in the Infix debug stream is the expected entry:
+		skip three bytes in the debug stream;
+		let the column number be the next byte in the debug stream;
+		if the next short in the debug stream is the expected entry:
 			decide on the relocation of the sequence point S from the line number N and the column number the column number;
 	decide on N.
 
@@ -1380,8 +1355,8 @@ To guess the routine shell for (A - a sayable value):
 	let the candidate routine shell record be the routine record beginning before line number the beginning line number;
 	if the candidate routine shell record is an invalid routine record or the end line number of the candidate routine shell record is not the beginning line number:
 		stop;
-	move the Infix debug stream to stream position nine plus the beginning stream position of the routine kernel record expecting to read only 562 bytes;
-	let the I6 name be a new synthetic text extracted from the Infix debug stream until a null terminator;
+	move the debug stream to stream position nine plus the beginning stream position of the routine kernel record expecting to read only 562 bytes;
+	let the I6 name be a new synthetic text extracted from the debug stream until a null terminator;
 	if the synthetic text I6 name begins with the synthetic text the routine kernel name prefix:
 		associate the routine shell at address the function address of the candidate routine shell record with the routine kernel at address the function address of the routine kernel record;
 	delete the synthetic text the I6 name.
@@ -1398,8 +1373,8 @@ To guess the routine kernel for (A - a sayable value):
 		delete the candidate list;
 		stop;
 	let the candidate routine kernel record be a routine record key popped off of the candidate list;
-	move the Infix debug stream to stream position nine plus the beginning stream position of the candidate routine kernel record expecting to read only 562 bytes;
-	let the I6 name be a new synthetic text extracted from the Infix debug stream until a null terminator;
+	move the debug stream to stream position nine plus the beginning stream position of the candidate routine kernel record expecting to read only 562 bytes;
+	let the I6 name be a new synthetic text extracted from the debug stream until a null terminator;
 	if the synthetic text I6 name begins with the synthetic text the routine kernel name prefix:
 		associate the routine shell at address the function address of the routine shell record with the routine kernel at address the function address of the candidate routine kernel record;
 	delete the synthetic text the I6 name.
@@ -2431,7 +2406,7 @@ A debug file setup rule (this is the open the debugging log binary input file ru
 	now the debugging log stream is an invalid binary input file stream.
 
 [So that aliasing works...]
-The open the debugging log binary input file rule is listed after the load debug information from the Infix binary input file rule in the debug file setup rulebook.
+The open the debugging log binary input file rule is listed after the load debug information from the debug binary input file rule in the debug file setup rulebook.
 
 Book "Debug File Parsing Setup"
 
@@ -2474,8 +2449,8 @@ To ensure that all routines have names (this is initializing routine names as ne
 		repeat with the linked list vertex running through the routine record list:
 			let the function address be the number key of the linked list vertex;
 			let the routine record be the routine record value of the linked list vertex;
-			move the Infix debug stream to stream position nine plus the beginning stream position of the routine record expecting to read only 562 bytes;
-			let the I6 name be a new permanent synthetic text extracted from the Infix debug stream until a null terminator;
+			move the debug stream to stream position nine plus the beginning stream position of the routine record expecting to read only 562 bytes;
+			let the I6 name be a new permanent synthetic text extracted from the debug stream until a null terminator;
 			give the routine at address the function address the routine name the I6 name;
 			if the name for the phrase function at address the function address is empty and the synthetic text the I6 name begins with the synthetic text the phrase routine name prefix:
 				let the preamble line number be the preamble line number of the routine record;
